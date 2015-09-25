@@ -1,0 +1,302 @@
+#+TITLE: TCP Keepalive HOWTO
+#+AUTHOR: Fabio Busatto, zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* 简介[1]
+[1]因为最近碰到redis连接满的情况，想总结一下TCP Keepalive相关的知识，发现[[http://www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/][TCP-Keepalive-HOWTO]] 讲得很到位，就翻译当总结了。
+
+
+理解TCP Keepalive并非必须，但特定场景它非常有用，阅读本文需要基本的TCP/IP网络知识，基本的C语言知识。
+
+本文的目的在于描述TCP Keepalive的细节，演示不同的应用场景。一些理论之后，给出配置的例子和技巧。
+
+第二部分，讲述内核提供的编程接口，C语言如何编程启用Keepalive。除了实用的例子，还会介绍 *libkeepalive* 项目，它可以在不修改代码的情况下，让遗留应用启用Keepalive。
+
+* TCP Keepalive 概览
+如其名所示，TCP Keepalive（常常简称做Keepalive）的作用是，Keep TCP alive。这意味着你可以检查连接的socket（TCP socket），看它是否存活或者无效了。
+
+** 什么是TCP Keepalive？
+Keepalive 的概念很简单：当TCP连接建立时，给它设一个定时器，当定时器归零时，发送keepalive探测包。这个包不含数据，并且打开了ACK标记，TCP协议规定了这样的包是合法的，对端会回复一个无数据，设置了ACK的包，这都不需要对端支持Keepalive，就可以完成。
+
+如果探测包有回复，说明对端是活的。TCP协议面向流，而不是数据包，这样零长度的数据包对应用是无害的。
+
+如果没有回复，说明连接丢失（可能因为重启），应用将发现连接损坏，这过程不需要实际的数据传输。
+
+** 为什么使用TCP Keepalive？
+多数情况下，Keepalive是非侵入式的，如果不相信，可以打开它，而不用担心有犯错的风险。但是，它的确产生了额外的网络流量，这可能对路由器和防火墙有点影响。
+
+简言之，自己决定，小心行事。
+
+下一节，我们将区别Keepalive的两个目的：
+- 检查无效的对端
+- 防止网络不活跃导致连接断开
+
+** 检查无效连接
+Keepalive可以用来发现对端失效（在对端告诉你它失效前）。多种原因可能导致这种情况，例如内核panic或者野蛮的结束程序（备注：如果只是kill -9进程并不会导致失效的连接，操作系统关闭socket文件描述符时，会通知对端连接关闭，但是强行关闭主机电源会导致对端收不到连接关闭通知，在对端造成无效连接。）另一种你需要检测对端失效的场景是，对端正常，但是连接两端的中间设备出了问题。
+
+考虑一个简单的TCP连接，A和B是连接的两端。通过三次握手，A发送SYNC给B，B回复SYNC/ACK给A，最后A回复ACK给B，此时连接建立，可以发送数据了。假如此时，拔掉B的电源，它会立即宕机，没有机会通知A连接断开了。假如A，此时正准备从B接受数据，它没办法知道B宕了。当B恢复时，A以为它和B仍处于连接状态，但B却不知道。只有当A试图往B发送数据，B回复RST时，A才知道连接失效了。
+
+Keepalive可以用来发现对端不可达，虽然有假阳性的风险。事实上，如果中间网络出了问题，在标记连接失效前，会间隔性的重试。
+
+#+BEGIN_SRC ditta
+ _____                                                 _____
+|     |                                               |     |
+|  A  |                                               |  B  |
+|_____|                                               |_____|
+   ^                                                     ^
+   |----->----->---->------- SYN ------>---->--->--------|
+   |-----<-----<----<----- SYN/ACK ------<----<---<------|
+   |----->----->---->------- ACK ------>---->--->--------|
+   |                                   system crash ---> X
+   |
+   |                                 system restart ---> ^
+   |----->----->---->------- PUSH ----->---->--->--------|
+   |-----<-----<----<------- RST  -----<----<---<------- |
+#+END_SRC
+
+
+** 防止网络不活跃导致连接断开
+Keepalive的另一种用途是防止不活跃的连接被断开。当使用NAT或者防火墙时，连接被莫名其妙的断开，经常发生。这种现象是NAT 代理和防火墙的连接跟踪机制导致的。代理和防火墙跟踪所有通过它们的连接，受硬件限制，它们只能同时跟踪有限的连接，常用的策略是，保留最新的连接，丢弃很久不活跃的连接。
+
+回到刚才的例子，连接建立后，需要等待事件发生，然后和对端通信，如果事件迟迟没有发生会怎样？我们的连接有自己的周期，但是代理并不知道，所以当我们最终发送数据时，连接可能已经从代理移除了，此时连接失效。
+
+代理的通常实现是，把连接放到一个队列里，如果连接有数据传递，就把它挪到队首，当（资源有限）需要移除一个连接时，从队尾删除。所以，周期性的发包，可以保证连接不时的往队首挪，最小化连接被删除的风险。
+
+#+BEGIN_SRC ditta
+ _____           _____                                     _____
+|     |         |     |                                   |     |
+|  A  |         | NAT |                                   |  B  |
+|_____|         |_____|                                   |_____|
+   ^               ^                                         ^
+   |--->--->--->---|----------- SYN ------------->--->--->---|
+   |---<---<---<---|--------- SYN/ACK -----------<---<---<---|
+   |--->--->--->---|----------- ACK ------------->--->--->---|
+   |               |                                         |
+   |               | <--- connection deleted from table      |
+   |               |                                         |
+   |--->- PSH ->---| <--- invalid connection                 |
+#+END_SRC
+
+* Linux 下如何使用TCP Keepalive
+Linux 自身支持Keepalive，可以通过procfs或sysctl接口配置相关参数。
+
+Keepalive和三个变量有关
+- *=tcp_keepalive_time=*
+  最后一个数据包（ACK不算）发送后多久，开始发Keepalive探测包，一旦某个连接开始发Keepalive探测包，这个计时器就不再有用了。
+- *=tcp_keepalive_intvl=*
+  Keepalive 探测包的发送间隔，不受链接发送正常数据包的影响。
+- *=tcp_keepalive_prob=*
+  连续多少个Keepalive 探测包发送失败，才标记连接失效，并通知应用层。
+
+即使配置了这些内核参数，Linux默认Keepalive仍是禁用的，你需要通过API开启。相对而言，实现Keepalive的程序并不多（备注：很多是通过超时来防止失效的连接），但是，仍然可以通过（下文描述）一些方法开开启Keepalive支持。
+
+** 配置内核
+有两种用户态命令可以用来配置内核的keepalive参数
+- *procfs* 接口
+- *sysctl* 接口
+我们主要讨论如何使用 *procfs* 完成这一任务，这时最常见的，容易理解的，推荐的方法。 *sysctl* 接口是 *sysctl* (2)系统调用，而不是 *sysctl* (8)系统工具（后者不是通过前者实现的）。
+
+*** *procfs* 接口
+这个接口需要sysctl和procfs，procfs挂载在某个文件系统目录下（通常是/proc）。你可以通过cat /proc/sys/net/ipv4下的文件来查看参数的值。
+
+#+BEGIN_SRC sh
+  # cat /proc/sys/net/ipv4/tcp_keepalive_time
+  7200
+  # cat /proc/sys/net/ipv4/tcp_keepalive_intvl
+  75
+  # cat /proc/sys/net/ipv4/tcp_keepalive_probes
+  9
+#+END_SRC
+
+头两个参数值单位是秒，第三个是单纯的数字，这意味着keepalive要等2个小时（7200秒）才开始发送第一个探测包，以后每隔75秒就再发一个，如果连续9次，探测包都没收到应答（ACK），这个连接被标记为失效。
+
+修改参数的方式很直观，直接往文件中写入值即可。假如你想在没有数据传送后10分钟发送探测包，并且之后，每1分钟发送一个，因为网络较差，希望连续20次探测失败才把连接标记为失效。
+
+#+BEGIN_SRC sh
+  # echo 600 > /proc/sys/net/ipv4/tcp_keepalive_time
+  # echo 60 > /proc/sys/net/ipv4/tcp_keepalive_intvl
+  # echo 20 > /proc/sys/net/ipv4/tcp_keepalive_probes
+#+END_SRC
+
+可以查看它们的新值，看是否修改成功。
+
+主意： *procfs* 是特殊文件，你不能对它们做任意操作，它们仅仅是内核空间的接口形式，不是真正的文件。测试相关脚本，并只用上面描述的简单的方法访问它们。
+
+也可以通过 sysctl(8) 工具来查看和修改。
+
+#+BEGIN_SRC sh
+  # sysctl net.ipv4.tcp_keepalive_time net.ipv4.tcp_keepalive_intvl net.ipv4.tcp_keepalive_probes
+  net.ipv4.tcp_keepalive_time = 7200
+  net.ipv4.tcp_keepalive_intvl = 75
+  net.ipv4.tcp_keepalive_probes = 9
+#+END_SRC
+
+*sysctl* 和 *procfs* 的命名方式很像，通过 sysctl(8) 的-w 参数修改它们。
+
+#+BEGIN_SRC sh
+  # sysctl -w net.ipv4.tcp_keepalive_time=600 net.ipv4.tcp_keepalive_intvl=60 net.ipv4.tcp_keepalive_probes=20
+  net.ipv4.tcp_keepalive_time = 600
+  net.ipv4.tcp_keepalive_intvl = 60
+  net.ipv4.tcp_keepalive_probes = 20
+#+END_SRC
+
+注意，*sysctl* (8) 并没有使用 ~sysctl~ (2) 系统调用，它是直接操作了 ~procfs~ 下的文件， *sysctl* (8) 只是 ~procfs~  的简单封装而已。
+
+*** ~sysctl~ 接口
+~sysctl~ (2) 是另一种操作内核变量的方法，在 ~procfs~ 不可用时，通过 ~sysctl~ (2) 可以直接和内核通讯而不需要 ~procfs~ 。目前没有工具封装了这个系统调用。
+
+可以通过 ~man 2 sysctl~ 查看更多细节。
+
+** 使修改持久化
+当系统重启时，上面做的修改会丢失。为了使修改持久化，需要在重启时，重新配置。每个Linux发行版的 *init* (8) 都有一套自己的init脚本机制，它们一般放在 ~/etc/rc.d~ ，或别的什么地方。任何时候，你都可以在启动脚本中设置这些参数。即使已经建立的连接，都可以使用新配置的值。
+
+可以把他们放在 ~/etc/rc.local~ 里，或者参考 ~sysctl~ (8)，把配置放到 ~/etc/sysctl.conf~ 中，系统启动时，会加载里面的配置。平时，可以修改 ~/etc/sysctl.conf~ ，然后用 ~sysctl -p /etc/sysctl.conf~ 使其生效。可以通过 ~man 5 sysctl.conf~ 查看其配置格式。
+
+* 应用编程
+本节讲述如何在应用中启用keepalive，需要你懂C语言，基本的网络知识，套接字。
+
+** 何时需要keepalive支持
+并不是所有的网络程序都需要keepalive支持的（备注：一般长期运行的长连接服务端程序才需要）。因为是TCP keepalive，所以只有TCP套接字才可以用（备注：其它也不需要）。
+
+可以通过编译选项或者启动选项，让用户选择是否启用keepalive。
+
+** ~setsockopt~ 函数调用
+通过设置套接字选项来启用keepalive，函数原型是
+
+#+BEGIN_SRC js
+int setsockopt(int s, int level, int optname, const void *optval, socklen_t optlen);
+#+END_SRC
+
+第一个参数是套接字，通过 ~socket~ (2)创建的，第二个参数必须是 ~SOL_SOCKET~ ，第三个参数必须是 ~SO_KEEPALIVE~ ，第四个参数是整数表示的boolean值，最后一个参数是整数的大小。
+
+函数返回0表示成功，-1表示失败，通过errno查看失败原因。
+
+还有其它三个和keepalive有关的选项可以设置，使用 ~SOL_TCP~ 替换 ~SOL_SOCKET~ ，它们会覆盖相应的系统设置。
+- =TCP_KEEPCNT= 覆盖 ~tcp_keepalive_probes~
+- =TCP_KEEPIDLE= 覆盖 ~tcp_keepalive_time~
+- =TCP_KEEPINTVL= 覆盖 ~tcp_keepalive_intvl~
+
+** 实例代码
+
+#+BEGIN_SRC js :exports code :main
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+int main()
+{
+   int s;
+   int optval;
+   socklen_t optlen = sizeof(optval);
+
+   /* Create the socket */
+   if((s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+      perror("socket()");
+      exit(EXIT_FAILURE);
+   }
+
+   /* Check the status for the keepalive option */
+   if(getsockopt(s, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
+      perror("getsockopt()");
+      close(s);
+      exit(EXIT_FAILURE);
+   }
+   printf("SO_KEEPALIVE is %s\n", (optval ? "ON" : "OFF"));
+
+   /* Set the option active */
+   optval = 1;
+   optlen = sizeof(optval);
+   if(setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
+      perror("setsockopt()");
+      close(s);
+      exit(EXIT_FAILURE);
+   }
+   printf("SO_KEEPALIVE set on socket\n");
+
+   /* Check the status again */
+   if(getsockopt(s, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
+      perror("getsockopt()");
+      close(s);
+      exit(EXIT_FAILURE);
+   }
+   printf("SO_KEEPALIVE is %s\n", (optval ? "ON" : "OFF"));
+
+   close(s);
+
+   exit(EXIT_SUCCESS);
+}
+
+#+END_SRC
+
+* 给第三方软件添加keepalive支持
+不是所有的软件都支持keepalive，因为Linux不支持在系统级别开启keepalive支持，唯一方法实在创建套接字后执行 ~setsockopt~ (2)调用，所以如果想支持keepalive，只有两种办法：
+- 修改源码
+- 使用PRELOAD，注入 ~setsockopt~ (2)
+
+** 修改源码
+需要修改所有套接字创建的地方，第一处是 ~socket~ (2)，它创建套接字，只用修改那些创建TCP套接字，并且第二个参数是 ~SOCK_STREAM~ 的调用。第二处是 ~accept~ (2)。
+
+找到相关套接字后，添加相应的 ~setsockopt~ (2)调用即可。
+
+** 使用libkeepalive
+修改源码并不总是可行的。[[http://libkeepalive.sourceforge.net/][libkeepalive]] 项目应运而生。
+
+借助 *ld.so* (8) 的preload 机制，可以在加载（相比正常加载的库）优先级更高的库。 ~socket~ (2)在glibc共享库中，libkeepalive封装了socket，并且在套接字创建后，注入 ~setsockopt~ (2)。因为依赖preload机制，所以 *gcc* (1)使用-static参数静态编译套接字函数的程序没法使用libkeepalive。
+
+libkeepalive通过环境变量 *KEEPALIVE* (on/off)  *KEEPCNT*  *KEEPIDLE*  *KEEPINTVL* 得到相关参数。可以通过下面的例子看出更多细节。
+
+#+BEGIN_SRC sh
+  $ test
+  SO_KEEPALIVE is OFF
+
+  $ LD_PRELOAD=libkeepalive.so KEEPCNT=20 KEEPIDLE=180 KEEPINTVL=60 test
+  SO_KEEPALIVE is ON
+  TCP_KEEPCNT   = 20
+  TCP_KEEPIDLE  = 180
+  TCP_KEEPINTVL = 60
+#+END_SRC
+
+通过 *strace* (1) 查看调用的细节
+
+#+BEGIN_SRC sh
+  $ strace test
+  execve("test", ["test"], [/* 26 vars */]) = 0
+  [..]
+  open("/lib/libc.so.6", O_RDONLY)        = 3
+  [..]
+  socket(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
+  getsockopt(3, SOL_SOCKET, SO_KEEPALIVE, [0], [4]) = 0
+  close(3)                                = 0
+  [..]
+  _exit(0)                                = ?
+
+  $ LD_PRELOAD=libkeepalive.so strace test
+  execve("test", ["test"], [/* 27 vars */]) = 0
+  [..]
+  open("/usr/local/lib/libkeepalive.so", O_RDONLY) = 3
+  [..]
+  open("/lib/libc.so.6", O_RDONLY)        = 3
+  [..]
+  open("/lib/libdl.so.2", O_RDONLY)       = 3
+  [..]
+  socket(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
+  setsockopt(3, SOL_SOCKET, SO_KEEPALIVE, [1], 4) = 0
+  setsockopt(3, SOL_TCP, TCP_KEEPCNT, [20], 4) = 0
+  setsockopt(3, SOL_TCP, TCP_KEEPIDLE, [180], 4) = 0
+  setsockopt(3, SOL_TCP, TCP_KEEPINTVL, [60], 4) = 0
+  [..]
+  getsockopt(3, SOL_SOCKET, SO_KEEPALIVE, [1], [4]) = 0
+  [..]
+  getsockopt(3, SOL_TCP, TCP_KEEPCNT, [20], [4]) = 0
+  [..]
+  getsockopt(3, SOL_TCP, TCP_KEEPIDLE, [180], [4]) = 0
+  [..]
+  getsockopt(3, SOL_TCP, TCP_KEEPINTVL, [60], [4]) = 0
+  [..]
+  close(3)                                = 0
+  [..]
+  _exit(0)                                = ?
+#+END_SRC

@@ -1,0 +1,707 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>TCP Keepalive HOWTO</title>
+<!-- 2015-09-25 五 08:23 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Fabio Busatto, zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">TCP Keepalive HOWTO</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. 简介</a></li>
+<li><a href="#sec-2">2. TCP Keepalive 概览</a>
+<ul>
+<li><a href="#sec-2-1">2.1. 什么是TCP Keepalive？</a></li>
+<li><a href="#sec-2-2">2.2. 为什么使用TCP Keepalive？</a></li>
+<li><a href="#sec-2-3">2.3. 检查无效连接</a></li>
+<li><a href="#sec-2-4">2.4. 防止网络不活跃导致连接断开</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. Linux 下如何使用TCP Keepalive</a>
+<ul>
+<li><a href="#sec-3-1">3.1. 配置内核</a>
+<ul>
+<li><a href="#sec-3-1-1">3.1.1. <b>procfs</b> 接口</a></li>
+<li><a href="#sec-3-1-2">3.1.2. <code>sysctl</code> 接口</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-2">3.2. 使修改持久化</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4. 应用编程</a>
+<ul>
+<li><a href="#sec-4-1">4.1. 何时需要keepalive支持</a></li>
+<li><a href="#sec-4-2">4.2. <code>setsockopt</code> 函数调用</a></li>
+<li><a href="#sec-4-3">4.3. 实例代码</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. 给第三方软件添加keepalive支持</a>
+<ul>
+<li><a href="#sec-5-1">5.1. 修改源码</a></li>
+<li><a href="#sec-5-2">5.2. 使用libkeepalive</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 简介<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup></h2>
+<div class="outline-text-2" id="text-1">
+<p>
+理解TCP Keepalive并非必须，但特定场景它非常有用，阅读本文需要基本的TCP/IP网络知识，基本的C语言知识。
+</p>
+
+<p>
+本文的目的在于描述TCP Keepalive的细节，演示不同的应用场景。一些理论之后，给出配置的例子和技巧。
+</p>
+
+<p>
+第二部分，讲述内核提供的编程接口，C语言如何编程启用Keepalive。除了实用的例子，还会介绍 <b>libkeepalive</b> 项目，它可以在不修改代码的情况下，让遗留应用启用Keepalive。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> TCP Keepalive 概览</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+如其名所示，TCP Keepalive（常常简称做Keepalive）的作用是，Keep TCP alive。这意味着你可以检查连接的socket（TCP socket），看它是否存活或者无效了。
+</p>
+</div>
+
+<div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 什么是TCP Keepalive？</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Keepalive 的概念很简单：当TCP连接建立时，给它设一个定时器，当定时器归零时，发送keepalive探测包。这个包不含数据，并且打开了ACK标记，TCP协议规定了这样的包是合法的，对端会回复一个无数据，设置了ACK的包，这都不需要对端支持Keepalive，就可以完成。
+</p>
+
+<p>
+如果探测包有回复，说明对端是活的。TCP协议面向流，而不是数据包，这样零长度的数据包对应用是无害的。
+</p>
+
+<p>
+如果没有回复，说明连接丢失（可能因为重启），应用将发现连接损坏，这过程不需要实际的数据传输。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 为什么使用TCP Keepalive？</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+多数情况下，Keepalive是非侵入式的，如果不相信，可以打开它，而不用担心有犯错的风险。但是，它的确产生了额外的网络流量，这可能对路由器和防火墙有点影响。
+</p>
+
+<p>
+简言之，自己决定，小心行事。
+</p>
+
+<p>
+下一节，我们将区别Keepalive的两个目的：
+</p>
+<ul class="org-ul">
+<li>检查无效的对端
+</li>
+<li>防止网络不活跃导致连接断开
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> 检查无效连接</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Keepalive可以用来发现对端失效（在对端告诉你它失效前）。多种原因可能导致这种情况，例如内核panic或者野蛮的结束程序（备注：如果只是kill -9进程并不会导致失效的连接，操作系统关闭socket文件描述符时，会通知对端连接关闭，但是强行关闭主机电源会导致对端收不到连接关闭通知，在对端造成无效连接。）另一种你需要检测对端失效的场景是，对端正常，但是连接两端的中间设备出了问题。
+</p>
+
+<p>
+考虑一个简单的TCP连接，A和B是连接的两端。通过三次握手，A发送SYNC给B，B回复SYNC/ACK给A，最后A回复ACK给B，此时连接建立，可以发送数据了。假如此时，拔掉B的电源，它会立即宕机，没有机会通知A连接断开了。假如A，此时正准备从B接受数据，它没办法知道B宕了。当B恢复时，A以为它和B仍处于连接状态，但B却不知道。只有当A试图往B发送数据，B回复RST时，A才知道连接失效了。
+</p>
+
+<p>
+Keepalive可以用来发现对端不可达，虽然有假阳性的风险。事实上，如果中间网络出了问题，在标记连接失效前，会间隔性的重试。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-ditta"> _____                                                 _____
+|     |                                               |     |
+|  A  |                                               |  B  |
+|_____|                                               |_____|
+   ^                                                     ^
+   |-----&gt;-----&gt;----&gt;------- SYN ------&gt;----&gt;---&gt;--------|
+   |-----&lt;-----&lt;----&lt;----- SYN/ACK ------&lt;----&lt;---&lt;------|
+   |-----&gt;-----&gt;----&gt;------- ACK ------&gt;----&gt;---&gt;--------|
+   |                                   system crash ---&gt; X
+   |
+   |                                 system restart ---&gt; ^
+   |-----&gt;-----&gt;----&gt;------- PUSH -----&gt;----&gt;---&gt;--------|
+   |-----&lt;-----&lt;----&lt;------- RST  -----&lt;----&lt;---&lt;------- |
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> 防止网络不活跃导致连接断开</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+Keepalive的另一种用途是防止不活跃的连接被断开。当使用NAT或者防火墙时，连接被莫名其妙的断开，经常发生。这种现象是NAT 代理和防火墙的连接跟踪机制导致的。代理和防火墙跟踪所有通过它们的连接，受硬件限制，它们只能同时跟踪有限的连接，常用的策略是，保留最新的连接，丢弃很久不活跃的连接。
+</p>
+
+<p>
+回到刚才的例子，连接建立后，需要等待事件发生，然后和对端通信，如果事件迟迟没有发生会怎样？我们的连接有自己的周期，但是代理并不知道，所以当我们最终发送数据时，连接可能已经从代理移除了，此时连接失效。
+</p>
+
+<p>
+代理的通常实现是，把连接放到一个队列里，如果连接有数据传递，就把它挪到队首，当（资源有限）需要移除一个连接时，从队尾删除。所以，周期性的发包，可以保证连接不时的往队首挪，最小化连接被删除的风险。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-ditta"> _____           _____                                     _____
+|     |         |     |                                   |     |
+|  A  |         | NAT |                                   |  B  |
+|_____|         |_____|                                   |_____|
+   ^               ^                                         ^
+   |---&gt;---&gt;---&gt;---|----------- SYN -------------&gt;---&gt;---&gt;---|
+   |---&lt;---&lt;---&lt;---|--------- SYN/ACK -----------&lt;---&lt;---&lt;---|
+   |---&gt;---&gt;---&gt;---|----------- ACK -------------&gt;---&gt;---&gt;---|
+   |               |                                         |
+   |               | &lt;--- connection deleted from table      |
+   |               |                                         |
+   |---&gt;- PSH -&gt;---| &lt;--- invalid connection                 |
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Linux 下如何使用TCP Keepalive</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Linux 自身支持Keepalive，可以通过procfs或sysctl接口配置相关参数。
+</p>
+
+<p>
+Keepalive和三个变量有关
+</p>
+<ul class="org-ul">
+<li><b><code>tcp_keepalive_time</code></b>
+  最后一个数据包（ACK不算）发送后多久，开始发Keepalive探测包，一旦某个连接开始发Keepalive探测包，这个计时器就不再有用了。
+</li>
+<li><b><code>tcp_keepalive_intvl</code></b>
+  Keepalive 探测包的发送间隔，不受链接发送正常数据包的影响。
+</li>
+<li><b><code>tcp_keepalive_prob</code></b>
+  连续多少个Keepalive 探测包发送失败，才标记连接失效，并通知应用层。
+</li>
+</ul>
+
+<p>
+即使配置了这些内核参数，Linux默认Keepalive仍是禁用的，你需要通过API开启。相对而言，实现Keepalive的程序并不多（备注：很多是通过超时来防止失效的连接），但是，仍然可以通过（下文描述）一些方法开开启Keepalive支持。
+</p>
+</div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 配置内核</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+有两种用户态命令可以用来配置内核的keepalive参数
+</p>
+<ul class="org-ul">
+<li><b>procfs</b> 接口
+</li>
+<li><b>sysctl</b> 接口
+</li>
+</ul>
+<p>
+我们主要讨论如何使用 <b>procfs</b> 完成这一任务，这时最常见的，容易理解的，推荐的方法。 <b>sysctl</b> 接口是 <b>sysctl</b> (2)系统调用，而不是 <b>sysctl</b> (8)系统工具（后者不是通过前者实现的）。
+</p>
+</div>
+
+<div id="outline-container-sec-3-1-1" class="outline-4">
+<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> <b>procfs</b> 接口</h4>
+<div class="outline-text-4" id="text-3-1-1">
+<p>
+这个接口需要sysctl和procfs，procfs挂载在某个文件系统目录下（通常是/proc）。你可以通过cat /proc/sys/net/ipv4下的文件来查看参数的值。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">cat /proc/sys/net/ipv4/tcp_keepalive_time</span>
+7200
+<span style="color: #b22222;"># </span><span style="color: #b22222;">cat /proc/sys/net/ipv4/tcp_keepalive_intvl</span>
+75
+<span style="color: #b22222;"># </span><span style="color: #b22222;">cat /proc/sys/net/ipv4/tcp_keepalive_probes</span>
+9
+</pre>
+</div>
+
+<p>
+头两个参数值单位是秒，第三个是单纯的数字，这意味着keepalive要等2个小时（7200秒）才开始发送第一个探测包，以后每隔75秒就再发一个，如果连续9次，探测包都没收到应答（ACK），这个连接被标记为失效。
+</p>
+
+<p>
+修改参数的方式很直观，直接往文件中写入值即可。假如你想在没有数据传送后10分钟发送探测包，并且之后，每1分钟发送一个，因为网络较差，希望连续20次探测失败才把连接标记为失效。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">echo 600 &gt; /proc/sys/net/ipv4/tcp_keepalive_time</span>
+<span style="color: #b22222;"># </span><span style="color: #b22222;">echo 60 &gt; /proc/sys/net/ipv4/tcp_keepalive_intvl</span>
+<span style="color: #b22222;"># </span><span style="color: #b22222;">echo 20 &gt; /proc/sys/net/ipv4/tcp_keepalive_probes</span>
+</pre>
+</div>
+
+<p>
+可以查看它们的新值，看是否修改成功。
+</p>
+
+<p>
+主意： <b>procfs</b> 是特殊文件，你不能对它们做任意操作，它们仅仅是内核空间的接口形式，不是真正的文件。测试相关脚本，并只用上面描述的简单的方法访问它们。
+</p>
+
+<p>
+也可以通过 sysctl(8) 工具来查看和修改。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">sysctl net.ipv4.tcp_keepalive_time net.ipv4.tcp_keepalive_intvl net.ipv4.tcp_keepalive_probes</span>
+net.ipv4.tcp_keepalive_time = 7200
+net.ipv4.tcp_keepalive_intvl = 75
+net.ipv4.tcp_keepalive_probes = 9
+</pre>
+</div>
+
+<p>
+<b>sysctl</b> 和 <b>procfs</b> 的命名方式很像，通过 sysctl(8) 的-w 参数修改它们。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">sysctl -w net.ipv4.tcp_keepalive_time=600 net.ipv4.tcp_keepalive_intvl=60 net.ipv4.tcp_keepalive_probes=20</span>
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_intvl = 60
+net.ipv4.tcp_keepalive_probes = 20
+</pre>
+</div>
+
+<p>
+注意，*sysctl* (8) 并没有使用 <code>sysctl</code> (2) 系统调用，它是直接操作了 <code>procfs</code> 下的文件， <b>sysctl</b> (8) 只是 <code>procfs</code>  的简单封装而已。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-1-2" class="outline-4">
+<h4 id="sec-3-1-2"><span class="section-number-4">3.1.2</span> <code>sysctl</code> 接口</h4>
+<div class="outline-text-4" id="text-3-1-2">
+<p>
+<code>sysctl</code> (2) 是另一种操作内核变量的方法，在 <code>procfs</code> 不可用时，通过 <code>sysctl</code> (2) 可以直接和内核通讯而不需要 <code>procfs</code> 。目前没有工具封装了这个系统调用。
+</p>
+
+<p>
+可以通过 <code>man 2 sysctl</code> 查看更多细节。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> 使修改持久化</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+当系统重启时，上面做的修改会丢失。为了使修改持久化，需要在重启时，重新配置。每个Linux发行版的 <b>init</b> (8) 都有一套自己的init脚本机制，它们一般放在 <code>/etc/rc.d</code> ，或别的什么地方。任何时候，你都可以在启动脚本中设置这些参数。即使已经建立的连接，都可以使用新配置的值。
+</p>
+
+<p>
+可以把他们放在 <code>/etc/rc.local</code> 里，或者参考 <code>sysctl</code> (8)，把配置放到 <code>/etc/sysctl.conf</code> 中，系统启动时，会加载里面的配置。平时，可以修改 <code>/etc/sysctl.conf</code> ，然后用 <code>sysctl -p /etc/sysctl.conf</code> 使其生效。可以通过 <code>man 5 sysctl.conf</code> 查看其配置格式。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 应用编程</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+本节讲述如何在应用中启用keepalive，需要你懂C语言，基本的网络知识，套接字。
+</p>
+</div>
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 何时需要keepalive支持</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+并不是所有的网络程序都需要keepalive支持的（备注：一般长期运行的长连接服务端程序才需要）。因为是TCP keepalive，所以只有TCP套接字才可以用（备注：其它也不需要）。
+</p>
+
+<p>
+可以通过编译选项或者启动选项，让用户选择是否启用keepalive。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> <code>setsockopt</code> 函数调用</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+通过设置套接字选项来启用keepalive，函数原型是
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #228b22;">int</span> <span style="color: #a0522d;">setsockopt</span><span style="color: #707183;">(</span><span style="color: #228b22;">int</span> <span style="color: #a0522d;">s</span>, <span style="color: #228b22;">int</span> level, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">optname</span>, <span style="color: #a020f0;">const</span> <span style="color: #a020f0;">void</span> *optval, socklen_t optlen<span style="color: #707183;">)</span>;
+</pre>
+</div>
+
+<p>
+第一个参数是套接字，通过 <code>socket</code> (2)创建的，第二个参数必须是 <code>SOL_SOCKET</code> ，第三个参数必须是 <code>SO_KEEPALIVE</code> ，第四个参数是整数表示的boolean值，最后一个参数是整数的大小。
+</p>
+
+<p>
+函数返回0表示成功，-1表示失败，通过errno查看失败原因。
+</p>
+
+<p>
+还有其它三个和keepalive有关的选项可以设置，使用 <code>SOL_TCP</code> 替换 <code>SOL_SOCKET</code> ，它们会覆盖相应的系统设置。
+</p>
+<ul class="org-ul">
+<li><code>TCP_KEEPCNT</code> 覆盖 <code>tcp_keepalive_probes</code>
+</li>
+<li><code>TCP_KEEPIDLE</code> 覆盖 <code>tcp_keepalive_time</code>
+</li>
+<li><code>TCP_KEEPINTVL</code> 覆盖 <code>tcp_keepalive_intvl</code>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> 实例代码</h3>
+<div class="outline-text-3" id="text-4-3">
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;stdio.h&gt;</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;stdlib.h&gt;</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;unistd.h&gt;</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;sys/types.h&gt;</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;sys/socket.h&gt;</span>
+<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;netinet/in.h&gt;</span>
+
+<span style="color: #228b22;">int</span> <span style="color: #a0522d;">main</span><span style="color: #707183;">()</span>
+<span style="color: #707183;">{</span>
+   <span style="color: #228b22;">int</span> <span style="color: #a0522d;">s</span>;
+   <span style="color: #228b22;">int</span> <span style="color: #a0522d;">optval</span>;
+   socklen_t optlen = sizeof<span style="color: #7388d6;">(</span>optval<span style="color: #7388d6;">)</span>;
+
+   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Create the socket */</span>
+   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span><span style="color: #909183;">(</span>s = socket<span style="color: #709870;">(</span>PF_INET, SOCK_STREAM, IPPROTO_TCP<span style="color: #709870;">)</span><span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"socket()"</span><span style="color: #909183;">)</span>;
+      exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
+   <span style="color: #7388d6;">}</span>
+
+   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Check the status for the keepalive option */</span>
+   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span>getsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, &amp;optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"getsockopt()"</span><span style="color: #909183;">)</span>;
+      close<span style="color: #909183;">(</span>s<span style="color: #909183;">)</span>;
+      exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
+   <span style="color: #7388d6;">}</span>
+   printf<span style="color: #7388d6;">(</span><span style="color: #8b2252;">"SO_KEEPALIVE is %s\n"</span>, <span style="color: #909183;">(</span>optval ? <span style="color: #8b2252;">"ON"</span> : <span style="color: #8b2252;">"OFF"</span><span style="color: #909183;">)</span><span style="color: #7388d6;">)</span>;
+
+   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Set the option active */</span>
+   optval = 1;
+   optlen = sizeof<span style="color: #7388d6;">(</span>optval<span style="color: #7388d6;">)</span>;
+   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span>setsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"setsockopt()"</span><span style="color: #909183;">)</span>;
+      close<span style="color: #909183;">(</span>s<span style="color: #909183;">)</span>;
+      exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
+   <span style="color: #7388d6;">}</span>
+   printf<span style="color: #7388d6;">(</span><span style="color: #8b2252;">"SO_KEEPALIVE set on socket\n"</span><span style="color: #7388d6;">)</span>;
+
+   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Check the status again */</span>
+   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span>getsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, &amp;optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"getsockopt()"</span><span style="color: #909183;">)</span>;
+      close<span style="color: #909183;">(</span>s<span style="color: #909183;">)</span>;
+      exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
+   <span style="color: #7388d6;">}</span>
+   printf<span style="color: #7388d6;">(</span><span style="color: #8b2252;">"SO_KEEPALIVE is %s\n"</span>, <span style="color: #909183;">(</span>optval ? <span style="color: #8b2252;">"ON"</span> : <span style="color: #8b2252;">"OFF"</span><span style="color: #909183;">)</span><span style="color: #7388d6;">)</span>;
+
+   close<span style="color: #7388d6;">(</span>s<span style="color: #7388d6;">)</span>;
+
+   exit<span style="color: #7388d6;">(</span>EXIT_SUCCESS<span style="color: #7388d6;">)</span>;
+<span style="color: #707183;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 给第三方软件添加keepalive支持</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+不是所有的软件都支持keepalive，因为Linux不支持在系统级别开启keepalive支持，唯一方法实在创建套接字后执行 <code>setsockopt</code> (2)调用，所以如果想支持keepalive，只有两种办法：
+</p>
+<ul class="org-ul">
+<li>修改源码
+</li>
+<li>使用PRELOAD，注入 <code>setsockopt</code> (2)
+</li>
+</ul>
+</div>
+
+<div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 修改源码</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+需要修改所有套接字创建的地方，第一处是 <code>socket</code> (2)，它创建套接字，只用修改那些创建TCP套接字，并且第二个参数是 <code>SOCK_STREAM</code> 的调用。第二处是 <code>accept</code> (2)。
+</p>
+
+<p>
+找到相关套接字后，添加相应的 <code>setsockopt</code> (2)调用即可。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> 使用libkeepalive</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+修改源码并不总是可行的。<a href="http://libkeepalive.sourceforge.net/">libkeepalive</a> 项目应运而生。
+</p>
+
+<p>
+借助 <b>ld.so</b> (8) 的preload 机制，可以在加载（相比正常加载的库）优先级更高的库。 <code>socket</code> (2)在glibc共享库中，libkeepalive封装了socket，并且在套接字创建后，注入 <code>setsockopt</code> (2)。因为依赖preload机制，所以 <b>gcc</b> (1)使用-static参数静态编译套接字函数的程序没法使用libkeepalive。
+</p>
+
+<p>
+libkeepalive通过环境变量 <b>KEEPALIVE</b> (on/off)  <b>KEEPCNT</b>  <b>KEEPIDLE</b>  <b>KEEPINTVL</b> 得到相关参数。可以通过下面的例子看出更多细节。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">$ test
+SO_KEEPALIVE is OFF
+
+$ <span style="color: #a0522d;">LD_PRELOAD</span>=libkeepalive.so <span style="color: #a0522d;">KEEPCNT</span>=20 <span style="color: #a0522d;">KEEPIDLE</span>=180 <span style="color: #a0522d;">KEEPINTVL</span>=60 test
+SO_KEEPALIVE is ON
+TCP_KEEPCNT   = 20
+TCP_KEEPIDLE  = 180
+TCP_KEEPINTVL = 60
+</pre>
+</div>
+
+<p>
+通过 <b>strace</b> (1) 查看调用的细节
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">$ strace test
+<span style="color: #0000ff;">execve</span>(<span style="color: #8b2252;">"test"</span>, [<span style="color: #8b2252;">"test"</span>], [/* 26 vars */]) = 0
+[..]
+<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/lib/libc.so.6"</span>, O_RDONLY)        = 3
+[..]
+<span style="color: #0000ff;">socket</span>(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
+<span style="color: #0000ff;">getsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [0], [4]) = 0
+<span style="color: #0000ff;">close</span>(3)                                = 0
+[..]
+<span style="color: #0000ff;">_exit</span>(0)                                = ?
+
+$ <span style="color: #a0522d;">LD_PRELOAD</span>=libkeepalive.so strace test
+<span style="color: #0000ff;">execve</span>(<span style="color: #8b2252;">"test"</span>, [<span style="color: #8b2252;">"test"</span>], [/* 27 vars */]) = 0
+[..]
+<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/usr/local/lib/libkeepalive.so"</span>, O_RDONLY) = 3
+[..]
+<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/lib/libc.so.6"</span>, O_RDONLY)        = 3
+[..]
+<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/lib/libdl.so.2"</span>, O_RDONLY)       = 3
+[..]
+<span style="color: #0000ff;">socket</span>(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
+<span style="color: #0000ff;">setsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [1], 4) = 0
+<span style="color: #0000ff;">setsockopt</span>(3, SOL_TCP, TCP_KEEPCNT, [20], 4) = 0
+<span style="color: #0000ff;">setsockopt</span>(3, SOL_TCP, TCP_KEEPIDLE, [180], 4) = 0
+<span style="color: #0000ff;">setsockopt</span>(3, SOL_TCP, TCP_KEEPINTVL, [60], 4) = 0
+[..]
+<span style="color: #0000ff;">getsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [1], [4]) = 0
+[..]
+<span style="color: #0000ff;">getsockopt</span>(3, SOL_TCP, TCP_KEEPCNT, [20], [4]) = 0
+[..]
+<span style="color: #0000ff;">getsockopt</span>(3, SOL_TCP, TCP_KEEPIDLE, [180], [4]) = 0
+[..]
+<span style="color: #0000ff;">getsockopt</span>(3, SOL_TCP, TCP_KEEPINTVL, [60], [4]) = 0
+[..]
+<span style="color: #0000ff;">close</span>(3)                                = 0
+[..]
+<span style="color: #0000ff;">_exit</span>(0)                                = ?
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+因为最近碰到redis连接满的情况，想总结一下TCP Keepalive相关的知识，发现<a href="http://www.tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/">TCP-Keepalive-HOWTO</a> 讲得很到位，就翻译当总结了。
+</p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: Fabio Busatto, zhengzhiyong</p>
+<p class="date">Created: 2015-09-25 五 08:23</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
