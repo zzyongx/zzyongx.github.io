@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>TCP Keepalive HOWTO</title>
-<!-- 2015-09-25 五 08:23 -->
+<!-- 2015-09-27 日 13:01 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Fabio Busatto, zhengzhiyong" />
@@ -374,11 +374,11 @@ Keepalive和三个变量有关
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">cat /proc/sys/net/ipv4/tcp_keepalive_time</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">cat /proc/sys/net/ipv4/tcp_keepalive_time</span>
 7200
-<span style="color: #b22222;"># </span><span style="color: #b22222;">cat /proc/sys/net/ipv4/tcp_keepalive_intvl</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">cat /proc/sys/net/ipv4/tcp_keepalive_intvl</span>
 75
-<span style="color: #b22222;"># </span><span style="color: #b22222;">cat /proc/sys/net/ipv4/tcp_keepalive_probes</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">cat /proc/sys/net/ipv4/tcp_keepalive_probes</span>
 9
 </pre>
 </div>
@@ -393,9 +393,9 @@ Keepalive和三个变量有关
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">echo 600 &gt; /proc/sys/net/ipv4/tcp_keepalive_time</span>
-<span style="color: #b22222;"># </span><span style="color: #b22222;">echo 60 &gt; /proc/sys/net/ipv4/tcp_keepalive_intvl</span>
-<span style="color: #b22222;"># </span><span style="color: #b22222;">echo 20 &gt; /proc/sys/net/ipv4/tcp_keepalive_probes</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">echo 600 &gt; /proc/sys/net/ipv4/tcp_keepalive_time</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">echo 60 &gt; /proc/sys/net/ipv4/tcp_keepalive_intvl</span>
+<span style="color: #ff0000;"># </span><span style="color: #ff0000;">echo 20 &gt; /proc/sys/net/ipv4/tcp_keepalive_probes</span>
 </pre>
 </div>
 
@@ -413,7 +413,7 @@ Keepalive和三个变量有关
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">sysctl net.ipv4.tcp_keepalive_time net.ipv4.tcp_keepalive_intvl net.ipv4.tcp_keepalive_probes</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">sysctl net.ipv4.tcp_keepalive_time net.ipv4.tcp_keepalive_intvl net.ipv4.tcp_keepalive_probes</span>
 net.ipv4.tcp_keepalive_time = 7200
 net.ipv4.tcp_keepalive_intvl = 75
 net.ipv4.tcp_keepalive_probes = 9
@@ -426,7 +426,7 @@ net.ipv4.tcp_keepalive_probes = 9
 
 <div class="org-src-container">
 
-<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">sysctl -w net.ipv4.tcp_keepalive_time=600 net.ipv4.tcp_keepalive_intvl=60 net.ipv4.tcp_keepalive_probes=20</span>
+<pre class="src src-sh"><span style="color: #ff0000;"># </span><span style="color: #ff0000;">sysctl -w net.ipv4.tcp_keepalive_time=600 net.ipv4.tcp_keepalive_intvl=60 net.ipv4.tcp_keepalive_probes=20</span>
 net.ipv4.tcp_keepalive_time = 600
 net.ipv4.tcp_keepalive_intvl = 60
 net.ipv4.tcp_keepalive_probes = 20
@@ -497,7 +497,7 @@ net.ipv4.tcp_keepalive_probes = 20
 
 <div class="org-src-container">
 
-<pre class="src src-js"><span style="color: #228b22;">int</span> <span style="color: #a0522d;">setsockopt</span><span style="color: #707183;">(</span><span style="color: #228b22;">int</span> <span style="color: #a0522d;">s</span>, <span style="color: #228b22;">int</span> level, <span style="color: #228b22;">int</span> <span style="color: #a0522d;">optname</span>, <span style="color: #a020f0;">const</span> <span style="color: #a020f0;">void</span> *optval, socklen_t optlen<span style="color: #707183;">)</span>;
+<pre class="src src-js"><span style="color: #00ff00;">int</span> <span style="color: #ffff00;">setsockopt</span><span style="color: #707183;">(</span><span style="color: #00ff00;">int</span> <span style="color: #ffff00;">s</span>, <span style="color: #00ff00;">int</span> level, <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">optname</span>, <span style="color: #00ffff; font-weight: bold;">const</span> <span style="color: #00ffff; font-weight: bold;">void</span> *optval, socklen_t optlen<span style="color: #707183;">)</span>;
 </pre>
 </div>
 
@@ -528,50 +528,50 @@ net.ipv4.tcp_keepalive_probes = 20
 <div class="outline-text-3" id="text-4-3">
 <div class="org-src-container">
 
-<pre class="src src-js"><span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;stdio.h&gt;</span>
-<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;stdlib.h&gt;</span>
-<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;unistd.h&gt;</span>
-<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;sys/types.h&gt;</span>
-<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;sys/socket.h&gt;</span>
-<span style="color: #483d8b;">#include</span> <span style="color: #8b2252;">&lt;netinet/in.h&gt;</span>
+<pre class="src src-js"><span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;stdio.h&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;stdlib.h&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;unistd.h&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;sys/types.h&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;sys/socket.h&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;netinet/in.h&gt;</span>
 
-<span style="color: #228b22;">int</span> <span style="color: #a0522d;">main</span><span style="color: #707183;">()</span>
+<span style="color: #00ff00;">int</span> <span style="color: #ffff00;">main</span><span style="color: #707183;">()</span>
 <span style="color: #707183;">{</span>
-   <span style="color: #228b22;">int</span> <span style="color: #a0522d;">s</span>;
-   <span style="color: #228b22;">int</span> <span style="color: #a0522d;">optval</span>;
+   <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">s</span>;
+   <span style="color: #00ff00;">int</span> <span style="color: #ffff00;">optval</span>;
    socklen_t optlen = sizeof<span style="color: #7388d6;">(</span>optval<span style="color: #7388d6;">)</span>;
 
-   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Create the socket */</span>
-   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span><span style="color: #909183;">(</span>s = socket<span style="color: #709870;">(</span>PF_INET, SOCK_STREAM, IPPROTO_TCP<span style="color: #709870;">)</span><span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
-      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"socket()"</span><span style="color: #909183;">)</span>;
+   <span style="color: #ff0000;">/* </span><span style="color: #ff0000;">Create the socket */</span>
+   <span style="color: #00ffff; font-weight: bold;">if</span><span style="color: #7388d6;">(</span><span style="color: #909183;">(</span>s = socket<span style="color: #709870;">(</span>PF_INET, SOCK_STREAM, IPPROTO_TCP<span style="color: #709870;">)</span><span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #00ff00;">"socket()"</span><span style="color: #909183;">)</span>;
       exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
    <span style="color: #7388d6;">}</span>
 
-   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Check the status for the keepalive option */</span>
-   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span>getsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, &amp;optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
-      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"getsockopt()"</span><span style="color: #909183;">)</span>;
+   <span style="color: #ff0000;">/* </span><span style="color: #ff0000;">Check the status for the keepalive option */</span>
+   <span style="color: #00ffff; font-weight: bold;">if</span><span style="color: #7388d6;">(</span>getsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, &amp;optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #00ff00;">"getsockopt()"</span><span style="color: #909183;">)</span>;
       close<span style="color: #909183;">(</span>s<span style="color: #909183;">)</span>;
       exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
    <span style="color: #7388d6;">}</span>
-   printf<span style="color: #7388d6;">(</span><span style="color: #8b2252;">"SO_KEEPALIVE is %s\n"</span>, <span style="color: #909183;">(</span>optval ? <span style="color: #8b2252;">"ON"</span> : <span style="color: #8b2252;">"OFF"</span><span style="color: #909183;">)</span><span style="color: #7388d6;">)</span>;
+   printf<span style="color: #7388d6;">(</span><span style="color: #00ff00;">"SO_KEEPALIVE is %s\n"</span>, <span style="color: #909183;">(</span>optval ? <span style="color: #00ff00;">"ON"</span> : <span style="color: #00ff00;">"OFF"</span><span style="color: #909183;">)</span><span style="color: #7388d6;">)</span>;
 
-   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Set the option active */</span>
+   <span style="color: #ff0000;">/* </span><span style="color: #ff0000;">Set the option active */</span>
    optval = 1;
    optlen = sizeof<span style="color: #7388d6;">(</span>optval<span style="color: #7388d6;">)</span>;
-   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span>setsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
-      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"setsockopt()"</span><span style="color: #909183;">)</span>;
+   <span style="color: #00ffff; font-weight: bold;">if</span><span style="color: #7388d6;">(</span>setsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #00ff00;">"setsockopt()"</span><span style="color: #909183;">)</span>;
       close<span style="color: #909183;">(</span>s<span style="color: #909183;">)</span>;
       exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
    <span style="color: #7388d6;">}</span>
-   printf<span style="color: #7388d6;">(</span><span style="color: #8b2252;">"SO_KEEPALIVE set on socket\n"</span><span style="color: #7388d6;">)</span>;
+   printf<span style="color: #7388d6;">(</span><span style="color: #00ff00;">"SO_KEEPALIVE set on socket\n"</span><span style="color: #7388d6;">)</span>;
 
-   <span style="color: #b22222;">/* </span><span style="color: #b22222;">Check the status again */</span>
-   <span style="color: #a020f0;">if</span><span style="color: #7388d6;">(</span>getsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, &amp;optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
-      perror<span style="color: #909183;">(</span><span style="color: #8b2252;">"getsockopt()"</span><span style="color: #909183;">)</span>;
+   <span style="color: #ff0000;">/* </span><span style="color: #ff0000;">Check the status again */</span>
+   <span style="color: #00ffff; font-weight: bold;">if</span><span style="color: #7388d6;">(</span>getsockopt<span style="color: #909183;">(</span>s, SOL_SOCKET, SO_KEEPALIVE, &amp;optval, &amp;optlen<span style="color: #909183;">)</span> &lt; 0<span style="color: #7388d6;">)</span> <span style="color: #7388d6;">{</span>
+      perror<span style="color: #909183;">(</span><span style="color: #00ff00;">"getsockopt()"</span><span style="color: #909183;">)</span>;
       close<span style="color: #909183;">(</span>s<span style="color: #909183;">)</span>;
       exit<span style="color: #909183;">(</span>EXIT_FAILURE<span style="color: #909183;">)</span>;
    <span style="color: #7388d6;">}</span>
-   printf<span style="color: #7388d6;">(</span><span style="color: #8b2252;">"SO_KEEPALIVE is %s\n"</span>, <span style="color: #909183;">(</span>optval ? <span style="color: #8b2252;">"ON"</span> : <span style="color: #8b2252;">"OFF"</span><span style="color: #909183;">)</span><span style="color: #7388d6;">)</span>;
+   printf<span style="color: #7388d6;">(</span><span style="color: #00ff00;">"SO_KEEPALIVE is %s\n"</span>, <span style="color: #909183;">(</span>optval ? <span style="color: #00ff00;">"ON"</span> : <span style="color: #00ff00;">"OFF"</span><span style="color: #909183;">)</span><span style="color: #7388d6;">)</span>;
 
    close<span style="color: #7388d6;">(</span>s<span style="color: #7388d6;">)</span>;
 
@@ -630,7 +630,7 @@ libkeepalive通过环境变量 <b>KEEPALIVE</b> (on/off)  <b>KEEPCNT</b>  <b>KEE
 <pre class="src src-sh">$ test
 SO_KEEPALIVE is OFF
 
-$ <span style="color: #a0522d;">LD_PRELOAD</span>=libkeepalive.so <span style="color: #a0522d;">KEEPCNT</span>=20 <span style="color: #a0522d;">KEEPIDLE</span>=180 <span style="color: #a0522d;">KEEPINTVL</span>=60 test
+$ <span style="color: #ffff00;">LD_PRELOAD</span>=libkeepalive.so <span style="color: #ffff00;">KEEPCNT</span>=20 <span style="color: #ffff00;">KEEPIDLE</span>=180 <span style="color: #ffff00;">KEEPINTVL</span>=60 test
 SO_KEEPALIVE is ON
 TCP_KEEPCNT   = 20
 TCP_KEEPIDLE  = 180
@@ -645,42 +645,42 @@ TCP_KEEPINTVL = 60
 <div class="org-src-container">
 
 <pre class="src src-sh">$ strace test
-<span style="color: #0000ff;">execve</span>(<span style="color: #8b2252;">"test"</span>, [<span style="color: #8b2252;">"test"</span>], [/* 26 vars */]) = 0
+<span style="color: #0000ff; font-weight: bold;">execve</span>(<span style="color: #00ff00;">"test"</span>, [<span style="color: #00ff00;">"test"</span>], [/* 26 vars */]) = 0
 [..]
-<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/lib/libc.so.6"</span>, O_RDONLY)        = 3
+<span style="color: #0000ff; font-weight: bold;">open</span>(<span style="color: #00ff00;">"/lib/libc.so.6"</span>, O_RDONLY)        = 3
 [..]
-<span style="color: #0000ff;">socket</span>(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
-<span style="color: #0000ff;">getsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [0], [4]) = 0
-<span style="color: #0000ff;">close</span>(3)                                = 0
+<span style="color: #0000ff; font-weight: bold;">socket</span>(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
+<span style="color: #0000ff; font-weight: bold;">getsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [0], [4]) = 0
+<span style="color: #0000ff; font-weight: bold;">close</span>(3)                                = 0
 [..]
-<span style="color: #0000ff;">_exit</span>(0)                                = ?
+<span style="color: #0000ff; font-weight: bold;">_exit</span>(0)                                = ?
 
-$ <span style="color: #a0522d;">LD_PRELOAD</span>=libkeepalive.so strace test
-<span style="color: #0000ff;">execve</span>(<span style="color: #8b2252;">"test"</span>, [<span style="color: #8b2252;">"test"</span>], [/* 27 vars */]) = 0
+$ <span style="color: #ffff00;">LD_PRELOAD</span>=libkeepalive.so strace test
+<span style="color: #0000ff; font-weight: bold;">execve</span>(<span style="color: #00ff00;">"test"</span>, [<span style="color: #00ff00;">"test"</span>], [/* 27 vars */]) = 0
 [..]
-<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/usr/local/lib/libkeepalive.so"</span>, O_RDONLY) = 3
+<span style="color: #0000ff; font-weight: bold;">open</span>(<span style="color: #00ff00;">"/usr/local/lib/libkeepalive.so"</span>, O_RDONLY) = 3
 [..]
-<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/lib/libc.so.6"</span>, O_RDONLY)        = 3
+<span style="color: #0000ff; font-weight: bold;">open</span>(<span style="color: #00ff00;">"/lib/libc.so.6"</span>, O_RDONLY)        = 3
 [..]
-<span style="color: #0000ff;">open</span>(<span style="color: #8b2252;">"/lib/libdl.so.2"</span>, O_RDONLY)       = 3
+<span style="color: #0000ff; font-weight: bold;">open</span>(<span style="color: #00ff00;">"/lib/libdl.so.2"</span>, O_RDONLY)       = 3
 [..]
-<span style="color: #0000ff;">socket</span>(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
-<span style="color: #0000ff;">setsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [1], 4) = 0
-<span style="color: #0000ff;">setsockopt</span>(3, SOL_TCP, TCP_KEEPCNT, [20], 4) = 0
-<span style="color: #0000ff;">setsockopt</span>(3, SOL_TCP, TCP_KEEPIDLE, [180], 4) = 0
-<span style="color: #0000ff;">setsockopt</span>(3, SOL_TCP, TCP_KEEPINTVL, [60], 4) = 0
+<span style="color: #0000ff; font-weight: bold;">socket</span>(PF_INET, SOCK_STREAM, IPPROTO_TCP) = 3
+<span style="color: #0000ff; font-weight: bold;">setsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [1], 4) = 0
+<span style="color: #0000ff; font-weight: bold;">setsockopt</span>(3, SOL_TCP, TCP_KEEPCNT, [20], 4) = 0
+<span style="color: #0000ff; font-weight: bold;">setsockopt</span>(3, SOL_TCP, TCP_KEEPIDLE, [180], 4) = 0
+<span style="color: #0000ff; font-weight: bold;">setsockopt</span>(3, SOL_TCP, TCP_KEEPINTVL, [60], 4) = 0
 [..]
-<span style="color: #0000ff;">getsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [1], [4]) = 0
+<span style="color: #0000ff; font-weight: bold;">getsockopt</span>(3, SOL_SOCKET, SO_KEEPALIVE, [1], [4]) = 0
 [..]
-<span style="color: #0000ff;">getsockopt</span>(3, SOL_TCP, TCP_KEEPCNT, [20], [4]) = 0
+<span style="color: #0000ff; font-weight: bold;">getsockopt</span>(3, SOL_TCP, TCP_KEEPCNT, [20], [4]) = 0
 [..]
-<span style="color: #0000ff;">getsockopt</span>(3, SOL_TCP, TCP_KEEPIDLE, [180], [4]) = 0
+<span style="color: #0000ff; font-weight: bold;">getsockopt</span>(3, SOL_TCP, TCP_KEEPIDLE, [180], [4]) = 0
 [..]
-<span style="color: #0000ff;">getsockopt</span>(3, SOL_TCP, TCP_KEEPINTVL, [60], [4]) = 0
+<span style="color: #0000ff; font-weight: bold;">getsockopt</span>(3, SOL_TCP, TCP_KEEPINTVL, [60], [4]) = 0
 [..]
-<span style="color: #0000ff;">close</span>(3)                                = 0
+<span style="color: #0000ff; font-weight: bold;">close</span>(3)                                = 0
 [..]
-<span style="color: #0000ff;">_exit</span>(0)                                = ?
+<span style="color: #0000ff; font-weight: bold;">_exit</span>(0)                                = ?
 </pre>
 </div>
 </div>
@@ -699,7 +699,7 @@ $ <span style="color: #a0522d;">LD_PRELOAD</span>=libkeepalive.so strace test
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Fabio Busatto, zhengzhiyong</p>
-<p class="date">Created: 2015-09-25 五 08:23</p>
+<p class="date">Created: 2015-09-27 日 13:01</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

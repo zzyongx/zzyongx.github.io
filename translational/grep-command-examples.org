@@ -1,0 +1,131 @@
+#+TITLE: grep command examples
+#+AUTHOR: SATHIYAMOORTHY,zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+TAGS: grep egrep fgrep
+
+本文部分摘译自[[http://www.thegeekstuff.com/2009/03/15-practical-unix-grep-command-examples/][15 Practical Grep Command Examples In Linux / UNIX]]
+
+本文使用下面的文件作为 ~grep~ 的对象。
+
+#+BEGIN_SRC bash
+  $ cat demo_file
+  THIS LINE IS THE 1ST UPPER CASE LINE IN THIS FILE.
+  this line is the 1st lower case line in this file.
+  This Line Has All Its First Character Of The Word With Upper Case.
+  
+  Two lines above this line is empty.
+  And this is the last line.
+#+END_SRC
+
+* 在文件中查找指定的字符串，可以一次在多个文件查找
+
+#+BEGIN_SRC bash
+  $ cp demo_file demo_file2
+  $ echo grep "Character" demo*
+  grep Character demo_file demo_file2
+  $ grep "Character" demo*
+  demo_file:This Line Has All Its First Character Of The Word With Upper Case.
+  demo_file2:This Line Has All Its First Character Of The Word With Upper Case.
+#+END_SRC
+
+如 *echo* 显示的，这里是 *$SHELL* 自身把 *=demo*=*  解析成两个文件，grep看到的还是两个文件
+
+* ~-i~ 忽略大小写
+grep默认是大小写区分的，通过 ~-i~ 可以忽略大小写
+
+#+BEGIN_SRC bash
+  $ grep the demo_file
+  this line is the 1st lower case line in this file.
+  And this is the last line.
+  $ grep -i the demo_file
+  THIS LINE IS THE 1ST UPPER CASE LINE IN THIS FILE.
+  this line is the 1st lower case line in this file.
+  This Line Has All Its First Character Of The Word With Upper Case.
+  And this is the last line.
+#+END_SRC
+
+* 使用正则表达式
+** 使用锚点
+- ~^~ ：必须出现在行首
+- ~$~ ：必须出现在行尾
+
+** 使用通配符
+- ~.~ ：匹配任意字符
+- ~[abc149]~ ：匹配[]里的任意字符
+- ~[a-c14-9]~ ：同上
+- ~[:digit:]~ ：同[0-9]
+- ~[:alnum:]~ ：同[0-9A-Za-z]
+- ~[:alpha:]~ ：同[A-Za-z]
+
+** 重复次数
+- ~?~     ：匹配0次或1次
+- ~*~     ：匹配任意次
+- ~+~     ：匹配至少1次
+- ~{n}~   ：匹配n次
+- ~{n,}~  ：匹配至少n次
+- ~{,m}~  ：最多匹配m次
+- ~{n,m}~ ：匹配n次到m次之间
+
+** 查找th开头，后跟2个字符的行
+主意grep和egrep的差别[[egrep-fgrep]]
+#+BEGIN_SRC sh
+  $ grep 'th[a-z]\{2\}' demo_file
+  this line is the 1st lower case line in this file.
+  Two lines above this line is empty.
+  And this is the last line.
+  $ egrep 'th[a-z]{2}' demo_file
+  this line is the 1st lower case line in this file.
+  Two lines above this line is empty.
+  And this is the last line.
+#+END_SRC
+
+* ~-w~ 匹配完整的单词
+
+#+BEGIN_SRC bash
+  $ grep is demo_file
+  this line is the 1st lower case line in this file.
+  This Line Has All Its First Character Of The Word With Upper Case.
+  Two lines above this line is empty.
+  And this is the last line.
+  $ grep -w is demo_file
+  this line is the 1st lower case line in this file.
+  Two lines above this line is empty.
+  And this is the last line.
+#+END_SRC
+
+* ~-B~ 显示匹配行的前几行， ~-A~ 显示后几行， ~-C~ 显示前后几行
+#+BEGIN_SRC bash
+  $ grep -B 2 empty demo_file
+  This Line Has All Its First Character Of The Word With Upper Case.
+  
+  Two lines above this line is empty.
+  $ grep -A 1 empty demo_file
+  Two lines above this line is empty.
+  And this is the last line.
+  $ grep -C 3 empty demo_file
+  this line is the 1st lower case line in this file.
+  This Line Has All Its First Character Of The Word With Upper Case.
+  
+  Two lines above this line is empty.
+  And this is the last line.
+#+END_SRC
+
+* ~--color~ 高亮现实匹配到的字符串
+#+BEGIN_SRC bash
+  $ grep --color=always empty demo_file
+  Two lines above this line is empty.
+#+END_SRC
+
+* 其它很有用的选项
+- ~-r~ ：递归查找
+- ~-n~ ：显示行号
+- ~-c~ ：只显示匹配了多少次
+- ~-o~ ：只显示匹配到的内容（默认是匹配到的行）
+- ~-l~ ：只显示匹配到的文件
+- ~-v~ ：只显示不匹配的
+- ~-q~ ：关闭输出，通过 ~$?~ 判断是否匹配成功
+
+* *egrep* *fgrep* <<egrep-fgrep>>
+- *egrep* 相当于 ~grep -E~ ，?， +， {， |， (， )，不需要转义
+- *fgrep* 相当于 ~grep -F~ ，关闭正则匹配
+- ~grep -P~ 使用perl正则表达式

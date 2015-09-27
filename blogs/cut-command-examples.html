@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>10 Practical Linux Cut Command Example to Select File Columns</title>
+<!-- 2015-09-27 日 13:01 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="BALAKRISHNAN MARIYAPPAN, zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">10 Practical Linux Cut Command Example to Select File Columns</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. 选择某列字符</a></li>
+<li><a href="#sec-2">2. 选择指定范围的列</a></li>
+<li><a href="#sec-3">3. 可以仅指定起止位置中的一个</a></li>
+<li><a href="#sec-4">4. 选择指定字段</a></li>
+<li><a href="#sec-5">5. 选择多个字段</a></li>
+<li><a href="#sec-6">6. 当行包含分割符时才选择字段</a></li>
+<li><a href="#sec-7">7. 选取指定字段外的剩余字段</a></li>
+<li><a href="#sec-8">8. 改变输出字段的分割符</a></li>
+<li><a href="#sec-9">9. 使用换行作为输出分割符</a></li>
+<li><a href="#sec-10">10. 和其它命令组合使用</a></li>
+</ul>
+</div>
+</div>
+<p>
+这是意译<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>。在文本处理中常用到cut命令，选取文件的部分列。本文是平时用到的一些实际的例子。对大部分例子，使用下面的测试文件。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cat test.txt
+cat command for file oriented operations.
+cp command for copy files or directories.
+ls command to list out files and directories with its attributes.
+
+$ cat passwd
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+uucp:x:10:14:uucp:/var/spool/uucp:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+</pre>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 选择某列字符</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+使用 <code>-c</code> 参数提取指定列的字符，下面的例子提取每行的第二个字符。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -c2 test.txt
+a
+p
+s
+</pre>
+</div>
+
+<p>
+a，p，s是每行的第二个字符。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 选择指定范围的列</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+通过为 <code>-c</code> 参数指定-分割的起止位置，可以选择某个范围的列，下面的例子选取第1到第3列。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -c1-3 test.txt
+cat
+cp
+ls
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 可以仅指定起止位置中的一个</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+下面的例子，只指定开始位置，结束位置默认是行未。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -c3- test.txt
+t command for file oriented operations.
+ command for copy files or directories.
+ command to list out files and directories with its attributes.
+</pre>
+</div>
+
+<p>
+下面的例子，只指定结束位置，开始位置默认是第一个字符
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -c-8 test.txt
+cat comm
+cp comma
+ls comma
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 选择指定字段</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+除了选择列，还可以选择字段，字段是通过分割符分割的字符串。通过 <code>-d</code> 指定分割符，通过 <code>-f</code> 指定选取的字段。下面的例子演示如何提取passwd的用户名，即第一个字段。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -d':' -f1 passwd
+mail
+uucp
+game
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 选择多个字段</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+下面演示了获取用户名和Home目录
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -d':' -f1,6 passwd
+mail:/var/spool/mail
+uucp:/var/spool/uucp
+games:/usr/games
+</pre>
+</div>
+
+<p>
+<code>-f</code> 也可以选择范围
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -d':' -f1-4,6,7 passwd
+mail:x:8:12:/var/spool/mail:/sbin/nologin
+uucp:x:10:14:/var/spool/uucp:/sbin/nologin
+games:x:12:100:/usr/games:/sbin/nologin
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 当行包含分割符时才选择字段</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+如果passwd某行不包含分割符，将输出整行
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -d'|' -f1 passwd
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+uucp:x:10:14:uucp:/var/spool/uucp:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+</pre>
+</div>
+
+<p>
+通过 <code>-s</code> 参数，设定只有包含分割符的行才输出
+</p>
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -d'|' -s -f1 passwd
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 选取指定字段外的剩余字段</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+通过 <code>--complement</code> 参数选择指定字段外的剩余字段
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -d':' -f7 --complement passwd
+mail:x:8:12:mail:/var/spool/mail
+uucp:x:10:14:uucp:/var/spool/uucp
+games:x:12:100:games:/usr/games
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 改变输出字段的分割符</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+通过 <code>--output-delimiter</code> 指定输出的分割符，替换 <code>-d</code> 指定的分割符
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">$ cut -d':' -f1,6,7 --output-delimiter='#' passwd
+mail#/var/spool/mail#/sbin/nologin
+uucp#/var/spool/uucp#/sbin/nologin
+games#/usr/games#/sbin/nologin
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> 使用换行作为输出分割符</h2>
+<div class="outline-text-2" id="text-9">
+<div class="org-src-container">
+
+<pre class="src src-bash">$ grep uucp passwd | cut -d':' -f1,6,7 --output-delimiter=$'\n'
+uucp
+/var/spool/uucp
+/sbin/nologin
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> 和其它命令组合使用</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+如果没有指定文件 <code>cut</code> 会从标准输入读取内容，这就可以通过管道和其它程序组合，写出更复杂的命令。下面这个例子组合了 <code>ps</code> <code>grep</code> <code>sed</code> <code>cut</code> ， <code>sed</code> 的作用时把多个空字符换成一个空格。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">$ ps -ef | grep chromium | sed s<span style="color: #00ff00;">'/\s\+/ /g'</span> | cut -d<span style="color: #00ff00;">' '</span> -f1,8
+zzyong /opt/chromium-browser/chrome-sandbox
+zzyong /opt/chromium-browser/chromium-browser
+zzyong /opt/chromium-browser/chromium-browser
+zzyong grep
+</pre>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+原文是<a href="http://www.thegeekstuff.com/2013/06/cut-command-examples/">cut-command-examples</a>
+</p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: BALAKRISHNAN MARIYAPPAN, zhengzhiyong</p>
+<p class="date">Created: 2015-09-27 日 13:01</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

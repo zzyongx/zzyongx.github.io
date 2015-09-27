@@ -1,0 +1,126 @@
+#+TITLE: cron command examples
+#+AUTHOR: SATHIYAMOORTHY,zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+本文大部分摘译自[[http://www.thegeekstuff.com/2009/06/15-practical-crontab-examples/][Linux Crontab: 15 Awesome Cron Job Examples]] ，部分是我添加的。
+
+* crontab 的组成
+*crontab* (1) 是用户的cron，在/var/spool/cron/下，这部分不需要指定用户名。/etc/crontab，/etc/cron.d 放置的是系统的cron，需要指定用户名。
+
+* crontab 的格式
+- 用户cron
+
+#+BEGIN_EXAMPLE
+MIN HOUR DOM MON DOW CMD
+#+END_EXAMPLE
+
+- 系统cron
+#+BEGIN_EXAMPLE
+MIN HOUR DOM MON DOW USER CMD
+#+END_EXAMPLE
+
+| 字段 | 描述           | 取值   |
+|------+----------------+--------|
+| MIN  | 分钟           | 0 - 59 |
+| HOUR | 小时           | 0 - 23 |
+| DOM  | 月份中的第几天 | 1 - 31 |
+| MON  | 月份           | 1 - 12 |
+| DOW  | 一周中的第几天 | 0 - 6  |
+| USER | 用户名      | 合法用户名 |
+| CMD  | 命令           | 任何命令 |
+
+*crontab* (5)描述了crontab的格式，有一些注意事项：
+- 以 ~#~ 开头的行表示注释
+- 命令中的 ~%~ 需要转义， ~%~ 后面的部分视为CMD的输入
+- crontab 必须以换行结尾，所以文件最后必须有换行
+- 如果同时指定了DOM和DOW（不为*），那么是或的关系
+- 没办法指定秒级的crontab
+
+下面的示例都是用户cron，如果是系统cron，需要在CMD前加USER。
+
+* 指定时间执行命令
+假如想在6月10日的上午8点30执行full-backup脚本
+
+#+BEGIN_EXAMPLE
+30 08 10 06 * /home/ramesh/full-backup
+#+END_EXAMPLE
+
+- 30：第30分
+- 08：上午8点
+- 10：当月的第10天
+- 06：6月
+- *：不指定DOW
+
+* 指定多个时间执行命令
+假如想在每天上午11点和下午4点执行full-backup
+
+#+BEGIN_EXAMPLE
+00 11,16 * * * /home/ramesh/full-backup
+#+END_EXAMPLE
+
+- 00：第0分
+- 11,16：上午11点和下午4点
+- *：每天
+- *：每月
+- *：一周的每天
+
+* 在某个时间范围执行命令
+假如想在每天上午9点到下午6点执行full-backup
+
+#+BEGIN_EXAMPLE
+00 09-18 * * * /home/ramesh/full-backup
+#+END_EXAMPLE
+
+- 00：第0分
+- 09-18：上午9点，10点，11点 ... 下午5点，下午6点
+- *：每天
+- *：每月
+- *：一周的每天
+
+假如想在工作日的上午9点到18点执行check-db-status
+
+#+BEGIN_EXAMPLE
+00 09-18 * * 1-5 /home/ramesh/check-db-status
+#+END_EXAMPLE
+
+* 如何查看crontab
+查看自己的crontab
+
+#+BEGIN_SRC sh
+  $ crontab -l
+  @yearly /home/ramesh/annual-maintenance
+  */10 * * * * /home/ramesh/check-disk-space
+#+END_SRC
+
+查看其它用户的crontab，需要root权限
+
+#+BEGIN_SRC sh
+  # crontab -u sathiya -l
+  @monthly /home/sathiya/monthly-backup
+  00 09-18 * * * /home/sathiya/check-db-status
+#+END_SRC
+
+* 如何编辑crontab
+- ~crontab -e~ 启动编辑，默认是vim
+- ~crontab -r~ 删除crontab
+- ~crontab -u sathiya -e~ 编辑sathiya的crontab
+- ~crontab cron-file.txt~ 从cron-file.txt导入crontab，会覆盖现有的
+
+* 一些其它crontab时间设定
+- 分钟字段 ~*/5~ 表示每5分钟一次
+- 分钟字段 ~0-10/2~ 表示每小时的头10分钟内，每2分钟一次
+- 其它时间字段也可以做类似的设置
+
+* 一些特殊宏
+| 关键字   | 等价时间  |
+|----------+-----------|
+| @yearly  | 0 0 1 1 * |
+| @monthly | 0 0 1 * * |
+| @daily   | 0 0 * * * |
+| @hourly  | 0 * * * * |
+| @reboot  | 每次系统启动时 |
+
+* crontab的环境变量
+可以在编辑crontab时设定环境变量
+- MAIL：每次cron执行，都会把结果发送给crontab的用户，可以通过修改MAIL修改收件人，如果想不发邮件，可以把MAIL设置为空。
+- PATH： 指定命令的查找路径

@@ -1,0 +1,144 @@
+#+TITLE: 10 Practical Linux Cut Command Example to Select File Columns
+#+AUTHOR: BALAKRISHNAN MARIYAPPAN, zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+这是意译[1]。在文本处理中常用到cut命令，选取文件的部分列。本文是平时用到的一些实际的例子。对大部分例子，使用下面的测试文件。
+
+#+BEGIN_SRC bash
+  $ cat test.txt
+  cat command for file oriented operations.
+  cp command for copy files or directories.
+  ls command to list out files and directories with its attributes.
+
+  $ cat passwd
+  mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+  uucp:x:10:14:uucp:/var/spool/uucp:/sbin/nologin
+  games:x:12:100:games:/usr/games:/sbin/nologin
+#+END_SRC
+
+* 选择某列字符
+使用 ~-c~ 参数提取指定列的字符，下面的例子提取每行的第二个字符。
+
+#+BEGIN_SRC bash
+  $ cut -c2 test.txt
+  a
+  p
+  s
+#+END_SRC
+
+a，p，s是每行的第二个字符。
+
+* 选择指定范围的列
+通过为 ~-c~ 参数指定-分割的起止位置，可以选择某个范围的列，下面的例子选取第1到第3列。
+
+#+BEGIN_SRC bash
+  $ cut -c1-3 test.txt
+  cat
+  cp
+  ls
+#+END_SRC
+
+* 可以仅指定起止位置中的一个
+下面的例子，只指定开始位置，结束位置默认是行未。
+
+#+BEGIN_SRC bash
+  $ cut -c3- test.txt
+  t command for file oriented operations.
+   command for copy files or directories.
+   command to list out files and directories with its attributes.
+#+END_SRC
+
+下面的例子，只指定结束位置，开始位置默认是第一个字符
+
+#+BEGIN_SRC bash
+  $ cut -c-8 test.txt
+  cat comm
+  cp comma
+  ls comma
+#+END_SRC
+
+* 选择指定字段
+除了选择列，还可以选择字段，字段是通过分割符分割的字符串。通过 ~-d~ 指定分割符，通过 ~-f~ 指定选取的字段。下面的例子演示如何提取passwd的用户名，即第一个字段。
+
+#+BEGIN_SRC bash
+  $ cut -d':' -f1 passwd
+  mail
+  uucp
+  game
+#+END_SRC
+
+* 选择多个字段
+下面演示了获取用户名和Home目录
+
+#+BEGIN_SRC bash
+  $ cut -d':' -f1,6 passwd
+  mail:/var/spool/mail
+  uucp:/var/spool/uucp
+  games:/usr/games
+#+END_SRC
+
+~-f~ 也可以选择范围
+
+#+BEGIN_SRC bash
+  $ cut -d':' -f1-4,6,7 passwd
+  mail:x:8:12:/var/spool/mail:/sbin/nologin
+  uucp:x:10:14:/var/spool/uucp:/sbin/nologin
+  games:x:12:100:/usr/games:/sbin/nologin
+#+END_SRC
+
+* 当行包含分割符时才选择字段
+如果passwd某行不包含分割符，将输出整行
+
+#+BEGIN_SRC bash
+  $ cut -d'|' -f1 passwd
+  mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+  uucp:x:10:14:uucp:/var/spool/uucp:/sbin/nologin
+  games:x:12:100:games:/usr/games:/sbin/nologin
+#+END_SRC
+
+通过 ~-s~ 参数，设定只有包含分割符的行才输出
+#+BEGIN_SRC bash
+  $ cut -d'|' -s -f1 passwd
+#+END_SRC
+
+* 选取指定字段外的剩余字段
+通过 ~--complement~ 参数选择指定字段外的剩余字段
+
+#+BEGIN_SRC bash
+  $ cut -d':' -f7 --complement passwd
+  mail:x:8:12:mail:/var/spool/mail
+  uucp:x:10:14:uucp:/var/spool/uucp
+  games:x:12:100:games:/usr/games
+#+END_SRC
+
+* 改变输出字段的分割符
+通过 ~--output-delimiter~ 指定输出的分割符，替换 ~-d~ 指定的分割符
+
+#+BEGIN_SRC bash
+  $ cut -d':' -f1,6,7 --output-delimiter='#' passwd
+  mail#/var/spool/mail#/sbin/nologin
+  uucp#/var/spool/uucp#/sbin/nologin
+  games#/usr/games#/sbin/nologin
+#+END_SRC
+
+* 使用换行作为输出分割符
+
+#+BEGIN_SRC bash
+  $ grep uucp passwd | cut -d':' -f1,6,7 --output-delimiter=$'\n'
+  uucp
+  /var/spool/uucp
+  /sbin/nologin
+#+END_SRC
+
+* 和其它命令组合使用
+如果没有指定文件 ~cut~ 会从标准输入读取内容，这就可以通过管道和其它程序组合，写出更复杂的命令。下面这个例子组合了 ~ps~ ~grep~ ~sed~ ~cut~ ， ~sed~ 的作用时把多个空字符换成一个空格。
+
+#+BEGIN_SRC sh
+  $ ps -ef | grep chromium | sed s'/\s\+/ /g' | cut -d' ' -f1,8
+  zzyong /opt/chromium-browser/chrome-sandbox
+  zzyong /opt/chromium-browser/chromium-browser
+  zzyong /opt/chromium-browser/chromium-browser
+  zzyong grep
+#+END_SRC
+
+[1] 原文是[[http://www.thegeekstuff.com/2013/06/cut-command-examples/][cut-command-examples]]
