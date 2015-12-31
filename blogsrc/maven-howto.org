@@ -1,0 +1,186 @@
+#+TITLE: Maven HowTo
+#+AUTHOR: zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* maven 简介
+我们先不谈maven是什么，我们先说，我们开发一个应用需要什么
+- 编译，测试，运行，打包
+- 管理依赖
+- 项目报告
+好的，maven以统一的形式提供了这些功能，虽然几乎所有功能都是以插件的形式提供的。
+
+* 安装 maven
+安装很简单，下载源码，解压，把bin目录添加到 PATH 路径即可。
+#+BEGIN_SRC bash
+# mvn -version
+Apache Maven 3.3.3 (7994120775791599e205a5524ec3e0dfe41d4a06; 2015-04-22T19:57:37+08:00)
+#+END_SRC
+
+能正确运行，说明安装成功
+
+* 创建项目
+要使用maven，项目必须符合一定的目录规范，最简单的方法就是用maven来创建项目。
+#+BEGIN_SRC
+# mvn archetype:generate -DgroupId=example -DartifactId=howto -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+# tree howto
+howto/
+├── pom.xml
+└── src
+    ├── main
+    │   └── java
+    │       └── example
+    │           └── App.java
+    └── test
+        └── java
+            └── example
+                └── AppTest.java
+#+END_SRC
+
+
+
+* 样板 pom.xml 
+除了目录结构外，pom.xml 是 maven 的核心， ~package~ 是包的类型 ~jar~ 或者 ~war~ ， ~properties~ 中定义的值可以在其它地方引用， ~dependencies~ 定义依赖， ~build~ 定义构建过程需要的插件， ~reporting~ 定义构建完后的一些报告插件。maven的大部分功能都是通过插件提供的，后面会说一些比较有用的插件。
+
+#+BEGIN_SRC xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>example</groupId>
+  <artifactId>howto</artifactId>
+  <packaging>war</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>howto</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.version>1.8</java.version>
+    <spring-boot.version>1.2.7.RELEASE</spring-boot.version>
+    <jetty.http.port>8180</jetty.http.port>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-ws</artifactId>
+      <version>${spring-boot.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jetty</artifactId>
+      <version>${spring-boot.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-Xlint:unchecked</arg>
+          </compilerArgs>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.3.4.RC1</version>
+        <configuration>
+          <httpConnector>
+            <port>${jetty.http.port}</port>
+          </httpConnector>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.6</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.3</version>
+        <configuration>
+          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>      
+    </plugins>
+  </reporting>
+</project>
+#+END_SRC
+
+* 常用的maven命令和选项
+- mvn compile 编译
+- mvn package 打 ~war~ 或者 ~jar~ 包
+- mvn clean 清除 package 或其它过程中产生的中间文件
+- mvn dependency:help 查看 dependency 插件的帮助
+- mvn site 查看项目报告，把 target/site 配置到 http doc 目录，可以以web方式查看
+
+通过 -D 参数指定环境变量，例如 -Dmaven.test.skip=true 用来跳过测试
+
+目标是可以组合的，例如 mvn clean package jetty:run
+
+* mvn test 常用选项
+- -Dtest=TestCircle 只测试 TestCircle
+- -Dtest=TestCi*le  模糊匹配
+- -Dtest=TestSquare,TestCi*le 指定多个
+- -Dtest=TestCircle#mytest 指定方法
+- -Dtest=TestCircle#test* 模糊匹配
+- -Dtest=TestCircle#testOne+testTwo 指定多个方法
+
+* 管理依赖
+通过 ~dependency~ 填写依赖，maven会在本地缓存一份数据 ~$HOME/.m2/repository~
+依赖管理是个很便捷的东西。c和c++就没有类似的项目，Makefile 里面指定的依赖额外安装。
+
+* 常用的maven插件
+** maven-compiler-plugin 插件
+编译插件，配置编译选项
+
+** maven-war-plugin
+打war包插件，配置打包选项
+
+** maven-assembly-plugin
+打独立运行的jar包
+
+** jetty-maven-plugin
+jetty插件，通过 mvn jetty:run 运行war包
+
+** maven-pmd-plugin
+源码分析插件，发现隐藏的bug
+
+** findbugs-maven-plugin
+代码静态分析，发现隐藏的bug

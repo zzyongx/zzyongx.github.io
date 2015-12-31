@@ -1,0 +1,23 @@
+cassandra 辅助索引优化实现
+
+详见：http://www.datastax.com/dev/blog/improving-secondary-index-write-performance-in-1-2
+对key-value数据库，针对value的索引的实现一般是这样的，数据库存放两条记录
+key -> value， value -> key 前者是主索引，后者是辅助索引。C* 最初的实现也是这样的，这样的实现有个问题。
+
+考虑一个具体情况：
+create table users (name text primary key, address text, age int); create index on users(address);
+insert into users(name, address, age) values('zzyong', 'beijing', 28);
+
+数据库中产生两条记录：zzyong -> beijing, 28; beijing -> zzyong
+
+此时 update users set address = 'henan' where name = 'zzyong';
+为了维护 secondary index, C* 需要新增 henan -> zzyong, 同时删除 beijing -> zzyong，避免通过 beijing 仍能读到 zzyong。
+
+但是update时不知道旧的address beijing，因此为了删除 beijing -> zzyong 需要一次读发生，读取旧的address beijing，
+这个违背了C*的理念，避免read before write。增大了latency，降低了throughout。
+
+1.2 以后是这样优化的，update时，不删除 beijing -> zzyong。当通过 secondary index 读取 beijing -> zzyong 时，
+读取 zzyong -> henan, 28; 发现 beijing =/= henan，于是删除 beijing -> zzyong，同时忽略这条记录。
+
+一般的实现都是 index 和 data 保持一致，这里不刻意保持 index 和 data 一致，
+而是通过读时修复这种不一致，来降低 index 的维护成本，想法很新颖，简单，但非常有效。

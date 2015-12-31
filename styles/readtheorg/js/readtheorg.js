@@ -40,6 +40,14 @@ $( document ).ready(function() {
     $('table').stickyTableHeaders();
 });
 
+$(document).ready(function() {
+  if ($('#text-table-of-contents ul li').length == 0) {
+    $('#table-of-contents').hide();
+    $('#postamble').hide();
+    $('#content').css("margin-left", 0);
+  }
+});
+
 window.SphinxRtdTheme = (function (jquery) {
     var stickyNav = (function () {
         var navBar,
