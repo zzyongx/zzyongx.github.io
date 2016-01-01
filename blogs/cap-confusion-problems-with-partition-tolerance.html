@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>CAP迷思：关于分区容忍性</title>
+<!-- 2016-01-01 五 15:13 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">CAP迷思：关于分区容忍性</h1>
+<p>
+CAP<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>理论是分布式存储系统的热门话题。然而，它被大量误用了。在本文中，我想强调为什么通常的说法“一致性（C），可用性（A）和分区容忍性（P），只能选择两个”，对分布式系统来说，是不适当的。事实上，我们从CAP理论中学到的是，只能在顺序一致性和高可用性中选择一个。
+</p>
+
+<p>
+（备注：作者的意思是，只能CP或者AP，因为P必选，所以说只能从C和A中选一个）
+</p>
+
+<p>
+在设计分布式存储系统或者谈论它的设计时，常常提到CAP理论。按照该理论通常的表述，设计者必须在三个相互排斥的条件中作出选择。
+</p>
+
+<ul class="org-ul">
+<li>一致性：大意是存储系统的所有客户端请求，都能得到一个“说的过去”的响应。例如：A先写入1再写入2，B不能读到2之后又读到1.
+</li>
+<li>可用性：存储系统的所有操作最终都返回成功。我们称系统是可用的。
+</li>
+<li>分区容忍性：如果集群中的机器被分成了两部分，这两部分不能互相通信，系统是否能继续正常工作。
+</li>
+</ul>
+
+<p>
+这通常被概述为一句话“一致性，可用性，分区容忍性，只能选择两个”，简单，干脆，实用。
+</p>
+
+<p>
+至少，传统观点是这样的。很多现代分布式存储，包括NoSQL，以提供可用性和分区容忍性，而不是强一致性，而自豪。它们认为，和短时间的不可用相比，短时间的应用异常要更好些。的确，Stonebraker博士在ACM的博客上，为多数系统选择了AP而感到遗憾，并且认为一致性和可用性才是应该选择的。然而，对绝大多数系统而言，我坚决主张，只能在一致性和可用性之间做选择。
+</p>
+
+<p>
+Stonebraker博士的核心观点是，分区很罕见，我们可以简单的牺牲掉“分区容忍性”，选择顺序一致性和可用性，这个模型很适合传统的事务处理，能保持多数关系数据库的ACID不变。我想说明，为什么这是对CAP理论的误读。
+</p>
+
+<p>
+我们先弄明白“分区容忍性”的确切含义是什么？Stonebraker博士断言，如果网络故障时，分区两边的处理可以继续，那就是分区容忍的。
+</p>
+
+<p>
+Seth Gilbert 和 Lynch在他们的论文中提供了CAP理论的公式和证明。我们应该参考他们对分区容忍性的定义，如果我们想把CAP当作一个数学真理来引用，我们就应该公式化我们的基础，否则它就是建立不稳固的基础上的。Gilbert和Lynch是这样定义分区容忍性的：网络允许丢失以一个节点发给另一个节点的任意多的消息。
+</p>
+
+<p>
+注意，Gilbert 和 Lynch 定义的不是分布式应用的性质，而是应用所在的网络的性质。分区容忍性不是我们设计系统时可以选择的东西（没得选）。如果网络发生分区，你或者失去一致性（因为允许分别更新分区两边）或者失去可用性（因为你检测到错误，关闭系统，直到分区消失）。分区容忍性意味着，开发一个应对策略，当分区时，丢弃一致性或可用性。这时我们真正从CAP中学到的，当你有个会丢消息的网络，你不能同时拥有可用性和一致性。
+</p>
+
+<p>
+Stonebraker关于分区容忍性的定义实际上是衡量可用性的，如果写到任何一个分区，最终会不会有响应？这对跨越不同地理位置的系统很有意义，但是在局域网中，两个分区都可写并不常见。然而，它是隐含在可用性要求中的，如果系统总是可写的，那么在网络分区时，当然也是可写的。
+</p>
+
+<p>
+那么什么导致了分区？有两个。第一个很显然，网络故障，例如交换机坏了，可以导致网络分区。第二个没那么明显，但是符合Gilbert和Lynch对分区的定义，机器故障，无论是软件的，还是硬件的。例如在异步网络中，消息处理没有在指定时间完成，不可能区分是机器故障还是消息丢失了。这样，一台故障机器自个和其余机器发生了分区。相关错误发生在一组机器，这组机器就和其它机器发生了分区。不能收到消息和网络没有投递消息是等价的。当足够多的机器故障时，保持可用性和一致性（中的一个）是不可能，不是因为写到了不同的分区，而是机器数量达不到的规定的数目（quorum机制）， 可能导致最近的写没法读出来。
+</p>
+
+<p>
+（备注：这就是为啥分区容忍是必选的，因为无论如何，它都要发生，无法控制）
+</p>
+
+<p>
+这就是为啥，把P定义为“允许分区保持可用”是有误导性的，机器失败是分区，当他们失败时系统可能不可用。Stonebrake还说他建议选择CA而不是P。这有点像同时要熊掌和鱼。不选择P，类似于要建一个永远不发生多相关故障的网络。正是因为Stonebrake在博客中描述的原因，相关错误，OS bug和集群灾难等，对分布式系统来说，构建这样的网络是不切实际的。所以设计者必须在一致性和可用性之间做选择。Stonebrake告诉我们要选择一致性。事实上，当大的失败事件发生时，可用性不可避免的要受到影响。这是合理的选择，RDBMS族的数据库把它用到了极致。但它既不能使我们免于小故障带来的可用性问题，也不能使我们免于花大力气维护顺序一致性。
+</p>
+
+<p>
+当机器扩展到成百上千的规模时，面对可能的错误，维持一致性变的非常昂贵（你不得不往更多的机器写数据，机器数目比你所能容忍的失败机器多一）。有一个细微的区别，CAP理论没说，考虑到吞吐量和延迟，维护一致性比维护可用性代价更高。Zookeeper是顺序一致的，因为集群规模够小，把数据写入法定多数的机器代价相对较小。HDFS也选择了一致性，如果倒霉，三个数据节点故障就导致文件块儿不可用。两个系统都设计为，能在普通的网络环境运行，当分区和失败发生时，他们可能变得不可用，在一致性和可用性间选择了一致性。对分布式系统来说，这种选择是不可避免的。
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+：本文译自 <a href="http://blog.cloudera.com/blog/2010/04/cap-confusion-problems-with-partition-tolerance/">cap confusion problems with partition tolerance</a>。文章的评论也有意思，CAP理论是愚蠢的，分区是可以避免的。分区发生时，通过把请求导入到最大的分区，可以移除分区，实现CAP。我个人认为大部分时候CAP理论的确是愚蠢的，大部分NoSQL实现在分区（节点故障）时仍然是高可用和一致的，但不绝对保证，因为节点故障是失败-恢复模型，不是失败-停止模型，前者在发生在节点应用故障或机器负载高，暂时不可用时，而后者发生在机器宕机，长时间稳定不可用时，显然前者更常见，不然就不需要Paxos，3PC就够了
+</p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2016-01-01 五 15:13</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

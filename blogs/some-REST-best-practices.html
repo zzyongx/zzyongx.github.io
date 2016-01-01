@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>一些REST最佳实践</title>
+<!-- 2016-01-01 五 14:56 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">一些REST最佳实践</h1>
+<p>
+如今，REST APIs<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup> 已经非常普遍，几乎所有WEB应用都用到了它们。提供简单，一致，实用的API是种义务，方便其它人很容易的使用。即使下面的这些规范，在你看来很正常，我经常看到人们不遵守它。这是我写这篇文章的原因。
+</p>
+
+<p>
+当你设计 RESTful API 时，下面是一些应该牢记的最佳规范。
+</p>
+
+<p>
+免责声明：下面的这些规范是根据过去的经验，我认为最好的。如果你有别的想法，咱们邮件讨论。
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 给API加上版本</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+API版本应该是必备的。这样API不会随时间过时。一种方法是把版本放到URL里（/api/v1&#x2026;)
+</p>
+
+<p>
+另一个巧妙的花招是使用 Accept HTTP header，来传递需要的版本，<a href="https://developer.github.com/v3/media/#request-specific-version">正如github所做的</a>。
+</p>
+
+<p>
+（备注：Github 的格式是，application/vnd.github[.version].param[+json]，version指定版本，param是想要的格式，txt，html等。从评论看似乎Github的方式更完美）
+</p>
+
+<p>
+通过版本，你可以改变API的结构，而不用担心老版客户端的兼容问题。（备注：API提供者默默承受维护多套API的痛苦）
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 使用名词，而不是动词</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+我经常看到有人使用动词而不是名词来表示资源名称，例如下面这些：
+</p>
+<ul class="org-ul">
+<li>/getProducts
+</li>
+<li>/listOrders
+</li>
+<li>/retreiveClientByOrder?orderId=1
+</li>
+</ul>
+
+<p>
+从结构整洁和一致角度考虑，你应该总是使用名词。而且，巧妙使用 HTTP 方法（GET，POST）可以把想要的操作从资源名称上去除。如下面的例子：
+</p>
+<ul class="org-ul">
+<li>GET  /products      返回所有产品列表
+</li>
+<li>POST /products      添加产品到产品列表
+</li>
+<li>GET  /products/4    提取Id为4的产品
+</li>
+<li>PATCH/PUT /products/4 更新Id为4的产品
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 使用复数形式</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+在我看来，同一资源命名，混合使用单数和复数形式不是好主意。很快就会混淆，带来不一致。
+</p>
+
+<p>
+即使对 show/delete/update 操作，使用 /artists 而不是 /artist 也更好点。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> GET 和 HEAD 操作应该是安全的（无副作用）</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+RFC2616 明确规定 HEAD 和 GET 必须是安全的（不能改变资源状态）
+</p>
+
+<p>
+右边是一个不好的例子： GET /deleteProduct?id=1
+</p>
+
+<p>
+如果搜索引擎检索了那个页面，画面太美我不敢看（备注：实践中对删除操作都有权限验证，就算操作引擎抓取也没啥破坏）
+</p>
+
+<p>
+（备注：POST和PUT的区别，POST是不幂等的，PUT是幂等的。如果多次调用URL得到的结果都一样，那就是幂等的。例如，发评论，如果评论ID在提交评论前已经生成，那么无论点多少次提交，看到的都是一条评论。如果评论ID在提交评论后生成，点多少次提交就看到多少条评论。）
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 使用嵌套资源</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+如果想获取全部的子集，使用嵌套路由来让风格简洁。例如想从所有唱片中选取特定的，使用 GET /artists/8/albums （备注：这里8就是所谓嵌套路由，指导选取哪个唱片）
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 分页</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+通过 HTTP 返回超大结果集不是好主意。序列化大的JSON数据很慢，这会导致性能问题。
+</p>
+
+<p>
+通常的做法是分页，Facebook，Twitter，Github都是这么做的。提取少里数据更快，就算需要多次调用，也比一次提取很大（但执行很慢）的数据更高效。
+</p>
+
+<p>
+如果想分页，一个好的方法是通过LINK HTTP header，来提示前一页和后一页。正如 Github 做的那样。
+</p>
+
+<p>
+（备注：LINK的用法 Link: <a href="http://next_url">http://next_url</a>; rel="next", <a href="http://last_url">http://last_url</a>; rel="last", <a href="http://first_url">http://first_url</a>; rel="first", <a href="http://prev_url">http://prev_url</a>; rel="prev"）
+</p>
+
+<ol class="org-ol">
+<li>使用合适的 HTTP 状态码
+</li>
+</ol>
+<p>
+请求返回时，无论请求成功与否，总是使用正确的返回码。下面是一些可能用到的状态码。
+</p>
+</div>
+
+<div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> 成功状态码（2XX系列）</h3>
+<div class="outline-text-3" id="text-6-1">
+<ul class="org-ul">
+<li>201 Created 当成功创建资源时（INSERT）
+</li>
+<li>202 Accepted 当请求被接受，并放到后台执行时（异步任务）
+</li>
+<li>204 No Content 当请求成功，但是没有内容返回时（例如 DELETE 时）
+</li>
+</ul>
+
+<p>
+（备注：是否 200 就足够了，引入其它是否增加理解负担）
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> 客户端错误（4xx系列）</h3>
+<div class="outline-text-3" id="text-6-2">
+<ul class="org-ul">
+<li>400 Bad Request 当处理querystring或http body时出错（例如非法JSON）
+</li>
+<li>401 Unauthorized 认证失败
+</li>
+<li>403 Forbidden 认证成功时，操作或请求的资源不被允许
+</li>
+<li>406 Not Acceptable 请求格式不被接受（例如试图请求JSON数据，但服务器只提供XML）
+</li>
+<li>410 Gone 请求的资源被永久删除（备注：咋判断是不存在还是被永久删除了）
+</li>
+<li>422 Unprocessable entity 当创建对象时发生可用性错误
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 总是返回一致的错误内容</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+当发生错误时，总是返回一致的错误描述。错误结构总是相同，这样更容易解析错误信息。
+</p>
+
+<p>
+如下描述，清晰，简单，自说明
+</p>
+<pre class="example">
+HTTP/1.1 401 Unauthorized
+{
+    "status": "Unauthorized",
+    "message": "No access token provided.",
+    "request_id": "594600f4-7eec-47ca-8012-02e7b89859ce"
+}
+</pre>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+本文译自：<a href="https://bourgeois.me/rest/">Some REST best practices</a>，英文好的建议读原文，文中多处引用github的接口规范，本文也顺带介绍一下。因为 <code>REST</code> （Representational State Transfer）是API风格，API自然涉及到团队内的合作，最好团队都采用REST风格的。个人认为一致比风格重要）
+</p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2016-01-01 五 14:56</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
