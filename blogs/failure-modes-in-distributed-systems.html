@@ -3,8 +3,8 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>跬步</title>
-<!-- 2016-01-01 五 19:12 -->
+<title>分布式系统中的失败模型</title>
+<!-- 2016-01-01 五 19:06 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="zzyongx" />
@@ -143,73 +143,92 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">跬步</h1>
+<h1 class="title">分布式系统中的失败模型</h1>
+<p>
+本文是<a href="http://videlalvaro.github.io/2013/12/failure-modes-in-distributed-systems.html">FAILURE MODES IN DISTRIBUTED SYSTEMS</a> 的阅读笔记。Linux中有个哲学，如果有动静（错误），就把动静闹大点。对错误遮遮掩掩，只能掩盖更大的错误。本文提到的几种失败模型，最彻底的失败要好过摇摆不定的失败，因为前者的确定性更大。大的确定性利于发现问题。例如：引发Segment fault的内存越界，比写花相邻内存，系统持有错误数据要好，因为没法确定内存是什么时候写花的。
+</p>
 
 <div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> 2016 丙申年</h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> 几种失败模型</h2>
 <div class="outline-text-2" id="text-1">
-<hr  />
-</div>
-
-<div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 阅读笔记</h3>
-<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li>拜占庭失败  <i>Byzantine or arbitrary failures</i>
+</li>
+</ul>
 <p>
-<a href="http://zzyongx.github.io/blogs/failure-modes-in-distributed-systems.html">分布式系统中的失败模型</a>
+这种失败发生时，它可能向部分节点发消息说 <code>φ</code> 是 <code>true</code> ，但是向另一部分发消息说 <code>φ</code> 是 <code>false</code> 。此外，它还发布其节点的虚假信息，例如，节点S的状态是 <code>true</code> ，但是S的真实状态是 <code>false</code> 。
 </p>
-<blockquote>
-<p>
-失败模型的核心是确定性，确定性高的失败要优于确定性低的失败。
-</p>
-</blockquote>
-</div>
-</div>
-</div>
 
+<p>
+这种失败模型，不确定性奇高，失败的节点完全不可理喻。
+</p>
+
+<ul class="org-ul">
+<li>做了认证的拜占庭失败 <i>Authentification detectable byzantine failures</i>
+</li>
+</ul>
+<p>
+此时，失败节点不能发布其它节点的虚假消息
+</p>
+
+<ul class="org-ul">
+<li>性能失败 <i>Performance failures</i>
+</li>
+</ul>
+<p>
+节点能正确响应，但是不能在指定时间内响应。
+</p>
+
+<ul class="org-ul">
+<li>遗漏失败 <i>Omission failures</i>
+</li>
+</ul>
+<p>
+上一种情况的特例，响应无限延迟，没有响应。
+</p>
+
+<ul class="org-ul">
+<li>崩溃失败 <i>Crash failures</i>
+</li>
+</ul>
+<p>
+发生一次遗漏失败，后续一直遗漏失败。
+</p>
+
+<ul class="org-ul">
+<li>“失败-停止”/Fail-stop failures/
+</li>
+</ul>
+<p>
+这是确定性最高的失败，表现同崩溃失败，但是其它正常节点都能确定该节点失败了。
+</p>
+</div>
+</div>
 
 <div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 2015 乙未年</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> 失败模型之间的关系</h2>
 <div class="outline-text-2" id="text-2">
-<hr  />
-</div>
-
-<div id="outline-container-sec-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 翻译</h3>
-<div class="outline-text-3" id="text-2-1">
 <p>
-<a href="http://zzyongx.github.io/blogs/tcp-keepalive-howto.html">TCP Keepalive HOWTO</a>
+上述几种失败模型，从上到下，确定性逐步提高。分布式系统中，失败无可避免，但是要提高失败的确定性。
 </p>
-<blockquote>
-<p>
-介绍了TCP Keepalive产生的背景，使用场景，和如何使用。
-对于理解TCP协议和系统开发很有帮助。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/some-REST-best-practices.html">一些REST最佳实践</a>
+可以把失败模型分为一致性失败 <i>Consistent failures</i> 和 不一致失败 <i>Inconsistent failures</i> 。对于前者，失败节点向所有剩余节点表现出失败，对于后者，失败节点向部分节点表现出失败，向部分节点不表现出失败。显然前者的确定性更高。
 </p>
-<blockquote>
-<p>
-越来越多的服务接口采用HTTP的方式，而RESTful风格可以让API语义更清晰。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/cap-confusion-problems-with-partition-tolerance.html">CAP迷思：关于分区容忍性</a>
+作者在文章中用了服务器server，我觉得节点表述稍微恰当，一个服务器部署多个节点时，更又可能出现上述情况。
 </p>
-<blockquote>
+
 <p>
-作者说CAP，其实只能是CP或者AP，因为P必选。
+还可以把失败分为数据失败 <i>Value failures</i> 和响应时长失败 <i>Timing failures</i> ，对于有状态的分布式系统，前者可能已经破坏了数据完整性。
 </p>
-</blockquote>
-</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zzyongx</p>
-<p class="date">Created: 2016-01-01 五 19:12</p>
+<p class="date">Created: 2016-01-01 五 19:06</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

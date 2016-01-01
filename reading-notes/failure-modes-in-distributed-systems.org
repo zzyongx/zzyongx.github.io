@@ -1,0 +1,36 @@
+#+TITLE: 分布式系统中的失败模型
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+本文是[[http://videlalvaro.github.io/2013/12/failure-modes-in-distributed-systems.html][FAILURE MODES IN DISTRIBUTED SYSTEMS]] 的阅读笔记。Linux中有个哲学，如果有动静（错误），就把动静闹大点。对错误遮遮掩掩，只能掩盖更大的错误。本文提到的几种失败模型，最彻底的失败要好过摇摆不定的失败，因为前者的确定性更大。大的确定性利于发现问题。例如：引发Segment fault的内存越界，比写花相邻内存，系统持有错误数据要好，因为没法确定内存是什么时候写花的。
+
+* 几种失败模型
+- 拜占庭失败  /Byzantine or arbitrary failures/
+这种失败发生时，它可能向部分节点发消息说 ~φ~ 是 ~true~ ，但是向另一部分发消息说 ~φ~ 是 ~false~ 。此外，它还发布其节点的虚假信息，例如，节点S的状态是 ~true~ ，但是S的真实状态是 ~false~ 。
+
+这种失败模型，不确定性奇高，失败的节点完全不可理喻。
+
+- 做了认证的拜占庭失败 /Authentification detectable byzantine failures/
+此时，失败节点不能发布其它节点的虚假消息
+
+- 性能失败 /Performance failures/
+节点能正确响应，但是不能在指定时间内响应。
+
+- 遗漏失败 /Omission failures/
+上一种情况的特例，响应无限延迟，没有响应。
+
+- 崩溃失败 /Crash failures/
+发生一次遗漏失败，后续一直遗漏失败。
+
+- “失败-停止”/Fail-stop failures/
+这是确定性最高的失败，表现同崩溃失败，但是其它正常节点都能确定该节点失败了。
+
+* 失败模型之间的关系
+上述几种失败模型，从上到下，确定性逐步提高。分布式系统中，失败无可避免，但是要提高失败的确定性。
+
+可以把失败模型分为一致性失败 /Consistent failures/ 和 不一致失败 /Inconsistent failures/ 。对于前者，失败节点向所有剩余节点表现出失败，对于后者，失败节点向部分节点表现出失败，向部分节点不表现出失败。显然前者的确定性更高。
+
+作者在文章中用了服务器server，我觉得节点表述稍微恰当，一个服务器部署多个节点时，更又可能出现上述情况。
+
+还可以把失败分为数据失败 /Value failures/ 和响应时长失败 /Timing failures/ ，对于有状态的分布式系统，前者可能已经破坏了数据完整性。
