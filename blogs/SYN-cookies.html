@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>SYN cookies HOWTO</title>
+<!-- 2016-01-09 六 18:34 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">SYN cookies HOWTO</h1>
+<p>
+说起<a href="https://en.wikipedia.org/wiki/SYN_cookies">SYN cookies</a>，就不得不先说<a href="https://en.wikipedia.org/wiki/SYN_flood">SYN flood</a>，而说起SYN flood就不得不先说 <code>TCP</code> 三次握手。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-ditta">Alice  --&gt;-- SYN     --&gt;-- Server
+Server --&gt;-- SYN-ACK --&gt;-- Alice
+Alice  --&gt;-- ACK     --&gt;-- Server
+</pre>
+</div>
+
+<p>
+这个是正常的三次握手，最后Alice向Server回复 <code>ACK</code> ，三次握手完成。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-ditta">Hack   --&gt;-- SYN     --&gt;-- Server
+Hack   --&gt;-- SYN     --&gt;-- Server
+Hack   --&gt;-- SYN     --&gt;-- Server
+Server --&gt;-- SYN-ACK --&gt;-- Hack
+Server --&gt;-- SYN-ACK --&gt;-- Hack
+Server --&gt;-- SYN-ACK --&gt;-- Hack
+</pre>
+</div>
+
+<p>
+上面Hack向Server发送了 <code>SYN</code> ，但是或者Hack故意不回复 <code>ACK</code> ，或者Hack向Server发送 <code>SYN</code> 时伪造了源IP地址。Server收不到最后的 <code>ACK</code> ，最终处于半连接状态。
+</p>
+
+<p>
+当Hack发送大量的 <code>SYN</code> 时，Server端保留了大量的半连接，占用了大量的资源，此时Alice发送正常的 <code>SYN</code> ，Server却无法响应了。这种情况，就是Hack利用 <code>SYN flood</code> 发起了 <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DOS</a> 攻击。
+</p>
+
+<p>
+<code>SYN cookie</code> 正是为了解决 <code>SYN flood</code> 才出现的。 <code>SYN flood</code> 造成 <code>DOS</code> 的关键是半连接，占用了Server的资源，如果能消除半连接占的资源，那么就可以防止 <code>SYN flood</code> 。 
+</p>
+
+<p>
+<code>TCP</code> 规定，每次 <code>ACK</code> 都要把收到的包的 <code>sequence number</code> 加1发送回去。 <code>SYN cookie</code> 的解决思路是，把半连接保存的资源放到 <code>sequence number</code> 中，收到 <code>ACK</code> 时把 <code>sequence number</code> 减1，从中恢复需要的资源。 <code>sequence number</code> 只有32位，能保存的资源有限，5位保存时间，3位保存TCP选项 <code>MSS</code> ，剩下24位保存一个加密串，具体实现参考<a href="https://en.wikipedia.org/wiki/SYN_cookies">wiki</a>。
+</p>
+
+<p>
+<code>SYN cookie</code> 有2个缺陷。首先，如果Alice发送的ACK <b>丢失</b> ，因为服务器没有保留半连接信息，所以它无法通过重发 <code>SYN ACK</code> 来让Alice重发 <code>ACK</code> ，当Alice的 <code>ACK</code> 丢失时，Alice认为连接建立，Server则根本没有这个连接。如果建立连接后是Server先发数据，Alice则只能通过超时发现问题。其次，因为 <code>sequence number</code> 只有32位，只保留了 <code>MSS</code> 这个TCP选项，这在早期不是问题，TCP选择逐渐增多，这些选项也非常重要，它们无法保存在 <code>sequence number</code> 中。
+</p>
+
+<p>
+在<a href="http://lwn.net/Articles/277146/">改进SYN cookie</a> 中，通过在TCP timestamp中保存更多的TCP选项，解决了缺陷2。在此文中提到，SYN cookie的最初作者认为SYN cookie可能已经没有必要了，因为现在Server性能强劲，内存常有富裕，半连接占用的资源已经可以忽略了。但是测试似乎表明 SYN cookie 提升了响应时间，虽然略有CPU的提升，另外在有SYN flood的情况下，SYN cookie开启要由于不开启。
+</p>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2016-01-09 六 18:34</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

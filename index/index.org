@@ -1,0 +1,41 @@
+#+TITLE: 跬步
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 2016 丙申年
+------------
+
+** 阅读笔记
+
+[[blog:SYN-cookies][SYN cookie是什么]]
+#+BEGIN_QUOTE
+SYN cookie 解决了什么问题，原理是什么，有什么缺陷
+#+END_QUOTE
+
+[[blog:failure-modes-in-distributed-systems][分布式系统中的失败模型]]
+#+BEGIN_QUOTE
+失败模型的核心是确定性，确定性高的失败要优于确定性低的失败。
+#+END_QUOTE
+
+* 2015 乙未年
+------------
+
+** 翻译
+
+[[blog:tcp-keepalive-howto][TCP Keepalive HOWTO]]
+#+BEGIN_QUOTE
+介绍了TCP Keepalive产生的背景，使用场景，和如何使用。
+对于理解TCP协议和系统开发很有帮助。
+#+END_QUOTE
+
+[[blog:some-REST-best-practices][一些REST最佳实践]]
+#+BEGIN_QUOTE
+越来越多的服务接口采用HTTP的方式，而RESTful风格可以让API语义更清晰。
+#+END_QUOTE
+
+[[blog:cap-confusion-problems-with-partition-tolerance][CAP迷思：关于分区容忍性]]
+#+BEGIN_QUOTE
+作者说CAP，其实只能是CP或者AP，因为P必选。
+#+END_QUOTE
+
