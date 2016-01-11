@@ -6,6 +6,12 @@
 * 2016 丙申年
 ------------
 
+** 经验
+[[blog:nginx-upstream-send-invalid-header][upstream send invalid header]]
+#+BEGIN_QUOTE
+HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为非法字符，nginx 会报错 upstream send invalid header
+#+END_QUOTE
+
 ** 阅读笔记
 
 [[blog:SYN-cookies][SYN cookie是什么]]
@@ -20,6 +26,13 @@ SYN cookie 解决了什么问题，原理是什么，有什么缺陷
 
 * 2015 乙未年
 ------------
+
+** 经验
+
+[[blog:maven-howto][maven HOWTO]]
+#+BEGIN_QUOTE
+maven 是重要的java构建工具，该文档涵盖了maven的常见用法
+#+END_QUOTE
 
 ** 翻译
 

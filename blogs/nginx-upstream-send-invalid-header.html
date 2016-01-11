@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>跬步</title>
-<!-- 2016-01-11 一 11:13 -->
+<title>nginx upstream send invalid header</title>
+<!-- 2016-01-07 四 11:28 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
-<meta  name="author" content="zzyongx" />
+<meta  name="author" content="zhengzhiyong" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center; }
@@ -143,109 +143,52 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">跬步</h1>
-
-<div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> 2016 丙申年</h2>
-<div class="outline-text-2" id="text-1">
-<hr  />
-</div>
-
-<div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 经验</h3>
-<div class="outline-text-3" id="text-1-1">
+<h1 class="title">nginx upstream send invalid header</h1>
 <p>
-<a href="http://zzyongx.github.io/blogs/nginx-upstream-send-invalid-header.html">upstream send invalid header</a>
+某次上线后，nginx 增加了很多这样的错误
 </p>
 <blockquote>
 <p>
-HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为非法字符，nginx 会报错 upstream send invalid header
-</p>
-</blockquote>
-</div>
-</div>
-
-<div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 阅读笔记</h3>
-<div class="outline-text-3" id="text-1-2">
-<p>
-<a href="http://zzyongx.github.io/blogs/SYN-cookies.html">SYN cookie是什么</a>
-</p>
-<blockquote>
-<p>
-SYN cookie 解决了什么问题，原理是什么，有什么缺陷
+upstream sent invalid header while reading response header from upstream
 </p>
 </blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/failure-modes-in-distributed-systems.html">分布式系统中的失败模型</a>
+常见的解释是，upstream的response header <b>太大</b> ，导致一个 <b>buffer</b> 不能放的下，相应的配置修改是：
+</p>
+<pre class="example">
+proxy_buffer_size 32k;
+proxy_buffers 16 10k;
+</pre>
+<p>
+配置的具体含义，参考<a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffer_size"><code>http_proxy</code></a> ，大概意思是增加相应的buffer大小。
+</p>
+
+<p>
+根据业务，upstream并不会返回很大的response header，侥幸试了一下，果然不起作用。
+</p>
+
+<p>
+无奈只能用tcpdump抓包，header部分在终端出现了乱码，header部分有乱码是很奇怪的。原来 http 协议对 header 的 <b>编码</b> 是有要求的。
+<a href="http://stackoverflow.com/questions/4400678/http-header-should-use-what-character-encoding">stackoverflow</a> 有相关回答，简单来说：
 </p>
 <blockquote>
 <p>
-失败模型的核心是确定性，确定性高的失败要优于确定性低的失败。
-</p>
-</blockquote>
-</div>
-</div>
-</div>
-
-<div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 2015 乙未年</h2>
-<div class="outline-text-2" id="text-2">
-<hr  />
-</div>
-
-<div id="outline-container-sec-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 经验</h3>
-<div class="outline-text-3" id="text-2-1">
-<p>
-<a href="http://zzyongx.github.io/blogs/maven-howto.html">maven HOWTO</a>
-</p>
-<blockquote>
-<p>
-maven 是重要的java构建工具，该文档涵盖了maven的常见用法
-</p>
-</blockquote>
-</div>
-</div>
-
-<div id="outline-container-sec-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 翻译</h3>
-<div class="outline-text-3" id="text-2-2">
-<p>
-<a href="http://zzyongx.github.io/blogs/tcp-keepalive-howto.html">TCP Keepalive HOWTO</a>
-</p>
-<blockquote>
-<p>
-介绍了TCP Keepalive产生的背景，使用场景，和如何使用。
-对于理解TCP协议和系统开发很有帮助。
+只有 ASCII 是肯定支持的，其它字符的支持看具体实现。
 </p>
 </blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/some-REST-best-practices.html">一些REST最佳实践</a>
+乱码出现在 <b>Set-Cookie</b> 的 <b>expire</b> 部分，显然和时间函数有关。原来 <b>java.text.SimpleDateFormat</b> 在格式化时间时，是要参考 <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html">Local</a> 的。
 </p>
-<blockquote>
-<p>
-越来越多的服务接口采用HTTP的方式，而RESTful风格可以让API语义更清晰。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/cap-confusion-problems-with-partition-tolerance.html">CAP迷思：关于分区容忍性</a>
+而在线上系统中，root和非root用户的 <b>Local</b> 配置不同。非root用户的 <b>Local</b> 配置了中文，于是格式化出的字符串就包含了中文，输出到 header中就导致 invalid header。
 </p>
-<blockquote>
-<p>
-作者说CAP，其实只能是CP或者AP，因为P必选。
-</p>
-</blockquote>
-</div>
-</div>
-</div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: zzyongx</p>
-<p class="date">Created: 2016-01-11 一 11:13</p>
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2016-01-07 四 11:28</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

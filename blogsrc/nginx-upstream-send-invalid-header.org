@@ -1,0 +1,27 @@
+#+TITLE: nginx upstream send invalid header
+#+AUTHOR: zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+某次上线后，nginx 增加了很多这样的错误
+#+BEGIN_QUOTE
+upstream sent invalid header while reading response header from upstream
+#+END_QUOTE
+
+常见的解释是，upstream的response header *太大* ，导致一个 *buffer* 不能放的下，相应的配置修改是：
+#+BEGIN_EXAMPLE
+proxy_buffer_size 32k;
+proxy_buffers 16 10k;
+#+END_EXAMPLE
+配置的具体含义，参考[[http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffer_size][=http_proxy=]] ，大概意思是增加相应的buffer大小。
+
+根据业务，upstream并不会返回很大的response header，侥幸试了一下，果然不起作用。
+
+无奈只能用tcpdump抓包，header部分在终端出现了乱码，header部分有乱码是很奇怪的。原来 http 协议对 header 的 *编码* 是有要求的。
+[[http://stackoverflow.com/questions/4400678/http-header-should-use-what-character-encoding][stackoverflow]] 有相关回答，简单来说：
+#+BEGIN_QUOTE
+只有 ASCII 是肯定支持的，其它字符的支持看具体实现。
+#+END_QUOTE
+
+乱码出现在 *Set-Cookie* 的 *expire* 部分，显然和时间函数有关。原来 *java.text.SimpleDateFormat* 在格式化时间时，是要参考 [[https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html][Local]] 的。
+
+而在线上系统中，root和非root用户的 *Local* 配置不同。非root用户的 *Local* 配置了中文，于是格式化出的字符串就包含了中文，输出到 header中就导致 invalid header。
