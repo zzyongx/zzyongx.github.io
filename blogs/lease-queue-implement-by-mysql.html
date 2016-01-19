@@ -3,8 +3,8 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>跬步</title>
-<!-- 2016-01-19 二 17:14 -->
+<title>“租约”消队列</title>
+<!-- 2016-01-19 二 17:10 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="zzyongx" />
@@ -143,118 +143,51 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">跬步</h1>
-
-<div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> 2016 丙申年</h2>
-<div class="outline-text-2" id="text-1">
-<hr  />
-</div>
-
-<div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 经验</h3>
-<div class="outline-text-3" id="text-1-1">
+<h1 class="title">“租约”消队列</h1>
 <p>
-<a href="http://zzyongx.github.io/blogs/lease-queue-implement-by-mysql.html">租约消息队列和其MySQL实现</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-19&gt;</span></span>
+通常而言，一个<a href="https://en.wikipedia.org/wiki/Queue_(abstract_data_type)">队列</a> 提供了 <i>enqueue</i> <i>dequeue</i> <i>front</i> 操作，从数据结构的角度看，这就够了，但是从队列服务的角度看，并不满足需求。
 </p>
-<blockquote>
-<p>
-站在数据结构的角度所讲的出队并不适合线上环境，因消费者崩溃带来的消息丢失是面临的主要问题，引入消息租约可以解决这一问题。可以很容易的用MySQL模拟其实现。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/nginx-upstream-send-invalid-header.html">upstream send invalid header</a>
+假设消费者使用 <i>dequeue</i> 取出消息后崩溃了，消息已经不在队列中，并且没有得到处理，无从恢复这条消息，相当于消息丢失了。
 </p>
-<blockquote>
-<p>
-HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为非法字符，nginx 会报错 upstream send invalid header
-</p>
-</blockquote>
-</div>
-</div>
-
-<div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 阅读笔记</h3>
-<div class="outline-text-3" id="text-1-2">
-<p>
-<a href="http://zzyongx.github.io/blogs/SYN-cookies.html">SYN cookie是什么</a>
-</p>
-<blockquote>
-<p>
-SYN cookie 解决了什么问题，原理是什么，有什么缺陷
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/failure-modes-in-distributed-systems.html">分布式系统中的失败模型</a>
+又假设消费者使用 <i>front</i> 查看消息，处理完后 <i>dequeue</i> 删除消息，这时就不怕消费者崩溃了，即时崩溃也不会丢失消息。这种方式的缺点是，如果有多于一个的消费者， <i>front</i> 会返回相同的消息，这要求消息的处理是 <code>幂等</code> 的，这带来额外的复杂性。
 </p>
-<blockquote>
-<p>
-失败模型的核心是确定性，确定性高的失败要优于确定性低的失败。
-</p>
-</blockquote>
-</div>
-</div>
-</div>
-
-<div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 2015 乙未年</h2>
-<div class="outline-text-2" id="text-2">
-<hr  />
-</div>
-
-<div id="outline-container-sec-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 经验</h3>
-<div class="outline-text-3" id="text-2-1">
-<p>
-<a href="http://zzyongx.github.io/blogs/maven-howto.html">maven HOWTO</a>
-</p>
-<blockquote>
-<p>
-maven 是重要的java构建工具，该文档涵盖了maven的常见用法
-</p>
-</blockquote>
-</div>
-</div>
-
-<div id="outline-container-sec-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 翻译</h3>
-<div class="outline-text-3" id="text-2-2">
-<p>
-<a href="http://zzyongx.github.io/blogs/tcp-keepalive-howto.html">TCP Keepalive HOWTO</a>
-</p>
-<blockquote>
-<p>
-介绍了TCP Keepalive产生的背景，使用场景，和如何使用。
-对于理解TCP协议和系统开发很有帮助。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/some-REST-best-practices.html">一些REST最佳实践</a>
+其实我们需要的是消息 <b>租约</b> ，从队列取消息只是获得一定时间的使用权，在此期间消息对其它消费者不可见，如果不手动删除消息，租约到期后，消息自动对其它消费者可见。这样可以防止消费者崩溃，又可以同时有多个消费者。  <b>这并不适合队列中的消息需要被严格有序处理的情况，这种队列只能有一个消费者</b>
 </p>
-<blockquote>
-<p>
-越来越多的服务接口采用HTTP的方式，而RESTful风格可以让API语义更清晰。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/cap-confusion-problems-with-partition-tolerance.html">CAP迷思：关于分区容忍性</a>
+可以使用MySQL模拟这样的服务
 </p>
-<blockquote>
-<p>
-作者说CAP，其实只能是CP或者AP，因为P必选。
-</p>
-</blockquote>
-</div>
-</div>
+<div class="org-src-container">
+
+<pre class="src src-sql">;; &#34920;&#23450;&#20041;
+<span style="color: #00ffff; font-weight: bold;">CREATE</span> <span style="color: #00ffff; font-weight: bold;">TABLE</span> IF <span style="color: #00ffff; font-weight: bold;">NOT</span> <span style="color: #00ffff; font-weight: bold;">EXISTS</span> <span style="color: #0000ff; font-weight: bold;">leaseQueue</span> (
+  id            BIGINT AUTO_INCREMENT <span style="color: #00ffff; font-weight: bold;">PRIMARY</span> <span style="color: #00ffff; font-weight: bold;">KEY</span>,
+  <span style="color: #00ffff; font-weight: bold;">data</span>          <span style="color: #00ff00;">VARCHAR</span>(128),
+  holder        <span style="color: #00ff00;">SMALLINT</span> <span style="color: #00ffff; font-weight: bold;">DEFAULT</span> 0,
+  lease         <span style="color: #00ff00;">TIMESTAMP</span>
+);
+
+;; &#20837;&#38431;&#21015;
+<span style="color: #00ffff; font-weight: bold;">INSERT</span> <span style="color: #00ffff; font-weight: bold;">INTO</span> leaseQueue(<span style="color: #00ffff; font-weight: bold;">data</span>) <span style="color: #00ffff; font-weight: bold;">VALUES</span>(#{<span style="color: #00ffff; font-weight: bold;">data</span>});
+
+;; &#36873;&#20986;&#38431;&#23614;&#28040;&#24687;&#65292;&#24182;&#19988;&#20197;5&#20998;&#38047;&#20026;&#26399;&#31199;&#35813;&#28040;&#24687;&#65292;&#37325;&#22797;&#19979;&#38754;&#20004;&#20010;<span style="color: #00ffff; font-weight: bold;">SQL</span>&#65292;&#30452;&#21040; <span style="color: #00ffff; font-weight: bold;">UPDATE</span> &#24433;&#21709;&#30340;&#34892;&#25968;&#26159;1
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> id, <span style="color: #00ffff; font-weight: bold;">data</span> <span style="color: #00ffff; font-weight: bold;">FROM</span> leaseQueue <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> id <span style="color: #00ffff; font-weight: bold;">ASC</span> <span style="color: #00ffff; font-weight: bold;">limit</span> 1;
+<span style="color: #00ffff; font-weight: bold;">UPDATE</span> leaseQueue <span style="color: #00ffff; font-weight: bold;">SET</span> holder = holder + 1 <span style="color: #00ffff; font-weight: bold;">WHERE</span> id = #{id} <span style="color: #00ffff; font-weight: bold;">AND</span> TIMESTAMPDIFF(<span style="color: #00ffff; font-weight: bold;">MINUTE</span>, lease, NOW()) &gt;= 5
+
+;; &#22788;&#29702;&#23436;&#21518;&#21024;&#38500;&#28040;&#24687;
+<span style="color: #00ffff; font-weight: bold;">DELETE</span> <span style="color: #00ffff; font-weight: bold;">FROM</span> leaseQueue <span style="color: #00ffff; font-weight: bold;">WHERE</span> id = #{id}
+</pre>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zzyongx</p>
-<p class="date">Created: 2016-01-19 二 17:14</p>
+<p class="date">Created: 2016-01-19 二 17:10</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

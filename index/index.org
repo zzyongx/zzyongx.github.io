@@ -7,6 +7,12 @@
 ------------
 
 ** 经验
+
+[[blog:lease-queue-implement-by-mysql][租约消息队列和其MySQL实现]] <2016-01-19>
+#+BEGIN_QUOTE
+站在数据结构的角度所讲的出队并不适合线上环境，因消费者崩溃带来的消息丢失是面临的主要问题，引入消息租约可以解决这一问题。可以很容易的用MySQL模拟其实现。
+#+END_QUOTE
+
 [[blog:nginx-upstream-send-invalid-header][upstream send invalid header]]
 #+BEGIN_QUOTE
 HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为非法字符，nginx 会报错 upstream send invalid header
