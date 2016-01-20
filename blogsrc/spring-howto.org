@@ -6,9 +6,18 @@
 
 2015年10月以后，终于不得不接触java开发，首当其冲的就是spring。一开始就被各种概念整懵了，IOC，DI，AOP，完全搞不懂这些东西是干啥的，也不知道引入它们的目的。徘徊了一个月，终于恍然大悟，spring其实很简单，如果有人点拨，学习spring的过程不至于这么曲折。随后，面试了一些java开发者，发现大家都知道spring，但是对spring的理解和使用都比较肤浅。本文试图由浅入深的讲解spring的本质是啥，如何最大限度的利用spring。
 
-本文基于Spring4。
+本文基于Spring4，主要讲解Rest风格的编程，不涉及到View部分。本文也不求面面俱到，只求领人入门，有更复杂的需求，尽可以翻看文档，Spring不会让你失望，只有想不到，没有做不到。
 
 * Spring 解决什么问题
+
+** 框架的作用
+框架五花八门，无处不在，框架解决的问题各式各样，但从编程实践的角度来看，框架是为了让程序更优雅。
+
+*** 框架消除重复代码
+
+*** 框架消除相似代码
+
+框架是一种抽象，抽象层次越高，上述好处越多，当然，可能相应的灵活性就少很多。
 
 ** 程序是什么
 这个问题似乎太简单，但一时又不知从何说起。先看个简单的程序，hello.pl
@@ -18,10 +27,10 @@ my $name = shift || "friend s";
 print "hello $name\n";
 #+END_SRC
 
-#+BEGIN_EXAMPLE
-  # ./hello.pl spring
+#+BEGIN_SRC sh
+  $ ./hello.pl spring
   hello spring
-#+END_EXAMPLE
+#+END_SRC
 
 这个程序异常简单，它接受字符串，输出字符串。那么复杂的程序呢？我们考虑http服务器，比如jetty，它的输入输出是什么？
 
@@ -48,30 +57,31 @@ print "hello $name\n";
 /**/x({"code":400,"message":"bad request","data":{"password":"password is required"}});
 #+END_EXAMPLE
 
-这里我们用curl模拟http请求，输入部分包括
+这里我们用curl模拟http请求， ~输入点~ 包括
 - HTTP Method，这里是 ~GET~ ，此外常用的还有 ~POST PUT DELETE~
 - 请求 ~url~ ，包括 ~path~ 这里是 ~/api/login~ ，和 ~querystring~ ，这里是 ~jsonp=x~ , ~querystring~ 是可选的
 - 请求 ~header~ ，例如 Host，Accept，有些header比其它header要重要一些，比如cookie。
 - 请求 ~body~ ，这里body为空，一般请求 ~POST PUT~ 才需要body。
 
-输出部分包括：
+~输出点~ 包括：
 - HTTP code，这里是 ~200~。
 - 响应 ~header~ ，例如 Content-Type
 - 响应 ~body~ ，这里是 /**/开头的行
 
-上面的 ~输入~ 通过 ~tcp~ 协议传送给jetty，jetty通过 ~tcp~ 协议将 ~输出~ 传送给用户。这里针对输入和输出的规定，构成了 ~http~ 协议的内容， ~http~ 协议并没有规定输出 ~body~ 的格式。
+上面的 ~输入~ 通过 ~tcp~ 协议传送给jetty，jetty通过 ~tcp~ 协议将 ~输出~ 回传给用户。这里针对输入和输出的规定，构成了 ~http~ 协议的内容， ~http~ 协议并没有规定输出 ~body~ 的格式。
 
-从简单的HelloWord，到复杂的web应用，程序所做的事情，无非都是解析输入，产生输出。
+从简单的 HelloWorld，到复杂的Web应用，程序的功能，无非都是解析输入，产生输出。程序使用程序语言编写的，程序语言规定了数据类型（结构），程序中的逻辑都是通过操作程序支持的数据类型实现的。我们需要在程序开始时，把输入转成程序语言支持的数据类型，在程序结束时，把程序语言支持的数据类型转成响应的输出。
+
+对 HelloWorld 而言， ~输入点~ 很简单，是一个命令行参数，对Web应用而言， ~输入点~ 就复杂很多，如何把 ~输入点~ 的数据转成编程语言支持的数据类型，正是框架做的事情。
+
+除了数据转换，框架还提供了机制，可以校验数据有效性。
 
 ** 程序
 
-* Spring 简化输入输出处理
+* Spring 如何抽象输入和输出
 
-程序的核心是处理输入，Spring作为一个开发框架，提供了大量机制来简化输入的处理。为了表述方便，我把 ~path~ ~querystring~ ~header~ 等这些功能不同的输入称为 ~输入点~。
-
-** Servlet如何处理输入输出
-
-如果开发 ~web~ 应用，需要处理输入，然后按照 ~http~ 协议做输出。如果从零开始，工程量必然很大，重复劳动也很多，于是java规定了 ~Servlet~ 标准，简化http应用的开发，看一个简单的例子：
+** 基于原生的Servlet如何编程
+Servlet是一套标准，java开发者可以使用它开发WEB应用，运行Servlet的web服务器称为Servlet容器，常见的Servlet容器有jetty，tomcat等。
 
 #+BEGIN_SRC java
 import java.io.*;
@@ -93,46 +103,259 @@ public class HelloWorld extends HttpServlet
 }
 #+END_SRC
 
-从上面代码可以看出，只要继承 ~HttpServlet~ ，覆盖其中的方法，就可以了。这个过程可以说一句相当简单了。但是有个问题，我们之前说的输入内容在 ~doGet~ 方法里面没有完全体现，想获得具体 ~输入点~ 的数据，还需要从 ~request~ 变量中获取。线上的web应用，肯定不止一个doGet方法，每个方法都要从 ~request~ 中取 ~输入点~ 的数据，代码千篇一律，且可读性差。
+除了上述函数，我们还需要在 web.xml 配置url和处理函数的对应关系
+#+BEGIN_SRC xml
+<servlet>
+   <servlet-name>HelloWorld</servlet-name>
+   <servlet-class>HelloWorld</servlet-class>
+</servlet>
 
-除了继承 ~HttpServlet~ ，还需要在 ~Servlet~ 容器（例如jetty）中配置 ~url~ 和 ~HttpServlet~ 子类的对应关系，当 jetty 解析到 ~url~ 部分时，调用响应的子类处理。
+<servlet-mapping>
+   <servlet-name>HelloWorld</servlet-name>
+   <url-pattern>/HelloWorld</url-pattern>
+</servlet-mapping>
+#+END_SRC
 
-** Spring 简化的输入点
-- ~url~ 和 ~url~ 处理函数的对应关系
-- 获取 ~path~ 的部分路径，例如 /api/user/spring 中的spring
-- 获取 ~querysting~ 的某个key的值，例如 jsonp=cb 中的 cb
-- 根据 HTTP method 和 ~url~ 映射处理函数
-- 获取 ~body~ 中的数据
-- 将 ~querystring~ 和 ~body~ 中的数据构造为对象
+这个过程非常直观，Servlet容器收到WEB请求，根据url和web.xml的配置，选择相应的处理类处理。使用 ~HttpServletRequest HttpServletResponse~ 表示输入和输出，这个抽象层次太低了，本例中为了获取 ~querystring~ 中的name参数，需要调用相应的函数。如果可以直接把 ~querystring~ 中的name参数绑定到一个 *String类型的变量* 抽象层次就高很多。
 
-*** Spring 如何映射url和url处理函数
+另外url和url处理类在不同的地方，不能一眼看出url的处理逻辑。
+
+** Spring 对输入的抽象
+
+Spring提供了非常简单的机制，将 ~输入点~ 的数据转成java支持的数据类型， ~long String List class~ 等。
+- 通过 ~RestController~ 和 ~RequestMapping~ 将 url 映射到具体的处理函数
+- 通过 ~PathVariable~ 和 ~RequestParam~ 将url的内容和querystring映射到java变量
+- 把 querystring 映射成java对象
+- 通过 ~RequestHeader~ 把 ~header~ 的值映射为java变量
+
+此外可以组合使用上述方法。如下代码将详细讲述映射（绑定）是如何发生的。
 
 #+BEGIN_SRC java
-@Controller
-public class UserController {
-  @RequestMapping(value = "/api/login")
-  void login() {}
+@RestController
+@RequestMapping("/api")
+public class EchoController {
+  
+  public static class Profile {
+    @NotBlank(message = "name is required")
+    public String name;
+    
+    @Pattern(regexp = "\\d{11,15}", message = "phone is required")
+    public String phone;
+    
+    public List<String> favoriteColor;
+    
+    public void setName(String name) {
+      this.name = name;
+    }
+    public void setPhone(String phone) {
+      this.phone = phone;
+    }
+    public void setFavoriteColor(List<String> color) {
+      this.favoriteColor = color;
+    }
+  }
+  
+  // OptionalLong is not support now, use Optional<Long> instead of
+  // curl dev:8180/api/power/5
+  // curl dev:8180/api/power/5/3
+  @RequestMapping(value = {"/power/{base}", "/power/{base}/{power}"}, method = RequestMethod.GET)
+  public long getPower(@PathVariable long base, @PathVariable("power") Optional<Long> powerOpt) {
+    long power = powerOpt.orElse(2L);
+    return (long) Math.pow(base, power);
+  }
 
-  @RequestMapping(value = {"/api/user/spring", "/api/user"} , method = RequestMethod.GET)
-  void updateUser() {}
+  // curl dev:8180/api/upper/hello
+  // curl dev:8180/api/upper?qs=world
+  @RequestMapping(value = {"/upper", "/upper/{upper}"}, method = RequestMethod.GET)
+  public String getUpper(
+    @PathVariable Optional<String> upper,
+    @RequestParam(required = false, defaultValue = "Hello world") String qs) {
+    if (upper.isPresent()) return upper.get().toUpperCase();
+    return qs.toUpperCase();
+  }
 
-  @RequestMapping(value = "/api/user/spring", method = RequestMethod.PUT)
-  void getUser() {}
+  // curl dev:8180/api/books -H "Accept: text/plain"
+  @RequestMapping(value = "/books", produces = "text/plain")
+  public String getBooksText() {
+    return "Mastering Spring MVC,Spring in Action";
+  }
+
+  // curl dev:8180/api/books
+  @RequestMapping(value = "/books")
+  public List<String> getBooks() {
+    return Arrays.asList("Mastering Spring MVC", "Spring in Action");
+  }
+
+  // curl -X PUT dev:8180/api/profile -d '{"name": "zzyong", "phone": 12345678901}' -H "Content-Type: application/octet-stream"
+  @RequestMapping(value = "/profile", method = RequestMethod.PUT,
+                  consumes = "application/octet-stream")
+  public void submitProfile(HttpServletRequest request, HttpServletResponse response)
+    throws IOException {
+    InputStream input = request.getInputStream();
+    OutputStream output = response.getOutputStream();
+    
+    byte[] buffer = new byte[512];
+    int n;
+    while ((n = input.read(buffer)) > 0) {
+      output.write(buffer, 0, n);
+    }
+  }
+
+  // curl -X PUT dev:8180/api/profile -d '{"name": "zzyong", "phone": 12345678901}' -H "Content-Type: application/json"  
+  @RequestMapping(value = "/profile", method = RequestMethod.PUT, consumes = "application/json")
+  public String submitProfileJson(@RequestBody String json) {
+    return json;
+  }
+
+  // curl -X PUT "dev:8180/api/profile" -d 'name=zzyong&phone=12345678901&favoriteColor=red,green' -vv
+  // Content-Type: application/x-www-form-urlencoded
+  // curl -X PUT "dev:8180/api/profile" -F 'name=zzyong' -F 'phone=12345678901' -F 'favoriteColor=red,green' -vv
+  // Content-Type: multipart/form-data; boundary=------------------------c00a4e11cd9e4e67
+  @RequestMapping(value = "/profile", method= RequestMethod.PUT)
+  public ResponseEntity submitProfileForm(@Valid Profile profile, BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      Map<String, String> map = new HashMap<>();
+      for(FieldError error : bindingResult.getFieldErrors()){
+        map.put(error.getField(), error.getDefaultMessage());
+      }
+      return new ResponseEntity<Map>(map, HttpStatus.BAD_REQUEST);      
+    } else {
+      return new ResponseEntity<Profile>(profile, HttpStatus.OK);
+    }
+  }
+
+  // curl "dev:8180/api/profile" -H "user: bob" -H "password: secret" -vv
+  // curl "dev:8180/api/profile" -H "Cookie: uid=btxaergfe" -vv
+  @RequestMapping(value = "/profile", method = RequestMethod.GET)
+  public Profile getProfile(
+    @CookieValue("uid") Optional<String> uid,
+    @RequestHeader("user") Optional<String> user,
+    @RequestHeader("password") Optional<String> pass) {
+    Profile profile = new Profile();
+    profile.name = "bob";
+    if (uid.isPresent() || (user.isPresent() && pass.isPresent())) {
+      profile.phone = "31415926535";
+      return profile;
+    } else {
+      return profile;
+    }
+  }
+
+  // curl dev:8180/api/x/100;name=apple;color=red/y/200;name=orange
+  @RequestMapping(value = "/x/{x}/y/{y}")
+  public Map coordinateProfile(
+    @PathVariable int x, @MatrixVariable(pathVar = "x") Map<String, String> xCnf,
+    @PathVariable int y, @MatrixVariable(pathVar = "y") Map<String, String> yCnf) {
+    return new HashMap<Integer, Map>() {{
+      put(x, xCnf);
+      put(y, yCnf);
+    }};
+  }
+}
+
+#+END_SRC
+
+*** RestController
+通过RestController标注， ~EchoController~ 中相应的函数会成为相应url的处理函数。
+
+*** RequestMapping
+当RequestMapping用来标类时，相应的path成为该类中，所有url的前缀，本例中所有url都自动加 /api 前缀。
+RequestMapping 常用参数如下：
+- value 指定url，可以指定多个，如 ~getPower~ 和 ~getUpper~
+- method 指定 HTTP 方法，默认不限制
+- produces 指定 Accept，只有Accept符合的请求才接受
+- consumes 指定 Content-Type，只有Content-Type符合的请求才接受
+
+当同一个url可以产生多种格式的输出时，请求通过 ~Accept~ 头指定接受的格式，选择匹配的 ~produces~ 处理函数，产生相应输出。
+
+例如，指定 ~Accept~ 只接受文本格式时，/api/books 返回逗号分隔的字符串，默认返回json。
+#+BEGIN_SRC sh
+$ curl dev:8180/api/books -H "Accept: text/plain"
+Mastering Spring MVC,Spring in Action
+
+$ curl dev:8180/api/books
+["Mastering Spring MVC","Spring in Action"]
+#+END_SRC
+
+当同一个url接受多种格式的输入时，请求通过 ~Content-Type~ 指定输入的格式，选择匹配的 ~consumes~ 处理函数。
+
+例如，指定 ~Content-Type~ 为 application/json 时，可以输入原生的Json数据，而不指定可以接受任意类型。这个主要影响数据绑定，Spring支持Content-Type为 application/x-www-form-urlencoded 和 multipart/form-data 的绑定
+
+#+BEGIN_SRC sh
+$ curl -X PUT dev:8180/api/profile -d '{"name": "zzyong", "phone": 12345678901}' -H "Content-Type: application/json"
+{"name": "zzyong", "phone": 12345678901}
+
+$ curl -X PUT dev:8180/api/profile -d 'name=zzyong&phone=12345678901&favoriteColor=red,green'
+{"name":"zzyong","phone":"12345678901","favoriteColor":["red","green"]}
+#+END_SRC
+
+*** PathVariable
+~PathVariable~ 用于绑定url模板中的参数，它只有一个参数，用于指定变量在url模板的名字。
+
+在 ~getPower~ 中，url模板为 {"/power/{base}", "/power/{base}/{power}"}，变量base的名字和{base}相同，而变量powerOpt和{power}不同，所以使用 ~@PathVariable("power")~ 指定模板的名字。
+
+此外， ~RequestMapping~ 指定了两个url，power是可选的，此时可以使用Java8的新特性，Optional。虽然Java8提供了 OptionLong 作为 Optional<Long> 的优化，似乎目前spring并不支持前者。
+
+*** ReqestParam
+~RequestParam~ 用于绑定 ~querystring~ 和 ~requestbody~ 中的参数，其主要参数有
+- required 指定参数是否必须，默认为ture
+- defaultValue 当required为false时，指定默认值，必须是字符串串，和绑定变量的类型无关。例如 1 写成 "1"
+
+*** CookieValue 和 RequestHeader
+~CooieValue~ 用于绑定 ~Cookie~ 中的某一个， ~RequestHeader~ 用于绑定header
+在 getProfile 中，用了Optional，因为这些都是可选的。
+
+*** MatrixVariable
+~MatrixVariable~ 用于获取url的某段path的选项，默认是关闭的，需要通过一个配置打开，具体来说就是创建一个 ~Bean~ 。
+#+BEGIN_SRC java
+@Bean
+public RequestMappingHandlerMapping requestMappingHandlerMapping() {
+  RequestMappingHandlerMapping r = new RequestMappingHandlerMapping();
+  r.setRemoveSemicolonContent(false);
+  return r;
 }
 #+END_SRC
 
-通过 @Controller 标注类，通过 @RequestMapping 来定义 ~url~ 和 ~url~ 处理函数的映射。如果指定了method，只有当method和url同时匹配时，才调用相应的函数。除了path和method，还可以指定headers，params等参数来进一步限定映射关系。
+~MatrixVariable~ 主要参数是一个 ~pathVar~ 用于指定相应的url模板部分，如果不指定，全部的matrix都会放到一个 ~Map~ 中去。
 
-*** Spring 如何获取 path 的部分路径
+~MatrixVariable~ 只是请求url有所不同，并不影响 ~RequestMapping~ 的形式。例如 x/{x}/y/{y} 可以映射下面的请求
 
-*** Spring 如何获取 querystring
+#+BEGIN_SRC sh
+$ curl 'http://dev:8180/api/x/100;name=apple;color=red/y/200;name=orange'
+{"100":{"name":["apple"],"color":["red"]},"200":{"name":["orange"]}}
+#+END_SRC
 
-*** Spring 如何将 querystring 和 body 来构造对象
 
-** Spring 如何简化输出点
+*** RequestBody
+对于 ~Content-Type~ 为 ~application/x-www-form-urlencoded~ 和 ~multipart/form-data~ 的请求，通常会把 ~requestbody~ 以key-value的形式绑定到各个变量。但有时需要获取整个 ~requestbody~ 的内容，此时可以用 ~RequestBody~ ，如 ~submitProfileJson~ 所示。
 
-* Spring 
+*** 绑定到对象
+~submitProfileForm~ 的参数是 ~(@Valid Profile profile, BindingResult bindingResult)~ ，spring会把 ~querystring~ 和 ~requestbody~ 中的值绑定到 ~Profile~ 。假如 ~requestbody~ 是 ~name=zzyong&phone=12345678901&favoriteColor=red,green~ ，spring解析到name时，会调用Profile的 ~setName~ 函数，解析到favoriteColor时，会调用 ~setFavoriteColor~ 。注意 Profile中的相关字段，必须有set方法，仅仅是public时不够的。
 
-spring data bind param，需要setParam函数，但是mybatis不需要。
+除了基本的类型转换，String转long外， *逗号分隔* 的字符串，也会被转成List。
 
-export MAVEN_OPTS='-Xdebug -Xrunjdwp:transport=dt_socket,address=8998,server=y,suspend=n'
+*** 参数校验
+使用场景参考 ~Profile~ 和 ~submitProfileForm~ ，可选的校验类型与spring无关，常见的校验
+- DateTimeFormat @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+- Pattern @Pattern(regexp = "\\d{11,15}")
+- NotBlank
+- NotNull
+- Min Max
+- Size
+
+Valid 用于校验参数的合法性，并把校验结果存放到 ~BindingResult~ 中。 例如：
+#+BEGIN_SRC sh
+$ curl -X PUT "dev:8180/api/profile" -d 'phone=12345678901&favoriteColor=red,green'
+{"name":"name is required"}
+#+END_SRC
+
+*** 原生态的输入
+如果上述绑定满足不了需求，仍然可以获得类似 ~Servlet~ 的参数，如 ~submitProfileStream~ 所示。
+
+*** Spring 对 RestController 中函数原型的要求
+有过 ~Servlet~ 编程经验的人，初次看到 ~RestController~ 的代码，可能会惊讶于函数签名的千奇百怪。的确，很多框架，都是要求使用者继承一个类，覆盖一些方法，或者实现一些接口，函数原型并没有选择的余地。Spring不是这样， ~RestController~ 中的函数原型是任意的，Spring会根据注解和变量类型，做正确的函数调用。
+
+** Spring 对输出的抽象
+
+*** 返回String
+*** 返回对象
