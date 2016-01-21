@@ -21,15 +21,15 @@
 
 ** 程序是什么
 这个问题似乎太简单，但一时又不知从何说起。先看个简单的程序，hello.pl
-#+BEGIN_SRC perl :results output
+#+BEGIN_SRC perl
 #!/usr/bin/perl
 my $name = shift || "friend s";
 print "hello $name\n";
 #+END_SRC
 
 #+BEGIN_SRC sh
-  $ ./hello.pl spring
-  hello spring
+$ ./hello.pl spring
+hello spring
 #+END_SRC
 
 这个程序异常简单，它接受字符串，输出字符串。那么复杂的程序呢？我们考虑http服务器，比如jetty，它的输入输出是什么？
@@ -84,10 +84,6 @@ print "hello $name\n";
 Servlet是一套标准，java开发者可以使用它开发WEB应用，运行Servlet的web服务器称为Servlet容器，常见的Servlet容器有jetty，tomcat等。
 
 #+BEGIN_SRC java
-import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
 public class HelloWorld extends HttpServlet 
 {
   public void doGet(HttpServletRequest request,
@@ -134,16 +130,20 @@ Spring提供了非常简单的机制，将 ~输入点~ 的数据转成java支持
 @RestController
 @RequestMapping("/api")
 public class EchoController {
-  
+
   public static class Profile {
     @NotBlank(message = "name is required")
     public String name;
-    
+
     @Pattern(regexp = "\\d{11,15}", message = "phone is required")
     public String phone;
-    
+
     public List<String> favoriteColor;
-    
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonSerialize(using = LocalDateTimeJsonSerializer.class)
+    public LocalDateTime birthday;
+
     public void setName(String name) {
       this.name = name;
     }
@@ -153,8 +153,11 @@ public class EchoController {
     public void setFavoriteColor(List<String> color) {
       this.favoriteColor = color;
     }
+    public void setBirthday(LocalDateTime birthday) {
+      this.birthday = birthday;
+    }
   }
-  
+
   // OptionalLong is not support now, use Optional<Long> instead of
   // curl dev:8180/api/power/5
   // curl dev:8180/api/power/5/3
@@ -193,7 +196,7 @@ public class EchoController {
     throws IOException {
     InputStream input = request.getInputStream();
     OutputStream output = response.getOutputStream();
-    
+
     byte[] buffer = new byte[512];
     int n;
     while ((n = input.read(buffer)) > 0) {
@@ -325,14 +328,13 @@ $ curl 'http://dev:8180/api/x/100;name=apple;color=red/y/200;name=orange'
 {"100":{"name":["apple"],"color":["red"]},"200":{"name":["orange"]}}
 #+END_SRC
 
-
 *** RequestBody
 对于 ~Content-Type~ 为 ~application/x-www-form-urlencoded~ 和 ~multipart/form-data~ 的请求，通常会把 ~requestbody~ 以key-value的形式绑定到各个变量。但有时需要获取整个 ~requestbody~ 的内容，此时可以用 ~RequestBody~ ，如 ~submitProfileJson~ 所示。
 
 *** 绑定到对象
 ~submitProfileForm~ 的参数是 ~(@Valid Profile profile, BindingResult bindingResult)~ ，spring会把 ~querystring~ 和 ~requestbody~ 中的值绑定到 ~Profile~ 。假如 ~requestbody~ 是 ~name=zzyong&phone=12345678901&favoriteColor=red,green~ ，spring解析到name时，会调用Profile的 ~setName~ 函数，解析到favoriteColor时，会调用 ~setFavoriteColor~ 。注意 Profile中的相关字段，必须有set方法，仅仅是public时不够的。
 
-除了基本的类型转换，String转long外， *逗号分隔* 的字符串，也会被转成List。
+除了基本的类型转换，String转long String转时间， *逗号分隔* 的字符串，也会被转成List。
 
 *** 参数校验
 使用场景参考 ~Profile~ 和 ~submitProfileForm~ ，可选的校验类型与spring无关，常见的校验
@@ -349,13 +351,91 @@ $ curl -X PUT "dev:8180/api/profile" -d 'phone=12345678901&favoriteColor=red,gre
 {"name":"name is required"}
 #+END_SRC
 
-*** 原生态的输入
+*** 原生Servlet输入
 如果上述绑定满足不了需求，仍然可以获得类似 ~Servlet~ 的参数，如 ~submitProfileStream~ 所示。
 
 *** Spring 对 RestController 中函数原型的要求
 有过 ~Servlet~ 编程经验的人，初次看到 ~RestController~ 的代码，可能会惊讶于函数签名的千奇百怪。的确，很多框架，都是要求使用者继承一个类，覆盖一些方法，或者实现一些接口，函数原型并没有选择的余地。Spring不是这样， ~RestController~ 中的函数原型是任意的，Spring会根据注解和变量类型，做正确的函数调用。
 
 ** Spring 对输出的抽象
+相对输入，输出就简单很多，主要涉及到把java ~对象~ 转成 ~responsebody~ 也就是字符串。字符串自身的格式有普通文本，Json，Xml等多种选择，现在的web应用基本以Json为主。
+参考以下配置，如果返回字符串，原样返回，如果其它，转成Json字符串。
+
+#+BEGIN_SRC java
+public class WebConfig extends WebMvcConfigurerAdapter {
+  @Override
+  public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+    /* string convert must be first */
+    converters.add(new StringHttpMessageConverter());
+
+    Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+    builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    builder.serializationInclusion(JsonInclude.Include.NON_NULL);
+    converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
+  }
+}
+#+END_SRC
 
 *** 返回String
+参考 ~getUpper~ 返回值是 ~String~ ，则 ~responsebody~ 就是返回的值。
+此处依赖配置 ~StringHttpMessageConverter~ 。假设返回Hello，如果没有该配置，则 ~responsebody~ 是 *"Hello"* ，而不是 *Hello* ，前者是字符串的Json形式。
+
 *** 返回对象
+参考 ~getBooks~ 和 ~getProfile~ ，无论是Java的容器，还是普通 ~类~ ，都可以自动转成合适的Json形式。
+
+*** 控制 HttpStatus 和 HttpHeader
+~ResponseEntity~ 是一个特殊的对象，返回它时不会把它自身转成Json，它自身控制了 ~Status Header Body~ ，通过相应的构造函数，控制相应的部分
+- ResponseEntity(HttpStatus statusCode)
+- ResponseEntity(MultiValueMap<String,String> headers, HttpStatus statusCode)
+- ResponseEntity(T body, HttpStatus statusCode)
+- ResponseEntity(T body, MultiValueMap<String,String> headers, HttpStatus statusCode)
+
+T 是任意对象，会被转成Json。 ~submitProfileForm~ 就是通过 ~ResponseEntity~ 返回400的
+
+*** 返回void，原生Servlet输出
+通过 ~HttpServletResponse~ 可以控制所有输出，此时函数返回void。
+
+*** JSONP
+[[https://en.wikipedia.org/wiki/JSONP][JSONP]] 用来克服浏览器的跨域限制。通常接口返回Json数据，而JSONP返回对Json数据的函数调用。例如：
+#+BEGIN_SRC sh
+$ curl "dev:8180/api/books"
+["Mastering Spring MVC","Spring in Action"]
+
+$ curl "dev:8180/api/books?jsonp=display"
+/**/display(["Mastering Spring MVC","Spring in Action"]);
+#+END_SRC
+
+~getBooks~ 函数并没有根据 ~jsonp~ 参数做任何特殊处理，但是带 ~jsonp~ 参数的请求返回的是函数调用，这都是Spring支持的，为了启用该支持，需要增加下面的代码。
+
+#+BEGIN_SRC java
+@ControllerAdvice
+public class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
+  public JsonpAdvice() {
+    super("jsonp");
+  }
+}
+#+END_SRC
+
+*** 控制返回的Json形式
+Spring提供了~Jackson2ObjectMapperBuilder~ 通过它可以配置Json序列化的参数，除此外还可以 ~JsonSerialize~ 配置序列化函数。
+
+* 依赖注入 DI
+** 从实用角度看 Ioc 和 DI
+关于 *Ioc* 和 *DI* 的讲解很多，反正我看着是很绕。让我们先抛开它们的定义，来看我们的需求。
+
+~EchoCtroller~ 已经实现了简单的功能。
+
+
+* 扔掉 XML 配置
+
+* 异常处理
+
+* RestTemplate
+
+* 数据库相关
+** mybatis
+** jdbcTemplate
+** 事务
+*** Transactional
+*** transactionTemplate

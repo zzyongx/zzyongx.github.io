@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Spring Web Develop HOWTO</title>
-<!-- 2016-01-20 三 19:18 -->
+<!-- 2016-01-21 四 12:09 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="root" />
@@ -217,7 +217,7 @@ for the JavaScript code in this tag.
 <li><a href="#sec-3-2-7">3.2.7. RequestBody</a></li>
 <li><a href="#sec-3-2-8">3.2.8. 绑定到对象</a></li>
 <li><a href="#sec-3-2-9">3.2.9. 参数校验</a></li>
-<li><a href="#sec-3-2-10">3.2.10. 原生态的输入</a></li>
+<li><a href="#sec-3-2-10">3.2.10. 原生Servlet输入</a></li>
 <li><a href="#sec-3-2-11">3.2.11. Spring 对 RestController 中函数原型的要求</a></li>
 </ul>
 </li>
@@ -225,6 +225,26 @@ for the JavaScript code in this tag.
 <ul>
 <li><a href="#sec-3-3-1">3.3.1. 返回String</a></li>
 <li><a href="#sec-3-3-2">3.3.2. 返回对象</a></li>
+<li><a href="#sec-3-3-3">3.3.3. 控制 HttpStatus 和 HttpHeader</a></li>
+<li><a href="#sec-3-3-4">3.3.4. 返回void，原生Servlet输出</a></li>
+<li><a href="#sec-3-3-5">3.3.5. JSONP</a></li>
+<li><a href="#sec-3-3-6">3.3.6. 控制返回的Json形式</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-4">4. 依赖注入 DI</a></li>
+<li><a href="#sec-5">5. 扔掉 XML 配置</a></li>
+<li><a href="#sec-6">6. 异常处理</a></li>
+<li><a href="#sec-7">7. RestTemplate</a></li>
+<li><a href="#sec-8">8. 数据库相关</a>
+<ul>
+<li><a href="#sec-8-1">8.1. mybatis</a></li>
+<li><a href="#sec-8-2">8.2. jdbcTemplate</a></li>
+<li><a href="#sec-8-3">8.3. 事务</a>
+<ul>
+<li><a href="#sec-8-3-1">8.3.1. Transactional</a></li>
+<li><a href="#sec-8-3-2">8.3.2. transactionTemplate</a></li>
 </ul>
 </li>
 </ul>
@@ -345,7 +365,7 @@ hello spring
 </li>
 <li>响应 <code>header</code> ，例如 Content-Type
 </li>
-<li>响应 <code>body</code> ，这里是 /**/开头的行
+<li>响应 <code>body</code> ，这里是 <i>**</i>开头的行
 </li>
 </ul>
 
@@ -384,13 +404,9 @@ Servlet是一套标准，java开发者可以使用它开发WEB应用，运行Ser
 
 <div class="org-src-container">
 
-<pre class="src src-java"><span style="color: #00ffff; font-weight: bold;">import</span> <span style="color: #ff00ff;">java</span>.<span style="color: #ff00ff;">io</span>.*;
-<span style="color: #00ffff; font-weight: bold;">import</span> <span style="color: #ff00ff;">javax</span>.<span style="color: #ff00ff;">servlet</span>.*;
-<span style="color: #00ffff; font-weight: bold;">import</span> <span style="color: #ff00ff;">javax</span>.<span style="color: #ff00ff;">servlet</span>.<span style="color: #ff00ff;">http</span>.*;
-
-<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">HelloWorld</span> <span style="color: #00ffff; font-weight: bold;">extends</span> <span style="color: #00ff00;">HttpServlet </span>
-<span style="color: #00ff00;">{</span>
-<span style="color: #00ff00;">  public void doGet(HttpServletRequest</span> <span style="color: #ffff00;">request</span>,
+<pre class="src src-java"><span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">HelloWorld</span> <span style="color: #00ffff; font-weight: bold;">extends</span> <span style="color: #00ff00;">HttpServlet</span> 
+{
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">doGet</span>(<span style="color: #00ff00;">HttpServletRequest</span> <span style="color: #ffff00;">request</span>,
                     <span style="color: #00ff00;">HttpServletResponse</span> <span style="color: #ffff00;">response</span>)
             <span style="color: #00ffff; font-weight: bold;">throws</span> <span style="color: #00ff00;">ServletException</span>, <span style="color: #00ff00;">IOException</span> {
     <span style="color: #00ff00;">String</span> <span style="color: #ffff00;">name</span> = request.getParameter(<span style="color: #00ff00;">"name"</span>);
@@ -467,6 +483,10 @@ Spring提供了非常简单的机制，将 <code>输入点</code> 的数据转�
 
     <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">List</span>&lt;<span style="color: #00ff00;">String</span>&gt; <span style="color: #ffff00;">favoriteColor</span>;
 
+    <span style="color: #ff00ff;">@DateTimeFormat</span>(pattern = <span style="color: #00ff00;">"yyyy-MM-dd'T'HH:mm:ss"</span>)
+    <span style="color: #ff00ff;">@JsonSerialize</span>(using = LocalDateTimeJsonSerializer.<span style="color: #00ffff; font-weight: bold;">class</span>)
+    <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">LocalDateTime</span> <span style="color: #ffff00;">birthday</span>;
+
     <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">setName</span>(<span style="color: #00ff00;">String</span> <span style="color: #ffff00;">name</span>) {
       <span style="color: #00ffff; font-weight: bold;">this</span>.name = name;
     }
@@ -475,6 +495,9 @@ Spring提供了非常简单的机制，将 <code>输入点</code> 的数据转�
     }
     <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">setFavoriteColor</span>(<span style="color: #00ff00;">List</span>&lt;<span style="color: #00ff00;">String</span>&gt; <span style="color: #ffff00;">color</span>) {
       <span style="color: #00ffff; font-weight: bold;">this</span>.favoriteColor = color;
+    }
+    <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">setBirthday</span>(<span style="color: #00ff00;">LocalDateTime</span> <span style="color: #ffff00;">birthday</span>) {
+      <span style="color: #00ffff; font-weight: bold;">this</span>.birthday = birthday;
     }
   }
 
@@ -628,7 +651,7 @@ $ curl dev:8180/api/books
 </p>
 
 <p>
-例如，指定 <code>Content-Type</code> 为 application/json 时，可以输入原生的Json数据，而不指定可以接受任意类型。这个主要影响数据绑定，Spring支持Content-Type为 application/x-www-form-urlencoded 和 multipart/form-data 的绑定
+例如，指定 <code>Content-Type</code> 为 application<i>json 时，可以输入原生的Json数据，而不指定可以接受任意类型。这个主要影响数据绑定，Spring支持Content-Type为 application</i>x-www-form-urlencoded 和 multipart/form-data 的绑定
 </p>
 
 <div class="org-src-container">
@@ -651,7 +674,7 @@ $ curl -X PUT dev:8180/api/profile -d <span style="color: #00ff00;">'name=zzyong
 </p>
 
 <p>
-在 <code>getPower</code> 中，url模板为 {"/power/{base}", "/power/{base}/{power}"}，变量base的名字和{base}相同，而变量powerOpt和{power}不同，所以使用 <code>@PathVariable("power")</code> 指定模板的名字。
+在 <code>getPower</code> 中，url模板为 {"<i>power/{base}", "</i>power/{base}/{power}"}，变量base的名字和{base}相同，而变量powerOpt和{power}不同，所以使用 <code>@PathVariable("power")</code> 指定模板的名字。
 </p>
 
 <p>
@@ -707,7 +730,7 @@ $ curl -X PUT dev:8180/api/profile -d <span style="color: #00ff00;">'name=zzyong
 </p>
 
 <p>
-<code>MatrixVariable</code> 只是请求url有所不同，并不影响 <code>RequestMapping</code> 的形式。例如 x/{x}/y/{y} 可以映射下面的请求
+<code>MatrixVariable</code> 只是请求url有所不同，并不影响 <code>RequestMapping</code> 的形式。例如 x<i>{x}</i>y/{y} 可以映射下面的请求
 </p>
 
 <div class="org-src-container">
@@ -718,7 +741,6 @@ $ curl -X PUT dev:8180/api/profile -d <span style="color: #00ff00;">'name=zzyong
 </div>
 </div>
 </div>
-
 
 <div id="outline-container-sec-3-2-7" class="outline-4">
 <h4 id="sec-3-2-7"><span class="section-number-4">3.2.7</span> RequestBody</h4>
@@ -737,7 +759,7 @@ $ curl -X PUT dev:8180/api/profile -d <span style="color: #00ff00;">'name=zzyong
 </p>
 
 <p>
-除了基本的类型转换，String转long外， <b>逗号分隔</b> 的字符串，也会被转成List。
+除了基本的类型转换，String转long String转时间， <b>逗号分隔</b> 的字符串，也会被转成List。
 </p>
 </div>
 </div>
@@ -776,7 +798,7 @@ Valid 用于校验参数的合法性，并把校验结果存放到 <code>Binding
 </div>
 
 <div id="outline-container-sec-3-2-10" class="outline-4">
-<h4 id="sec-3-2-10"><span class="section-number-4">3.2.10</span> 原生态的输入</h4>
+<h4 id="sec-3-2-10"><span class="section-number-4">3.2.10</span> 原生Servlet输入</h4>
 <div class="outline-text-4" id="text-3-2-10">
 <p>
 如果上述绑定满足不了需求，仍然可以获得类似 <code>Servlet</code> 的参数，如 <code>submitProfileStream</code> 所示。
@@ -797,18 +819,166 @@ Valid 用于校验参数的合法性，并把校验结果存放到 <code>Binding
 <div id="outline-container-sec-3-3" class="outline-3">
 <h3 id="sec-3-3"><span class="section-number-3">3.3</span> Spring 对输出的抽象</h3>
 <div class="outline-text-3" id="text-3-3">
-</div><div id="outline-container-sec-3-3-1" class="outline-4">
-<h4 id="sec-3-3-1"><span class="section-number-4">3.3.1</span> 返回String</h4>
+<p>
+相对输入，输出就简单很多，主要涉及到把java <code>对象</code> 转成 <code>responsebody</code> 也就是字符串。字符串自身的格式有普通文本，Json，Xml等多种选择，现在的web应用基本以Json为主。
+参考以下配置，如果返回字符串，原样返回，如果其它，转成Json字符串。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">WebConfig</span> <span style="color: #00ffff; font-weight: bold;">extends</span> <span style="color: #00ff00;">WebMvcConfigurerAdapter</span> {
+  <span style="color: #ff00ff;">@Override</span>
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">configureMessageConverters</span>(<span style="color: #00ff00;">List</span>&lt;<span style="color: #00ff00;">HttpMessageConverter</span>&lt;?&gt;&gt; <span style="color: #ffff00;">converters</span>) {
+    <span style="color: #ffff00;">/* </span><span style="color: #ffff00;">string convert must be first */</span>
+    converters.add(<span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">StringHttpMessageConverter</span>());
+
+    <span style="color: #00ff00;">Jackson2ObjectMapperBuilder</span> <span style="color: #ffff00;">builder</span> = <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">Jackson2ObjectMapperBuilder</span>();
+    builder.featuresToDisable(<span style="color: #ff00ff;">SerializationFeature</span>.WRITE_DATES_AS_TIMESTAMPS);
+    builder.featuresToDisable(<span style="color: #ff00ff;">SerializationFeature</span>.FAIL_ON_EMPTY_BEANS);
+    builder.serializationInclusion(<span style="color: #ff00ff;">JsonInclude</span>.<span style="color: #ff00ff;">Include</span>.NON_NULL);
+    converters.add(<span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">MappingJackson2HttpMessageConverter</span>(builder.build()));
+  }
+}
+</pre>
 </div>
+</div>
+
+<div id="outline-container-sec-3-3-1" class="outline-4">
+<h4 id="sec-3-3-1"><span class="section-number-4">3.3.1</span> 返回String</h4>
+<div class="outline-text-4" id="text-3-3-1">
+<p>
+参考 <code>getUpper</code> 返回值是 <code>String</code> ，则 <code>responsebody</code> 就是返回的值。
+此处依赖配置 <code>StringHttpMessageConverter</code> 。假设返回Hello，如果没有该配置，则 <code>responsebody</code> 是 <b>"Hello"</b> ，而不是 <b>Hello</b> ，前者是字符串的Json形式。
+</p>
+</div>
+</div>
+
 <div id="outline-container-sec-3-3-2" class="outline-4">
 <h4 id="sec-3-3-2"><span class="section-number-4">3.3.2</span> 返回对象</h4>
+<div class="outline-text-4" id="text-3-3-2">
+<p>
+参考 <code>getBooks</code> 和 <code>getProfile</code> ，无论是Java的容器，还是普通 <code>类</code> ，都可以自动转成合适的Json形式。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3-3" class="outline-4">
+<h4 id="sec-3-3-3"><span class="section-number-4">3.3.3</span> 控制 HttpStatus 和 HttpHeader</h4>
+<div class="outline-text-4" id="text-3-3-3">
+<p>
+<code>ResponseEntity</code> 是一个特殊的对象，返回它时不会把它自身转成Json，它自身控制了 <code>Status Header Body</code> ，通过相应的构造函数，控制相应的部分
+</p>
+<ul class="org-ul">
+<li>ResponseEntity(HttpStatus statusCode)
+</li>
+<li>ResponseEntity(MultiValueMap&lt;String,String&gt; headers, HttpStatus statusCode)
+</li>
+<li>ResponseEntity(T body, HttpStatus statusCode)
+</li>
+<li>ResponseEntity(T body, MultiValueMap&lt;String,String&gt; headers, HttpStatus statusCode)
+</li>
+</ul>
+
+<p>
+T 是任意对象，会被转成Json。 <code>submitProfileForm</code> 就是通过 <code>ResponseEntity</code> 返回400的
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3-4" class="outline-4">
+<h4 id="sec-3-3-4"><span class="section-number-4">3.3.4</span> 返回void，原生Servlet输出</h4>
+<div class="outline-text-4" id="text-3-3-4">
+<p>
+通过 <code>HttpServletResponse</code> 可以控制所有输出，此时函数返回void。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3-5" class="outline-4">
+<h4 id="sec-3-3-5"><span class="section-number-4">3.3.5</span> JSONP</h4>
+<div class="outline-text-4" id="text-3-3-5">
+<p>
+<a href="https://en.wikipedia.org/wiki/JSONP">JSONP</a> 用来克服浏览器的跨域限制。通常接口返回Json数据，而JSONP返回对Json数据的函数调用。例如：
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ curl <span style="color: #00ff00;">"dev:8180/api/books"</span>
+[<span style="color: #00ff00;">"Mastering Spring MVC"</span>,<span style="color: #00ff00;">"Spring in Action"</span>]
+
+$ curl <span style="color: #00ff00;">"dev:8180/api/books?jsonp=display"</span>
+/**/display([<span style="color: #00ff00;">"Mastering Spring MVC"</span>,<span style="color: #00ff00;">"Spring in Action"</span>]);
+</pre>
+</div>
+
+<p>
+<code>getBooks</code> 函数并没有根据 <code>jsonp</code> 参数做任何特殊处理，但是带 <code>jsonp</code> 参数的请求返回的是函数调用，这都是Spring支持的，为了启用该支持，需要增加下面的代码。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #ff00ff;">@ControllerAdvice</span>
+<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">JsonpAdvice</span> <span style="color: #00ffff; font-weight: bold;">extends</span> <span style="color: #00ff00;">AbstractJsonpResponseBodyAdvice</span> {
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #0000ff; font-weight: bold;">JsonpAdvice</span>() {
+    <span style="color: #00ffff; font-weight: bold;">super</span>(<span style="color: #00ff00;">"jsonp"</span>);
+  }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3-6" class="outline-4">
+<h4 id="sec-3-3-6"><span class="section-number-4">3.3.6</span> 控制返回的Json形式</h4>
+<div class="outline-text-4" id="text-3-3-6">
+<p>
+Spring提供了<code>Jackson2ObjectMapperBuilder</code> 通过它可以配置Json序列化的参数，除此外还可以 <code>JsonSerialize</code> 配置序列化函数。
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 依赖注入 DI</h2>
+</div>
+
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 扔掉 XML 配置</h2>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 异常处理</h2>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> RestTemplate</h2>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 数据库相关</h2>
+<div class="outline-text-2" id="text-8">
+</div><div id="outline-container-sec-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> mybatis</h3>
+</div>
+<div id="outline-container-sec-8-2" class="outline-3">
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> jdbcTemplate</h3>
+</div>
+<div id="outline-container-sec-8-3" class="outline-3">
+<h3 id="sec-8-3"><span class="section-number-3">8.3</span> 事务</h3>
+<div class="outline-text-3" id="text-8-3">
+</div><div id="outline-container-sec-8-3-1" class="outline-4">
+<h4 id="sec-8-3-1"><span class="section-number-4">8.3.1</span> Transactional</h4>
+</div>
+<div id="outline-container-sec-8-3-2" class="outline-4">
+<h4 id="sec-8-3-2"><span class="section-number-4">8.3.2</span> transactionTemplate</h4>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2016-01-20 三 19:18</p>
+<p class="date">Created: 2016-01-21 四 12:09</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
