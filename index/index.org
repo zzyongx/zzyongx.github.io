@@ -7,6 +7,10 @@
 ------------
 
 ** 经验
+[[blog:bluff-Ioc-DI][唬人的Ioc和DI]] <2016-01-22>
+#+BEGIN_QUOTE
+借助反射，Ioc和DI让多态的使用更加优雅了，本身并没有超越多态的范畴。不理解也罢。
+#+END_QUOTE
 
 [[blog:lease-queue-implement-by-mysql][租约消息队列和其MySQL实现]] <2016-01-19>
 #+BEGIN_QUOTE

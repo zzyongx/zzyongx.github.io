@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>唬人的Ioc和DI</title>
+<!-- 2016-01-22 五 10:54 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">唬人的Ioc和DI</h1>
+<p>
+初次接触Spring时，Ioc和DI迎面而来，控制反转、依赖注入，之前从没有听过，看解释也没看懂，顿时感到深深的恐惧，c++程序已经落后时代很久了么！
+</p>
+
+<p>
+所幸看不懂概念，照猫画虎也能用这些机制，并且用的毫无困难，全然忘记了自己不理解Ioc和DI，甚至觉得没有这两个概念更好。倒不妨先看看Spring中的DI解决了什么问题！
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 从全局变量到单例</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+和c++不同，java 没有全局变量的概念，那需要用全局变量时怎么办？比如，启动时加载的配置。答案是单例。因为每次创建一个单例的对象得到的都是同一个，所以完全胜任全局变量的工作，并且不得不说，更优雅。反省之前的代码，虽然极力避免全局变量，但毕竟不能彻底避免，如果用单例，可能看起来，代码效果要好很多。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 工厂模式</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+我几乎没用过工厂模式，觉得这玩意不实用。直到有天，我发现jackson的 <code>ObjectMapper</code> 有很多的配置选项，如果每次new出来一个对象，都做很多的配置，就太闹心了。这时候工厂模式就派上用场了，通过配置工厂，每次得到配置好的 <code>ObjectMapper</code> 。这里的工厂一般是个单例，不然又回到了每次都配置工厂的老路上。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 用工厂模式隐藏对象的细节</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+假设我们实现了一个字符串排序的程序，我们希望能够配置，默认按照字典序排序，当字符串都是数字是，希望按照大小排序。直观看，程序应该这么写，如果默认配置，调用字符串排序函数，如果数字排序配置，调用数字排序函数。如果增加了别的排序函数，继续增加条件分支。
+</p>
+
+<p>
+另一种思路是，使用工厂模式，工厂根据配置生成相应的排序对象，程序自身不需要关心具体怎么排序（ <code>子类怎么实现</code> ），它只需要排序（ <code>父类或者接口定义</code> ）。如果是java这种支持反射的语言，可以直接配置类名，如果是c++，还得根据 <b>if-else</b> 或者 <b>预配置的表</b> 来创建相应对象。
+</p>
+
+<p>
+这里对象的所有细节都被隐藏了，程序创建的只是具有 <code>某种行为</code> 的对象，并不关心 <code>某种行为具体怎么做的</code> ，这就是多态。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Ioc 控制反转</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+对象一般是这么创建的 <code>Order *order = new IntOrder</code> ，在 <b>创建对象的时候</b> ，就 <b>知道</b> 要创建什么对象，使用工厂是这么创建的 <code>Order *order = OrderFactory::getInstance()</code> ， <b>创建对象的时候</b> 并 <b>不知道</b> 创建的是什么对象，我们把它叫做 <b>控制反转</b> ，为这点事儿还起个名字，真是多余。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 反射的影响</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+java支持反射，这深刻的影响了java的很多特性。在java中甚至不需要使用工厂，而是通过反射来发现对象。完全可以在构造函数中，通过反射发现某个class的定义，子类，或者某个interface的实现，根据规则生成它们的实例。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> DI 依赖注入</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+上面说可以自动找到用来初始化的类，这个过程可以做成通用的实现，这就是 <b>依赖注入</b> ， <code>对象</code> 不负责自己的初始化，而是由某种机制，找到相应的 <code>类</code> ，由该机制初始化它。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 缺乏反射的语言</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+反射从本质上说是 <b>自动发现</b> ，缺乏反射的语言，可以 <b>手动发现</b> ，可以把需要通过反射发现的东西，手动写入一张表，根据这张表来 <b>注入</b> 。这个过程并没有特别的优势，所以c++程序员对使用Ioc和DI没有特别的动力。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 本质还是多态</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+如果一个class只有一个子类，或者一个接口只有一个实现（ <b>没有表现出多态</b> ），对象的初始化 <b>没有第二个选择</b> ，既然没有选择，Ioc 和 DI 也没有使用的意义，当然可以假扩展性之名使用。但是到需要扩展的时候再改，并不需要多余的工作，反而是过度设计影响代码质量。
+</p>
+
+<p>
+所以本质还是 <b>多态</b> 场景下如何优雅的选择哪个实现的问题。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> 一段c++代码</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+通过环境变量控制工厂生成的排序类，需要c++11编译。
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">$ ./order  1 13 2
+1 13 2 
+$ <span style="color: #ffff00;">ORDER_CONFIG</span>=int ./order  1 13 2
+1 2 13
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-c++"><span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;cstdio&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;cstring&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;vector&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;iostream&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;iterator&gt;</span>
+<span style="color: #0000ff; font-weight: bold;">#include</span> <span style="color: #00ff00;">&lt;algorithm&gt;</span>
+
+<span style="color: #00ffff; font-weight: bold;">using</span> <span style="color: #00ffff; font-weight: bold;">namespace</span> <span style="color: #ff00ff;">std</span>;
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Order</span> {
+<span style="color: #00ffff; font-weight: bold;">public</span>:
+  <span style="color: #00ffff; font-weight: bold;">virtual</span> <span style="color: #00ff00;">vector</span>&lt;<span style="color: #00ff00;">string</span>&gt; &amp;<span style="color: #0000ff; font-weight: bold;">perform</span>(<span style="color: #00ff00;">vector</span>&lt;<span style="color: #00ff00;">string</span>&gt; &amp;<span style="color: #ffff00;">v</span>) = 0;
+};
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">IntOrder</span> : <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">Order</span> {
+<span style="color: #00ffff; font-weight: bold;">public</span>:
+  <span style="color: #00ff00;">vector</span>&lt;<span style="color: #00ff00;">string</span>&gt; &amp;<span style="color: #0000ff; font-weight: bold;">perform</span>(<span style="color: #00ff00;">vector</span>&lt;<span style="color: #00ff00;">string</span>&gt; &amp;<span style="color: #ffff00;">v</span>) {
+    sort(v.begin(), v.end(), [](<span style="color: #00ffff; font-weight: bold;">const</span> <span style="color: #00ff00;">string</span> &amp;<span style="color: #ffff00;">a</span>, <span style="color: #00ffff; font-weight: bold;">const</span> <span style="color: #00ff00;">string</span> &amp;<span style="color: #ffff00;">b</span>) -&gt; <span style="color: #00ff00;">bool</span> {
+        <span style="color: #00ffff; font-weight: bold;">return</span> stoi(a) &lt; stoi(b);
+      });
+    <span style="color: #00ffff; font-weight: bold;">return</span> v;
+  }
+};
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">StringOrder</span> : <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">Order</span> {
+<span style="color: #00ffff; font-weight: bold;">public</span>:
+  <span style="color: #00ff00;">vector</span>&lt;<span style="color: #00ff00;">string</span>&gt; &amp;<span style="color: #0000ff; font-weight: bold;">perform</span>(<span style="color: #00ff00;">vector</span>&lt;<span style="color: #00ff00;">string</span>&gt; &amp;<span style="color: #ffff00;">v</span>) {
+    sort(v.begin(), v.end());
+    <span style="color: #00ffff; font-weight: bold;">return</span> v;
+  }
+};
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">OrderFactory</span> {
+<span style="color: #00ffff; font-weight: bold;">public</span>:
+  <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ff00;">Order</span> *<span style="color: #0000ff; font-weight: bold;">getInstance</span>() {
+    <span style="color: #00ffff; font-weight: bold;">const</span> <span style="color: #00ff00;">char</span> *<span style="color: #ffff00;">config</span> = getenv(<span style="color: #00ff00;">"ORDER_CONFIG"</span>);
+    <span style="color: #00ffff; font-weight: bold;">if</span> (config &amp;&amp; strcmp(config, <span style="color: #00ff00;">"int"</span>) == 0) {
+      <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">IntOrder</span>;
+    } <span style="color: #00ffff; font-weight: bold;">else</span> {
+      <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">StringOrder</span>;
+    }
+  }
+};
+
+<span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">Main</span> {
+<span style="color: #00ffff; font-weight: bold;">public</span>:
+  <span style="color: #0000ff; font-weight: bold;">Main</span>(<span style="color: #00ff00;">int</span> <span style="color: #ffff00;">argc</span>, <span style="color: #00ff00;">char</span> *<span style="color: #ffff00;">argv</span>[]) : argc_(argc), <span style="color: #00ff00;">argv_</span>(<span style="color: #ffff00;">argv</span>) {
+    order_ = <span style="color: #ff00ff;">OrderFactory</span>::getInstance();
+  }
+  <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">run</span>() {
+    <span style="color: #00ff00;">vector</span>&lt;<span style="color: #00ff00;">string</span>&gt; <span style="color: #ffff00;">v</span>(argv_+1, argv_+argc_);
+    order_-&gt;perform(v);
+    copy(v.begin(), v.end(), <span style="color: #00ff00;">ostream_iterator</span>&lt;<span style="color: #00ff00;">string</span>&gt;(cout, <span style="color: #00ff00;">" "</span>));
+  }
+<span style="color: #00ffff; font-weight: bold;">private</span>:
+  <span style="color: #00ff00;">Order</span>  *<span style="color: #ffff00;">order_</span>;
+  <span style="color: #00ff00;">int</span>     <span style="color: #ffff00;">argc_</span>;
+  <span style="color: #00ff00;">char</span>  **<span style="color: #ffff00;">argv_</span>;
+};
+
+<span style="color: #00ff00;">int</span> <span style="color: #0000ff; font-weight: bold;">main</span>(<span style="color: #00ff00;">int</span> <span style="color: #ffff00;">argc</span>, <span style="color: #00ff00;">char</span> *<span style="color: #ffff00;">argv</span>[])
+{
+  <span style="color: #00ff00;">Main</span> <span style="color: #ffff00;">main</span>(argc, argv);
+  main.run();
+  <span style="color: #00ffff; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2016-01-22 五 10:54</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

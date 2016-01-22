@@ -1,0 +1,216 @@
+#+TITLE: Crowd Funding API
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* 发起众筹
+** 发起众筹项目
+- 方法：POST
+- 接口：/api/user/{uid}/cf
+- 参数：
+| 字段      | 是否必须 | 字段类型                      | 描述         |
+|-----------+----------+-------------------------------+--------------|
+| title     | Y        | string                        | 项目名称     |
+| imgIcon   | Y        | string                        | 商品小图片   |
+| imgTitle  | Y        | string                        | 项目图片     |
+| startTime | Y        | DateTime(yyyy-MM-dd HH:mm:ss) | 开始时间     |
+| endTime   | Y        | DateTime                      | 结束时间     |
+| orderMin  | Y        | integer                       | 众筹起点数目 |
+| orderMax  | Y        | integer                       | 最多众筹此数 |
+| content   | Y        | string                        | 项目介绍     |
+
+** 修改众筹项目
+- 方法：PUT
+- 接口：/api/user/{uid}/cf/{cfId}
+- 参数：
+同 {{发起众筹}}
+
+** 下线众筹项目
+- 方法：DELETE
+- 接口：/api/user/{uid}/cf/{cfId}
+
+** 给项目添加商品
+- 方法：POST
+- 接口：/api/user/{uid}/cf/{cfId}/scf
+- 参数：
+| 字段     | 是否必须 | 字段类型 | 描述       |
+|----------+----------+----------+------------|
+| title    | Y        | string   | 商品名称   |
+| imgIcon  | Y        | string   | 商品小图片 |
+| imgTitle | Y        | string   | 商品图片   |
+| content  | Y        | string   | 商品描述   |
+
+** 修改项目的商品
+- 方法：PUT
+- 接口：/api/user/{uid}/cf/{cfId}/scf/{scfId}
+- 参数：
+同 {{给项目添加商品}}
+
+** 下线商品
+- 方法：DELETE
+- 接口：/api/user/{uid}/cf/{cfId}/scf/{scfId}
+
+** 给商品添加规格
+- 方法：POST
+- 接口：/api/user/{uid}/cf/{cfId}/scf/{scfId}/ps
+- 参数：
+| 字段  | 是否必须 | 字段类型 | 描述     |
+|-------+----------+----------+----------|
+| spec  | Y        | string   | 规格描述 |
+| price | Y        | string   | 价格     |
+
+** 修改商品规格
+- 方法：PUT
+- 接口：/api/user/{uid}/cf/{cfId}/scf/{scfId}/ps/{psId}
+- 参数：
+同{{给商品添加规格}}
+
+** 删除商品规格
+- 方法：DELETE
+- 接口: /api/user/{uid}/cf/{cfId}/scf/{scfId}/ps/{psId}
+
+* 图片接口
+** 列出图片
+- 方法：GET
+- 接口：/api/user/{uid}/img
+
+** 上传图片
+- 方法：POST
+- 接口：/api/user/{uid}/img
+- 参数：
+| 是否必须 | 字段 | 字段类型 | 描述          |
+|----------+------+----------+---------------|
+| imgX1    | 否   | integer  | 裁剪的X轴起点 |
+| imgY1    | 否   | integer  | 裁剪的Y轴起点 |
+| cropW    | 否   | integer  | 裁剪的宽度    |
+| cropH    | 否   | integer  | 裁剪的高度    |
+| imgW     | 否   | integer  | 缩率的高      |
+| imgH     | 否   | integer  | 缩率的宽      |
+| rotation | 否   | (0,360)  | 旋转的角度    |
+| imgUrl   | 是   | string   | 图片的内容    |
+
+* 订单接口
+** 下单
+- 方法：POST
+- 接口：/api/order
+- 参数：
+| 是否必须     | 字段 | 字段类型 | 描述       |
+|--------------+------+----------+------------|
+| psId         | 是   | integer  | 商品规格ID |
+| buyerUid     | 是   | string   | 用户ID     |
+| receiverInfo | 是   | string   | 收货信息   |
+| amount       | 是   | integer  | 商品数量   |
+
+** 填快递单号
+- 方法：PUT
+- 接口：/api/order/{orderId}/expcom/{expCom}/expnu/{expNu}
+
+** 查询快递
+- 方法：GET
+- 接口：/api/expno/{expNo}
+
+** 买家查询订单
+- 方法：GET
+- 最新购买接口：/api/buy/user/{uid} 
+- 分页接口：/api/buy/user/{uid}/off/{orderId}
+
+** 买家订单详情
+- 方法：GET
+- 接口：/api/buy/user/{uid}/orderId/{orderId}
+
+** 卖家项目列表
+- 方法：GET
+- 接口：/api/user/{uid}/cf
+
+** 卖家查询订单
+- 方法：GET
+- 最新购买接口：/api/sale/user/{uid}/cf/{cfId}
+- 分页接口：/api/sale/user/{uid}/cf/{cfId}/off/{orderId}
+- 最新购买状态接口：/api/sale/user/{uid}/cf/{cfId}/flag/{flag}
+- 分页状态接口：/api/sale/user/{uid}/cf/{cfId}/flag/{flag}/off/{orderId}
+
+** 订单状态说明 flag
+| 标记 | 说明     |
+|------+----------|
+|    1 | 等待付款 |
+|    2 | 已经付款 |
+|    3 | 等待发货 |
+|    4 | 等待收货 |
+|    5 | 订单完结 |
+
+* 用户接口
+** 注册
+- 方法：PUT
+- 接口：/api/user
+- 参数：
+| 字段     | 是否必须 | 字段类型 | 描述       |
+|----------+----------+----------+------------|
+| phone    | 是       | string   | 用户手机   |
+| password | 是       | string   | 用户密码   |
+| smsCode  | 是       | integer  | 短信验证码 |
+
+** 登陆
+- 方法：GET
+- 接口：/api/login
+- 参数：
+| 字段     | 是否必须 | 字段类型 | 描述     |
+|----------+----------+----------+----------|
+| phone    | 是       | string   | 用户手机 |
+| password | 是       | string   | 用户密码 |
+
+** 获取短信验证码
+- 方法：GET
+- 接口：/api/smscode
+- 参数：
+| 字段     | 是否必须 | 字段类型 | 描述     |
+|----------+----------+----------+----------|
+| phone    | 是       | string   | 用户手机 |
+
+** 获取用户地址
+- 方法：GET
+- 接口：/api/user/{uid}/address
+
+** 设置用户地址
+- 方法：PUT
+- 接口：/api/user/{uid}/address
+- 参数：
+| 字段     | 是否必须 | 字段类型 | 描述     |
+|----------+----------+----------+----------|
+| address  | 是       | string   | 用户地址描述 |
+
+* 管理接口
+
+** 获取用户列表
+- 方法：GET
+- 最新用户接口：/api/admin/users
+- 分页用户接口：/api/admin/users/off/{uid}
+
+** 设置用户角色
+- 方法：POST
+- 接口1：/api/admin/user/{uid}/role/{role}
+- 接口2：/api/admin/phone/{phone}/role/{role}
+
+** 审核项目
+- 方法：POST
+- 接口：/api/admin/verify/cf/{cfId}
+
+** 列出待审核项目
+- 方法：GET
+- 接口：/api/admin/verify
+
+* 错误码
+| 错误码 | 说明           |
+|--------+----------------|
+|      0 | 正常           |
+|    400 | 请求参数错误   |
+|    401 | 没有权限       |
+|    404 | 找不到资源     |
+|    406 | 无效的请求     |
+|    500 | 内部错误       |
+|    503 | 服务暂时不可用 |
+|    601 | 微信接口失败   |
+|   1000 | 用户已经存在   |
+|   1001 | 验证码错误     |
+|   1002 | 用户不存在     |
+|   1003 | 密码错误       |
+|   2000 | 发送验证码失败 |
+|   3000 | 订单超时       |
+
