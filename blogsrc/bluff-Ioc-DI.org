@@ -1,0 +1,117 @@
+#+TITLE: 唬人的Ioc和DI
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+初次接触Spring时，Ioc和DI迎面而来，控制反转、依赖注入，之前从没有听过，看解释也没看懂，顿时感到深深的恐惧，c++程序已经落后时代很久了么！
+
+所幸看不懂概念，照猫画虎也能用这些机制，并且用的毫无困难，全然忘记了自己不理解Ioc和DI，甚至觉得没有这两个概念更好。倒不妨先看看Spring中的DI解决了什么问题！
+
+* 从全局变量到单例
+和c++不同，java 没有全局变量的概念，那需要用全局变量时怎么办？比如，启动时加载的配置。答案是单例。因为每次创建一个单例的对象得到的都是同一个，所以完全胜任全局变量的工作，并且不得不说，更优雅。反省之前的代码，虽然极力避免全局变量，但毕竟不能彻底避免，如果用单例，可能看起来，代码效果要好很多。
+
+* 工厂模式
+我几乎没用过工厂模式，觉得这玩意不实用。直到有天，我发现jackson的 ~ObjectMapper~ 有很多的配置选项，如果每次new出来一个对象，都做很多的配置，就太闹心了。这时候工厂模式就派上用场了，通过配置工厂，每次得到配置好的 ~ObjectMapper~ 。这里的工厂一般是个单例，不然又回到了每次都配置工厂的老路上。
+
+* 用工厂模式隐藏对象的细节
+假设我们实现了一个字符串排序的程序，我们希望能够配置，默认按照字典序排序，当字符串都是数字时，按照数字大小排序。直观看，程序应该这么写，如果默认配置，调用字符串排序函数，如果数字排序配置，调用数字排序函数。如果增加了别的排序函数，继续增加条件分支。
+
+另一种思路是，使用工厂模式，工厂根据配置生成相应的排序对象，程序自身不需要关心具体怎么排序（ ~子类怎么实现~ ），它只需要排序（ ~父类或者接口定义~ ）。如果是java这种支持反射的语言，可以直接配置类名，如果是c++，还得根据 *if-else* 或者 *预配置的表* 来创建相应对象。
+
+这里对象的所有细节都被隐藏了，程序创建的只是具有 ~某种行为~ 的对象，并不关心 ~某种行为具体怎么做的~ ，这就是多态。
+
+* Ioc 控制反转
+对象一般是这么创建的 ~Order *order = new IntOrder~ ，在 *创建对象的时候* ，就 *知道* 要创建什么对象，使用工厂是这么创建的 ~Order *order = OrderFactory::getInstance()~ ， *创建对象的时候* 并 *不知道* 创建的是什么对象，我们把它叫做 *控制反转* ，为这点事儿还起个名字，真是多余。
+
+* 反射的影响
+java支持反射，这深刻的影响了java的很多特性。在java中甚至不需要使用工厂，而是通过反射来发现对象。完全可以在构造函数中，通过反射发现某个class的定义，子类，或者某个interface的实现，根据规则生成它们的实例。
+
+* DI 依赖注入
+上面说可以自动找到用来初始化的类，这个过程可以做成通用的实现，这就是 *依赖注入* ， ~对象~ 不负责自己的初始化，而是由某种机制，找到相应的 ~类~ ，由该机制初始化它。
+
+* 缺乏反射的语言
+反射从本质上说是 *自动发现* ，缺乏反射的语言，可以 *手动发现* ，可以把需要通过反射发现的东西，手动写入一张表，根据这张表来 *注入* 。这个过程并没有特别的优势，所以c++程序员对使用Ioc和DI没有特别的动力。
+
+* 本质还是多态
+如果一个class只有一个子类，或者一个接口只有一个实现（ *没有表现出多态* ），对象的初始化 *没有第二个选择* ，既然没有选择，Ioc 和 DI 也没有使用的意义，当然可以假扩展性之名使用。但是到需要扩展的时候再改，并不需要多余的工作，反而是过度设计影响代码质量。
+
+所以本质还是 *多态* 场景下如何优雅的选择哪个实现的问题。
+
+* 一段c++代码
+通过环境变量控制工厂生成的排序类，需要c++11编译。
+
+#+BEGIN_SRC sh
+$ ./order  1 13 2
+1 13 2 
+$ ORDER_CONFIG=int ./order  1 13 2
+1 2 13 
+#+END_SRC
+
+#+BEGIN_SRC c++
+#include <cstdio>
+#include <cstring>
+#include <vector>
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+
+using namespace std;
+
+class Order {
+public:
+  virtual vector<string> &perform(vector<string> &v) = 0;
+};
+
+class IntOrder : public Order {
+public:
+  vector<string> &perform(vector<string> &v) {
+    sort(v.begin(), v.end(), [](const string &a, const string &b) -> bool {
+        return stoi(a) < stoi(b);
+      });
+    return v;
+  }
+};
+
+class StringOrder : public Order {
+public:
+  vector<string> &perform(vector<string> &v) {
+    sort(v.begin(), v.end());
+    return v;
+  }
+};
+
+class OrderFactory {
+public:
+  static Order *getInstance() {
+    const char *config = getenv("ORDER_CONFIG");
+    if (config && strcmp(config, "int") == 0) {
+      return new IntOrder;
+    } else {
+      return new StringOrder;
+    }
+  }
+};
+
+class Main {
+public:
+  Main(int argc, char *argv[]) : argc_(argc), argv_(argv) {
+    order_ = OrderFactory::getInstance();
+  }
+  void run() {
+    vector<string> v(argv_+1, argv_+argc_);
+    order_->perform(v);
+    copy(v.begin(), v.end(), ostream_iterator<string>(cout, " "));
+  }
+private:
+  Order  *order_;
+  int     argc_;
+  char  **argv_;
+};
+
+int main(int argc, char *argv[])
+{
+  Main main(argc, argv);
+  main.run();
+  return 0;
+}
+#+END_SRC
