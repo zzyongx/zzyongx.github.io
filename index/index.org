@@ -7,6 +7,11 @@
 ------------
 
 ** 经验
+[[blog:java-exception-tips][我的 Java 异常最佳实践]] <2016-02-25>
+#+BEGIN_QUOTE
+优先使用 Unchecked 异常，优先使用 try() 释放资源。
+#+END_QUOTE
+
 [[blog:bluff-Ioc-DI][唬人的Ioc和DI]] <2016-01-22>
 #+BEGIN_QUOTE
 借助反射，Ioc和DI让多态的使用更加优雅了，本身并没有超越多态的范畴。不理解也罢。

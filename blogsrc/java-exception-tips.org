@@ -1,0 +1,88 @@
+#+TITLE: 我的java异常最佳实践
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+这是我的最佳实践，为什么呢？先看代码
+
+#+BEGIN_SRC java
+class ResourceHolder implements AutoCloseable {
+  private String name;
+  public ResourceHolder(String name) {
+    this.name = name;
+    System.out.println(name + " get resource");
+  }
+  public void useResource() throws Exception {
+    throw new Exception(name + " exception in useResource");
+  }
+  public void close() {
+    System.out.println(name + " release resource");
+    throw new RuntimeException(name + " exception in close");
+  }
+}
+
+public class TestException {
+  public static void testTryBlock() throws Exception {
+    ResourceHolder resourceHolder = null;
+    try {
+      resourceHolder = new ResourceHolder("try-block");
+      resourceHolder.useResource();
+    } catch (Exception e) {
+      throw e;
+    } finally {
+      if (resourceHolder != null) resourceHolder.close();
+    }
+  }
+
+  public static void testTryWithResource() throws Exception {
+    try (
+      ResourceHolder resourceHolder = new ResourceHolder("try-with-resource")
+      ) {
+      resourceHolder.useResource();
+    } catch (Exception e) {
+      throw e;
+    }
+  }
+    
+  public static void main(String[] args) {
+    try {
+      testTryBlock();
+    } catch (Exception e) {
+      System.out.println(e.toString());
+    }
+    try {
+      testTryWithResource();
+    } catch (Exception e) {
+      System.out.println(e.toString());
+    }
+  }
+}
+#+END_SRC
+
+这是输出
+#+BEGIN_SRC sh
+try-block get resource
+try-block release resource
+java.lang.RuntimeException: try-block exception in close
+try-with-resource get resource
+try-with-resource release resource
+java.lang.Exception: try-with-resource exception in useResource
+#+END_SRC
+
+* Checked 还是 Unchecked ？
+java的异常分 *Checked* 和 *Unchecked* ，可以简单的认为所有继承自 ~RuntimeException~ 的异常都是 *Unchecked* 的，这类异常可以try-catch，也可以不try-catch，并且不需要出现在函数的签名中，例如 ~ResourceHolder::close~ ，剩下的都是 *Checked* ，必须try-catch或者出现在函数签名中，异常向上抛。除此外，两者没有任何不同。
+
+这点和=c++=不同， =c++=的异常都是 *Unchecked* 的。 *Checked* 的好处是强制，无法忘记异常的存在，当然我可以选择try-catch之后，选择忽略，强制的作用就失效了。 *Unchecked* 的好处是，给你选择，给你自由，可以处理，也可以不处理。
+
+问题在于，有多少时候，catch住异常后，异常是可以恢复的，如果异常不可恢复，那 *Checked* 异常就毫无意义。有语法错误的SQL，超时的连接，等等，都是错了就错了，除非人工干预，否则catch住异常没有任何用处，最后还是把错误报告给最终用户。Spring框架干了一件事情，它把几乎所有 *Checked* 的异常都转成 *Unchecked* 的了。
+
+我觉得所有的异常都最好是 *Unchecked* ，让用户自由选择，毕竟强制处理异常的作用是微弱的。
+
+~ResourceHolder::close~ 跑出的异常如果是 *Checked* 的，那么finally子句还需要增加try-catch。
+
+* 异常时如何释放资源的问题
+*分配资源* 和 *释放资源* 是成对儿的操作，如果两个操作中间有异常发生（尤其是 *Unchecked* 异常），需要处理异常，并在异常处理子句 *释放资源* ，这个过程需要些大量 *相似* 代码，如 ~testTryBlock~ 所示。在java7中新增的 [[https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html][try-with-resources]] 可以简化该问题，如 ~testTryWithResource~ 所示，出现在 ~try()~ 中的对象，必须实现 ~AutoCloseable~ 接口，当 ~try{}~ 结束时（无论有没有异常），自动调用其 ~close~ 方法，可以把 *释放资源* 的操作放到 ~close~ 函数中。
+
+所有涉及到 *释放资源* 的类或操作都应该用这种方法。
+
+* 被抑制的异常
+因为finally子句总是执行的，finally子句如果抛出异常，外层看到的是finally子句的异常，而不是catch子句的，这点和 ~try()~ 不一样，这点从main函数中捕获的两个异常不一样可以看出。

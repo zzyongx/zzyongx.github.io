@@ -421,11 +421,21 @@ public class JsonpAdvice extends AbstractJsonpResponseBodyAdvice {
 Spring提供了~Jackson2ObjectMapperBuilder~ 通过它可以配置Json序列化的参数，除此外还可以 ~JsonSerialize~ 配置序列化函数。
 
 * 依赖注入 DI
-** 从实用角度看 Ioc 和 DI
-关于 *Ioc* 和 *DI* 的讲解很多，反正我看着是很绕。让我们先抛开它们的定义，来看我们的需求。
+** 如何理解DI
+我的理解是，不要去理解，用就行了。可以参考 [[http://zzyongx.github.io/blogs/bluff-Ioc-DI.html][唬人的Ioc和DI]]
 
-~EchoCtroller~ 已经实现了简单的功能。
+** 为什么需要DI
+- 配置框架需要
+- 简化变量初始化，类可以自动是单例的
 
+** Spring DI 包括哪些组成部分
+- Component     定义可以被DI的类
+- Autowired     需要DI的变量
+- Bean          用来DI的变量
+
+具体看下面的代码
+
+** 
 
 * 扔掉 XML 配置
 
