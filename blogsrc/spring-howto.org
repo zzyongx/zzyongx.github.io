@@ -1,3 +1,4 @@
+
 #+TITLE: Spring Web Develop HOWTO
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 
@@ -424,28 +425,238 @@ Spring提供了~Jackson2ObjectMapperBuilder~ 通过它可以配置Json序列化�
 ** 如何理解DI
 我的理解是，不要去理解，用就行了。可以参考 [[http://zzyongx.github.io/blogs/bluff-Ioc-DI.html][唬人的Ioc和DI]]
 
-** 为什么需要DI
-- 配置框架需要
-- 简化变量初始化，类可以自动是单例的
+** 从单例到DI
+一般聊到单例都是指这样一种形式 ~SingletonClass.create~ 无论这个函数调用多少次，这个函数只返回同一个对象。Spring中所有DI的类都是单例的（默认如此，但是可以改变），单例对象的值是可以使用Spring自动注入的。这个过程可以分两步：
+- 构造单例表
+- 注入单例对象
+
+可以这么理解，Spring启动时，根据一定的规则，生成一个全局的 ~Map<String, Object>~ 的单例表，通过这个表来实现单例。这个表的初始化，通过以下方式完成：
+- 扫描指定包，如果类带有注解 ~@Component @RestController~ 等，添加到单例表中。
+- 标记为@Bean的函数创建的对象，添加到单例表中。
+
+单例表完成后，扫描所有标记为 ~@Autowired~ 的成员变量和成员函数，根据名字查照单例表，用相应的值初始化。
 
 ** Spring DI 包括哪些组成部分
 - Component     定义可以被DI的类
+- Bean          创建用来DI的变量
 - Autowired     需要DI的变量
-- Bean          用来DI的变量
 
-具体看下面的代码
+** 实例讲解DI
 
-** 
+MemoController.java
+#+BEGIN_SRC java
+@RestController
+@RequestMapping("/api")
+public class MemoController {
+  @Autowired MemoManager memoManager;
+  
+  @RequestMapping(value = "/memo", method = RequestMethod.GET)
+  public ApiResult listMemo() {
+    return memoManager.list();
+  }
+}
+#+END_SRC
+
+MemoManager.java
+#+BEGIN_SRC java
+@Component
+public class MemoManager {
+  @Autowired JedisPool jedisPool;
+
+  final String KEY = "memo";
+
+  public ApiResult list() {
+    try (Jedis c = jedisPool.getResource()) {
+      return new ApiResult<Map>(c.hgetAll(KEY));
+    }
+  }
+}
+#+END_SRC
+
+RootConfig.java
+#+BEGIN_SRC java
+@Configuration
+@ComponentScan({"example"})
+@PropertySource("classpath:application-${spring.profiles.active}.properties")
+public class RootConfig {
+  @Autowired Environment env;
+
+  @Bean
+  public JedisPool jedisPool() {
+    return new JedisPool(
+      env.getRequiredProperty("redis.url"),
+      env.getRequiredProperty("redis.port", Integer.class));
+  }
+}
+#+END_SRC
+
+*** MemoController 有注入需求
+~@RestController~ 默认也是单例的。我们找不到 ~MemoController~ 实例化的地方，它的成员变量 ~memoManager~ 只能通过注入的方式初始化。根据注入规则，需要名字为 *memoManager* 的对象。
+
+*** MemoManager 提供了注入能力
+根据规则，spring在启动时，发现 ~MemoManager~ 有 ~@Component~ 注解，于是名字为 *memoManager* 的对象被记了下来。当需要名为 *memoManager* 对象时，就可以使用了。
+
+*** DI 是递归的
+~MemoManager~ 也有标记为 ~@Autowired~ 的成员变量 ~jedisPool~ ，也需要注入。因为 JedisPool 是第三方库，我们使用 ~@Bean~ 标记函数的方法，提供 *jedisPool* 对象。
+
+** 以上只是猜测
+以上描述的过程都是 *不负责任* 的猜测，Spring是不是这么做的不清楚，但是这么做是肯定可以实现的。
+
+以上的描述都假设单例表是个Map，这不一定是真的，例如 *memoManager* 需要被注入，它的类型是 *MemoManager* ，只需要根据类型就能找到相应的依赖对象。
+
+** 给单例对象命名
+本例中 *只有一个* JedisPool，隐含了只有一个Redis，假设我们有多个Redis怎么办？这时靠默认名字（小写类名的第一个字母）显然不行了。这时需要给Bean起名字，同时Autowired时指定需要的Bean的名字。
+1. @Bean("redisPoolOne") 给Bean命名
+2. @Qualifier("redisPoolOne") @Autowired JedisPool jedisPool 指定注入的Bean的名字。
+
+** @Bean注解函数
+上例中，无论 ~jedisPool()~ 调用多少次，返回的都是同一个对象。
+
+** @Autowired 和静态函数、静态成员变量
+~@Autowired~ 不能用于静态函数和静态成员变量
 
 * 扔掉 XML 配置
+spring有两种配置方式，一种基于XML，一种基于java代码（ ~java config~ ），最近的资料，推崇 ~java config~ 。我学习spring的时间较晚，只会后者。
+
+** 配置什么？
+- url 和处理函数的映射
+- Web框架的配置
+- 各种Component所在的包
+- 不同环境的配置文件
+
+** url和处理函数的映射
+#+BEGIN_SRC java
+public class WebInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+  @Override
+  protected Class<?>[] getRootConfigClasses() {
+    return new Class<?>[] {
+      RootConfig.class, DaoConfig.class
+    };
+  }
+  
+  @Override
+  protected Class<?>[] getServletConfigClasses() {
+    return new Class<?>[] { WebConfig.class };
+  }
+
+  @Override
+  protected String[] getServletMappings() {
+    return new String[] { "/" };
+  }
+
+  @Override
+  protected void customizeRegistration(Dynamic registration) {
+    registration.setMultipartConfig(
+      new MultipartConfigElement("/tmp", 1500_000, 1500_000, 1500_000));
+  }
+}
+#+END_SRC
+
+上文以及说了用 ~RequestMapping~ 映射url和处理函数，这里又说需要配置，这多少令人困惑。 ~RequestMapping~ 只是告诉spring这个映射关系，但是Servlet容器并不知道，它甚至不知道Spring的存在。
+
+在Servlet3以前需要通过XML告诉Servlet容器，url和处理函数的映射关系，在Servlet3及以后的版本，只要实现了[[http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContainerInitializer.html][ServletContainerInitializer]] 接口，Servlet容器会自动发现其实现，并做相关配置，当然Spring做了封装，配置起来更简单。
+
+首先继承 ~AbstractAnnotationConfigDispatcherServletInitializer~ ， ~getRootConfigClasses~ 配置应用上下文，主要是一些全局配置， ~getServletConfigClasses~ 配置Servlet上下文， ~getServletMappings~ 配置对应的url。
+
+如果需要配置多个Servlet上下文，实现多个 ~AbstractAnnotationConfigDispatcherServletInitializer~ 即可，如果需要更精细的配置，可以研究 ~AbstractDispatcherServletInitializer~ 。
+
+** 配置Servlet上下文
+
+#+BEGIN_SRC java
+@Configuration
+@EnableWebMvc
+@ComponentScan({"example.api"})
+public class WebConfig extends WebMvcConfigurerAdapter {
+  @Override
+  public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+    converters.add(new StringHttpMessageConverter());
+      
+    Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
+    builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    builder.featuresToDisable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    builder.serializationInclusion(JsonInclude.Include.NON_NULL);
+    converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
+  }
+}
+#+END_SRC
+
+~@Configuration~ 表明这是个配置， ~@EnableWebMvc~ 启用Mvc， ~@ComponentScan~ 配置 Controller 所在的包。继承 ~WebMvcConfigurerAdapter~ 配置Web细节。
+
+** 配置应用上下文
+#+BEGIN_SRC java
+@Configuration
+@ComponentScan({"example"})
+@PropertySource("classpath:application-${spring.profiles.active}.properties")
+public class RootConfig {
+  @Autowired Environment env;
+
+  @Bean
+  public JedisPool jedisPool() {
+    return new JedisPool(
+      env.getRequiredProperty("redis.url"),
+      env.getRequiredProperty("redis.port", Integer.class));
+  }
+}
+#+END_SRC
+
+~@ComponentScan~ 配置 ~@Component~ 类所在的包。
+
+** 配置文件
+虽说没有了XML，可是并不能没有配置，spring支持 [[https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html][Properties]] 配置。通过 ~@PropertySource~ 指定文件的位置， ~Environment~ 会被自动注入，用来获取具体配置项。
+
+在具体的开发中，有开发环境，测试环境，线上环境，等等，它们的配置通常是不同的。通过java ~spring.profiles.active~ 环境变量可以辅助指定使用的配置文件。参见RootConfig。
+
+** @Profile
+当 ~spring.profiles.active~ 的值等于 ~Profile~ 的值时，才激活响应的类或者创建Bean的方法。
+
+** 创建一个Bean来做相应的配置
+在 [[MatrixVariable]] 中，我们通过创建Bean来配置支持 MatrixVariable。我猜是spring在初始化时，寻找相应的Bean来做初始化，如果没有就使用默认值。
+
+** 集成一个类来做相应的配置
+在 [[JSONP]] 中，通过继承类，来实现JSONP的启用。我猜是spring在初始化是，需要相应的类的最底层的子类来生成相应的配置。
 
 * 异常处理
+** 无处不在的异常
+jdk和许多的java库，都会抛出异常。在WEB应用中，要和数据库，Redis，HTTP接口等众多其它服务打交道，能抛出异常的地方太多了，要时时检查异常，会淹没代码的业务逻辑。
+
+** 无能为力的异常
+在WEB环境下（其它环境也差不多），当异常发生时，所能做的只是返回错误，所以检查异常并没有特别的意义。
+
+** Spring的异常观
+在Spring封装异常的地方（例如DAO，RestClientException），它把所有 *Checked* 异常变成了 *Unchecked* 异常，在代码和函数签名里，不用特意的检查异常。
+
+** 统一的异常处理
+Spring提供了统一的异常处理机制，借助 ~@ControllerAdvice~ 和 ~@ExceptionHandler~ ，在统一的地方配置好异常处理函数就可以了。业务逻辑可以完全不关心异常。
+#+BEGIN_SRC java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+  @ExceptionHandler(DataAccessException.class)
+  @ResponseBody
+  public ApiResult dataAccessExcption(Exception e) {
+    e.printStackTrace();
+    return new ApiResult(Errno.INTERNAL_ERROR, "interal db error");
+  }
+}
+#+END_SRC
 
 * RestTemplate
 
 * 数据库相关
-** mybatis
-** jdbcTemplate
+** 名目繁多的ORM
+ORM 要解决的问题是，java对象和数据表如何映射。有 ~Hibernate JDO JPA~ 等多种方案，这些不熟，不予置评。但理想的ORM应该是什么样的？
+- 对象和数据表的映射应该简单
+- 映射背后的SQL应该透明
+我推荐 [[blog:mybatis-spring-howto][mybatis]]。
+
+** DataSource
+
+
+** JdbcTemplate
+INSERT，UPDATE，DELETE，使用JdbcTemplate很方便（INSERT需要返回自增ID除外），SELECT略麻烦。测试时可以使用。
+具体参考 [[http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/htmlsingle/#jdbc-JdbcTemplate][JdbcTemplate]]
+
 ** 事务
 *** Transactional
 *** transactionTemplate
+
+* 性能监控和slf4j

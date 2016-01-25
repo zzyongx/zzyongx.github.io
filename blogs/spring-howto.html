@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Spring Web Develop HOWTO</title>
-<!-- 2016-01-21 四 12:09 -->
+<!-- 2016-01-25 一 18:10 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="root" />
@@ -233,22 +233,59 @@ for the JavaScript code in this tag.
 </li>
 </ul>
 </li>
-<li><a href="#sec-4">4. 依赖注入 DI</a></li>
-<li><a href="#sec-5">5. 扔掉 XML 配置</a></li>
-<li><a href="#sec-6">6. 异常处理</a></li>
+<li><a href="#sec-4">4. 依赖注入 DI</a>
+<ul>
+<li><a href="#sec-4-1">4.1. 如何理解DI</a></li>
+<li><a href="#sec-4-2">4.2. 从单例到DI</a></li>
+<li><a href="#sec-4-3">4.3. Spring DI 包括哪些组成部分</a></li>
+<li><a href="#sec-4-4">4.4. 实例讲解DI</a>
+<ul>
+<li><a href="#sec-4-4-1">4.4.1. MemoController 有注入需求</a></li>
+<li><a href="#sec-4-4-2">4.4.2. MemoManager 提供了注入能力</a></li>
+<li><a href="#sec-4-4-3">4.4.3. DI 是递归的</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-5">4.5. 以上只是猜测</a></li>
+<li><a href="#sec-4-6">4.6. 给单例对象命名</a></li>
+<li><a href="#sec-4-7">4.7. @Bean注解函数</a></li>
+<li><a href="#sec-4-8">4.8. @Autowired 和静态函数、静态成员变量</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. 扔掉 XML 配置</a>
+<ul>
+<li><a href="#sec-5-1">5.1. 配置什么？</a></li>
+<li><a href="#sec-5-2">5.2. url和处理函数的映射</a></li>
+<li><a href="#sec-5-3">5.3. 配置Servlet上下文</a></li>
+<li><a href="#sec-5-4">5.4. 配置应用上下文</a></li>
+<li><a href="#sec-5-5">5.5. 配置文件</a></li>
+<li><a href="#sec-5-6">5.6. @Profile</a></li>
+<li><a href="#sec-5-7">5.7. 创建一个Bean来做相应的配置</a></li>
+<li><a href="#sec-5-8">5.8. 集成一个类来做相应的配置</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6. 异常处理</a>
+<ul>
+<li><a href="#sec-6-1">6.1. 无处不在的异常</a></li>
+<li><a href="#sec-6-2">6.2. 无能为力的异常</a></li>
+<li><a href="#sec-6-3">6.3. Spring的异常观</a></li>
+<li><a href="#sec-6-4">6.4. 统一的异常处理</a></li>
+</ul>
+</li>
 <li><a href="#sec-7">7. RestTemplate</a></li>
 <li><a href="#sec-8">8. 数据库相关</a>
 <ul>
-<li><a href="#sec-8-1">8.1. mybatis</a></li>
-<li><a href="#sec-8-2">8.2. jdbcTemplate</a></li>
-<li><a href="#sec-8-3">8.3. 事务</a>
+<li><a href="#sec-8-1">8.1. 名目繁多的ORM</a></li>
+<li><a href="#sec-8-2">8.2. DataSource</a></li>
+<li><a href="#sec-8-3">8.3. JdbcTemplate</a></li>
+<li><a href="#sec-8-4">8.4. 事务</a>
 <ul>
-<li><a href="#sec-8-3-1">8.3.1. Transactional</a></li>
-<li><a href="#sec-8-3-2">8.3.2. transactionTemplate</a></li>
+<li><a href="#sec-8-4-1">8.4.1. Transactional</a></li>
+<li><a href="#sec-8-4-2">8.4.2. transactionTemplate</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li><a href="#sec-9">9. 性能监控和slf4j</a></li>
 </ul>
 </div>
 </div>
@@ -940,15 +977,419 @@ Spring提供了<code>Jackson2ObjectMapperBuilder</code> 通过它可以配置Jso
 
 <div id="outline-container-sec-4" class="outline-2">
 <h2 id="sec-4"><span class="section-number-2">4</span> 依赖注入 DI</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 如何理解DI</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+我的理解是，不要去理解，用就行了。可以参考 <a href="http://zzyongx.github.io/blogs/bluff-Ioc-DI.html">唬人的Ioc和DI</a>
+</p>
+</div>
 </div>
 
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> 从单例到DI</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+一般聊到单例都是指这样一种形式 <code>SingletonClass.create</code> 无论这个函数调用多少次，这个函数只返回同一个对象。Spring中所有DI的类都是单例的（默认如此，但是可以改变），单例对象的值是可以使用Spring自动注入的。这个过程可以分两步：
+</p>
+<ul class="org-ul">
+<li>构造单例表
+</li>
+<li>注入单例对象
+</li>
+</ul>
+
+<p>
+可以这么理解，Spring启动时，根据一定的规则，生成一个全局的 <code>Map&lt;String, Object&gt;</code> 的单例表，通过这个表来实现单例。这个表的初始化，通过以下方式完成：
+</p>
+<ul class="org-ul">
+<li>扫描指定包，如果类带有注解 <code>@Component @RestController</code> 等，添加到单例表中。
+</li>
+<li>标记为@Bean的函数创建的对象，添加到单例表中。
+</li>
+</ul>
+
+<p>
+单例表完成后，扫描所有标记为 <code>@Autowired</code> 的成员变量和成员函数，根据名字查照单例表，用相应的值初始化。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> Spring DI 包括哪些组成部分</h3>
+<div class="outline-text-3" id="text-4-3">
+<ul class="org-ul">
+<li>Component     定义可以被DI的类
+</li>
+<li>Bean          创建用来DI的变量
+</li>
+<li>Autowired     需要DI的变量
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4" class="outline-3">
+<h3 id="sec-4-4"><span class="section-number-3">4.4</span> 实例讲解DI</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+MemoController.java
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #ff00ff;">@RestController</span>
+<span style="color: #ff00ff;">@RequestMapping</span>(<span style="color: #00ff00;">"/api"</span>)
+<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">MemoController</span> {
+  <span style="color: #ff00ff;">@Autowired</span> <span style="color: #00ff00;">MemoManager</span> <span style="color: #ffff00;">memoManager</span>;
+
+  <span style="color: #ff00ff;">@RequestMapping</span>(value = <span style="color: #00ff00;">"/memo"</span>, method = <span style="color: #ff00ff;">RequestMethod</span>.GET)
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">ApiResult</span> <span style="color: #0000ff; font-weight: bold;">listMemo</span>() {
+    <span style="color: #00ffff; font-weight: bold;">return</span> memoManager.list();
+  }
+}
+</pre>
+</div>
+
+<p>
+MemoManager.java
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #ff00ff;">@Component</span>
+<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">MemoManager</span> {
+  <span style="color: #ff00ff;">@Autowired</span> <span style="color: #00ff00;">JedisPool</span> <span style="color: #ffff00;">jedisPool</span>;
+
+  <span style="color: #00ffff; font-weight: bold;">final</span> <span style="color: #00ff00;">String</span> <span style="color: #ffff00;">KEY</span> = <span style="color: #00ff00;">"memo"</span>;
+
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">ApiResult</span> <span style="color: #0000ff; font-weight: bold;">list</span>() {
+    <span style="color: #00ffff; font-weight: bold;">try</span> (<span style="color: #00ff00;">Jedis</span> <span style="color: #ffff00;">c</span> = jedisPool.getResource()) {
+      <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">ApiResult</span>&lt;<span style="color: #00ff00;">Map</span>&gt;(c.hgetAll(KEY));
+    }
+  }
+}
+</pre>
+</div>
+
+<p>
+RootConfig.java
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #ff00ff;">@Configuration</span>
+<span style="color: #ff00ff;">@ComponentScan</span>({<span style="color: #00ff00;">"example"</span>})
+<span style="color: #ff00ff;">@PropertySource</span>(<span style="color: #00ff00;">"classpath:application-${spring.profiles.active}.properties"</span>)
+<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">RootConfig</span> {
+  <span style="color: #ff00ff;">@Autowired</span> <span style="color: #00ff00;">Environment</span> <span style="color: #ffff00;">env</span>;
+
+  <span style="color: #ff00ff;">@Bean</span>
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">JedisPool</span> <span style="color: #0000ff; font-weight: bold;">jedisPool</span>() {
+    <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">JedisPool</span>(
+      env.getRequiredProperty(<span style="color: #00ff00;">"redis.url"</span>),
+      env.getRequiredProperty(<span style="color: #00ff00;">"redis.port"</span>, Integer.<span style="color: #00ffff; font-weight: bold;">class</span>));
+  }
+}
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4-1" class="outline-4">
+<h4 id="sec-4-4-1"><span class="section-number-4">4.4.1</span> MemoController 有注入需求</h4>
+<div class="outline-text-4" id="text-4-4-1">
+<p>
+<code>@RestController</code> 默认也是单例的。我们找不到 <code>MemoController</code> 实例化的地方，它的成员变量 <code>memoManager</code> 只能通过注入的方式初始化。根据注入规则，需要名字为 <b>memoManager</b> 的对象。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4-2" class="outline-4">
+<h4 id="sec-4-4-2"><span class="section-number-4">4.4.2</span> MemoManager 提供了注入能力</h4>
+<div class="outline-text-4" id="text-4-4-2">
+<p>
+根据规则，spring在启动时，发现 <code>MemoManager</code> 有 <code>@Component</code> 注解，于是名字为 <b>memoManager</b> 的对象被记了下来。当需要名为 <b>memoManager</b> 对象时，就可以使用了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4-3" class="outline-4">
+<h4 id="sec-4-4-3"><span class="section-number-4">4.4.3</span> DI 是递归的</h4>
+<div class="outline-text-4" id="text-4-4-3">
+<p>
+<code>MemoManager</code> 也有标记为 <code>@Autowired</code> 的成员变量 <code>jedisPool</code> ，也需要注入。因为 JedisPool 是第三方库，我们使用 <code>@Bean</code> 标记函数的方法，提供 <b>jedisPool</b> 对象。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-5" class="outline-3">
+<h3 id="sec-4-5"><span class="section-number-3">4.5</span> 以上只是猜测</h3>
+<div class="outline-text-3" id="text-4-5">
+<p>
+以上描述的过程都是 <b>不负责任</b> 的猜测，Spring是不是这么做的不清楚，但是这么做是肯定可以实现的。
+</p>
+
+<p>
+以上的描述都假设单例表是个Map，这不一定是真的，例如 <b>memoManager</b> 需要被注入，它的类型是 <b>MemoManager</b> ，只需要根据类型就能找到相应的依赖对象。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-6" class="outline-3">
+<h3 id="sec-4-6"><span class="section-number-3">4.6</span> 给单例对象命名</h3>
+<div class="outline-text-3" id="text-4-6">
+<p>
+本例中 <b>只有一个</b> JedisPool，隐含了只有一个Redis，假设我们有多个Redis怎么办？这时靠默认名字（小写类名的第一个字母）显然不行了。这时需要给Bean起名字，同时Autowired时指定需要的Bean的名字。
+</p>
+<ol class="org-ol">
+<li>@Bean("redisPoolOne") 给Bean命名
+</li>
+<li>@Qualifier("redisPoolOne") @Autowired JedisPool jedisPool 指定注入的Bean的名字。
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-4-7" class="outline-3">
+<h3 id="sec-4-7"><span class="section-number-3">4.7</span> @Bean注解函数</h3>
+<div class="outline-text-3" id="text-4-7">
+<p>
+上例中，无论 <code>jedisPool()</code> 调用多少次，返回的都是同一个对象。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-8" class="outline-3">
+<h3 id="sec-4-8"><span class="section-number-3">4.8</span> @Autowired 和静态函数、静态成员变量</h3>
+<div class="outline-text-3" id="text-4-8">
+<p>
+<code>@Autowired</code> 不能用于静态函数和静态成员变量
+</p>
+</div>
+</div>
+</div>
 
 <div id="outline-container-sec-5" class="outline-2">
 <h2 id="sec-5"><span class="section-number-2">5</span> 扔掉 XML 配置</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+spring有两种配置方式，一种基于XML，一种基于java代码（ <code>java config</code> ），最近的资料，推崇 <code>java config</code> 。我学习spring的时间较晚，只会后者。
+</p>
+</div>
+
+<div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 配置什么？</h3>
+<div class="outline-text-3" id="text-5-1">
+<ul class="org-ul">
+<li>url 和处理函数的映射
+</li>
+<li>Web框架的配置
+</li>
+<li>各种Component所在的包
+</li>
+<li>不同环境的配置文件
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> url和处理函数的映射</h3>
+<div class="outline-text-3" id="text-5-2">
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">WebInitializer</span> <span style="color: #00ffff; font-weight: bold;">extends</span> <span style="color: #00ff00;">AbstractAnnotationConfigDispatcherServletInitializer</span> {
+  <span style="color: #ff00ff;">@Override</span>
+  <span style="color: #00ffff; font-weight: bold;">protected</span> <span style="color: #00ff00;">Class</span>&lt;?&gt;[] <span style="color: #0000ff; font-weight: bold;">getRootConfigClasses</span>() {
+    <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">Class</span>&lt;?&gt;[] {
+      RootConfig.<span style="color: #00ffff; font-weight: bold;">class</span>, DaoConfig.<span style="color: #00ffff; font-weight: bold;">class</span>
+    };
+  }
+
+  <span style="color: #ff00ff;">@Override</span>
+  <span style="color: #00ffff; font-weight: bold;">protected</span> <span style="color: #00ff00;">Class</span>&lt;?&gt;[] <span style="color: #0000ff; font-weight: bold;">getServletConfigClasses</span>() {
+    <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">Class</span>&lt;?&gt;[] { WebConfig.<span style="color: #00ffff; font-weight: bold;">class</span> };
+  }
+
+  <span style="color: #ff00ff;">@Override</span>
+  <span style="color: #00ffff; font-weight: bold;">protected</span> <span style="color: #00ff00;">String</span>[] <span style="color: #0000ff; font-weight: bold;">getServletMappings</span>() {
+    <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">String</span>[] { <span style="color: #00ff00;">"/"</span> };
+  }
+
+  <span style="color: #ff00ff;">@Override</span>
+  <span style="color: #00ffff; font-weight: bold;">protected</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">customizeRegistration</span>(<span style="color: #00ff00;">Dynamic</span> <span style="color: #ffff00;">registration</span>) {
+    registration.setMultipartConfig(
+      <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">MultipartConfigElement</span>(<span style="color: #00ff00;">"/tmp"</span>, 1500_000, 1500_000, 1500_000));
+  }
+}
+</pre>
+</div>
+
+<p>
+上文以及说了用 <code>RequestMapping</code> 映射url和处理函数，这里又说需要配置，这多少令人困惑。 <code>RequestMapping</code> 只是告诉spring这个映射关系，但是Servlet容器并不知道，它甚至不知道Spring的存在。
+</p>
+
+<p>
+在Servlet3以前需要通过XML告诉Servlet容器，url和处理函数的映射关系，在Servlet3及以后的版本，只要实现了<a href="http://docs.oracle.com/javaee/7/api/javax/servlet/ServletContainerInitializer.html">ServletContainerInitializer</a> 接口，Servlet容器会自动发现其实现，并做相关配置，当然Spring做了封装，配置起来更简单。
+</p>
+
+<p>
+首先继承 <code>AbstractAnnotationConfigDispatcherServletInitializer</code> ， <code>getRootConfigClasses</code> 配置应用上下文，主要是一些全局配置， <code>getServletConfigClasses</code> 配置Servlet上下文， <code>getServletMappings</code> 配置对应的url。
+</p>
+
+<p>
+如果需要配置多个Servlet上下文，实现多个 <code>AbstractAnnotationConfigDispatcherServletInitializer</code> 即可，如果需要更精细的配置，可以研究 <code>AbstractDispatcherServletInitializer</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-3" class="outline-3">
+<h3 id="sec-5-3"><span class="section-number-3">5.3</span> 配置Servlet上下文</h3>
+<div class="outline-text-3" id="text-5-3">
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #ff00ff;">@Configuration</span>
+<span style="color: #ff00ff;">@EnableWebMvc</span>
+<span style="color: #ff00ff;">@ComponentScan</span>({<span style="color: #00ff00;">"example.api"</span>})
+<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">WebConfig</span> <span style="color: #00ffff; font-weight: bold;">extends</span> <span style="color: #00ff00;">WebMvcConfigurerAdapter</span> {
+  <span style="color: #ff00ff;">@Override</span>
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">configureMessageConverters</span>(<span style="color: #00ff00;">List</span>&lt;<span style="color: #00ff00;">HttpMessageConverter</span>&lt;?&gt;&gt; <span style="color: #ffff00;">converters</span>) {
+    converters.add(<span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">StringHttpMessageConverter</span>());
+
+    <span style="color: #00ff00;">Jackson2ObjectMapperBuilder</span> <span style="color: #ffff00;">builder</span> = <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">Jackson2ObjectMapperBuilder</span>();
+    builder.featuresToDisable(<span style="color: #ff00ff;">SerializationFeature</span>.WRITE_DATES_AS_TIMESTAMPS);
+    builder.featuresToDisable(<span style="color: #ff00ff;">SerializationFeature</span>.FAIL_ON_EMPTY_BEANS);
+    builder.serializationInclusion(<span style="color: #ff00ff;">JsonInclude</span>.<span style="color: #ff00ff;">Include</span>.NON_NULL);
+    converters.add(<span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">MappingJackson2HttpMessageConverter</span>(builder.build()));
+  }
+}
+</pre>
+</div>
+
+<p>
+<code>@Configuration</code> 表明这是个配置， <code>@EnableWebMvc</code> 启用Mvc， <code>@ComponentScan</code> 配置 Controller 所在的包。继承 <code>WebMvcConfigurerAdapter</code> 配置Web细节。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-4" class="outline-3">
+<h3 id="sec-5-4"><span class="section-number-3">5.4</span> 配置应用上下文</h3>
+<div class="outline-text-3" id="text-5-4">
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #ff00ff;">@Configuration</span>
+<span style="color: #ff00ff;">@ComponentScan</span>({<span style="color: #00ff00;">"example"</span>})
+<span style="color: #ff00ff;">@PropertySource</span>(<span style="color: #00ff00;">"classpath:application-${spring.profiles.active}.properties"</span>)
+<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">RootConfig</span> {
+  <span style="color: #ff00ff;">@Autowired</span> <span style="color: #00ff00;">Environment</span> <span style="color: #ffff00;">env</span>;
+
+  <span style="color: #ff00ff;">@Bean</span>
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">JedisPool</span> <span style="color: #0000ff; font-weight: bold;">jedisPool</span>() {
+    <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">JedisPool</span>(
+      env.getRequiredProperty(<span style="color: #00ff00;">"redis.url"</span>),
+      env.getRequiredProperty(<span style="color: #00ff00;">"redis.port"</span>, Integer.<span style="color: #00ffff; font-weight: bold;">class</span>));
+  }
+}
+</pre>
+</div>
+
+<p>
+<code>@ComponentScan</code> 配置 <code>@Component</code> 类所在的包。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-5" class="outline-3">
+<h3 id="sec-5-5"><span class="section-number-3">5.5</span> 配置文件</h3>
+<div class="outline-text-3" id="text-5-5">
+<p>
+虽说没有了XML，可是并不能没有配置，spring支持 <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html">Properties</a> 配置。通过 <code>@PropertySource</code> 指定文件的位置， <code>Environment</code> 会被自动注入，用来获取具体配置项。
+</p>
+
+<p>
+在具体的开发中，有开发环境，测试环境，线上环境，等等，它们的配置通常是不同的。通过java <code>spring.profiles.active</code> 环境变量可以辅助指定使用的配置文件。参见RootConfig。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-6" class="outline-3">
+<h3 id="sec-5-6"><span class="section-number-3">5.6</span> @Profile</h3>
+<div class="outline-text-3" id="text-5-6">
+<p>
+当 <code>spring.profiles.active</code> 的值等于 <code>Profile</code> 的值时，才激活响应的类或者创建Bean的方法。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-7" class="outline-3">
+<h3 id="sec-5-7"><span class="section-number-3">5.7</span> 创建一个Bean来做相应的配置</h3>
+<div class="outline-text-3" id="text-5-7">
+<p>
+在 <a href="#sec-3-2-6">3.2.6</a> 中，我们通过创建Bean来配置支持 MatrixVariable。我猜是spring在初始化时，寻找相应的Bean来做初始化，如果没有就使用默认值。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-8" class="outline-3">
+<h3 id="sec-5-8"><span class="section-number-3">5.8</span> 集成一个类来做相应的配置</h3>
+<div class="outline-text-3" id="text-5-8">
+<p>
+在 <a href="#sec-3-3-5">3.3.5</a> 中，通过继承类，来实现JSONP的启用。我猜是spring在初始化是，需要相应的类的最底层的子类来生成相应的配置。
+</p>
+</div>
+</div>
 </div>
 
 <div id="outline-container-sec-6" class="outline-2">
 <h2 id="sec-6"><span class="section-number-2">6</span> 异常处理</h2>
+<div class="outline-text-2" id="text-6">
+</div><div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> 无处不在的异常</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+jdk和许多的java库，都会抛出异常。在WEB应用中，要和数据库，Redis，HTTP接口等众多其它服务打交道，能抛出异常的地方太多了，要时时检查异常，会淹没代码的业务逻辑。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> 无能为力的异常</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+在WEB环境下（其它环境也差不多），当异常发生时，所能做的只是返回错误，所以检查异常并没有特别的意义。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6-3" class="outline-3">
+<h3 id="sec-6-3"><span class="section-number-3">6.3</span> Spring的异常观</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+在Spring封装异常的地方（例如DAO，RestClientException），它把所有 <b>Checked</b> 异常变成了 <b>Unchecked</b> 异常，在代码和函数签名里，不用特意的检查异常。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6-4" class="outline-3">
+<h3 id="sec-6-4"><span class="section-number-3">6.4</span> 统一的异常处理</h3>
+<div class="outline-text-3" id="text-6-4">
+<p>
+Spring提供了统一的异常处理机制，借助 <code>@ControllerAdvice</code> 和 <code>@ExceptionHandler</code> ，在统一的地方配置好异常处理函数就可以了。业务逻辑可以完全不关心异常。
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #ff00ff;">@ControllerAdvice</span>
+<span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">class</span> <span style="color: #00ff00;">GlobalExceptionHandler</span> {
+  <span style="color: #ff00ff;">@ExceptionHandler</span>(DataAccessException.<span style="color: #00ffff; font-weight: bold;">class</span>)
+  <span style="color: #ff00ff;">@ResponseBody</span>
+  <span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ff00;">ApiResult</span> <span style="color: #0000ff; font-weight: bold;">dataAccessExcption</span>(<span style="color: #00ff00;">Exception</span> <span style="color: #ffff00;">e</span>) {
+    e.printStackTrace();
+    <span style="color: #00ffff; font-weight: bold;">return</span> <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">ApiResult</span>(<span style="color: #ff00ff;">Errno</span>.INTERNAL_ERROR, <span style="color: #00ff00;">"interal db error"</span>);
+  }
+}
+</pre>
+</div>
+</div>
+</div>
 </div>
 
 <div id="outline-container-sec-7" class="outline-2">
@@ -959,26 +1400,57 @@ Spring提供了<code>Jackson2ObjectMapperBuilder</code> 通过它可以配置Jso
 <h2 id="sec-8"><span class="section-number-2">8</span> 数据库相关</h2>
 <div class="outline-text-2" id="text-8">
 </div><div id="outline-container-sec-8-1" class="outline-3">
-<h3 id="sec-8-1"><span class="section-number-3">8.1</span> mybatis</h3>
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> 名目繁多的ORM</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+ORM 要解决的问题是，java对象和数据表如何映射。有 <code>Hibernate JDO JPA</code> 等多种方案，这些不熟，不予置评。但理想的ORM应该是什么样的？
+</p>
+<ul class="org-ul">
+<li>对象和数据表的映射应该简单
+</li>
+<li>映射背后的SQL应该透明
+</li>
+</ul>
+<p>
+我推荐 <a href="http://zzyongx.github.io/blogs/mybatis-spring-howto.html">mybatis</a>。
+</p>
 </div>
+</div>
+
 <div id="outline-container-sec-8-2" class="outline-3">
-<h3 id="sec-8-2"><span class="section-number-3">8.2</span> jdbcTemplate</h3>
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> DataSource</h3>
 </div>
+
+
 <div id="outline-container-sec-8-3" class="outline-3">
-<h3 id="sec-8-3"><span class="section-number-3">8.3</span> 事务</h3>
+<h3 id="sec-8-3"><span class="section-number-3">8.3</span> JdbcTemplate</h3>
 <div class="outline-text-3" id="text-8-3">
-</div><div id="outline-container-sec-8-3-1" class="outline-4">
-<h4 id="sec-8-3-1"><span class="section-number-4">8.3.1</span> Transactional</h4>
+<p>
+INSERT，UPDATE，DELETE，使用JdbcTemplate很方便（INSERT需要返回自增ID除外），SELECT略麻烦。测试时可以使用。
+具体参考 <a href="http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/htmlsingle/#jdbc-JdbcTemplate">JdbcTemplate</a>
+</p>
 </div>
-<div id="outline-container-sec-8-3-2" class="outline-4">
-<h4 id="sec-8-3-2"><span class="section-number-4">8.3.2</span> transactionTemplate</h4>
+</div>
+
+<div id="outline-container-sec-8-4" class="outline-3">
+<h3 id="sec-8-4"><span class="section-number-3">8.4</span> 事务</h3>
+<div class="outline-text-3" id="text-8-4">
+</div><div id="outline-container-sec-8-4-1" class="outline-4">
+<h4 id="sec-8-4-1"><span class="section-number-4">8.4.1</span> Transactional</h4>
+</div>
+<div id="outline-container-sec-8-4-2" class="outline-4">
+<h4 id="sec-8-4-2"><span class="section-number-4">8.4.2</span> transactionTemplate</h4>
 </div>
 </div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> 性能监控和slf4j</h2>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2016-01-21 四 12:09</p>
+<p class="date">Created: 2016-01-25 一 18:10</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
