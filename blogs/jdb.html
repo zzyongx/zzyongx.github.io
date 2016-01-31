@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>跬步</title>
-<!-- 2016-01-28 四 11:14 -->
+<title>jdb debug java howto</title>
+<!-- 2016-01-28 四 11:03 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
-<meta  name="author" content="zzyongx" />
+<meta  name="author" content="root" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center; }
@@ -143,145 +143,165 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">跬步</h1>
+<h1 class="title">jdb debug java howto</h1>
+<p>
+java的IDE很发达，很少有直接使用jdb的情况，并且jdb着实很不好用。但是呢？对不用IDE的小伙伴，掌握jdb还是必须的。
+</p>
 
 <div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> 2016 丙申年</h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> 启用java的远程调试</h2>
 <div class="outline-text-2" id="text-1">
-<hr  />
-</div>
-
-<div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 经验</h3>
-<div class="outline-text-3" id="text-1-1">
 <p>
-<a href="http://zzyongx.github.io/blogs/jdb.html">使用jdb调试java</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-02-28&gt;</span></span>
+启动java时，需要增加参数 <code>-Xdebug -agentlib:jdwp=transport=dt_socket,address=localhost:9999,server=y,suspend=n</code> ，开启远程调试，这里需要谨慎选择address，以免调试端口暴露在公网上，安全起见，可以选择localhost。
 </p>
-<blockquote>
-<p>
-使用IDE调试java程序要比jdb方便快捷，但是作为专业程序员，不能总依赖IDE不是。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/java-exception-tips.html">我的 Java 异常最佳实践</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-02-25&gt;</span></span>
+对于开发时，用maven启动的程序，可以通过设置 <code>MAVEN_OPTS</code> 环境变量的方式设置java启动参数。
 </p>
-<blockquote>
-<p>
-优先使用 Unchecked 异常，优先使用 try() 释放资源。
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/bluff-Ioc-DI.html">唬人的Ioc和DI</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-22&gt;</span></span>
-</p>
-<blockquote>
-<p>
-借助反射，Ioc和DI让多态的使用更加优雅了，本身并没有超越多态的范畴。不理解也罢。
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/lease-queue-implement-by-mysql.html">租约消息队列和其MySQL实现</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-19&gt;</span></span>
-</p>
-<blockquote>
-<p>
-站在数据结构的角度所讲的出队并不适合线上环境，因消费者崩溃带来的消息丢失是面临的主要问题，引入消息租约可以解决这一问题。可以很容易的用MySQL模拟其实现。
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/nginx-upstream-send-invalid-header.html">upstream send invalid header</a>
-</p>
-<blockquote>
-<p>
-HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为非法字符，nginx 会报错 upstream send invalid header
-</p>
-</blockquote>
-</div>
-</div>
-
-<div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 阅读笔记</h3>
-<div class="outline-text-3" id="text-1-2">
-<p>
-<a href="http://zzyongx.github.io/blogs/SYN-cookies.html">SYN cookie是什么</a>
-</p>
-<blockquote>
-<p>
-SYN cookie 解决了什么问题，原理是什么，有什么缺陷
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/failure-modes-in-distributed-systems.html">分布式系统中的失败模型</a>
-</p>
-<blockquote>
-<p>
-失败模型的核心是确定性，确定性高的失败要优于确定性低的失败。
-</p>
-</blockquote>
-</div>
 </div>
 </div>
 
 <div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 2015 乙未年</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> 连接调试端口</h2>
 <div class="outline-text-2" id="text-2">
-<hr  />
-</div>
-
-<div id="outline-container-sec-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 经验</h3>
-<div class="outline-text-3" id="text-2-1">
 <p>
-<a href="http://zzyongx.github.io/blogs/maven-howto.html">maven HOWTO</a>
+jdb -attach localhost:9999
 </p>
-<blockquote>
-<p>
-maven 是重要的java构建工具，该文档涵盖了maven的常见用法
-</p>
-</blockquote>
 </div>
 </div>
 
-<div id="outline-container-sec-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 翻译</h3>
-<div class="outline-text-3" id="text-2-2">
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 常用的命令</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> help</h3>
+<div class="outline-text-3" id="text-3-1">
 <p>
-<a href="http://zzyongx.github.io/blogs/tcp-keepalive-howto.html">TCP Keepalive HOWTO</a>
+不言而喻
 </p>
-<blockquote>
-<p>
-介绍了TCP Keepalive产生的背景，使用场景，和如何使用。
-对于理解TCP协议和系统开发很有帮助。
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/some-REST-best-practices.html">一些REST最佳实践</a>
-</p>
-<blockquote>
-<p>
-越来越多的服务接口采用HTTP的方式，而RESTful风格可以让API语义更清晰。
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/cap-confusion-problems-with-partition-tolerance.html">CAP迷思：关于分区容忍性</a>
-</p>
-<blockquote>
-<p>
-作者说CAP，其实只能是CP或者AP，因为P必选。
-</p>
-</blockquote>
 </div>
 </div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> 断点相关</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<b>下面的&lt;class id&gt; 必须是完全限定名，不能只是类名</b>
+</p>
+</div>
+
+<div id="outline-container-sec-3-2-1" class="outline-4">
+<h4 id="sec-3-2-1"><span class="section-number-4">3.2.1</span> 在方法中设置断点</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+stop in &lt;class id&gt;.&lt;method&gt; 例如 <code>stop in example.WorkflowManager.worksheetNext</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2-2" class="outline-4">
+<h4 id="sec-3-2-2"><span class="section-number-4">3.2.2</span> 在行中设置断点</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<p>
+stop at &lt;class id&gt;:&lt;line&gt; 例如 <code>stop at example.WorkflowManager:216</code>
+</p>
+
+<p>
+需要注意，空行也可以成功设置断点，但是会报错，例如：无法设置断点example.WorkflowManager:215: example.WorkflowManager中的行 215 处没有代码。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2-3" class="outline-4">
+<h4 id="sec-3-2-3"><span class="section-number-4">3.2.3</span> 可能错误的断点设置</h4>
+<div class="outline-text-4" id="text-3-2-3">
+<p>
+<code>stop in WorkflowManager.worksheetNext</code> 输出
+</p>
+<pre class="example">
+正在延迟断点WorkflowManager.worksheetNext。
+将在加载类后设置
+</pre>
+
+<p>
+这里显示成功设置了断点，但是这个设置的是 <code>WorkflowManager</code> 的，不是 <code>example.WorkflowManager</code> 的，显然后者才是我们的目的。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2-4" class="outline-4">
+<h4 id="sec-3-2-4"><span class="section-number-4">3.2.4</span> 查看并删除断点</h4>
+<div class="outline-text-4" id="text-3-2-4">
+<ul class="org-ul">
+<li><code>clear</code> 查看所有断点
+</li>
+<li><code>clear &lt;class id&gt;:&lt;line&gt;</code> 清除行中断点
+</li>
+<li><code>clear &lt;class id&gt;.&lt;method&gt;</code> 清除方法中的断点
+</li>
+</ul>
+
+<p>
+这个是stop的逆过程，比较好理解。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> 查看变量的值</h3>
+<div class="outline-text-3" id="text-3-3">
+<ul class="org-ul">
+<li>locals 查看当前的所有本地变量
+</li>
+<li>print  查看表达式的值
+</li>
+<li>dump   查看对象的详细信息，例如各个字段的信息
+</li>
+</ul>
+
+<p>
+请看下面的对比
+</p>
+<pre class="example">
+qtp910889057-13[1] print approver
+ approver = "example.Approver@7ad4e984"
+qtp910889057-13[1] dump approver
+ approver = {
+    id: 11
+    worksheetTitle: "星期三测试"
+    employeeId: 31415946
+    opinion: 3
+    updatedAt: instance of java.time.LocalDateTime(id=8669)
+}
+qtp910889057-13[1] print employeeId
+ employeeId = 31415946
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> 执行</h3>
+<div class="outline-text-3" id="text-3-4">
+<ul class="org-ul">
+<li><code>step up</code> 一直执行到方法返回
+</li>
+<li><code>step</code> 单步执行
+</li>
+<li><code>cont</code> 继续执行，只到下一个断点
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 未完待续。。。</h2>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: zzyongx</p>
-<p class="date">Created: 2016-01-28 四 11:14</p>
+<p class="author">Author: root</p>
+<p class="date">Created: 2016-01-28 四 11:03</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

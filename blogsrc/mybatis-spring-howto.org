@@ -1,0 +1,112 @@
+#+TITLE: mybatis spring howto
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* 配置 datasource
+这个并无特殊之处，选一个合适的 ~DataSource~ 实现，配置好就行。
+
+* 配置 SqlSessionFactory
+
+
+* ORM
+ORM 核心是有两个
+- 函数映射到SQL
+- 对象（变量）映射到SQL的字段
+
+至于SQL对应的数据，稍后再看，先看下面的代码
+
+#+BEGIN_SRC java
+public interface EmployeeDao {
+  class Sql {
+    final static String TABLE = "employee";
+    final static String SELECT_ALL = "SELECT * FROM " + TABLE;
+    final static String DELETE = "DELETE FROM " + TABLE + " WHERE id = #{id}";
+
+    public static String insert(Employee employee) {
+      SQL sql = new SQL()
+        .INSERT_INTO(TABLE)
+        .VALUES("name", "#{name}")
+        .VALUES("phone", "#{phone}");
+      if (employee.getDepartment() != null) {
+        sql.VALUES("department", "#{department}");
+      }
+      if (employee.getPosition() != null) {
+        sql.VALUES("position", "#{position}");
+      }
+      return sql.toString();
+    }
+
+    public static String update(Employee employee) {
+      SQL sql = new SQL().UPDATE(TABLE);
+      if (employee.getName() != null) {
+        sql.SET("name = #{name}");
+      }
+      if (employee.getDepartment() != null) {
+        sql.SET("department = #{department}");
+      }
+      if (employee.getPosition() != null) {
+        sql.SET("position = #{position}");
+      }
+      return sql.SET("phone = #{phone}")
+        .WHERE("id = #{id}").toString();        
+    }
+  }
+
+  @Select(Sql.SELECT_ALL)
+  List<Employee> findAll();
+
+  @InsertProvider(type = Sql.class, method = "insert")
+  @Options(useGeneratedKeys=true, keyProperty = "id")
+  int add(Employee employee);
+
+  @UpdateProvider(type = Sql.class, method = "update")
+  int update(Employee employee);
+
+  @Delete(Sql.DELETE)
+  int delete(long id);
+}
+#+END_SRC
+
+** 从函数到SQL
+
+*** 通过 Select Insert Update Delete 注解绑定静态SQL
+如 ~findAll delete~ 所示，这里要求SQL都是编译时常量。静态SQL简单，但是缺乏一定的灵活性。
+
+*** 通过 SelectProvider InsertProvider UpdateProvider DeleteProvider 注解绑定动态SQL
+如 ~insert update~ 所示，通过type指定产生SQL的类，通过method指定类的方法。method指定的方法接受的参数和注解方法的参数相同，可以根据这个参数的值，动态生成SQL。
+
+*** 通过 Options 注解可以返回Insert语句的自增ID
+~keyProperty~ 用于指定自增ID对应的字段名
+
+** 从对象到SQL的参数
+传递给函数的值，最终需要绑定到SQL参数，绑定遵循一定的规则。
+
+*** 一个简单变量
+这是最简单的情况，变量类型是long，String之类的，并且只有一个。此时没得选，SQL需要绑定变量时，只能绑定它。
+
+*** 多个简单变量
+此时是个多对多的关系，如何确定函数参数和SQL需要绑定的变量的对应关系呢？此时需要 ~Param~ 注解指定对应关系。例如 ~findByNameAndPhone(@Param("name") String name, @Param("phone") int phone)~ 指定了 *name* 绑定到 *#{name}* *phone* 绑定到 *#{phone}* 。
+
+*** 对象
+如果SQL需要 *#{name}* 对应的值时，会调用对象的 *getName* 方法。似乎有 *public* 的 *name* 字段也可以。
+
+*** Map
+如果SQL需要 *#{name}* 时，调用Map的 *get(Object key)* 方法。
+
+** 注意事项
+- 对象的字段、Map中相应的value、简单变量的值不能为null。如果可能为null，可以利用动态SQL判断。
+- 函数不能重载，函数变量名必须唯一。
+- 注解中指定的method似乎只能接受一个参数。
+
+** 动态SQL
+动态SQL的构建函数（method）只是构建SQL，值绑定并不是发生在这个阶段。但是在这个阶段显示绑定也没有太大问题。例如 ~sql.SET("name = #{name}")~ 写成 ~sql.SET("name = " + employee.getName())~ 也没有什么不可以，除了可能引发SQL注入。
+
+** SQL注入
+客户端请求SQL服务器执行SQL有两种方式。一种是最终的SQL，例如 ~SELECT * FROM employee WHERE id = 10~ 。一种是先请求 ~SELECT * FROM employee WHERE id = #{id}~ ，然后发送 id 对应的具体值过去，这被称作 *Prepare Execute* 两个阶段。
+
+前者更直观，也是SQL注入的温床。因为10是用户输入的，如果缺少过滤，用户可能输入 *10; drop table employee* ，这样最终的SQL语句是 ~SELECT * FROM employee WHERE id = 10; drop table employee~ ， *drop* 语句被注入了。
+
+后者没有这个问题，后者执行 id 为 *10; drop table employee* 的查询。虽然可以防止SQL注入，但是并不能预防持久型XSS攻击，适当的输入过滤有时还是必要的。
+
+* 分表
+
+* 分库

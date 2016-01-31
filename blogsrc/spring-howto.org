@@ -1,4 +1,3 @@
-
 #+TITLE: Spring Web Develop HOWTO
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 
@@ -9,14 +8,15 @@
 
 本文基于Spring4，主要讲解Rest风格的编程，不涉及到View部分。本文也不求面面俱到，只求领人入门，有更复杂的需求，尽可以翻看文档，Spring不会让你失望，只有想不到，没有做不到。
 
+本文所有代码都可以从[[https://github.com/zzyongx/c-gist/tree/master/java/howto][这里]] 下载。
+
 * Spring 解决什么问题
 
 ** 框架的作用
 框架五花八门，无处不在，框架解决的问题各式各样，但从编程实践的角度来看，框架是为了让程序更优雅。
 
-*** 框架消除重复代码
-
-*** 框架消除相似代码
+- 框架消除重复代码
+- 框架消除相似代码
 
 框架是一种抽象，抽象层次越高，上述好处越多，当然，可能相应的灵活性就少很多。
 
@@ -76,8 +76,6 @@ hello spring
 对 HelloWorld 而言， ~输入点~ 很简单，是一个命令行参数，对Web应用而言， ~输入点~ 就复杂很多，如何把 ~输入点~ 的数据转成编程语言支持的数据类型，正是框架做的事情。
 
 除了数据转换，框架还提供了机制，可以校验数据有效性。
-
-** 程序
 
 * Spring 如何抽象输入和输出
 
@@ -648,15 +646,52 @@ ORM 要解决的问题是，java对象和数据表如何映射。有 ~Hibernate 
 - 映射背后的SQL应该透明
 我推荐 [[blog:mybatis-spring-howto][mybatis]]。
 
-** DataSource
-
+** 配置DataSource
+[[https://docs.oracle.com/javase/8/docs/api/javax/sql/DataSource.html][DataSource]] 是一个java接口，基于它实现数据库连接池的功能。有很多实现，例如：[[https://github.com/brettwooldridge/HikariCP][HikariCP]] [[https://github.com/alibaba/druid/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98][druid]]
 
 ** JdbcTemplate
 INSERT，UPDATE，DELETE，使用JdbcTemplate很方便（INSERT需要返回自增ID除外），SELECT略麻烦。测试时可以使用。
 具体参考 [[http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/htmlsingle/#jdbc-JdbcTemplate][JdbcTemplate]]
 
 ** 事务
+事务通常都是借助Spring的机制来控制的，为了在spring中使用事务，需要创建事务管理器。这里对函数的名字有要求，因为函数名也是 ~Bean~ 的名字。
+#+BEGIN_SRC java
+@Configuration
+@EnableTransactionManagement
+public class DaoConfig {
+  @Bean
+  public DataSourceTransactionManager transactionManager() {
+    return new DataSourceTransactionManager(dataSource());
+  }
+}
+#+END_SRC
+
+有两种使用事务的方式
 *** Transactional
-*** transactionTemplate
+#+BEGIN_SRC java
+@Transactional
+public void databaseOperation() {
+  // database operation
+}
+#+END_SRC
+
+通过 ~@Transactional~ 注解一个 *public* 函数，该函数内部的数据操作是一个事务。
+
+
+*** TransactionTemplate
+#+BEGIN_SRC java
+// init
+this.transactionTemplate = new TransactionTemplate(transactionManager);
+
+// use
+transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+    protected void doInTransactionWithoutResult(TransactionStatus status) {
+      // database operation
+    }
+  });
+
+#+END_SRC
+
+通过 ~TransactionTemplate~ 封装了一段需要保持事务的操作。
 
 * 性能监控和slf4j

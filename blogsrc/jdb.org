@@ -1,0 +1,72 @@
+#+TITLE: jdb debug java howto
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+java的IDE很发达，很少有直接使用jdb的情况，并且jdb着实很不好用。但是呢？对不用IDE的小伙伴，掌握jdb还是必须的。
+
+* 启用java的远程调试
+启动java时，需要增加参数 ~-Xdebug -agentlib:jdwp=transport=dt_socket,address=localhost:9999,server=y,suspend=n~ ，开启远程调试，这里需要谨慎选择address，以免调试端口暴露在公网上，安全起见，可以选择localhost。
+
+对于开发时，用maven启动的程序，可以通过设置 ~MAVEN_OPTS~ 环境变量的方式设置java启动参数。
+
+* 连接调试端口
+jdb -attach localhost:9999
+
+* 常用的命令
+** help
+不言而喻
+
+** 断点相关
+*下面的<class id> 必须是完全限定名，不能只是类名*
+
+*** 在方法中设置断点
+stop in <class id>.<method> 例如 ~stop in example.WorkflowManager.worksheetNext~
+
+*** 在行中设置断点
+stop at <class id>:<line> 例如 ~stop at example.WorkflowManager:216~
+
+需要注意，空行也可以成功设置断点，但是会报错，例如：无法设置断点example.WorkflowManager:215: example.WorkflowManager中的行 215 处没有代码。
+
+*** 可能错误的断点设置
+~stop in WorkflowManager.worksheetNext~ 输出
+#+BEGIN_EXAMPLE
+正在延迟断点WorkflowManager.worksheetNext。
+将在加载类后设置
+#+END_EXAMPLE
+
+这里显示成功设置了断点，但是这个设置的是 ~WorkflowManager~ 的，不是 ~example.WorkflowManager~ 的，显然后者才是我们的目的。
+
+*** 查看并删除断点 
+- ~clear~ 查看所有断点
+- ~clear <class id>:<line>~ 清除行中断点
+- ~clear <class id>.<method>~ 清除方法中的断点
+
+这个是stop的逆过程，比较好理解。
+
+** 查看变量的值
+- locals 查看当前的所有本地变量
+- print  查看表达式的值
+- dump   查看对象的详细信息，例如各个字段的信息
+
+请看下面的对比
+#+BEGIN_EXAMPLE
+qtp910889057-13[1] print approver
+ approver = "example.Approver@7ad4e984"
+qtp910889057-13[1] dump approver
+ approver = {
+    id: 11
+    worksheetTitle: "星期三测试"
+    employeeId: 31415946
+    opinion: 3
+    updatedAt: instance of java.time.LocalDateTime(id=8669)
+}
+qtp910889057-13[1] print employeeId
+ employeeId = 31415946
+#+END_EXAMPLE
+
+** 执行
+- ~step up~ 一直执行到方法返回
+- ~step~ 单步执行
+- ~cont~ 继续执行，只到下一个断点
+
+* 未完待续。。。

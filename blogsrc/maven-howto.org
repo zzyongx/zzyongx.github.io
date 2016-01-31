@@ -150,7 +150,8 @@ howto/
 - mvn dependency:help 查看 dependency 插件的帮助
 - mvn site 查看项目报告，把 target/site 配置到 http doc 目录，可以以web方式查看
 
-通过 -D 参数指定环境变量，例如 -Dmaven.test.skip=true 用来跳过测试
+通过 -D 参数指定环境变量，例如 ~-Dmaven.test.skip=true~ 用来跳过测试。
+通过 ~MAVEN_OPTS~ 环境变量，可以设置java的启动参数，例如 ~export MAVEN_OPTS="-Xmx512M -Xms512M"~
 
 目标是可以组合的，例如 mvn clean package jetty:run
 

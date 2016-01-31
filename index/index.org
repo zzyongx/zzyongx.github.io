@@ -7,6 +7,12 @@
 ------------
 
 ** 经验
+
+[[blog:jdb][使用jdb调试java]] <2016-02-28>
+#+BEGIN_QUOTE
+使用IDE调试java程序要比jdb方便快捷，但是作为专业程序员，不能总依赖IDE不是。
+#+END_QUOTE
+
 [[blog:java-exception-tips][我的 Java 异常最佳实践]] <2016-02-25>
 #+BEGIN_QUOTE
 优先使用 Unchecked 异常，优先使用 try() 释放资源。
