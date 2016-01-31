@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>跬步</title>
-<!-- 2016-01-31 日 18:18 -->
+<title>HTTP2 简介</title>
+<!-- 2016-01-31 日 18:15 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
-<meta  name="author" content="zzyongx" />
+<meta  name="author" content="zhengzhiyong" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center; }
@@ -143,163 +143,133 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">跬步</h1>
+<h1 class="title">HTTP2 简介</h1>
+<p>
+本文是<a href="https://assets.wp.nginx.com/wp-content/uploads/2015/09/NGINX_HTTP2_White_Paper_v4.pdf">NGINX HTTP2 White Paper</a> 、 <a href="https://www.nginx.com/blog/http2-module-nginx/">http2-module-nginx</a>、 <a href="https://www.nginx.com/blog/7-tips-for-faster-http2-performance/">tips for faster http2</a> 的阅读笔记，主要介绍HTTP2的特性，实现现状，如何从HTTP1.x升级到HTTP2。
+</p>
 
 <div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> 2016 丙申年</h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> HTTP/1.x 现状</h2>
 <div class="outline-text-2" id="text-1">
-<hr  />
-</div>
-
-<div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 经验</h3>
-<div class="outline-text-3" id="text-1-1">
 <p>
-<a href="http://zzyongx.github.io/blogs/jdb.html">使用jdb调试java</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-02-28&gt;</span></span>
+自1990年出现HTTP，一个TCP连接一次只能处理一个HTTP请求，TCP连接无法重用。当时一个WEB页面对应的资源比较单一，随着一个页面对应的资源的增多（图片，JS）等，HTTP愈发不能满足需求。为了减少页面加载时间，WEB浏览器通常会一次创建多个连接。
 </p>
-<blockquote>
-<p>
-使用IDE调试java程序要比jdb方便快捷，但是作为专业程序员，不能总依赖IDE不是。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/java-exception-tips.html">我的 Java 异常最佳实践</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-02-25&gt;</span></span>
+1999年引入了HTTP/1.1，主要解决TCP连接无法重用的问题，即KeepAlive。即使TCP连接可以重用，HTTP仍然是请求应答式的，一个请求没完成前，是不会开始下一个请求的。尤其是HTTPS连接需要更多的交互才能建立。
 </p>
-<blockquote>
-<p>
-优先使用 Unchecked 异常，优先使用 try() 释放资源。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/bluff-Ioc-DI.html">唬人的Ioc和DI</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-22&gt;</span></span>
+为了优化HTTP/1.1，开发者想出了很多招。
 </p>
-<blockquote>
-<p>
-借助反射，Ioc和DI让多态的使用更加优雅了，本身并没有超越多态的范畴。不理解也罢。
-</p>
-</blockquote>
+<ul class="org-ul">
+<li>域名共享。因为针对同一个域名，WEB浏览器最多打开6个连接。为了增加并发，通常会使用域名共享，同一资源可以用多个域名访问。
+</li>
+<li>图片合并。多个图片合并成一个图片，尤其在CSS中，减少请求个数。
+</li>
+<li>合并代码文件。通过合并JS，CSS文件，减少请求个数。
+</li>
+<li>内联文件。通过把JS、CSS直接写到HTML文件中，减少请求个数。
+</li>
+</ul>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/lease-queue-implement-by-mysql.html">租约消息队列和其MySQL实现</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-19&gt;</span></span>
+其实，图片也可以内联到HTML文件中。这个优化在HTTPS中得到应用。GOOGLE的搜索结果，图片都是内联到HTML页面中的，没有单独的图片请求。所有这些优化，都落到了一处， <b>减少请求个数</b> ，HTTP2的改进也是主要针对这点。
 </p>
-<blockquote>
-<p>
-站在数据结构的角度所讲的出队并不适合线上环境，因消费者崩溃带来的消息丢失是面临的主要问题，引入消息租约可以解决这一问题。可以很容易的用MySQL模拟其实现。
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/nginx-upstream-send-invalid-header.html">upstream send invalid header</a>
-</p>
-<blockquote>
-<p>
-HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为非法字符，nginx 会报错 upstream send invalid header
-</p>
-</blockquote>
-</div>
-</div>
-
-<div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 阅读笔记</h3>
-<div class="outline-text-3" id="text-1-2">
-<p>
-<a href="http://zzyongx.github.io/blogs/http.html">HTTP/2简介</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-31&gt;</span></span>
-</p>
-<blockquote>
-<p>
-主要介绍HTTP2的特性，实现现状，性能，如何从HTTP1.x升级到HTTP2
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/how-https-connect-build.html">HTTPS 连接是如何建立的</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-31&gt;</span></span>
-</p>
-<blockquote>
-<p>
-通过了解 HTTPS 是如何建立的，了解HTTPS对性能的影响，以及HTTPS证书是如何保障安全的
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/SYN-cookies.html">SYN cookie是什么</a>
-</p>
-<blockquote>
-<p>
-SYN cookie 解决了什么问题，原理是什么，有什么缺陷
-</p>
-</blockquote>
-
-<p>
-<a href="http://zzyongx.github.io/blogs/failure-modes-in-distributed-systems.html">分布式系统中的失败模型</a>
-</p>
-<blockquote>
-<p>
-失败模型的核心是确定性，确定性高的失败要优于确定性低的失败。
-</p>
-</blockquote>
-</div>
 </div>
 </div>
 
 <div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 2015 乙未年</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> HTTP/2 的改进</h2>
 <div class="outline-text-2" id="text-2">
-<hr  />
-</div>
-
-<div id="outline-container-sec-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 经验</h3>
-<div class="outline-text-3" id="text-2-1">
 <p>
-<a href="http://zzyongx.github.io/blogs/maven-howto.html">maven HOWTO</a>
+HTTP/2并没有改变HTTP/1.1的语义，包括HTTP协议的格式，状态码，HEADER的定义等。主要改进的是HTTP的交互方式。
 </p>
-<blockquote>
-<p>
-maven 是重要的java构建工具，该文档涵盖了maven的常见用法
-</p>
-</blockquote>
-</div>
-</div>
-
-<div id="outline-container-sec-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 翻译</h3>
-<div class="outline-text-3" id="text-2-2">
-<p>
-<a href="http://zzyongx.github.io/blogs/tcp-keepalive-howto.html">TCP Keepalive HOWTO</a>
-</p>
-<blockquote>
-<p>
-介绍了TCP Keepalive产生的背景，使用场景，和如何使用。
-对于理解TCP协议和系统开发很有帮助。
-</p>
-</blockquote>
+<ul class="org-ul">
+<li>单一持久连接。一个网页，只有一个TCP连接。
+</li>
+<li>多路。所有的HTTP请求都通过这个连接发送。没必要等上一个HTTP请求结束，就可以发送下一个，这个也叫PIPELINE。
+</li>
+<li>Header压缩和二进制编码。压缩使用HPACK算法。
+</li>
+<li>优先级。因为是多路请求，为了解决依赖关系，不同等级的请求有不同的优先级。
+</li>
+</ul>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/some-REST-best-practices.html">一些REST最佳实践</a>
+HTTP/2 还规定了服务器PUSH，但是nginx还没有实现这点。
 </p>
-<blockquote>
-<p>
-越来越多的服务接口采用HTTP的方式，而RESTful风格可以让API语义更清晰。
-</p>
-</blockquote>
 
 <p>
-<a href="http://zzyongx.github.io/blogs/cap-confusion-problems-with-partition-tolerance.html">CAP迷思：关于分区容忍性</a>
+从下图可以看出HTTP/1.x和HTTP/2的主要区别。
 </p>
-<blockquote>
-<p>
-作者说CAP，其实只能是CP或者AP，因为P必选。
+
+<div class="figure">
+<p><img src="../images/http2-vs-http1.png" alt="http2-vs-http1.png" />
 </p>
-</blockquote>
 </div>
+
+<p>
+从下图可以形象的看出HTTP2是如何发送HTTP请求的。
+</p>
+
+<div class="figure">
+<p><img src="../images/http2-traffic.jpg" alt="http2-traffic.jpg" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> HTTP/2 和 HTTPS</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+这两者本来没有任何关系，但是现在主流浏览器只有在HTTPS时才启用HTTP2，所以为了使用HTTP2，服务端只能配置成HTTPS模式的。主要还是HTTPS的连接更昂贵，在HTTPS上启用HTTP/2收益更大。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 性能</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>在RTT小于20ms时，HTTP/1.x 和 HTTP/2差别不大
+</li>
+<li>RTT在30ms和250ms之间时，HTTP/2小胜
+</li>
+<li>RTT大于250ms时，HTTP/1.x有优势
+</li>
+</ul>
+
+<p>
+大文件没有用HTTP/2的必要。这是NGINX公司的测试，你可能需要构建自己的测试用例。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> HTTP/2的影响</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>所有HTTP/1.x的优化可以去掉了，这些优化反而会妨碍HTTP/2的性能
+</li>
+<li>还没采用HTTPS的网站，为了尽快使用HTTP/2，又多了一条使用HTTPS的理由
+</li>
+<li>HTTP服务器的并发压力会降低很多倍
+</li>
+<li>二进制HEADER，带来了调试困难
+</li>
+<li>NGINX的upstream并不支持HTTP/2，因为KEEPALIVE和RTT很小
+</li>
+<li>HTTP库例如libcurl何时支持HTTP/2，以及如何才是最佳实践还有待研究
+</li>
+</ul>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: zzyongx</p>
-<p class="date">Created: 2016-01-31 日 18:18</p>
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2016-01-31 日 18:15</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
