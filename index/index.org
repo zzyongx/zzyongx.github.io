@@ -35,6 +35,11 @@ HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为�
 
 ** 阅读笔记
 
+[[blog:how-https-connect-build][HTTPS 连接是如何建立的]] <2016-01-31>
+#+BEGIN_QUOTE
+通过了解 HTTPS 是如何建立的，了解HTTPS对性能的影响，以及HTTPS证书是如何保障安全的
+#+END_QUOTE
+
 [[blog:SYN-cookies][SYN cookie是什么]]
 #+BEGIN_QUOTE
 SYN cookie 解决了什么问题，原理是什么，有什么缺陷

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>HTTPS 连接是如何建立的</title>
+<!-- 2016-01-31 日 12:45 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">HTTPS 连接是如何建立的</h1>
+<p>
+本文是<a href="http://www.infoq.com/articles/HTTPS-Connection-Jeff-Moser">The First Few Milliseconds of an HTTPS Connection</a> 和<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security">SSL</a> 的阅读笔记，主要描述了建立HTTPS连接的过程，侧重关注以下几点：
+</p>
+<ol class="org-ol">
+<li>SSL 连接完成需要几次握手
+</li>
+<li>HTTPS 证书如何发挥作用
+</li>
+<li>安全是如何保障的
+</li>
+</ol>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> SSL建立连接的三次握手</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+这里的 <i>握手</i> 要和TCP握手区分，因为这时TCP连接已经建立。如果是HTTP连接，在TCP连接建立完成后，就会发GET请求。但是HTTPS连接，需要基于TCP之上建立的SSL连接，SSL连接本质还是应用层的，所谓握手也只是说需要几次TCP交互而已（这里的一次交互不一定就是一个TCP包，可能是多个）。本文分析和Amazon的连接内容来讲解的。
+</p>
+
+<p>
+分析几次握手的意义在于，分析除了加密消耗的CPU外，额外的SSL握手对HTTPS响应延迟的影响。
+</p>
+</div>
+
+<div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Client Hello</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+客户端发起，值得注意的几点是：
+</p>
+<ul class="org-ul">
+<li>Random 随机串，包含UNIX时间戳和随时串，稍后使用
+</li>
+<li>Session ID，可以是null，如果之前有和Amazon的连接，可以填之前使用的Session ID。
+</li>
+<li>Cipher Suites，客户端支持的加密套件
+</li>
+<li>Server Name 扩展，<a href="#sec-2">2</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Server Hello</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+服务端响应，值得注意的几点是：
+</p>
+<ul class="org-ul">
+<li>Random 随机串，包含UNIX时间戳和随机串，稍后使用
+</li>
+<li>Session ID，非null
+</li>
+<li>Cipher Suites，服务端从客户端发送的Cipher Suites中选择一个支持的，返回
+</li>
+<li>HTTPS 证书
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> Client Key Exchange 和 Change Cipher Spec</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+前者客户端用公钥加密 <b>PreMasterKey</b> 给服务器，后者客户端发送消息结束SSL握手。
+</p>
+
+<p>
+这里 <b>PreMasterKey</b> 是随机串，用来生成对称加密的密钥，最终的密钥是通过前两次握手的Random随机串和 <b>PreMasterKey</b> 通过某个算法生成的。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Server Name 扩展</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+HTTP 通过 <b>Host</b> 字段指定服务端的vhost，这样在同一个机器上可以服务多个域名。在HTTPS中，SSL建立阶段，HTTP请求还没有开始，此时服务端并不知道 <b>Host</b> ，所以服务端并不知道返回哪个 <b>Host</b> 对应的证书，所以通常的策略是，不同的 <b>Host</b> 绑定到不同的IP，通过IP来区分不同的域名，这需要在服务端的配置文件里面写Host对应的IP，很难维护。
+</p>
+
+<p>
+通过 Server Name 扩展，服务端匹配相应的Host，从而选择相应的HTTPS证书。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Cipher Suites 的选择</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+不同的加密算法，保密程度不同，响应的CPU消耗也不同，服务端可以根据业务需要选择适当的算法。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> HTTPS 证书的组成</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>证书的有效期，起止时间
+</li>
+<li>RSA 公钥
+</li>
+<li>CA和CA签名
+</li>
+<li>证书对应的域名
+</li>
+</ul>
+</div>
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> RSA 和 HTTPS</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+RSA 是非对称加密，分公钥和私钥，私钥保密，公钥不保密。公钥加密，私钥解密。私钥签名，公钥验证签名。非对称加密的效率非常低。
+对称加密（Cipher Suites中对应的算法），只有一个密钥，加解密都用它，效率比非对称加密高。但是如何 <b>安全传递密钥</b> 是个问题。
+</p>
+
+<p>
+HTTPS 是两者的结合，通过RSA传递对称加密的密钥，然后用HTTP请求的数据用对称加密加密。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> 中间人攻击</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+在传送HTTPS证书时，还是普通的TCP请求，数据都没有加密，如果有人截获TCP通信的数据，用攻击者的证书代替真实的证书，怎么办？CA是证书签发者，HTTPS证书需要通过CA购买，从CA购买的证书有CA的签名。
+</p>
+
+<p>
+上面说过RSA可以用私钥做数据签名，然后公钥持有者可以检验数据来自私钥持有者，而不是伪造的。这里浏览器内置了CA的公钥，浏览器用CA的公钥验证HTTPS证书的签名，确认证书的确是CA签发的。证书中还包含了域名信息，通过CA签名和域名确认证书不是伪造的。
+</p>
+
+<p>
+会不会有人冒充域名持有者获取了CA签名呢？如果CA不靠谱，是有可能的。我想这也是为啥有的CA卖的HTTPS证书贵，有的CA卖的HTTPS证书便宜。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> 自签发的证书</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+如果是内部应用，可以自己做HTTPS证书。这时浏览器显示不信任的证书，可以自己做CA公钥，导入浏览器，这样就不会不信任了。
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2016-01-31 日 12:45</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,62 @@
+#+TITLE: HTTPS 连接是如何建立的
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+本文是[[http://www.infoq.com/articles/HTTPS-Connection-Jeff-Moser][The First Few Milliseconds of an HTTPS Connection]] 和[[https://en.wikipedia.org/wiki/Transport_Layer_Security][SSL]] 的阅读笔记，主要描述了建立HTTPS连接的过程，侧重关注以下几点：
+1. SSL 连接完成需要几次握手
+2. HTTPS 证书如何发挥作用
+3. 安全是如何保障的
+
+* SSL建立连接的三次握手
+这里的 /握手/ 要和TCP握手区分，因为这时TCP连接已经建立。如果是HTTP连接，在TCP连接建立完成后，就会发GET请求。但是HTTPS连接，需要基于TCP之上建立的SSL连接，SSL连接本质还是应用层的，所谓握手也只是说需要几次TCP交互而已（这里的一次交互不一定就是一个TCP包，可能是多个）。本文分析和Amazon的连接内容来讲解的。
+
+分析几次握手的意义在于，分析除了加密消耗的CPU外，额外的SSL握手对HTTPS响应延迟的影响。
+
+** Client Hello
+客户端发起，值得注意的几点是：
+- Random 随机串，包含UNIX时间戳和随时串，稍后使用
+- Session ID，可以是null，如果之前有和Amazon的连接，可以填之前使用的Session ID。
+- Cipher Suites，客户端支持的加密套件
+- Server Name 扩展，[[Server Name 扩展]]
+
+** Server Hello
+服务端响应，值得注意的几点是：
+- Random 随机串，包含UNIX时间戳和随机串，稍后使用
+- Session ID，非null
+- Cipher Suites，服务端从客户端发送的Cipher Suites中选择一个支持的，返回
+- HTTPS 证书
+
+** Client Key Exchange 和 Change Cipher Spec
+前者客户端用公钥加密 *PreMasterKey* 给服务器，后者客户端发送消息结束SSL握手。
+
+这里 *PreMasterKey* 是随机串，用来生成对称加密的密钥，最终的密钥是通过前两次握手的Random随机串和 *PreMasterKey* 通过某个算法生成的。
+
+* Server Name 扩展
+HTTP 通过 *Host* 字段指定服务端的vhost，这样在同一个机器上可以服务多个域名。在HTTPS中，SSL建立阶段，HTTP请求还没有开始，此时服务端并不知道 *Host* ，所以服务端并不知道返回哪个 *Host* 对应的证书，所以通常的策略是，不同的 *Host* 绑定到不同的IP，通过IP来区分不同的域名，这需要在服务端的配置文件里面写Host对应的IP，很难维护。
+
+通过 Server Name 扩展，服务端匹配相应的Host，从而选择相应的HTTPS证书。
+
+* Cipher Suites 的选择
+不同的加密算法，保密程度不同，响应的CPU消耗也不同，服务端可以根据业务需要选择适当的算法。
+
+* HTTPS 证书的组成
+- 证书的有效期，起止时间
+- RSA 公钥
+- CA和CA签名
+- 证书对应的域名
+
+** RSA 和 HTTPS
+RSA 是非对称加密，分公钥和私钥，私钥保密，公钥不保密。公钥加密，私钥解密。私钥签名，公钥验证签名。非对称加密的效率非常低。
+对称加密（Cipher Suites中对应的算法），只有一个密钥，加解密都用它，效率比非对称加密高。但是如何 *安全传递密钥* 是个问题。
+
+HTTPS 是两者的结合，通过RSA传递对称加密的密钥，然后用HTTP请求的数据用对称加密加密。
+
+** 中间人攻击
+在传送HTTPS证书时，还是普通的TCP请求，数据都没有加密，如果有人截获TCP通信的数据，用攻击者的证书代替真实的证书，怎么办？CA是证书签发者，HTTPS证书需要通过CA购买，从CA购买的证书有CA的签名。
+
+上面说过RSA可以用私钥做数据签名，然后公钥持有者可以检验数据来自私钥持有者，而不是伪造的。这里浏览器内置了CA的公钥，浏览器用CA的公钥验证HTTPS证书的签名，确认证书的确是CA签发的。证书中还包含了域名信息，通过CA签名和域名确认证书不是伪造的。
+
+会不会有人冒充域名持有者获取了CA签名呢？如果CA不靠谱，是有可能的。我想这也是为啥有的CA卖的HTTPS证书贵，有的CA卖的HTTPS证书便宜。
+
+** 自签发的证书
+如果是内部应用，可以自己做HTTPS证书。这时浏览器显示不信任的证书，可以自己做CA公钥，导入浏览器，这样就不会不信任了。
