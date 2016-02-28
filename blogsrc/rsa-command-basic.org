@@ -1,0 +1,56 @@
+#+TITLE: RSA 命令行和Key格式
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+RSA的使用本身不复杂，尤其是某些语言（例如Java）接口封装的很好，只需要照文档编程就好，不需要更多的知识。但涉及到多语言操作Key时，就碰到点问题，我用的是Java和Lua，Lua是通过ffi直接调用的c的OpenSSL库，具体名称是 [[https://github.com/doujiang24/lua-resty-rsa][lua-resty-rsa]]。
+
+* Java语言内生成Key操作
+#+BEGIN_SRC java
+KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+generator.initialize(1024, new SecureRandom());
+
+KeyPair pair = generator.generateKeyPair();
+Files.write(Paths.get("private.der"), pair.getPrivate().getEncoded(), StandardOpenOption.WRITE);
+Files.write(Paths.get("public.der"), pair.getPublic().getEncoded(), StandardOpenOption.WRITE);
+
+PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Files.readAllBytes(Paths.get("private.der")));
+PrivateKey key = KeyFactory.getInstance("RSA").generatePrivate(pkcs8KeySpec);
+
+X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(Files.readAllBytes(Paths.get("public.der")));
+PublicKey key = KeyFactory.getInstance("RSA").generatePublic(x509KeySpec);
+#+END_SRC
+
+其中PublicKey可以使用PrivateKey生成。
+
+* 使用openssl工具生成Key
+#+BEGIN_SRC sh
+# openssl genrsa -out private.pem 1024
+# openssl rsa -in private.pem -inform PEM -outform PEM -pubout -out public.pem
+#+END_SRC
+
+* DER 和 PEM 格式
+  上面的Key分别以DER和PEM格式保存，DER是二进制形式，用ASN.1编码。Java分别用PKCS#8 X509读取PrivateKey和PublicKey的DER文件。
+PEM是文本形式，是DER形式做base64编码，并加上头尾（如-----BEGIN RSA PRIVATE KEY-----）生成的。
+
+DER和PEM格式可以互相转换
+#+BEGIN_SRC sh
+# openssl rsa -in private.der -inform DER -outform PEM -out private.pem
+# openssl rsa -in public.der -inform DER -outform PEM -pubin -out public.pem 
+#+END_SRC
+
+* Lua使用上面的public.pem出的问题
+lua无法识别上面的PublicKey，格式不对。OpenSSL支持两种PublicKey格式，对应的API是 ~PEM_read_RSAPublicKey~ 和 ~PEM_read_RSA_PUBKEY~ ，其中 ~RSAPublicKey~ 使用#PKCS1 RSAPublicKey结构， ~RSA_PUBKEY~ 使用 #PKCS1 SubjectPublicKeyInfo结构，两种结构对应的PEM内容不同。
+
+lua使用的是 ~RSAPublicKey~ ，而openssl命令输出的是 ~SubjectPublicKeyInfo~ 结构的。现在需要输出 ~RSAPublicKey~ 格式的。但是OpenSSL 0.9.2（centos6默认版本）命令行不支持这一点，可以编译一个1.1.0版本的，命令如下
+#+BEGIN_SRC sh
+# openssl rsa -in private.pem -inform PEM -outform PEM -RSAPublicKey_out -out public.pem
+#+END_SRC
+
+* 一点体会
+加密系统的概念其实很多，通常不需要关心，一旦碰到问题，查资料比较困难。这个问题查了挺久，当时并没有用上面的方式解决，而是曲线救国。既然PublicKey的格式不对，那么就换一种途径生成PublicKey，把ssh使用的PublicKey格式转成RSA格式的。
+#+BEGIN_SRC sh
+# ssh-keygen -y -f private.pem > key.pub
+# ssh-keygen -f key.pub -e -m pem > key.pem
+#+END_SRC
+
+这个过程并不顺利，ssh-keygen的 -m 参数是openssh 6.5以后才支持的，只能编译一个6.5以后的版本才获取这个参数的支持。其实当时如果能明白OpenSSL这两种PublicKey格式，可以直接修改Lua代码，或者使用c写一个转换工具，问题应该解决的更快些。

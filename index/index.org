@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:rsa-command-basic][RSA命令行工具和KEY格式]] <2016-02-28>
+#+BEGIN_QUOTE
+如何用程序生成RSA KEY，以及常用的KEY格式。
+#+END_QUOTE
+
 [[blog:cryptography-basic][密码系统常识]] <2016-02-28>
 #+BEGIN_QUOTE
 程序员应该知道的密码系统常识。和算法一样，这些作为基础知识，也是必须知道的。
