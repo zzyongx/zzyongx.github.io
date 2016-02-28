@@ -8,12 +8,17 @@
 
 ** 经验
 
-[[blog:jdb][使用jdb调试java]] <2016-02-28>
+[[blog:cryptography-basic][密码系统常识]] <2016-02-28>
+#+BEGIN_QUOTE
+程序员应该知道的密码系统常识。和算法一样，这些作为基础知识，也是必须知道的。
+#+END_QUOTE
+
+[[blog:jdb][使用jdb调试java]] <2016-01-28>
 #+BEGIN_QUOTE
 使用IDE调试java程序要比jdb方便快捷，但是作为专业程序员，不能总依赖IDE不是。
 #+END_QUOTE
 
-[[blog:java-exception-tips][我的 Java 异常最佳实践]] <2016-02-25>
+[[blog:java-exception-tips][我的 Java 异常最佳实践]] <2016-01-25>
 #+BEGIN_QUOTE
 优先使用 Unchecked 异常，优先使用 try() 释放资源。
 #+END_QUOTE
@@ -82,4 +87,3 @@ maven 是重要的java构建工具，该文档涵盖了maven的常见用法
 #+BEGIN_QUOTE
 作者说CAP，其实只能是CP或者AP，因为P必选。
 #+END_QUOTE
-
