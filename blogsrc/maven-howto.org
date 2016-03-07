@@ -167,6 +167,11 @@ howto/
 通过 ~dependency~ 填写依赖，maven会在本地缓存一份数据 ~$HOME/.m2/repository~
 依赖管理是个很便捷的东西。c和c++就没有类似的项目，Makefile 里面指定的依赖额外安装。
 
+* 打出多种格式的包
+假设应用除了提供web接口（这需要应用打包成war），还提供了一些小命令（这些小命令对war里面的class有依赖），此时除了war外，再打包出一个jar包供小命令用是个不错的选择。
+
+通过build阶段的多个plugin，可以打出多种格式的包。
+
 * 常用的maven插件
 ** maven-compiler-plugin 插件
 编译插件，配置编译选项
@@ -174,14 +179,76 @@ howto/
 ** maven-war-plugin
 打war包插件，配置打包选项
 
+** maven-jar-plugin
+打jar包插件，不包含依赖
+#+BEGIN_SRC xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-jar-plugin</artifactId>
+  <version>2.6</version>
+  <executions>
+    <execution>
+      <id>make-a-jar</id>
+      <phase>package</phase>
+      <goals>
+        <goal>jar</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+#+END_SRC
+
+** maven-dependency-plugin
+提取所有的依赖
+#+BEGIN_SRC xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-dependency-plugin</artifactId>
+  <version>2.6</version>
+  <executions>
+    <execution>
+      <id>copy</id>
+      <phase>package</phase>
+      <goals>
+        <goal>copy-dependencies</goal>
+      </goals>
+      <configuration>
+        <outputDirectory>${project.build.directory}/lib</outputDirectory>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+#+END_SRC
+
 ** maven-assembly-plugin
-打独立运行的jar包
+打独立运行的jar包，build-plugins段
+#+BEGIN_SRC xml
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-assembly-plugin</artifactId>
+  <version>2.6</version>
+  <configuration>
+    <descriptorRefs>
+      <descriptorRef>jar-with-dependencies</descriptorRef>
+    </descriptorRefs>
+  </configuration>
+  <executions>
+    <execution>
+      <id>make-a-assembly</id>
+      <phase>package</phase>
+      <goals>
+        <goal>single</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+#+END_SRC
 
 ** jetty-maven-plugin
-jetty插件，通过 mvn jetty:run 运行war包
+jetty插件，通过 mvn jetty:run 运行war包，查看 [[样板 pom.xml]]
 
 ** maven-pmd-plugin
-源码分析插件，发现隐藏的bug
+源码分析插件，发现隐藏的bug，参考 [[样板 pom.xml]]
 
 ** findbugs-maven-plugin
-代码静态分析，发现隐藏的bug
+代码静态分析，发现隐藏的bug，参考 [[样板 pom.xml]]
