@@ -1,0 +1,67 @@
+#+TITLE: 攻击方式简述
+#+AUTHOR: zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+本文是学习各种攻击方式、攻击原理、预防方法所做的笔记，主要内容来自wikipedia，以及wikipedia的参考资料。攻击的方式和花样很多，但只要程序员掌握了很简单的基础知识，80%的攻击是可以轻松防御的。
+
+* 跨站伪造请求 CSRF
+=CSRF= 是 =Cross-site request forge= 的简称，又叫 =XSRF= 。它利用了站点对用户浏览器的信任（也就是对Session的信任，因此也叫session-riding）。它通常诱导用户点击某个 /不明链接/ ，或者打开某个可以 /自动触发不明链接请求/ 的网站，模拟用户发出请求，因为这个请求是浏览器发出的，又有用户的Session，除了这个请求不是 /用户的本意/ ，是被欺骗发出的，它和真实的请求几乎没有区别（没有Refer或者Refer是其它网站的），服务端并不能区分。
+
+** 攻击案例
+*** 诱骗受害者打开链接
+考虑一个银行转账请求 ~GET https://bank.com/transfer?toAccount=31415926&money=1000~ ，如果是我点击银行网页的转账按钮，银行网页发出这个请求，那就是合法请求，我要向账号31415926转账1000块。可是如果我收到邮件，邮件里面有文字为 =尼斯湖水怪= 的链接，链接的真实内容是上面的转账请求。受好奇心驱使，我点了链接，默认会唤起浏览器打开，假设此时我和银行的session还没有到期，那么一次转账发生了。对银行来说，这两次请求没有区别，都是浏览器发起的，Session都有效。
+
+*** 诱骗用户打开恶意网站
+假设给家中路由器添加用户的的请求是 ~POST http://192.168.1.2/addUser user=hack&password=123~ ，因为这个是POST请求，浏览器直接打开无效，所以攻击者在恶意网站的页面中添加了一个自动提交的表单，当我打开恶意网站时，表单自动提交，一个hack用户被添加到了我的路由器中。同样的，路由器区分不出这个请求是我有意发出的，还是攻击者模拟我恶意发出的。
+
+** 和XSS的重要不同
+上面的恶意网站无法用AJAX请求发出POST，只能用自动提交的表单，原因在于浏览器的同源策略（SOP），AJAX只能向*和本页面同域名*的链接发起请求，向路由器添加用户请求的域名和恶意网站所在的域名不同。但表单提交没有这个限制。如果是XSS，它发生在路由器所在的页面，所以没有SOP的限制，可以用AJAX。
+
+** HTTP方法和CSRF
+*** GET方法
+GET请求是最容易被CSRF的，只要诱骗受害者点击链接，攻击就发生了。想想是不是很可怕。其实不尽然。根据HTTP标准，GET方法应该是无副作用的，或者说是只读的，在[[诱骗受害者打开链接][ 案例一]] 中，GET方法有转账的副作用，如果用POST方法，攻击就没法发生。GET请求如此容易触发，会不会涉及到隐私泄露呢？比如盗取银行卡号。这涉及到CSRF的一个 [[CSRF的限制][限制]]，通常而言，GET不会泄露隐私。
+
+*** POST方法
+1. 如果POST的数据是querystring的形式 user=hack&password=123，那么很容易用表单模拟POST攻击。
+2. 如果POST的数据是JSON或者XML，必须借助AJAX，表单无法模拟出JSON和XML，而AJAX受SOP的限制，没法使用。虽然可以设置表单的 ~ENCTYPE~ 为 ~text/plan~ 发送任意数据（JSON，XML）等，但只要服务端检查下 ~Content-Type~ 就可以轻松把非法请求识别出来。
+
+*** PUT DELETE 方法
+只能用AJAX发起，无法发起CSRF攻击，很安全。
+
+** CSRF的限制
+CSRF是一种盲攻击，如果CSRF请求GET出了数据，只能显示在用户的浏览器上， *攻击者是看不到的* 。例如，我被诱骗点击了获取我银行卡号的链接，银行卡号也只能出现在我的浏览器上，攻击者啥也看不到。模拟GET请求的方法很多，例如IMG的src属性，SCRIPT的src属性等，这些数据可以被读取，但却无法传递给攻击者。有一种情况除外，SCRIPT返回的是*JSONP* （jsonp({"blankNo": 31415926});）或者*JS变量赋值* （data = {"blankNo": 31415926};)，而不是纯的JSON数据或者Javascript代码，此时攻击者可以用JS代码获取GET的数据。
+
+** 防御CSRF
+*** 重新认证或者验证码
+碰到重要敏感信息，使用重新认证或者验证码的方式。要求用户重新输入密码，而不是依赖已有的Session，提高安全性。验证码则可以简单防止表单自动提交。
+这种方式提高了安全性，但是降低了易用性，适用于重要且敏感信息。例如银行转账操作，必须输入验证码和再次输入密码。
+
+*** 表单隐藏字段
+每次提交的表单包含了一个隐藏字段，提交到服务端后验证隐藏字段的正确性。因为CSRF发出的请求，没法获取隐藏字段的key-value，所以请求失效。例如 ~<input type="hidden" name="csrfTokenName" value="359023572" /><input type="hidden" name="csrfTokenValue" value="KbyUmhTLMpYj7CD2di7JKP1P3qmLlkPt" />~ ，每次检验csrfTokenName和crsfTokenValue对儿是否正确。这种方式的缺陷是，前端页面是动态生成的，前后端分离起来比较麻烦。
+
+*** 利用Cookie
+根据Cookie的安全限制，只能被*相同域* （域名相同或者子域）的脚本读取，可以在Cookie中设置 ~Set-Cookie: Csrf-token=i8XNjC4b8KVok4uw5RftR38Wgp2BFwql~ ，Cookie一定不能是HttpOnly的。每次请求时，JS读取Cookie，把它的值放置到请求*Header*中 ~X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql~ 。因为CSRF发出的请求，无法读取Cookie，所以请求失败。这种方式的缺陷（特点），必须借助AJAX才能发起请求。
+
+也有把Csrf-token放到请求的querystring中，这个也可以。但是安全性不如Header，因为前者就算Csrf-Token被猜出来也没用，因为只能借助AJAX才能发请求，而AJAX发CSRF没用。
+
+后两种方法，得到很多服务端框架（Spring）和客户端框架的支持（AnjularJS）的支持。
+
+* 移动时代
+** 移动时代更多使用APP
+** DNS劫持和代码注入
+
+* 安全总结
+** 使用 HTTPS
+防止DNS劫持，防止窃听
+
+** 敏感且重要的数据
+读取或修改这些数据时，使用验证码，重新认证，两步验证等保护数据的措施
+
+** 使用正确的HTTP方法
+该使用POST，PUT，DELETE的地方，不用使用GET，它们不仅让请求更符合语义，也更安全。
+
+** 检查Content-Type
+如果希望请求是JSON数据，那么要求Content-Type必须是~application/json~ 。
+
+** 谨慎使用 JSONP
+JSONP是用来突破SOP的，SOP是浏览器的安全限制，打破限制的同时，也打破了安全的大门。

@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>攻击方式简述</title>
+<!-- 2016-03-08 二 12:04 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">攻击方式简述</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. 跨站伪造请求 CSRF</a>
+<ul>
+<li><a href="#sec-1-1">1.1. 攻击案例</a>
+<ul>
+<li><a href="#sec-1-1-1">1.1.1. 诱骗受害者打开链接</a></li>
+<li><a href="#sec-1-1-2">1.1.2. 诱骗用户打开恶意网站</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-2">1.2. 和XSS的重要不同</a></li>
+<li><a href="#sec-1-3">1.3. HTTP方法和CSRF</a>
+<ul>
+<li><a href="#sec-1-3-1">1.3.1. GET方法</a></li>
+<li><a href="#sec-1-3-2">1.3.2. POST方法</a></li>
+<li><a href="#sec-1-3-3">1.3.3. PUT DELETE 方法</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-4">1.4. CSRF的限制</a></li>
+<li><a href="#sec-1-5">1.5. 防御CSRF</a>
+<ul>
+<li><a href="#sec-1-5-1">1.5.1. 重新认证或者验证码</a></li>
+<li><a href="#sec-1-5-2">1.5.2. 表单隐藏字段</a></li>
+<li><a href="#sec-1-5-3">1.5.3. 利用Cookie</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-2">2. 移动时代</a>
+<ul>
+<li><a href="#sec-2-1">2.1. 移动时代更多使用APP</a></li>
+<li><a href="#sec-2-2">2.2. DNS劫持和代码注入</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. 安全总结</a>
+<ul>
+<li><a href="#sec-3-1">3.1. 使用 HTTPS</a></li>
+<li><a href="#sec-3-2">3.2. 敏感且重要的数据</a></li>
+<li><a href="#sec-3-3">3.3. 使用正确的HTTP方法</a></li>
+<li><a href="#sec-3-4">3.4. 检查Content-Type</a></li>
+<li><a href="#sec-3-5">3.5. 谨慎使用 JSONP</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+本文是学习各种攻击方式、攻击原理、预防方法所做的笔记，主要内容来自wikipedia，以及wikipedia的参考资料。攻击的方式和花样很多，但只要程序员掌握了很简单的基础知识，80%的攻击是可以轻松防御的。
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 跨站伪造请求 CSRF</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<code>CSRF</code> 是 <code>Cross-site request forge</code> 的简称，又叫 <code>XSRF</code> 。它利用了站点对用户浏览器的信任（也就是对Session的信任，因此也叫session-riding）。它通常诱导用户点击某个 <i>不明链接</i> ，或者打开某个可以 <i>自动触发不明链接请求</i> 的网站，模拟用户发出请求，因为这个请求是浏览器发出的，又有用户的Session，除了这个请求不是 <i>用户的本意</i> ，是被欺骗发出的，它和真实的请求几乎没有区别（没有Refer或者Refer是其它网站的），服务端并不能区分。
+</p>
+</div>
+
+<div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 攻击案例</h3>
+<div class="outline-text-3" id="text-1-1">
+</div><div id="outline-container-sec-1-1-1" class="outline-4">
+<h4 id="sec-1-1-1"><span class="section-number-4">1.1.1</span> 诱骗受害者打开链接</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<p>
+考虑一个银行转账请求 <code>GET https://bank.com/transfer?toAccount=31415926&amp;money=1000</code> ，如果是我点击银行网页的转账按钮，银行网页发出这个请求，那就是合法请求，我要向账号31415926转账1000块。可是如果我收到邮件，邮件里面有文字为 <code>尼斯湖水怪</code> 的链接，链接的真实内容是上面的转账请求。受好奇心驱使，我点了链接，默认会唤起浏览器打开，假设此时我和银行的session还没有到期，那么一次转账发生了。对银行来说，这两次请求没有区别，都是浏览器发起的，Session都有效。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-1-2" class="outline-4">
+<h4 id="sec-1-1-2"><span class="section-number-4">1.1.2</span> 诱骗用户打开恶意网站</h4>
+<div class="outline-text-4" id="text-1-1-2">
+<p>
+假设给家中路由器添加用户的的请求是 <code>POST http://192.168.1.2/addUser user=hack&amp;password=123</code> ，因为这个是POST请求，浏览器直接打开无效，所以攻击者在恶意网站的页面中添加了一个自动提交的表单，当我打开恶意网站时，表单自动提交，一个hack用户被添加到了我的路由器中。同样的，路由器区分不出这个请求是我有意发出的，还是攻击者模拟我恶意发出的。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 和XSS的重要不同</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+上面的恶意网站无法用AJAX请求发出POST，只能用自动提交的表单，原因在于浏览器的同源策略（SOP），AJAX只能向<b>和本页面同域名</b>的链接发起请求，向路由器添加用户请求的域名和恶意网站所在的域名不同。但表单提交没有这个限制。如果是XSS，它发生在路由器所在的页面，所以没有SOP的限制，可以用AJAX。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> HTTP方法和CSRF</h3>
+<div class="outline-text-3" id="text-1-3">
+</div><div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1"><span class="section-number-4">1.3.1</span> GET方法</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<p>
+GET请求是最容易被CSRF的，只要诱骗受害者点击链接，攻击就发生了。想想是不是很可怕。其实不尽然。根据HTTP标准，GET方法应该是无副作用的，或者说是只读的，在<a href="#sec-1-1-1"> 案例一</a> 中，GET方法有转账的副作用，如果用POST方法，攻击就没法发生。GET请求如此容易触发，会不会涉及到隐私泄露呢？比如盗取银行卡号。这涉及到CSRF的一个 <a href="#sec-1-4">限制</a>，通常而言，GET不会泄露隐私。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2"><span class="section-number-4">1.3.2</span> POST方法</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<ol class="org-ol">
+<li>如果POST的数据是querystring的形式 user=hack&amp;password=123，那么很容易用表单模拟POST攻击。
+</li>
+<li>如果POST的数据是JSON或者XML，必须借助AJAX，表单无法模拟出JSON和XML，而AJAX受SOP的限制，没法使用。虽然可以设置表单的 <code>ENCTYPE</code> 为 <code>text/plan</code> 发送任意数据（JSON，XML）等，但只要服务端检查下 <code>Content-Type</code> 就可以轻松把非法请求识别出来。
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3-3" class="outline-4">
+<h4 id="sec-1-3-3"><span class="section-number-4">1.3.3</span> PUT DELETE 方法</h4>
+<div class="outline-text-4" id="text-1-3-3">
+<p>
+只能用AJAX发起，无法发起CSRF攻击，很安全。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> CSRF的限制</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+CSRF是一种盲攻击，如果CSRF请求GET出了数据，只能显示在用户的浏览器上， <b>攻击者是看不到的</b> 。例如，我被诱骗点击了获取我银行卡号的链接，银行卡号也只能出现在我的浏览器上，攻击者啥也看不到。模拟GET请求的方法很多，例如IMG的src属性，SCRIPT的src属性等，这些数据可以被读取，但却无法传递给攻击者。有一种情况除外，SCRIPT返回的是<b>JSONP</b> （jsonp({"blankNo": 31415926});）或者<b>JS变量赋值</b> （data = {"blankNo": 31415926};)，而不是纯的JSON数据或者Javascript代码，此时攻击者可以用JS代码获取GET的数据。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5" class="outline-3">
+<h3 id="sec-1-5"><span class="section-number-3">1.5</span> 防御CSRF</h3>
+<div class="outline-text-3" id="text-1-5">
+</div><div id="outline-container-sec-1-5-1" class="outline-4">
+<h4 id="sec-1-5-1"><span class="section-number-4">1.5.1</span> 重新认证或者验证码</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<p>
+碰到重要敏感信息，使用重新认证或者验证码的方式。要求用户重新输入密码，而不是依赖已有的Session，提高安全性。验证码则可以简单防止表单自动提交。
+这种方式提高了安全性，但是降低了易用性，适用于重要且敏感信息。例如银行转账操作，必须输入验证码和再次输入密码。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5-2" class="outline-4">
+<h4 id="sec-1-5-2"><span class="section-number-4">1.5.2</span> 表单隐藏字段</h4>
+<div class="outline-text-4" id="text-1-5-2">
+<p>
+每次提交的表单包含了一个隐藏字段，提交到服务端后验证隐藏字段的正确性。因为CSRF发出的请求，没法获取隐藏字段的key-value，所以请求失效。例如 <code>&lt;input type="hidden" name="csrfTokenName" value="359023572" /&gt;&lt;input type="hidden" name="csrfTokenValue" value="KbyUmhTLMpYj7CD2di7JKP1P3qmLlkPt" /&gt;</code> ，每次检验csrfTokenName和crsfTokenValue对儿是否正确。这种方式的缺陷是，前端页面是动态生成的，前后端分离起来比较麻烦。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-1-5-3" class="outline-4">
+<h4 id="sec-1-5-3"><span class="section-number-4">1.5.3</span> 利用Cookie</h4>
+<div class="outline-text-4" id="text-1-5-3">
+<p>
+根据Cookie的安全限制，只能被<b>相同域</b> （域名相同或者子域）的脚本读取，可以在Cookie中设置 <code>Set-Cookie: Csrf-token=i8XNjC4b8KVok4uw5RftR38Wgp2BFwql</code> ，Cookie一定不能是HttpOnly的。每次请求时，JS读取Cookie，把它的值放置到请求<b>Header</b>中 <code>X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql</code> 。因为CSRF发出的请求，无法读取Cookie，所以请求失败。这种方式的缺陷（特点），必须借助AJAX才能发起请求。
+</p>
+
+<p>
+也有把Csrf-token放到请求的querystring中，这个也可以。但是安全性不如Header，因为前者就算Csrf-Token被猜出来也没用，因为只能借助AJAX才能发请求，而AJAX发CSRF没用。
+</p>
+
+<p>
+后两种方法，得到很多服务端框架（Spring）和客户端框架的支持（AnjularJS）的支持。
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 移动时代</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 移动时代更多使用APP</h3>
+</div>
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> DNS劫持和代码注入</h3>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 安全总结</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 使用 HTTPS</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+防止DNS劫持，防止窃听
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> 敏感且重要的数据</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+读取或修改这些数据时，使用验证码，重新认证，两步验证等保护数据的措施
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> 使用正确的HTTP方法</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+该使用POST，PUT，DELETE的地方，不用使用GET，它们不仅让请求更符合语义，也更安全。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> 检查Content-Type</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+如果希望请求是JSON数据，那么要求Content-Type必须是<code>application/json</code> 。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-5" class="outline-3">
+<h3 id="sec-3-5"><span class="section-number-3">3.5</span> 谨慎使用 JSONP</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+JSONP是用来突破SOP的，SOP是浏览器的安全限制，打破限制的同时，也打破了安全的大门。
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2016-03-08 二 12:04</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
