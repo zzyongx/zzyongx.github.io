@@ -2,6 +2,8 @@
 #+AUTHOR: zhengzhiyong
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 
+攻击分两种，一种是DOS，剩下的是另一种。前者简单粗暴，且没有有效防御措施，但通常损人不利己。后者花样繁多，用于获取、篡改敏感信息，获取利益。
+
 本文是学习各种攻击方式、攻击原理、预防方法所做的笔记，主要内容来自wikipedia，以及wikipedia的参考资料。攻击的方式和花样很多，但只要程序员掌握了很简单的基础知识，80%的攻击是可以轻松防御的。
 
 * 跨站伪造请求 CSRF <<CSRF>>
@@ -49,10 +51,11 @@ CSRF是一种盲攻击，如果CSRF请求GET出了数据，只能显示在用户
 以上是 [[https://en.wikipedia.org/wiki/Cross-site_request_forgery][Cross-site request forgery]] 的阅读笔记。
 
 * 同源策略 SOP <<SOP>>
-[[CSRF][CSRF]] 和 [[XSS][XSS]] 多次提到SOP Same-origin policy，这是浏览器安全的基石。主要涉及到AJAX、DOM、Cookie等，非同源操作受到严格的限制。
+[[CSRF][CSRF]] 和 [[XSS][XSS]] 多次提到SOP Same-origin policy，这是浏览器安全的基石。主要涉及到AJAX、DOM、Cookie等，非同源操作受到严格的限制。很多攻击都跟绕开SOP有关。
 
 ** 同源的含义
-同源指的是URL中的协议~HTTP/HTTPS~ 、域名、端口，三部分完全一致，才叫同源。同源策略是建议的，不是绝对的，例如IE就没有考虑端口部分。考虑URL 
+同源指的是URL中的协议 ~HTTP/HTTPS~ 、域名、端口，三部分完全一致，才叫同源。同源策略是建议的，不是绝对的，例如IE就没有考虑端口部分。考虑URL
+
 http://www.example.com/ ，下面的URL和它全部不同源: 协议、域名、端口总有一个不一样。
 - http://www.example.com:81
 - https://www.example.com
@@ -61,7 +64,8 @@ http://www.example.com/ ，下面的URL和它全部不同源: 协议、域名、
 - http://v2.www.example.com
 
 ** 同源的影响 TODO
-同源对AJAX、DOM、Cookie的限制，并不一样。例如子域可以设置父域的Cookie，www.example.com 可以设置Cookie到example.com，但无法操作 www.example.org 的。通常要求至少顶级域（tld）是相同的，这里example.com 和 example.org 是不同的顶级域。
+同源对AJAX、DOM、Cookie的限制，并不一样。
+例如子域可以设置父域的Cookie，www.example.com 可以设置Cookie到example.com，但无法操作 a.www.example.com 和 www.example.org 的。前者不是父域，后者tld不同。
 
 ** 放松同源的要求
 同源策略可能太严格了，不利于应用开发，有一些方法可以放松或者绕开SOP，但是牢记，放松或者绕开意味着可能因为引入安全隐患。
@@ -79,6 +83,24 @@ CORS <<CORS>> 让AJAX操作可以让开SOP，需要服务端配置。这个方�
 可以访问任何地址。同样方便了XSS攻击者。
 
 以上是 [[https://en.wikipedia.org/wiki/Same-origin_policy][Same-origin policy]] 的阅读笔记。
+
+* DNS rebinding
+把自己的DNS域名绑定到别人的IP，通常没什么用处，这是给她人做嫁衣。但是，考虑Google不小心把自己的域名绑定到了花旗银行的网站上，无数访问Google的流量被转移到花旗银行，后者瞬间就得崩溃。这个和~DNS rebinding~ 无关，想这么干的，自己的域名本身应该也没多大访问量。
+
+** 攻击过程
+1. 注册自己的域名，假设是 attacker.com，通过自己的DNS服务器解析域名（方便更改域名指向），TTL设置很短（减短DNS缓存时间）。attacker.com 对应的服务器上放置恶意代码，准备就绪。
+2. 诱拐用户（不一定是受害者，用户只是无意中充当了帮凶）打开 attacker.com，attacker.com 打开完毕后，通知服务端，然后稍微休息一下等待TTL过去。
+3. 再次请求 attacker.com/DETECT，因为TTL过去了，所以要重新解析域名，此时DNS服务器返回“要攻击的地址”（DNS rebinding），因为 attacker.com 域名自身没变，所以AJAX可以发起任何请求，获取敏感数据。
+4. 通过另外的域名，比如 save.attacker.com 把获取到的数据传送回去。这个请求跨域了，但是用[[CORS][CORS]]很容易就可以跨域了。
+
+攻击发生在第3步，虽然可以攻击任意地址，但是域名是 attacker.com 获取不到任何额外的浏览器信任，只能攻击基于IP建立的信任关系，例如内网地址。很多公司内网服务放置了敏感信息，却没有用户认证。攻击并不是特别容易成功，被攻击的地址首先得有内网服务，其次URL中的DETECT必须是正确的地址。考虑到对所有用户必须先返回正确的域名解析，然后再返回用于攻击的域名解析，只能根据来源IP在两种解析间做切换，而很多公司的出口IP有限，攻击并不是很容易成功。
+
+** 防御
+1. WEB服务器必须检查Host，拒绝掉Host不对的请求。但很多WEB服务器的默认配置都不检查Host。
+2. 公司最外层的Cache DNS，丢弃掉返回私网地址的域名解析。
+3. HTTPS 无疑是极好的，但是私网环境用HTTPS无疑太奢侈了。
+
+以上是 [[https://en.wikipedia.org/wiki/DNS_rebinding][DNS rebinding]] 的阅读笔记。
 
 * 移动时代
 ** 移动时代更多使用APP

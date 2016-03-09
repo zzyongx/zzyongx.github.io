@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>WEB攻击和安全</title>
-<!-- 2016-03-09 三 13:30 -->
+<!-- 2016-03-09 三 18:40 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="zhengzhiyong" />
@@ -188,24 +188,34 @@ for the JavaScript code in this tag.
 </li>
 </ul>
 </li>
-<li><a href="#sec-3">3. 移动时代</a>
+<li><a href="#sec-3">3. DNS rebinding</a>
 <ul>
-<li><a href="#sec-3-1">3.1. 移动时代更多使用APP</a></li>
-<li><a href="#sec-3-2">3.2. DNS劫持和代码注入</a></li>
+<li><a href="#sec-3-1">3.1. 攻击过程</a></li>
+<li><a href="#sec-3-2">3.2. 防御</a></li>
 </ul>
 </li>
-<li><a href="#sec-4">4. 安全总结</a>
+<li><a href="#sec-4">4. 移动时代</a>
 <ul>
-<li><a href="#sec-4-1">4.1. 使用 HTTPS</a></li>
-<li><a href="#sec-4-2">4.2. 敏感且重要的数据</a></li>
-<li><a href="#sec-4-3">4.3. 使用正确的HTTP方法</a></li>
-<li><a href="#sec-4-4">4.4. 检查Content-Type</a></li>
-<li><a href="#sec-4-5">4.5. 谨慎使用 JSONP</a></li>
+<li><a href="#sec-4-1">4.1. 移动时代更多使用APP</a></li>
+<li><a href="#sec-4-2">4.2. DNS劫持和代码注入</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. 安全总结</a>
+<ul>
+<li><a href="#sec-5-1">5.1. 使用 HTTPS</a></li>
+<li><a href="#sec-5-2">5.2. 敏感且重要的数据</a></li>
+<li><a href="#sec-5-3">5.3. 使用正确的HTTP方法</a></li>
+<li><a href="#sec-5-4">5.4. 检查Content-Type</a></li>
+<li><a href="#sec-5-5">5.5. 谨慎使用 JSONP</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
+<p>
+攻击分两种，一种是DOS，剩下的是另一种。前者简单粗暴，且没有有效防御措施，但通常损人不利己。后者花样繁多，用于获取、篡改敏感信息，获取利益。
+</p>
+
 <p>
 本文是学习各种攻击方式、攻击原理、预防方法所做的笔记，主要内容来自wikipedia，以及wikipedia的参考资料。攻击的方式和花样很多，但只要程序员掌握了很简单的基础知识，80%的攻击是可以轻松防御的。
 </p>
@@ -341,7 +351,7 @@ CSRF是一种盲攻击，如果CSRF请求GET出了数据，只能显示在用户
 <h2 id="sec-2"><span class="section-number-2">2</span> 同源策略 SOP <a id="SOP" name="SOP"></a></h2>
 <div class="outline-text-2" id="text-2">
 <p>
-<a href="#CSRF">CSRF</a> 和 <i>XSS</i> 多次提到SOP Same-origin policy，这是浏览器安全的基石。主要涉及到AJAX、DOM、Cookie等，非同源操作受到严格的限制。
+<a href="#CSRF">CSRF</a> 和 <i>XSS</i> 多次提到SOP Same-origin policy，这是浏览器安全的基石。主要涉及到AJAX、DOM、Cookie等，非同源操作受到严格的限制。很多攻击都跟绕开SOP有关。
 </p>
 </div>
 
@@ -349,7 +359,10 @@ CSRF是一种盲攻击，如果CSRF请求GET出了数据，只能显示在用户
 <h3 id="sec-2-1"><span class="section-number-3">2.1</span> 同源的含义</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
-同源指的是URL中的协议<code>HTTP/HTTPS</code> 、域名、端口，三部分完全一致，才叫同源。同源策略是建议的，不是绝对的，例如IE就没有考虑端口部分。考虑URL 
+同源指的是URL中的协议 <code>HTTP/HTTPS</code> 、域名、端口，三部分完全一致，才叫同源。同源策略是建议的，不是绝对的，例如IE就没有考虑端口部分。考虑URL
+</p>
+
+<p>
 <a href="http://www.example.com/">http://www.example.com/</a> ，下面的URL和它全部不同源: 协议、域名、端口总有一个不一样。
 </p>
 <ul class="org-ul">
@@ -371,7 +384,8 @@ CSRF是一种盲攻击，如果CSRF请求GET出了数据，只能显示在用户
 <h3 id="sec-2-2"><span class="section-number-3">2.2</span> 同源的影响 TODO</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
-同源对AJAX、DOM、Cookie的限制，并不一样。例如子域可以设置父域的Cookie，www.example.com 可以设置Cookie到example.com，但无法操作 www.example.org 的。通常要求至少顶级域（tld）是相同的，这里example.com 和 example.org 是不同的顶级域。
+同源对AJAX、DOM、Cookie的限制，并不一样。
+例如子域可以设置父域的Cookie，www.example.com 可以设置Cookie到example.com，但无法操作 a.www.example.com 和 www.example.org 的。前者不是父域，后者tld不同。
 </p>
 </div>
 </div>
@@ -427,58 +441,105 @@ CORS <a id="CORS" name="CORS"></a> 让AJAX操作可以让开SOP，需要服务�
 </div>
 
 <div id="outline-container-sec-3" class="outline-2">
-<h2 id="sec-3"><span class="section-number-2">3</span> 移动时代</h2>
+<h2 id="sec-3"><span class="section-number-2">3</span> DNS rebinding</h2>
 <div class="outline-text-2" id="text-3">
-</div><div id="outline-container-sec-3-1" class="outline-3">
-<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 移动时代更多使用APP</h3>
+<p>
+把自己的DNS域名绑定到别人的IP，通常没什么用处，这是给她人做嫁衣。但是，考虑Google不小心把自己的域名绑定到了花旗银行的网站上，无数访问Google的流量被转移到花旗银行，后者瞬间就得崩溃。这个和<code>DNS rebinding</code> 无关，想这么干的，自己的域名本身应该也没多大访问量。
+</p>
 </div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 攻击过程</h3>
+<div class="outline-text-3" id="text-3-1">
+<ol class="org-ol">
+<li>注册自己的域名，假设是 attacker.com，通过自己的DNS服务器解析域名（方便更改域名指向），TTL设置很短（减短DNS缓存时间）。attacker.com 对应的服务器上放置恶意代码，准备就绪。
+</li>
+<li>诱拐用户（不一定是受害者，用户只是无意中充当了帮凶）打开 attacker.com，attacker.com 打开完毕后，通知服务端，然后稍微休息一下等待TTL过去。
+</li>
+<li>再次请求 attacker.com/DETECT，因为TTL过去了，所以要重新解析域名，此时DNS服务器返回“要攻击的地址”（DNS rebinding），因为 attacker.com 域名自身没变，所以AJAX可以发起任何请求，获取敏感数据。
+</li>
+<li>通过另外的域名，比如 save.attacker.com 把获取到的数据传送回去。这个请求跨域了，但是用<a href="#CORS">CORS</a>很容易就可以跨域了。
+</li>
+</ol>
+
+<p>
+攻击发生在第3步，虽然可以攻击任意地址，但是域名是 attacker.com 获取不到任何额外的浏览器信任，只能攻击基于IP建立的信任关系，例如内网地址。很多公司内网服务放置了敏感信息，却没有用户认证。攻击并不是特别容易成功，被攻击的地址首先得有内网服务，其次URL中的DETECT必须是正确的地址。考虑到对所有用户必须先返回正确的域名解析，然后再返回用于攻击的域名解析，只能根据来源IP在两种解析间做切换，而很多公司的出口IP有限，攻击并不是很容易成功。
+</p>
+</div>
+</div>
+
 <div id="outline-container-sec-3-2" class="outline-3">
-<h3 id="sec-3-2"><span class="section-number-3">3.2</span> DNS劫持和代码注入</h3>
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> 防御</h3>
+<div class="outline-text-3" id="text-3-2">
+<ol class="org-ol">
+<li>WEB服务器必须检查Host，拒绝掉Host不对的请求。但很多WEB服务器的默认配置都不检查Host。
+</li>
+<li>公司最外层的Cache DNS，丢弃掉返回私网地址的域名解析。
+</li>
+<li>HTTPS 无疑是极好的，但是私网环境用HTTPS无疑太奢侈了。
+</li>
+</ol>
+
+<p>
+以上是 <a href="https://en.wikipedia.org/wiki/DNS_rebinding">DNS rebinding</a> 的阅读笔记。
+</p>
+</div>
 </div>
 </div>
 
 <div id="outline-container-sec-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> 安全总结</h2>
+<h2 id="sec-4"><span class="section-number-2">4</span> 移动时代</h2>
 <div class="outline-text-2" id="text-4">
 </div><div id="outline-container-sec-4-1" class="outline-3">
-<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 使用 HTTPS</h3>
-<div class="outline-text-3" id="text-4-1">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 移动时代更多使用APP</h3>
+</div>
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> DNS劫持和代码注入</h3>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 安全总结</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 使用 HTTPS</h3>
+<div class="outline-text-3" id="text-5-1">
 <p>
 防止DNS劫持，防止窃听
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-4-2" class="outline-3">
-<h3 id="sec-4-2"><span class="section-number-3">4.2</span> 敏感且重要的数据</h3>
-<div class="outline-text-3" id="text-4-2">
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> 敏感且重要的数据</h3>
+<div class="outline-text-3" id="text-5-2">
 <p>
 读取或修改这些数据时，使用验证码，重新认证，两步验证等保护数据的措施
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-4-3" class="outline-3">
-<h3 id="sec-4-3"><span class="section-number-3">4.3</span> 使用正确的HTTP方法</h3>
-<div class="outline-text-3" id="text-4-3">
+<div id="outline-container-sec-5-3" class="outline-3">
+<h3 id="sec-5-3"><span class="section-number-3">5.3</span> 使用正确的HTTP方法</h3>
+<div class="outline-text-3" id="text-5-3">
 <p>
 该使用POST，PUT，DELETE的地方，不用使用GET，它们不仅让请求更符合语义，也更安全。
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-4-4" class="outline-3">
-<h3 id="sec-4-4"><span class="section-number-3">4.4</span> 检查Content-Type</h3>
-<div class="outline-text-3" id="text-4-4">
+<div id="outline-container-sec-5-4" class="outline-3">
+<h3 id="sec-5-4"><span class="section-number-3">5.4</span> 检查Content-Type</h3>
+<div class="outline-text-3" id="text-5-4">
 <p>
 如果希望请求是JSON数据，那么要求Content-Type必须是<code>application/json</code> 。
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-4-5" class="outline-3">
-<h3 id="sec-4-5"><span class="section-number-3">4.5</span> 谨慎使用 JSONP</h3>
-<div class="outline-text-3" id="text-4-5">
+<div id="outline-container-sec-5-5" class="outline-3">
+<h3 id="sec-5-5"><span class="section-number-3">5.5</span> 谨慎使用 JSONP</h3>
+<div class="outline-text-3" id="text-5-5">
 <p>
 JSONP是用来突破SOP的，SOP是浏览器的安全限制，打破限制的同时，也打破了安全的大门。
 </p>
@@ -488,7 +549,7 @@ JSONP是用来突破SOP的，SOP是浏览器的安全限制，打破限制的同
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2016-03-09 三 13:30</p>
+<p class="date">Created: 2016-03-09 三 18:40</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
