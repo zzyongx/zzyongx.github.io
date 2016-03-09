@@ -1,10 +1,10 @@
-#+TITLE: 攻击方式简述
+#+TITLE: WEB攻击和安全
 #+AUTHOR: zhengzhiyong
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 
 本文是学习各种攻击方式、攻击原理、预防方法所做的笔记，主要内容来自wikipedia，以及wikipedia的参考资料。攻击的方式和花样很多，但只要程序员掌握了很简单的基础知识，80%的攻击是可以轻松防御的。
 
-* 跨站伪造请求 CSRF
+* 跨站伪造请求 CSRF <<CSRF>>
 =CSRF= 是 =Cross-site request forge= 的简称，又叫 =XSRF= 。它利用了站点对用户浏览器的信任（也就是对Session的信任，因此也叫session-riding）。它通常诱导用户点击某个 /不明链接/ ，或者打开某个可以 /自动触发不明链接请求/ 的网站，模拟用户发出请求，因为这个请求是浏览器发出的，又有用户的Session，除了这个请求不是 /用户的本意/ ，是被欺骗发出的，它和真实的请求几乎没有区别（没有Refer或者Refer是其它网站的），服务端并不能区分。
 
 ** 攻击案例
@@ -15,7 +15,7 @@
 假设给家中路由器添加用户的的请求是 ~POST http://192.168.1.2/addUser user=hack&password=123~ ，因为这个是POST请求，浏览器直接打开无效，所以攻击者在恶意网站的页面中添加了一个自动提交的表单，当我打开恶意网站时，表单自动提交，一个hack用户被添加到了我的路由器中。同样的，路由器区分不出这个请求是我有意发出的，还是攻击者模拟我恶意发出的。
 
 ** 和XSS的重要不同
-上面的恶意网站无法用AJAX请求发出POST，只能用自动提交的表单，原因在于浏览器的同源策略（SOP），AJAX只能向*和本页面同域名*的链接发起请求，向路由器添加用户请求的域名和恶意网站所在的域名不同。但表单提交没有这个限制。如果是XSS，它发生在路由器所在的页面，所以没有SOP的限制，可以用AJAX。
+上面的恶意网站无法用AJAX请求发出POST，只能用自动提交的表单，原因在于浏览器的同源策略（[[SOP][SOP]]），AJAX只能向*和本页面同域名*的链接发起请求，向路由器添加用户请求的域名和恶意网站所在的域名不同。但表单提交没有这个限制。如果是XSS，它发生在路由器所在的页面，所以没有SOP的限制，可以用AJAX。
 
 ** HTTP方法和CSRF
 *** GET方法
@@ -45,6 +45,40 @@ CSRF是一种盲攻击，如果CSRF请求GET出了数据，只能显示在用户
 也有把Csrf-token放到请求的querystring中，这个也可以。但是安全性不如Header，因为前者就算Csrf-Token被猜出来也没用，因为只能借助AJAX才能发请求，而AJAX发CSRF没用。
 
 后两种方法，得到很多服务端框架（Spring）和客户端框架的支持（AnjularJS）的支持。
+
+以上是 [[https://en.wikipedia.org/wiki/Cross-site_request_forgery][Cross-site request forgery]] 的阅读笔记。
+
+* 同源策略 SOP <<SOP>>
+[[CSRF][CSRF]] 和 [[XSS][XSS]] 多次提到SOP Same-origin policy，这是浏览器安全的基石。主要涉及到AJAX、DOM、Cookie等，非同源操作受到严格的限制。
+
+** 同源的含义
+同源指的是URL中的协议~HTTP/HTTPS~ 、域名、端口，三部分完全一致，才叫同源。同源策略是建议的，不是绝对的，例如IE就没有考虑端口部分。考虑URL 
+http://www.example.com/ ，下面的URL和它全部不同源: 协议、域名、端口总有一个不一样。
+- http://www.example.com:81
+- https://www.example.com
+- http://en.example.com
+- http://example.com
+- http://v2.www.example.com
+
+** 同源的影响 TODO
+同源对AJAX、DOM、Cookie的限制，并不一样。例如子域可以设置父域的Cookie，www.example.com 可以设置Cookie到example.com，但无法操作 www.example.org 的。通常要求至少顶级域（tld）是相同的，这里example.com 和 example.org 是不同的顶级域。
+
+** 放松同源的要求
+同源策略可能太严格了，不利于应用开发，有一些方法可以放松或者绕开SOP，但是牢记，放松或者绕开意味着可能因为引入安全隐患。
+
+*** document.domain
+两个window或者frame设置~document.domain~ 相同，两个window就同源了。但是只能在同一个tld下，www.example.com 可以设置 document.domain 为 example.com，肯定不能设置为 example.org。不然就乱套了。
+
+*** CORS
+CORS <<CORS>> 让AJAX操作可以让开SOP，需要服务端配置。这个方便了XSS攻击者。
+
+*** JSONP
+可以访问任意的URL，但是只能GET，这个是它的实现原理决定的。
+
+*** WebSockets
+可以访问任何地址。同样方便了XSS攻击者。
+
+以上是 [[https://en.wikipedia.org/wiki/Same-origin_policy][Same-origin policy]] 的阅读笔记。
 
 * 移动时代
 ** 移动时代更多使用APP
