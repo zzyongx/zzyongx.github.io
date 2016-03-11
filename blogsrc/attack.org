@@ -102,13 +102,119 @@ CORS <<CORS>> 让AJAX操作可以让开SOP，需要服务端配置。这个方�
 
 以上是 [[https://en.wikipedia.org/wiki/DNS_rebinding][DNS rebinding]] 的阅读笔记。
 
+* DNS spoofing
+又叫 DNS cache poisoning，主要目的是污染CacheDNS的域名指向，通常把域名指向为恶意的IP，用来网络钓鱼。因为DNS的TTL，一次成功攻击，会影响很多机器。
+例如 www.sogou.com 本来指向 w.x.y.z，通过污染CacheDNS，www.sogou.com 指向了 a.b.c.d，这个机器黑客控制的，当用户访问sogou的时候会访问 a.b.c.d，这时候黑客可以做很多事情。
+
+** DNS基本知识
+*** DNS解析流程
+以~www.sogou.com~ 为例，实际上是解析~www.sogou.com.~ 注意最后的~.~ ，解析流程是这样的：
+1. 查询CacheDns，缓存没命中，CacheDNS 向13台 RootServer（中的一台，它们的IP是内置到DNS中的）查询 ~com.~ ，RootServer返回gTLDServer的IP。
+2. CacheDns 向 gTLDServer 查询 ~sogou.com.~ ，gTLDServer返回 ~sogou.com.~ 的sogou的权威DNS的IP。
+4. sogou的权威DNS返回www.sogou.com对应的IP。
+
+使用 ~dig +trace www.sogou.com~ 可以查看DNS的解析流程，这里可能是多级CacheDNS，并没有真的查询 ROOT和gTLD服务器。
+
+#+BEGIN_EXAMPLE 
+# dig +trace www.sogou.com
+
+; <<>> DiG 9.7.3-P3-RedHat-9.7.3-8.P3.el6_2.3 <<>> +trace www.sogou.com
+;; global options: +cmd
+.                       518400  IN      NS      G.ROOT-SERVERS.NET.
+.                       518400  IN      NS      E.ROOT-SERVERS.NET.
+.                       518400  IN      NS      K.ROOT-SERVERS.NET.
+.                       518400  IN      NS      C.ROOT-SERVERS.NET.
+.                       518400  IN      NS      I.ROOT-SERVERS.NET.
+.                       518400  IN      NS      L.ROOT-SERVERS.NET.
+.                       518400  IN      NS      J.ROOT-SERVERS.NET.
+.                       518400  IN      NS      A.ROOT-SERVERS.NET.
+.                       518400  IN      NS      F.ROOT-SERVERS.NET.
+.                       518400  IN      NS      H.ROOT-SERVERS.NET.
+.                       518400  IN      NS      M.ROOT-SERVERS.NET.
+.                       518400  IN      NS      B.ROOT-SERVERS.NET.
+.                       518400  IN      NS      D.ROOT-SERVERS.NET.
+;; Received 496 bytes from 10.146.0.1#53(10.146.0.1) in 1 ms
+
+com.                    172800  IN      NS      a.gtld-servers.net.
+com.                    172800  IN      NS      b.gtld-servers.net.
+com.                    172800  IN      NS      c.gtld-servers.net.
+com.                    172800  IN      NS      d.gtld-servers.net.
+com.                    172800  IN      NS      e.gtld-servers.net.
+com.                    172800  IN      NS      f.gtld-servers.net.
+com.                    172800  IN      NS      g.gtld-servers.net.
+com.                    172800  IN      NS      h.gtld-servers.net.
+com.                    172800  IN      NS      i.gtld-servers.net.
+com.                    172800  IN      NS      j.gtld-servers.net.
+com.                    172800  IN      NS      k.gtld-servers.net.
+com.                    172800  IN      NS      l.gtld-servers.net.
+com.                    172800  IN      NS      m.gtld-servers.net.
+;; Received 491 bytes from 198.97.190.53#53(H.ROOT-SERVERS.NET) in 445 ms
+
+sogou.com.              172800  IN      NS      ns1.sogou.com.
+sogou.com.              172800  IN      NS      ns2.sogou.com.
+;; Received 99 bytes from 192.35.51.30#53(f.gtld-servers.net) in 232 ms
+
+www.sogou.com.          300     IN      CNAME   e.proxy.sogou.com.
+e.proxy.sogou.com.      300     IN      CNAME   ctc.e.proxy.sogou.com.
+ctc.e.proxy.sogou.com.  300     IN      A       106.120.188.39
+ctc.e.proxy.sogou.com.  300     IN      A       106.38.241.48
+ctc.e.proxy.sogou.com.  300     IN      A       106.38.241.37
+ctc.e.proxy.sogou.com.  300     IN      A       106.120.188.38
+sogou.com.              600     IN      NS      ns1.sogou.com.
+sogou.com.              600     IN      NS      ns2.sogou.com.
+;; Received 247 bytes from 123.126.51.23#53(ns2.sogou.com) in 2 ms
+#+END_EXAMPLE
+
+网上找到一张图片
+[[http://zzyongx.github.com/images/dns-resolve-process.jpg]]
+
+*** DNS使用UDP
+UDP是DNS的首选，UDP决定了两点：
+1. 信道没法使用SSL，UDP数据在传输中可以被篡改
+2. UDP是无连接协议，这是DNS race 攻击的前提。
+
+** 攻击方式
+*** 利用DNS软件漏洞，或者域名服务商的漏洞。
+DNS软件漏洞可遇不可求，域名服务商的漏洞，也很难寻找。如果这两种方式攻击成功，影响很大，并且这两者的漏洞，不是受害者所能控制的。受害者所能做的，是选择靠谱的域名服务商。
+百度就中招过。[[http://thenextweb.com/asia/2010/01/12/breaking-baidu-hacked-iranian/][Baidu, China's Largest Search Engine, Hacked by "Iranian Cyber Army"]]。当时把百度的域名解析到了Yahoo，Yahoo好像还拉了百度一把，又把百度的流量代理了回来，不过很快黑客就把百度的域名解析到了127.0.0.1。
+
+*** 篡改DNS返回的数据
+DNS使用UDP协议，信道不安全。但要控制网络上的交换机，然后纂改数据，我想想也挺难的。
+
+*** DNS race 攻击
+这个攻击是这样的，假设CacheDNS向上游DNS做查询
+1. CacheDNS 发请求给上游DNS，然后等待响应。
+2. 黑客模拟上游DNS给CacheDNS发响应。
+3. 上游DNS也给CacheDNS发响应。
+4. 如果CacheDNS收到了黑客发的响应，且响应正确，攻击成功。
+
+这并不简单，首先得CacheDNS正在查询某个域名，然后得知道CacheDNS的UDP端口号，当然不知道了，只好给所有端口发。其次需要知道请求中的一个随机数，这当然也不知道。最后，还得赶在真正的响应到来前让CacheDNS收到。
+唯一的好消息是端口号和随机数范围比较小，都是小于65536的数。
+
+这是UDP协议自身的弱点，也是DNS设计的缺陷。
+
+*** 误导CacheDNS
+DNS很傻很天真，别的DNS说什么，它就信什么。
+攻击者需要一个域名 subdomain.attacker.com，并且拥有个DNS服务器。
+1. 诱导人访问 subdomain.attacker.com
+2. 域名是攻击者控制的，它并不返回 subdomain.attacker.com 的IP，而是返回 attacker.example. 3600 IN NS ns.target.example. ns.target.example. IN A w.x.y.z。意思是去 ns.target.example 问 attacker.com，它知道我在那，ns.target.exmpale 的 IP是w.x.y.z。这时CacheDNS会缓存 ns.target.exmpale 的IP是 w.x.y.z，它的IP当然不是 w.x.y.z，攻击完成。
+
+感觉这个攻击比较好防御，DNS服务器可以选择不信任，而是自己去问。
+
+** 防御
+1. 使用HTTPS，防止网络钓鱼。
+2. 选择靠谱的域名服务商。
+3. 选择 [[https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions][DNSSEC]] ，不知道这个现在的实施情况如何。
+
+以上是 [[https://en.wikipedia.org/wiki/DNS_spoofing][DNS spoofing]] 的阅读笔记。
+
 * 移动时代
 ** 移动时代更多使用APP
 ** DNS劫持和代码注入
 
 * 安全总结
 ** 使用 HTTPS
-防止DNS劫持，防止窃听
+防止DNS劫持，防止窃听，防止网络钓鱼。
 
 ** 敏感且重要的数据
 读取或修改这些数据时，使用验证码，重新认证，两步验证等保护数据的措施
