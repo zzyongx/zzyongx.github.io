@@ -1,0 +1,46 @@
+#+TITLE: 使用nc模拟redis-cli为什么会失败
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+今天需要操作redis，但是机器上没有redis-cli，我决定秀一下我最喜欢的nc， ~echo get a | nc redis.server 6379~ ，居然失败了，什么都没有返回，而a是有值的呀！自尊心受到100点伤害！
+
+* 用nc的正确姿势
+#+BEGIN_SRC sh
+# echo set a HI | nc redis.server 6379
+# echo get a | nc redis.server 6379
+# nc redis.server 6379
+get a
+$2
+HI
+#+END_SRC
+
+几点疑问？
+1. set 成功了
+2. nc 从管道读命令，get失败。换成STDIN重定向也一样。
+3. nc 从货真价实的STDIN读命令，get成功。
+
+更可气的是 ~echo get a | nc redis.server~ 居然偶尔也能成功一次，到底哪里出了问题？
+
+* tcpdump 出马
+用tcpdump查看失败和成功时的网络流量（只保留了关键数据）。
+#+BEGIN_EXAMPLE
+dev.62291 > redis.server.6379: Flags [P.]
+get a
+
+dev.62291 > redis.server.6379: Flags [F.]
+
+
+dev.62554 > redis.server.6379: Flags [P.]
+get a
+
+redis.server.6379 > dev.62554: Flags [.]
+#+END_EXAMPLE
+
+一对比，惊呆了，失败时，竟然没有等redis应答，就发了fin包，主动关闭连接，看到这里，原因就很清楚了。
+
+nc 从管道或重定向读取数据，读到了EOF时（echo结束或是文件结尾），就关掉了自己的写端 ~shutdown(3, SHUT_WR)~ 。这时候redis发现了这一点，就把自己也关掉了，于是读取失败。偶尔redis会在发送完请求的数据，才发现nc关掉了自己的写端，此时nc就成功读到了数据。
+
+* 换个姿势，搞定
+~cat <(echo get a) - | nc server.host 6379~ 这样，我们可以保持STDIN不关闭，nc也就不会自动断开连接了。
+
+感觉这个是redis实现的一个问题。

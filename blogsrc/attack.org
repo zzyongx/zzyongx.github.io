@@ -166,6 +166,7 @@ sogou.com.              600     IN      NS      ns2.sogou.com.
 #+END_EXAMPLE
 
 网上找到一张图片
+
 [[http://zzyongx.github.com/images/dns-resolve-process.jpg]]
 
 *** DNS使用UDP

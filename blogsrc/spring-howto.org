@@ -687,7 +687,6 @@ public void databaseOperation() {
 
 通过 ~@Transactional~ 注解一个 *public* 函数，该函数内部的数据操作是一个事务。
 
-
 *** TransactionTemplate
 #+BEGIN_SRC java
 // init
@@ -705,3 +704,6 @@ transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 通过 ~TransactionTemplate~ 封装了一段需要保持事务的操作。
 
 * 性能监控和slf4j
+
+* API 文档
+

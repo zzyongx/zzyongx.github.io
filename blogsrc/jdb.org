@@ -16,8 +16,42 @@ jdb -attach localhost:9999
 ** help
 不言而喻
 
+** 查看类，成员函数，成员变量
+用来方便设置断点
+
+*** 查看所有的类
+~classes~ 可以查看已经加载的所有类
+
+*** 查看类信息
+~class <class id>~ 查看类信息，包括父类，嵌套类
+#+BEGIN_EXAMPLE
+类: qiyun.model.Workflow
+扩展: java.lang.Object
+嵌套: qiyun.model.Workflow$NextCond
+嵌套: qiyun.model.Workflow$OrgDuty
+嵌套: qiyun.model.Workflow$SelectNext
+嵌套: qiyun.model.Workflow$StartNode
+嵌套: qiyun.model.Workflow$WorkNode
+嵌套: qiyun.model.Workflow$Worksheet
+#+END_EXAMPLE
+
+*** 查看类的成员函数
+~methods <class id>~ 查看类的成员函数，包括继承的
+#+BEGIN_EXAMPLE
+qiyun.model.Workflow getWorkNode(long)
+qiyun.model.Workflow getNextsDetail(java.util.List)
+qiyun.model.Workflow getNexts(long)
+java.lang.Object <init>()
+java.lang.Object registerNatives()
+java.lang.Object getClass()
+java.lang.Object hashCode()
+#+END_EXAMPLE
+
+*** 查看类的成员变量
+~fields <class id>~ 查看类的成员变量
+
 ** 断点相关
-*下面的<class id> 必须是完全限定名，不能只是类名*
+*下面的<class id> 必须是完全限定名，不能只是类名，对于嵌套类，用$分隔*
 
 *** 在方法中设置断点
 stop in <class id>.<method> 例如 ~stop in example.WorkflowManager.worksheetNext~
@@ -42,6 +76,9 @@ stop at <class id>:<line> 例如 ~stop at example.WorkflowManager:216~
 - ~clear <class id>.<method>~ 清除方法中的断点
 
 这个是stop的逆过程，比较好理解。
+
+** 查看堆栈信息
+~where~
 
 ** 查看变量的值
 - locals 查看当前的所有本地变量
