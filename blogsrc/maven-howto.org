@@ -97,6 +97,7 @@ howto/
         <configuration>
           <compilerArgs>
             <arg>-Xlint:unchecked</arg>
+            <arg>-Xlint:deprecation</arg>
           </compilerArgs>
           <source>${java.version}</source>
           <target>${java.version}</target>
@@ -166,6 +167,16 @@ howto/
 * 管理依赖
 通过 ~dependency~ 填写依赖，maven会在本地缓存一份数据 ~$HOME/.m2/repository~
 依赖管理是个很便捷的东西。c和c++就没有类似的项目，Makefile 里面指定的依赖额外安装。
+
+** 处理maven仓库中不存在的库
+有时候会碰到jar包不在标准maven仓库的情况，这时有两种选择，一种是自己搭建maven仓库，另一种是把jar把安装到maven缓存中，这里介绍第二种方法。
+
+#+BEGIN_SRC bash
+# download jar
+curl http://path-to-jar/org.patchca.patchca-0.6.0.jar -o org.patchca.patchca-0.6.0.jar
+# install jar to local mvn cache
+mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patchca -DartifactId=patchca -Dversion=0.6.0 -Dpackaging=jar
+#+END_SRC
 
 * 打出多种格式的包
 假设应用除了提供web接口（这需要应用打包成war），还提供了一些小命令（这些小命令对war里面的class有依赖），此时除了war外，再打包出一个jar包供小命令用是个不错的选择。
