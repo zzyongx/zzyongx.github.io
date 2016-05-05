@@ -648,6 +648,13 @@ public class GlobalExceptionHandler {
 #+END_SRC
 
 * RestTemplate
+RestTemplate 主要解决两个问题：
+1. Http请求都大同小异，建立连接， *准备请求参数* ，发送请求，接受请求， *解析返回内容* ，关闭连接。
+2. 准备请求参数和解析返回内容的过程自动化。
+
+假设请求返回Json ~{"version": "1.2.3", "license": "Apache"}~ ，对应的对象是Version。使用 ~Version version = new RestTemplate(version-api, Version.class)~ ，没有一点多余代码。
+
+更多详细内容参考：RestClient.java
 
 * 数据库相关
 ** 名目繁多的ORM
@@ -706,4 +713,4 @@ transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 * 性能监控和slf4j
 
 * API 文档
-
+推荐使用 [[http://jsondoc.org/][JSONDoc]] 自动生成 *API* 文档，查看 *example.api* 下的代码了解使用方式。

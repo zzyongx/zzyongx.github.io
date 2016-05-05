@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Spring Web Develop HOWTO</title>
-<!-- 2016-01-26 二 18:05 -->
+<!-- 2016-04-18 一 17:11 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="root" />
@@ -243,6 +243,8 @@ for the JavaScript code in this tag.
 <li><a href="#sec-4-6">4.6. 给单例对象命名</a></li>
 <li><a href="#sec-4-7">4.7. @Bean注解函数</a></li>
 <li><a href="#sec-4-8">4.8. @Autowired 和静态函数、静态成员变量</a></li>
+<li><a href="#sec-4-9">4.9. Component 的局限性</a></li>
+<li><a href="#sec-4-10">4.10. 线程安全</a></li>
 </ul>
 </li>
 <li><a href="#sec-5">5. 扔掉 XML 配置</a>
@@ -280,6 +282,7 @@ for the JavaScript code in this tag.
 </ul>
 </li>
 <li><a href="#sec-9">9. 性能监控和slf4j</a></li>
+<li><a href="#sec-10">10. API 文档</a></li>
 </ul>
 </div>
 </div>
@@ -777,6 +780,10 @@ $ curl -X PUT dev:8180/api/profile -d <span style="color: #00ff00;">'name=zzyong
 <p>
 对于 <code>Content-Type</code> 为 <code>application/x-www-form-urlencoded</code> 和 <code>multipart/form-data</code> 的请求，通常会把 <code>requestbody</code> 以key-value的形式绑定到各个变量。但有时需要获取整个 <code>requestbody</code> 的内容，此时可以用 <code>RequestBody</code> ，如 <code>submitProfileJson</code> 所示。
 </p>
+
+<p>
+对于 <code>Content-Type</code> 为 <code>application/json</code> 的请求， <code>requestbody</code> 是Json，会自动解析为对象。此时最好设置 consumes 为 "application/json"
+</p>
 </div>
 </div>
 
@@ -1158,6 +1165,26 @@ RootConfig.java
 </p>
 </div>
 </div>
+
+<div id="outline-container-sec-4-9" class="outline-3">
+<h3 id="sec-4-9"><span class="section-number-3">4.9</span> Component 的局限性</h3>
+<div class="outline-text-3" id="text-4-9">
+<p>
+标记为 <code>Component</code> 的类可以被自动注入，它的构造函数必须是无参的，借助 <code>Autowired</code> 的自动绑定，其实构造函数也不需要参数。当我们需要从配置文件读取配置，然后通过构造函数传递配置时，无参构造函数就不够用了。
+我们可以通过用 <code>Autowired</code> 标记构造函数，传递参数给构造函数，参数规则同 <code>Autowired</code> 标记的变量。如果参数是类似String的简单变量，这种方法也不可行。此时可以通过去掉 <code>Component</code> 注解，通过 <code>Bean</code> 来完成。
+就像JedisPool那样。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-10" class="outline-3">
+<h3 id="sec-4-10"><span class="section-number-3">4.10</span> 线程安全</h3>
+<div class="outline-text-3" id="text-4-10">
+<p>
+使用DI时一定要牢记，默认DI是单例的，也就是说用于DI的类一定要是线程安全的。
+</p>
+</div>
+</div>
 </div>
 
 <div id="outline-container-sec-5" class="outline-2">
@@ -1386,6 +1413,25 @@ Spring提供了统一的异常处理机制，借助 <code>@ControllerAdvice</cod
 
 <div id="outline-container-sec-7" class="outline-2">
 <h2 id="sec-7"><span class="section-number-2">7</span> RestTemplate</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+RestTemplate 主要解决两个问题：
+</p>
+<ol class="org-ol">
+<li>Http请求都大同小异，建立连接， <b>准备请求参数</b> ，发送请求，接受请求， <b>解析返回内容</b> ，关闭连接。
+</li>
+<li>准备请求参数和解析返回内容的过程自动化。
+</li>
+</ol>
+
+<p>
+假设请求返回Json <code>{"version": "1.2.3", "license": "Apache"}</code> ，对应的对象是Version。使用 <code>Version version = new RestTemplate(version-api, Version.class)</code> 。
+</p>
+
+<p>
+更多详细内容参考：RestClient.java
+</p>
+</div>
 </div>
 
 <div id="outline-container-sec-8" class="outline-2">
@@ -1469,7 +1515,6 @@ INSERT，UPDATE，DELETE，使用JdbcTemplate很方便（INSERT需要返回自�
 </div>
 </div>
 
-
 <div id="outline-container-sec-8-4-2" class="outline-4">
 <h4 id="sec-8-4-2"><span class="section-number-4">8.4.2</span> TransactionTemplate</h4>
 <div class="outline-text-4" id="text-8-4-2">
@@ -1498,10 +1543,14 @@ transactionTemplate.execute(<span style="color: #00ffff; font-weight: bold;">new
 <div id="outline-container-sec-9" class="outline-2">
 <h2 id="sec-9"><span class="section-number-2">9</span> 性能监控和slf4j</h2>
 </div>
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> API 文档</h2>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2016-01-26 二 18:05</p>
+<p class="date">Created: 2016-04-18 一 17:11</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

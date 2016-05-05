@@ -1,0 +1,37 @@
+#+TITLE: linux命令备忘
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* java 工具
+
+** 将汉字编码为utf8
+#+BEGIN_SRC bash
+# echo -n "善良" | native2ascii
+\u5584\u826f
+#+END_SRC
+
+java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在文件中
+
+** 替换war包中的文件
+~jar uf app.war WEB-INF/classes/application-online.properties~ 替换文件，注意必须和war包中的文件保持相同路径
+
+* 字符串
+
+** 获取随机字符串
+#+BEGIN_SRC bash
+# head -n 1024 /dev/urandom | md5sum
+9b480cfa33d33009cbae5c0f10d7b2f7  -
+#+END_SRC
+
+碰到需要随机数的场合，这是一个不错的方法
+
+* OpenSSL
+
+** HMAC
+#+BEGIN_SRC bash
+# echo -n "initial text" | openssl dgst -sha1 -hmac "9b480cfa33d33009cbae5c0f10d7b2f7"
+(stdin)= 32740bc521b8476818d7b7ba056ff7e758217adc
+#+END_SRC
+
+可以用来检查编程结果的正确性
+
