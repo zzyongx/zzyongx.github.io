@@ -1,0 +1,20 @@
+#+TITLE: TCP 状态转换过程
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+TCP建立连接的三次握手相对简单，可是断开连接的状态转换总是记不住，这里备忘一下。
+
+* 建立连接三次握手
+用C表示client，S表示server。
+1. C -- SYN --> S
+2. S -- SYN ACK --> C
+3. C -- ACK --> S
+
+* 断开连接
+连接建立后，就无所谓client和server，双方是对等的，既可以是client主动断开连接，也可以是server主动断开连接。用S1和S2表示连接的两端，并假设S1主动断开连接。
+1. S1 -- FIN --> S2   (S1: =FIN_WAIT_1= )
+2. S2 -- ACK --> S1   (S2: =CLOSE_WAIT= , S1: =FIN_WAIT_2= )
+3. S2 -- FIN --> S1   (S2: =LAST_ACK= )
+4. S1 -- ACK --> S2   (S1: =TIME_WAIT= , S2: =CLOSED= )
+
+=TIME_WAIT= 会持续2MSL（Maximum segment lifetime），然后自动消失，只有主动断开连接的一方才会出现 =TIME_WAIT= 。
