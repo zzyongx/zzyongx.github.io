@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+        <section>
+          <h1>只有成功的产品才有成功的技术</h1>
+        </section>
+
+        <section>
+          <h2>约定不是为了束缚，而是降低沟通、协作成本</h2>
+        </section>
+
+        <section>
+          <li> DEV </li>
+          <li> API </li>
+          <li> CI </li>
+          <li> DEPLOY </li>
+          <li> RUN ?? </li>
+        </section>
+
+        <section>
+          <h3>DEV</h3>
+          <li> maven </li>
+          <li> Java8 </li>
+          <li> Spring4 </li>
+          <li> MyBatis </li>
+        </section>
+
+        <section>
+          <h3> 程序的两大组成部分 </h3>
+          <li> 库 </li>
+          <li> 语言 </li>
+        </section>
+
+        <section>
+          <h3> maven </h3>
+          <li> 库的使用多于语言自身，管理好库很重要 </li>
+          <li> POM引入新的依赖，需要和团队沟通 </li>
+          <li> 非官方源的管理 </li>
+          <li> 我们维护的commons </li>
+          <li> 尽量少用第三方库 </li>
+        </section>
+
+        <section>
+          <h3> 关于技术选型 </h3>
+          <li> 充分调研 </li>
+          <li> 团队沟通 </li>
+          <li> 忘掉单机环境 </li>
+        </section>
+
+        <section>
+          <h3> Java8 特性 </h3>
+          <li> Stream </li>
+          <li> lambda </li>
+          <li> java.time.* </li>
+        </section>
+
+        <section>
+          <h3> Spring4 </h3>
+          <li> 没有XML </li>
+          <li> HTTP 请求 -> Java对象 -> HTTP 响应 </li>
+          <li> 需要库时优先从Spring中找灵感 </li>
+          <li> 消除冗余代码 </li>
+        </section>
+
+        <section>
+          <h3> MyBatis </h3>
+          <li> 没有 XML </li>
+          <li> 查询有索引，SQL有效率 </li>
+          <li> 禁用 MyBatis 自带缓存 </li>
+          <li> 关心数据安全 </li>
+        </section>
+
+        <section>
+          <h3> 基于注解的API </h3>
+          <li> REST 风格</li>
+          <li> 自动生成 </li>
+          <li> WEB访问</li>
+        </section>
+
+        <section>
+          <h3> 开发环境 </h3>
+          <li> 熟悉的IDE编码 </li>
+          <li> 测试数据库，redis统一管理</li>
+        </section>
+
+        <section>
+          <h3> 编码要求 </h3>
+          <li> 删代码和写代码同样重要 </li>
+          <li> 2 个空格，行别太长，少用中文 </li>
+          <li> 没有特殊理由，不许关警告 </li>
+          <li> 不允许只有一个实现的接口 </li>
+          <li> 及时commit，push 的代码必须能够通过 CI </li>
+        </section>
+
+        <section>
+          <h3> 域名约定 </h3>
+          <li> 正式域名前加test. 是测试域名 </li>
+        </section>
+        
+        <section>
+          <h3> CI Jenkins </h3>
+          <li> 定时 mvn package </li>
+          <li> 定时 mvn test </li>
+          <li> 定时 api test </li>
+          <li> 每次通过mvn test的构建会发布到测试环境</li>
+        </section>
+
+
+        <section>
+          <h3> 上线 </h3>
+          <li> 手动Jenkins构建，输入变动注释后自动上线 </li>
+        </section>
+
+        <section>
+          <h3> 线上运行 </h3>
+          <p> TO BE CONTINUE ... </p>
+        </section>        
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>

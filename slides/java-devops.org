@@ -1,0 +1,82 @@
+#+Title: Java DevOps
+#+Author: 郑志勇
+#+Email: zhengzhiyong@sogou-inc.com
+
+#+OPTIONS: num:nil toc:nil
+#+REVEAL_HLEVEL: 2
+#+REVEAL_THEME: black
+#+REVEAL_TRANS: none
+
+
+* 只有成功的产品才有成功的技术
+- 技术要和产品一条心
+- 技术要主动推动产品落地
+
+* 约定的目的
+- 降低沟通成本
+- 降低协作成本
+
+* DevOps要素
+
+** Dev
+
+*** 程序的两大核心
+- 库
+- 语言
+库在开发中占的比重远大于语言自身
+
+*** maven
+- 依赖管理，主要涉及到库
+- 引入新的库，需要和团队沟通
+- 如何管理非官方源的库
+- 我们维护的commons
+- 减少库的种类提高代码可读性
+
+*** 新技术（库）选型
+- 充分调研
+- 团队沟通
+- 分布式环境
+
+*** Java8 新特性
+- Stream
+- lambda
+- java.time.*
+- 接口可以有默认方法
+
+*** Spring4
+- 使用java-config代替xml
+- 把HTTP请求/响应映射为Java对象
+- 丰富的类库，HttpTemplate等
+- 统一异常处理
+- 消除样板代码
+
+*** MyBatis
+- 使用注解代替xml
+- 查询有索引，SQL有效率
+- 禁用 MyBatis 自带的缓存
+
+*** 编码要求
+- 删代码和写代码同样重要
+- 缩进用2个空格，行别太长，少用中文
+- 没有特殊理由，不许关警告
+- 不允许只有一个实现的接口
+- 及时commit，push 的代码必须能够通过 CI
+
+** API
+- 基于注解，自动生成
+- REST风格
+- WEB访问
+
+** 开发 测试 线上
+- 自己配置编码环境
+- 测试数据库，redis等统一管理
+- 正式域名前加 ~test.~ 是测试环境
+
+** CI
+- 使用Jenkins
+- 定时构建，单元测试，API测试
+- 单元测试通过会发布的测试环境        
+
+** 上线
+- 使用Jenkins + 辅助脚本
+- 手动Jenkins构建，输入变动注释后自动上线
