@@ -3,23 +3,30 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>SYN cookies HOWTO</title>
-<!-- 2016-01-09 六 18:34 -->
+<!-- 2016-06-13 一 12:12 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>SYN cookies HOWTO</title>
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="zzyongx" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
-  .title  { text-align: center; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
   .todo   { font-family: monospace; color: red; }
-  .done   { color: green; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
   .tag    { background-color: #eee; font-family: monospace;
             padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
-  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
   .underline { text-decoration: underline; }
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
@@ -58,15 +65,14 @@
   caption.t-above { caption-side: top; }
   caption.t-bottom { caption-side: bottom; }
   td, th { vertical-align:top;  }
-  th.right  { text-align: center;  }
-  th.left   { text-align: center;   }
-  th.center { text-align: center; }
-  td.right  { text-align: right;  }
-  td.left   { text-align: left;   }
-  td.center { text-align: center; }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
   dt { font-weight: bold; }
-  .footpara:nth-child(2) { display: inline; }
-  .footpara { display: block; }
+  .footpara { display: inline; }
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
@@ -188,17 +194,16 @@ Server --&gt;-- SYN-ACK --&gt;-- Hack
 </p>
 
 <p>
-<code>SYN cookie</code> 有2个缺陷。首先，如果Alice发送的ACK <b>丢失</b> ，因为服务器没有保留半连接信息，所以它无法通过重发 <code>SYN ACK</code> 来让Alice重发 <code>ACK</code> ，当Alice的 <code>ACK</code> 丢失时，Alice认为连接建立，Server则根本没有这个连接。如果建立连接后是Server先发数据，Alice则只能通过超时发现问题。其次，因为 <code>sequence number</code> 只有32位，只保留了 <code>MSS</code> 这个TCP选项，这在早期不是问题，TCP选择逐渐增多，这些选项也非常重要，它们无法保存在 <code>sequence number</code> 中。
+<code>SYN cookie</code> 有2个缺陷。首先，如果Alice发送的ACK <b>丢失</b> ，因为服务器没有保留半连接信息，所以它无法通过重发 <code>SYN ACK</code> 来让Alice重发 <code>ACK</code> ，当Alice的 <code>ACK</code> 丢失时，Alice认为连接建立，Server则根本没有这个连接。如果建立连接后是Server先发数据，Alice则只能通过超时发现问题。其次，因为 <code>sequence number</code> 只有32位，只保留了 <code>MSS</code> 这个TCP选项，这在早期不是问题，随着TCP选择逐渐增多，而这些选项也非常重要，它们无法保存在 <code>sequence number</code> 中。
 </p>
 
 <p>
-在<a href="http://lwn.net/Articles/277146/">改进SYN cookie</a> 中，通过在TCP timestamp中保存更多的TCP选项，解决了缺陷2。在此文中提到，SYN cookie的最初作者认为SYN cookie可能已经没有必要了，因为现在Server性能强劲，内存常有富裕，半连接占用的资源已经可以忽略了。但是测试似乎表明 SYN cookie 提升了响应时间，虽然略有CPU的提升，另外在有SYN flood的情况下，SYN cookie开启要由于不开启。
+在<a href="http://lwn.net/Articles/277146/">改进SYN cookie</a> 中，通过在TCP timestamp中保存更多的TCP选项，解决了缺陷2。在此文中提到，SYN cookie的最初作者认为SYN cookie可能已经没有必要了，因为现在Server性能强劲，内存常有富裕，半连接占用的资源已经可以忽略了。但是测试似乎表明 SYN cookie 提升了响应时间，虽然略有CPU的提升，另外在有SYN flood的情况下，SYN cookie开启要优于不开启。
 </p>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zzyongx</p>
-<p class="date">Created: 2016-01-09 六 18:34</p>
-<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="date">Created: 2016-06-13 一 12:12</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
