@@ -1,7 +1,7 @@
 #+TITLE: SYN cookies HOWTO
 #+AUTHOR: zzyongx
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
-#+OPTION: toc:nil
+#+OPTIONS: toc:nil
 
 说起[[https://en.wikipedia.org/wiki/SYN_cookies][SYN cookies]]，就不得不先说[[https://en.wikipedia.org/wiki/SYN_flood][SYN flood]]，而说起SYN flood就不得不先说 ~TCP~ 三次握手。
 
