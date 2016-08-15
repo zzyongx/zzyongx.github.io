@@ -35,3 +35,10 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 
 可以用来检查编程结果的正确性
 
+* Bash
+** ssh 自动补全主机名
+#+BEGIN_SRC bash
+# cat > /etc/bash_completion.d/ssh
+complete -W "$(echo `cat ~/.ssh/known_hosts | cut -f 1 -d ' ' | sed -e s/,.*//g | uniq | grep -v "\["`;)" ssh
+# source /etc/bash_completion.d/ssh
+#+END_SRC
