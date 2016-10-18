@@ -41,4 +41,8 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 # cat > /etc/bash_completion.d/ssh
 complete -W "$(echo `cat ~/.ssh/known_hosts | cut -f 1 -d ' ' | sed -e s/,.*//g | uniq | grep -v "\["`;)" ssh
 # source /etc/bash_completion.d/ssh
+# cat >> ~/.bashrc
+for f in /etc/bash_completion.d/*; do
+  source $f
+done
 #+END_SRC
