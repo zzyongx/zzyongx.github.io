@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:crontab][Linux CRON 详解]] <2016-10-18>
+#+BEGIN_QUOTE
+cron语法，注意事项，最佳实践
+#+END_QUOTE
+
 [[blog:rsa-command-basic][RSA命令行工具和KEY格式]] <2016-02-28>
 #+BEGIN_QUOTE
 如何用程序生成RSA KEY，以及常用的KEY格式。
