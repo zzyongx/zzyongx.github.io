@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:linux-terminal-shortcut][Linux 终端快捷键]] <2016-10-19>
+#+BEGIN_QUOTE
+新手使用快捷键，别让“键程束缚你的想象
+#+END_QUOTE
+
 [[blog:linux-redirect][Linux 重定向]] <2016-10-19>
 #+BEGIN_QUOTE
 linux重定向基础，什么程序需要感知重定向，如何感知重定向
