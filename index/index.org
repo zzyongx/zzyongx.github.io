@@ -10,7 +10,7 @@
 
 [[blog:linux-redirect][Linux 重定向]] <2016-10-19>
 #+BEGIN_QUOTE
-linux重定向基础，程序对重定向的感知
+linux重定向基础，什么程序需要感知重定向，如何感知重定向
 #+END_QUOTE
 
 [[blog:crontab][Linux CRON 详解]] <2016-10-18>

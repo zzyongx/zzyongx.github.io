@@ -55,6 +55,8 @@ ioctl(1, TIOCGWINSZ, 0x7fff83690420) = -1 ENOTTY (Inappropriate ioctl for device
 
 ls命令的输出是有高亮的（区分文件，目录，符号链接等），高亮是通过输出不可见字符实现的，如果不能感知是否重定向，那么不可见字符就会输出到文件中，当我们在shell脚本中使用 ~FILES=$(ls /etc/default/)~ （这里隐含了重定向）得到就是混杂着不可见字符的文件名。
 
+理解了这些，你的命令习惯会有微妙的变化。例如 =ls /etc/default | wc -l= 获取目录下有多少文件，而不用担心像屏幕输出一样，一行有多个文件，导致计数错误。
+
 通过感知输出，可以让屏幕输出方便肉眼看，而重定向的数据方便程序处理，看mysql的例子，重定向得到的输出非常利于程序处理。
 #+BEGIN_SRC bash
 # mysql -u root -S /search/mysql3306/mysql.sock -e 'show databases'
