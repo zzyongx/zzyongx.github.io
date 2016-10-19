@@ -1,0 +1,73 @@
+#+TITLE: linux重定向
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 重定向基础
+#+BEGIN_SRC bash
+# >output
+# ls /bin/ls /file_not_exist >>output 2>&1
+# ls /bin/ls /file_not_exist >>output 2>&1
+# ls /bin/ls /file_not_exist &>>output
+# cat output
+ls: cannot access /file_not_exist: No such file or directory
+/bin/ls
+ls: cannot access /file_not_exist: No such file or directory
+/bin/ls
+ls: cannot access /file_not_exist: No such file or directory
+/bin/ls
+# ls /bin/ls /file_not_exist >>output 2>>&1
+sh: syntax error near unexpected token `&'
+#+END_SRC
+
+第1行重定向，因为没有任何命令，相当于清空了output的内容。
+
+第2,3,4行是等价的，标准输出以追加方式重定向到output，错误输出（用2表示）重定向到了标准输出（用1表示），这个从output的内容可以看出。也可以用第4行的形式，把标准输出和错误输出重定向到同一个文件。
+
+重定向是 =>= ，默认是覆盖写，如果想要追加，使用 =>>= 。 这里很容易被误导，认为有 =2>&1= 和 =2>>&1= 两种形式，事实上只有第一种，如果标准输出是覆盖写，那么错误输出也是覆盖写，如果标准输出是追加写，那么错误输出也是追加写。最后一个命令报错，就是这个原因，不存在 =2>>&1= 。
+
+* 程序对重定向的感知
+#+BEGIN_SRC bash
+# ls /etc/default/
+cassandra  influxdb  jetty  nss  useradd
+# ls /etc/default/ > output
+# cat output
+cassandra
+influxdb
+jetty
+nss
+useradd
+# ls /etc/default/ | wc -l
+5
+#+END_SRC
+
+按通常的理解，重定向只是把本来要输出到屏幕（标准输出）的内容输出到文件而已，两者内容应该是一样的。这并不总是正确。例如ls输出到屏幕和输出到文件、输出到管道是不同的。
+
+这是ls实现很优雅的地方，它有办法感知输出的地方是屏幕还是其它。对比下面strace的输出，看出ls用 =ioctl= 探测了标准输出是不是屏幕。
+#+BEGIN_SRC bash
+# strace -e trace=ioctl -f bash -c 'ls /etc/default'
+ioctl(1, SNDCTL_TMR_TIMEBASE or TCGETS, {B38400 opost isig icanon echo ...}) = 0
+ioctl(1, TIOCGWINSZ, {ws_row=41, ws_col=164, ws_xpixel=1476, ws_ypixel=779}) = 0
+cassandra  influxdb  jetty  nss  useradd
+# strace -e trace=ioctl -f bash -c 'ls /etc/default > output'
+ioctl(1, SNDCTL_TMR_TIMEBASE or TCGETS, 0x7fff836902c0) = -1 ENOTTY (Inappropriate ioctl for device)
+ioctl(1, TIOCGWINSZ, 0x7fff83690420) = -1 ENOTTY (Inappropriate ioctl for device)
+#+END_SRC
+
+ls命令的输出是有高亮的（区分文件，目录，符号链接等），高亮是通过输出不可见字符实现的，如果不能感知是否重定向，那么不可见字符就会输出到文件中，当我们在shell脚本中使用 ~FILES=$(ls /etc/default/)~ （这里隐含了重定向）得到就是混杂着不可见字符的文件名。
+
+通过感知输出，可以让屏幕输出方便肉眼看，而重定向的数据方便程序处理，看mysql的例子，重定向得到的输出非常利于程序处理。
+#+BEGIN_SRC bash
+# mysql -u root -S /search/mysql3306/mysql.sock -e 'show databases'
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| test               |
++--------------------+
+# mysql -u root -S /search/mysql3306/mysql.sock -e 'show databases' | cat
+Database
+information_schema
+test
+#+END_SRC
+
+不得不感慨，这些程序之优雅，*NIX气息之浓郁。当你碰到命令输出不方便程序处理时，不妨看看它重定向后的内容是什么样子的。

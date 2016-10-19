@@ -46,3 +46,9 @@ for f in /etc/bash_completion.d/*; do
   source $f
 done
 #+END_SRC
+
+** 如何用命令删除文件的第一行
+#+BEGIN_SRC bash
+# tail -n +2 file
+#+END_SRC
+

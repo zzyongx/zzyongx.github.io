@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:linux-redirect][Linux 重定向]] <2016-10-19>
+#+BEGIN_QUOTE
+linux重定向基础，程序对重定向的感知
+#+END_QUOTE
+
 [[blog:crontab][Linux CRON 详解]] <2016-10-18>
 #+BEGIN_QUOTE
 cron语法，注意事项，最佳实践
