@@ -1,0 +1,48 @@
+#+TITLE: gitlab 安装配置
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+gitlab 是开源的github，除了是git，还能用作code-review，并作为jenkins集成测试的关键环节。除了配置邮件，其它都挺简单，并且邮件发送错误，没有比较详细的日志，排查起来比较麻烦。
+
+* 安装
+我用的是linux，直接下载rpm包安装的。 ~rpm -ivh gitlab-ce-8.9.1-ce.1.el6.x86_64~ 一句话搞定。
+
+* 配置
+
+** 配置模板
+配置的模板是 =/opt/gitlab/etc/gitlab.rb.template= ，复制到 =/etc/gitlab/gitlab.rb= ，配置都在这个文件里面。
+
+** 需要关注的配置项
+- =external_url= gitlab的uri前缀，例如 =http://git.example.com= 
+- =git_data_dir= git的数据地址，例如 =/path-to-big-disk=
+- =unicorn['port']= ruby服务器的端口
+- =nginx['listen_port']= nginx服务器的端口，nginx服务器是ruby服务器的代理
+
+** 应用配置
+=gitlab-ctl reconfigure= 应用配置，并重新启动。每次配置变更，重新运行这个命令即可，命令输出中包含了和之前配置的diff。
+
+* 邮件配置及问题诊断
+
+** 配置
+#+BEGIN_EXAMPLE
+gitlab_rails['gitlab_email_enabled'] = true
+gitlab_rails['gitlab_email_from'] = 'admin@mail.example.com'
+gitlab_rails['gitlab_email_display_name'] = 'git'
+
+gitlab_rails['smtp_enable'] = true
+gitlab_rails['smtp_address'] = "mail.example.com"
+gitlab_rails['smtp_port'] = 25
+gitlab_rails['smtp_user_name'] = "admin@mail.example.com"
+gitlab_rails['smtp_password'] = "password-of-admin"
+gitlab_rails['smtp_domain'] = "mail.example.com"
+gitlab_rails['smtp_authentication'] = "login"
+
+#+END_EXAMPLE
+
+** 问题诊断
+核心是用 =tcpdump= 抓包， =tcpdump -i any -nn -p tcp and port 25 -A -s0= 观察输出
+- 没有输出，说明gitlab没发邮件。检查配置对不对，例如 =smtp_authentication= 的值
+- =Authentication unsuccessful= ，说明密码没配置对
+- =Client does not have permissions to send as this sender= ， =gitlab_email_from= 的配置可能必须和 =smtp_user_name= 一样
+
+只要有输出就好说，根据输出的内容Google就可以了。

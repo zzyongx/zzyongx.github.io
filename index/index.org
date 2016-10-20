@@ -8,9 +8,14 @@
 
 ** 经验
 
+[[blog:gitlab-install-config][gitlab 安装配置]] <2016-10-20>
+#+BEGIN_QUOTE
+gitlab 是团队协作，devops的关键环节，有时候小团队需要自己的gitlab。
+#+END_QUOTE
+
 [[blog:linux-terminal-shortcut][Linux 终端快捷键]] <2016-10-19>
 #+BEGIN_QUOTE
-新手使用快捷键，别让“键程束缚你的想象
+终端快捷键信手拈来，别让“键程”束缚你的想
 #+END_QUOTE
 
 [[blog:linux-redirect][Linux 重定向]] <2016-10-19>
