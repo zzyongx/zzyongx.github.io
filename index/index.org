@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:mybatis-spring-howto][mybatis使用详解]] <2016-10-21>
+#+BEGIN_QUOTE
+mybatis如何使用，以及用法背后的机制
+#+END_QUOTE
+
 [[blog:gitlab-install-config][gitlab 安装配置]] <2016-10-20>
 #+BEGIN_QUOTE
 gitlab 是团队协作，devops的关键环节，有时候小团队需要自己的gitlab。

@@ -1,0 +1,12 @@
+#+TITLE: git 基础
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+=git branch=
+=git branch -d branch-to-rm=
+
+=git remote rm origin=
+=git remote add origin git-path=
+=git push -u origin master --all=
+
+=git commit --amend -m "new commit message"=
