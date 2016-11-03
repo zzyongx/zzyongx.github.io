@@ -4,9 +4,48 @@
 
 =git branch=
 =git branch -d branch-to-rm=
+=git branch -D branch-to-rm-anyway=
+
+=git checkout exists-branch=
+=git checkout -b local-branch=
+=git checkout -b remote-branch origin/remote-branch=
 
 =git remote rm origin=
 =git remote add origin git-path=
 =git push -u origin master --all=
 
 =git commit --amend -m "new commit message"=
+
+=git merge --no-ff branch-to-be-merged=
+
+
+=git clone --bare http://zzyong@git.example/zzyong/small.git=
+=git push --mirror http://zzyong@git.example/zzyong/big.git=
+
+=git diff --cached=
+
+
+#+BEGIN_SRC bash
+# git push
+Password:
+To http://zzyong@git.example/zzyong/big.git
+ ! [rejected]        master -> master (non-fast-forward)
+error: failed to push some refs to 'http://zzyong@git.example/zzyong/big.git'
+To prevent you from losing history, non-fast-forward updates were rejected
+Merge the remote changes before pushing again.  See the 'Note about
+fast-forwards' section of 'git push --help' for details.
+# git pull origin master
+Password:
+From http://git.example/zzyong/big
+ * branch            master     -> FETCH_HEAD
+Already up-to-date.
+# git push
+Password:
+Counting objects: 26, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (9/9), done.
+Writing objects: 100% (9/9), 1.88 KiB, done.
+Total 9 (delta 4), reused 0 (delta 0)
+To http://zzyong@git.example/zzyong/big.git
+   1a6cbcc..f0dd65f  master -> master
+#+END_SRC

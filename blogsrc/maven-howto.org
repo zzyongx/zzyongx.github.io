@@ -273,7 +273,7 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 #+END_SRC
 
 ** jetty-maven-plugin
-jetty插件，通过 mvn jetty:run-run 运行war包，查看 [[样板 pom.xml]]
+jetty插件，通过 mvn jetty:run-war 运行war包，查看 [[样板 pom.xml]]
 虽然通过 jetty:run 也可以运行，但有时候会引起问题，尤其是关于slf4j的。run-war 相当于执行了 mvn package ，更接近真实的环境。
 
 通过jetty插件运行程序使用的是maven的日志配置，在 ~$MAVEN_HOME/conf/logging/simplelogger.properties~ 文件中，默认基本是 info，通过增加 ~org.slf4j.simpleLogger.log.example=debug~ 把example包(及子包)下的日志级别设置为debug，用于调试example包。

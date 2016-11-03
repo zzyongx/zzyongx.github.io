@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:modify-querystring-use-nginx][nginx proxy如何修改querystring]] <2016-11-03>
+#+BEGIN_QUOTE
+这应该算不上是一种技巧，但是它提醒我，专注于目的，而不是解决问题的手段。
+#+END_QUOTE
+
 [[blog:mybatis-spring-howto][mybatis使用详解]] <2016-10-21>
 #+BEGIN_QUOTE
 mybatis如何使用，以及用法背后的机制

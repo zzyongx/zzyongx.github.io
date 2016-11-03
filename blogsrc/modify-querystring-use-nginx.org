@@ -1,0 +1,40 @@
+#+TITLE: nginx 做代理时如何修改querystring
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+我们有段nginx配置是这样的：
+#+BEGIN_SRC c
+set $arg_from "1";
+if ($host = "inner.domain") {
+  set $arg_from "0";
+}
+set $args "$args&from=$arg_from";
+#+END_SRC
+
+如果请求来自inner.domain域名，就给querystring添加参数from=0，表明是内网过来的（公网入口不会转发host为inner.domain的请求）。这样upstream只需要检查from参数即可判断请求来源，和域名解绑了。
+
+但是这个配置有个bug，如果用户请求时添加 ~from=0~ 参数，从公网发请求，querystring变成了 ~from=0&from=1~ ，上面的配置是追加参数，而不是修改参数。那么该如何修复这个bug呢？核心是修改 ~$args~ ，很多方法也是围绕这个展开的，但是都不够通用。
+
+最后我也没找到修改 ~$args~ 的好办法，但是问题解决了，最后的配置是这样的：
+#+BEGIN_SRC c
+if ($arg_from != "") {
+  return 401;
+}
+set $arg_from "1";
+if ($host = "inner.domain") {
+  set $arg_from "0";
+}
+set $args "$args&from=$arg_from";
+#+END_SRC
+既然不能修改 ~$args~, 那就禁止用户传 ~from~ 参数，曲线救国达到目的。
+
+说到底，依赖 ~querystring~ 里的参数不是个好主意，最好的方法是使用Header，更加通用。不会有两个同名Header，也不用担心和请求里可能会有的from参数冲突。
+#+BEGIN_SRC c
+set $req_source 1;
+if ($host = "inner.domain") {
+  set $req_source 0;
+}
+proxy_set_header X-Req-Source $req_source;
+#+END_SRC
+
+这应该算不上是一种技巧，但是它提醒我，专注于目的，而不是解决问题的手段。
