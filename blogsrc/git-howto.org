@@ -24,6 +24,12 @@
 
 =git diff --cached=
 
+推送本地分支 issue25
+=git push origin issue25=
+
+删除远程分支 issue25
+=git push orgin :issue25=
+
 
 #+BEGIN_SRC bash
 # git push

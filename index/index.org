@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:login-without-username-password-when-troubleshoot][排查问题时，如何使用用户身份登录]] <2016-11-14>
+#+BEGIN_QUOTE
+如何在没用用户的用户名和密码的情况下，使用用户身份登录，排查问题。
+#+END_QUOTE
+
 [[blog:modify-querystring-use-nginx][nginx proxy如何修改querystring]] <2016-11-03>
 #+BEGIN_QUOTE
 这应该算不上是一种技巧，但是它提醒我，专注于目的，而不是解决问题的手段。

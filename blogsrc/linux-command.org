@@ -52,3 +52,7 @@ done
 # tail -n +2 file
 #+END_SRC
 
+* Net
+** 测试网速
+- ~curl http://example.com/bigfile.txt >/dev/null -vv~ 会显示打开速度
+- ~rsync -v example.com::path/bigfile.txt /bigfile.txt.`date +%s`~ 使用rsync，目标文件必须每次都不同
