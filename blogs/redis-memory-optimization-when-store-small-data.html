@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2016-11-22 二 19:20 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>redis存储海量小数据，如何优化内存使用</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">redis存储海量小数据，如何优化内存使用</h1>
+<p>
+最近有个需求，需要存储海量小数据，大概几十亿的规模，每个数据是6位的数字加一个32位的md5（16进制显示）。因为数据很小，数据总量并不算大，我们计划根据md5做分片，存储到多个redis中，每个redis大概存储1亿的数据，纯数据大概 <code>(6+32)*10^9 = 3.8G</code> ，这是redis很擅长存的量。
+</p>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 快速加载数据到redis</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+redis已经非常快了，高达 <code>10w/s</code> ，但面对亿级别的数据，也需要将近20分钟。如果使用pipeline的话，redis还可以更快，达到 <code>40w/s</code> ，5分钟就可以轻松写入1亿数据。
+</p>
+
+<p>
+redis自带的 redis-cli 的 <code>--pipe</code> 参数可以实现快速加载数据，但是需要我们把数据转成redis协议。 <code>--pipe-timeout</code> 参数设置为0，防止redis响应太晚redis-cli过早退出。下面例子中的pl脚本就是拼redis协议的。但是pl的性能稍弱，还没到redis的吞吐量瓶颈，自己CPU先100%了，为此，使用20个进程，每个进程500万数据，这样redis的CPU使用率到了100%，数据加载可以在5分钟内完成。
+</p>
+
+<p>
+我们用 <code>ps -eo 'pid rss pmem cmd' | grep redis</code> 和redis的 <code>info</code> 查看redis的内存使用。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> 最直观的存储方式</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+<code>time head -n 5000000 data | ./redis-pipe-1.pl | redis-cli --pipe --pipe-timeout 0</code>
+redis-pipe-1.pl 最核心的是 <code>print join("\r\n", "*3", '$3', "SET", '$'.$keylen, $key, '$1', 1), "\r\n";</code> 其中key是6位数字加32位md5串，共38位。
+</p>
+
+<p>
+内存使用情况
+</p>
+<pre class="example">
+5490 9033980  6.8 redis-server *:6379
+
+used_memory_human:8.45G
+db0:keys=100000000,expires=0,avg_ttl=0
+</pre>
+
+<p>
+从内存使用上看，8G左右，是预估3.8G的2倍多。因为redis的内部数据结构，1个指针就是8位，在加上小value，slab内存分配策略，2倍也没有特别不正常。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3"><span class="section-number-2">3</span> 使用二进制存储</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+<code>md5</code> 本身是 <code>16</code> 位的unsigned char，为了转成可见字符用了16进制显示，变成了32位。本来想用base64 24位就可以了，后来觉得redis支持二进制，为啥不直接存16位的unsigned char。
+在./redis-pipe-2.pl里面把32位的16进制显示改成了16位的数据
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-perl"><span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span> = ();
+<span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00;">$hex</span> = <span style="color: #00ff00;">""</span>;
+<span style="color: #00ffff; font-weight: bold;">foreach</span> (<span style="color: #ff83fa;">split</span> <span style="color: #ff00ff;">//</span>, $md5) {
+  $hex .= $_;
+  <span style="color: #00ffff; font-weight: bold;">if</span> (<span style="color: #00ff00;">length</span>($hex) == 2) {
+    <span style="color: #ff83fa;">push</span>(<span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span>, <span style="color: #00ff00;">chr</span>(<span style="color: #00ff00;">hex</span>($hex)));
+    $hex = <span style="color: #00ff00;">""</span>;
+  }
+}
+$key = $appid . <span style="color: #00ff00;">join</span>(<span style="color: #00ff00;">""</span>, <span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span>);
+$keylen = <span style="color: #00ff00;">length</span>($key);
+</pre>
+</div>
+
+<p>
+内存使用情况
+</p>
+<pre class="example">
+12343 7437316  5.6 redis-server *:6379
+used_memory_human:6.96G
+db0:keys=100000000,expires=0,avg_ttl=0
+</pre>
+
+<p>
+从内存使用上看，减少1.5G左右，和预期差不多 <code>16*10^9 = 1.6G</code>
+</p>
+
+<p>
+到现在为止，是从数据本身来减少内存使用。而根据分析redis自身的数据结构消耗占了一半左右，怎么减少redis数据结构的消耗呢？
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4"><span class="section-number-2">4</span> 使用SET和HSET混合的数据组织方式</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+先看两个很有意思的配置，是专门为小Hash做准备（使用HSET），当Hash中的条目小于512，并且每个value小于64个字节时，Redis内部采用特殊的编码方式，可以使内存平均节省5倍。
+</p>
+<pre class="example">
+hash-max-ziplist-entries 512
+hash-max-ziplist-value 64
+</pre>
+
+<p>
+我们可以把key-value的结构拆解成key-smallhash这样的结构来降低内存的使用
+</p>
+<div class="org-src-container">
+
+<pre class="src src-perl"><span style="color: #00ffff; font-weight: bold;">my</span> (<span style="color: #ffff00;">$appid</span>, <span style="color: #ffff00;">$md5</span>) = <span style="color: #ff83fa;">split</span> <span style="color: #ff00ff;">/</span><span style="color: #0000ff; font-weight: bold;">\</span><span style="color: #00ff00;">s</span><span style="color: #ff00ff;">/</span>, $line;
+<span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span> = ();
+<span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00;">$hex</span> = <span style="color: #00ff00;">""</span>;
+<span style="color: #00ffff; font-weight: bold;">foreach</span> (<span style="color: #ff83fa;">split</span> <span style="color: #ff00ff;">//</span>, $md5) {
+  $hex .= $_;
+  <span style="color: #00ffff; font-weight: bold;">if</span> (<span style="color: #00ff00;">length</span>($hex) == 2) {
+    <span style="color: #ff83fa;">push</span>(<span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span>, <span style="color: #00ff00;">chr</span>(<span style="color: #00ff00;">hex</span>($hex)));
+    $hex = <span style="color: #00ff00;">""</span>;
+  }
+}
+
+<span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00;">$hash</span> = $appid . <span style="color: #00ff00;">join</span>(<span style="color: #00ff00;">""</span>, <span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span>[0 .. 2]);
+<span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00;">$hashlen</span> = <span style="color: #00ff00;">length</span>($hash);
+
+<span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00;">$key</span> = <span style="color: #00ff00;">join</span>(<span style="color: #00ff00;">""</span>, <span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span>[3 .. <span style="color: #ffff00; background-color: #000080; font-weight: bold;">@chars</span>-1]);
+<span style="color: #00ffff; font-weight: bold;">my</span> <span style="color: #ffff00;">$keylen</span> = <span style="color: #00ff00;">length</span>(<span style="color: #00ff00;">"$key"</span>);
+
+<span style="color: #ff83fa;">print</span> <span style="color: #00ff00;">join</span>(<span style="color: #00ff00;">"\r\n"</span>, <span style="color: #00ff00;">"*4"</span>, <span style="color: #00ff00;">'$4'</span>, <span style="color: #00ff00;">"HSET"</span>, <span style="color: #00ff00;">'$'</span>.$hashlen, $hash, <span style="color: #00ff00;">'$'</span>.$keylen, $key, <span style="color: #00ff00;">'$1'</span>, 1), <span style="color: #00ff00;">"\r\n"</span>;
+</pre>
+</div>
+
+<p>
+三个unsigned char大概是 <code>2^24 = 16777216</code> 如果有1亿记录的话，每个hash自身平均6个key-value
+</p>
+
+<p>
+内存使用情况
+</p>
+<pre class="example">
+8593 4052120  3.0 redis-server *:6379
+
+used_memory_human:3.31G
+db0:keys=16733972,expires=0,avg_ttl=0
+</pre>
+
+<p>
+内存使用3.31G，比裸数据 <code>(6+16)*10^9 = 2.2G</code> 只多了50%左右。不仅是省内存，这种方式还有个优势，内存占用 <b>不会随着条目数线性增长</b> 。因为最多16777216个条目，就算数据导了2亿，也只是每个hash到平均12个左右。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">5</span> 参考资料</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li><a href="http://redis.io/topics/mass-insert">mass-insert</a></li>
+
+<li><a href="http://redis.io/topics/memory-optimization">memory-optimization</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2016-11-22 二 19:20</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

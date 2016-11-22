@@ -8,6 +8,11 @@
 
 ** 经验
 
+[[blog:redis-memory-optimization-when-store-small-data][如何使用redis存储海量小数据]] <2016-11-22>
+#+BEGIN_QUOTE
+redis存储海量小数据，如何优化内存使用
+#+END_QUOTE
+
 [[blog:login-without-username-password-when-troubleshoot][排查问题时，如何使用用户身份登录]] <2016-11-14>
 #+BEGIN_QUOTE
 如何在没用用户的用户名和密码的情况下，使用用户身份登录，排查问题。

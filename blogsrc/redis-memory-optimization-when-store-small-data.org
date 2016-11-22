@@ -1,0 +1,102 @@
+#+TITLE: redis存储海量小数据，如何优化内存使用
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+最近有个需求，需要存储海量小数据，大概几十亿的规模，每个数据是6位的数字加一个32位的md5（16进制显示）。因为数据很小，数据总量并不算大，我们计划根据md5做分片，存储到多个redis中，每个redis大概存储1亿的数据，纯数据大概 ~(6+32)*10^9 = 3.8G~ ，这是redis很擅长存的量。
+
+* 快速加载数据到redis
+redis已经非常快了，高达 ~10w/s~ ，但面对亿级别的数据，也需要将近20分钟。如果使用pipeline的话，redis还可以更快，达到 ~40w/s~ ，5分钟就可以轻松写入1亿数据。
+
+redis自带的 redis-cli 的 ~--pipe~ 参数可以实现快速加载数据，但是需要我们把数据转成redis协议。 ~--pipe-timeout~ 参数设置为0，防止redis响应太晚redis-cli过早退出。下面例子中的pl脚本就是拼redis协议的。但是pl的性能稍弱，还没到redis的吞吐量瓶颈，自己CPU先100%了，为此，使用20个进程，每个进程500万数据，这样redis的CPU使用率到了100%，数据加载可以在5分钟内完成。
+
+我们用 ~ps -eo 'pid rss pmem cmd' | grep redis~ 和redis的 ~info~ 查看redis的内存使用。
+
+* 最直观的存储方式
+~time head -n 5000000 data | ./redis-pipe-1.pl | redis-cli --pipe --pipe-timeout 0~
+redis-pipe-1.pl 最核心的是 ~print join("\r\n", "*3", '$3', "SET", '$'.$keylen, $key, '$1', 1), "\r\n";~ 其中key是6位数字加32位md5串，共38位。
+
+内存使用情况
+#+BEGIN_EXAMPLE
+5490 9033980  6.8 redis-server *:6379
+
+used_memory_human:8.45G
+db0:keys=100000000,expires=0,avg_ttl=0
+#+END_EXAMPLE
+
+从内存使用上看，8G左右，是预估3.8G的2倍多。因为redis的内部数据结构，1个指针就是8位，在加上小value，slab内存分配策略，2倍也没有特别不正常。
+
+* 使用二进制存储
+~md5~ 本身是 ~16~ 位的unsigned char，为了转成可见字符用了16进制显示，变成了32位。本来想用base64 24位就可以了，后来觉得redis支持二进制，为啥不直接存16位的unsigned char。
+在./redis-pipe-2.pl里面把32位的16进制显示改成了16位的数据
+
+#+BEGIN_SRC perl
+my @chars = ();
+my $hex = "";
+foreach (split //, $md5) {
+  $hex .= $_;
+  if (length($hex) == 2) {
+    push(@chars, chr(hex($hex)));
+    $hex = "";
+  }
+}
+$key = $appid . join("", @chars);
+$keylen = length($key);
+#+END_SRC
+
+内存使用情况
+#+BEGIN_EXAMPLE
+12343 7437316  5.6 redis-server *:6379
+used_memory_human:6.96G
+db0:keys=100000000,expires=0,avg_ttl=0
+#+END_EXAMPLE
+
+从内存使用上看，减少1.5G左右，和预期差不多 ~16*10^9 = 1.6G~
+
+到现在为止，是从数据本身来减少内存使用。而根据分析redis自身的数据结构消耗占了一半左右，怎么减少redis数据结构的消耗呢？
+
+* 使用SET和HSET混合的数据组织方式
+先看两个很有意思的配置，是专门为小Hash做准备（使用HSET），当Hash中的条目小于512，并且每个value小于64个字节时，Redis内部采用特殊的编码方式，可以使内存平均节省5倍。
+#+BEGIN_EXAMPLE
+hash-max-ziplist-entries 512
+hash-max-ziplist-value 64
+#+END_EXAMPLE
+
+我们可以把key-value的结构拆解成key-smallhash这样的结构来降低内存的使用
+#+BEGIN_SRC perl
+my ($appid, $md5) = split /\s/, $line;
+my @chars = ();
+my $hex = "";
+foreach (split //, $md5) {
+  $hex .= $_;
+  if (length($hex) == 2) {
+    push(@chars, chr(hex($hex)));
+    $hex = "";
+  }
+}
+
+my $hash = $appid . join("", @chars[0 .. 2]);
+my $hashlen = length($hash);
+
+my $key = join("", @chars[3 .. @chars-1]);
+my $keylen = length("$key");
+
+print join("\r\n", "*4", '$4', "HSET", '$'.$hashlen, $hash, '$'.$keylen, $key, '$1', 1), "\r\n";
+#+END_SRC
+
+三个unsigned char大概是 ~2^24 = 16777216~ 如果有1亿记录的话，每个hash自身平均6个key-value
+
+内存使用情况
+#+BEGIN_EXAMPLE
+8593 4052120  3.0 redis-server *:6379
+
+used_memory_human:3.31G
+db0:keys=16733972,expires=0,avg_ttl=0
+#+END_EXAMPLE
+
+内存使用3.31G，比裸数据 ~(6+16)*10^9 = 2.2G~ 只多了50%左右。不仅是省内存，这种方式还有个优势，内存占用 *不会随着条目数线性增长* 。因为最多16777216个条目，就算数据导了2亿，也只是每个hash到平均12个左右。
+
+* 参考资料
+- [[http://redis.io/topics/mass-insert][mass-insert]] 
+
+- [[http://redis.io/topics/memory-optimization][memory-optimization]]
+
