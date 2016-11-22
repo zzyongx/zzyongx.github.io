@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2016-11-22 二 19:20 -->
+<!-- 2016-11-22 二 19:31 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>redis存储海量小数据，如何优化内存使用</title>
@@ -296,8 +296,18 @@ db0:keys=16733972,expires=0,avg_ttl=0
 </div>
 
 <div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">5</span> 参考资料</h2>
+<h2 id="orgheadline5"><span class="section-number-2">5</span> 额外需要关注的问题</h2>
 <div class="outline-text-2" id="text-5">
+<ol class="org-ol">
+<li>本来准备把6位的数字转成4位的整数存储，可以额外节省200M，后来放弃了，因为数字转成int，各个语言的互操作性有隐患。</li>
+<li>我们的redis读不是特别多，需要测试hash的压缩存储对性能的影响，但我估计没影响，因为默认是开的。</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">6</span> 参考资料</h2>
+<div class="outline-text-2" id="text-6">
 <ul class="org-ul">
 <li><a href="http://redis.io/topics/mass-insert">mass-insert</a></li>
 
@@ -308,7 +318,7 @@ db0:keys=16733972,expires=0,avg_ttl=0
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2016-11-22 二 19:20</p>
+<p class="date">Created: 2016-11-22 二 19:31</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
