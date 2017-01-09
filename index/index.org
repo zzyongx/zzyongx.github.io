@@ -3,11 +3,19 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
+* 2017 丁酉年
+-------------
+
+** 经验
+[[blog:mysql-acid-lock][MySQL的事务和锁]] <2017-01-09>
+#+BEGIN_QUOTE
+MySQL的事务隔离级别和背后的锁
+#+END_QUOTE
+
 * 2016 丙申年
 ------------
 
 ** 经验
-
 [[blog:redis-memory-optimization-when-store-small-data][如何使用redis存储海量小数据]] <2016-11-22>
 #+BEGIN_QUOTE
 redis存储海量小数据，如何优化内存使用

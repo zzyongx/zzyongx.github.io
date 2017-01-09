@@ -1,0 +1,156 @@
+#+TITLE: MySQL InnoDB Locking and Transaction
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+事情起源于同事的一个问题，读表-修改-写表，在事务内完成，是否有并发问题？我想当然的以为没问题，不然要事务干什么？缺乏对事务的深入思考。事实是，这样有并发问题，如果不使用锁，是没法保证并发安全的。那么锁和事务是什么关系呢？
+
+* 事务
+一般而言，如果数据库支持ACID属性，那么它就支持事务。事务只是数据库的一个特性而已，不是说有了事务，一些问题被神奇的解决了。还需要思考问题的内在逻辑。
+
+** A（atomicity）
+原子性，事务内的所有操作，要么都做（ =COMMIT= ），要么都不做（ =ROLLBACK= ）。但做的对不对，不管。
+例如订单系统，减库存和生成订单，要么库存减少，订单生成。要么库存没变化，订单没生成。但是，两个人同时买库存为一的商品，可能把库存减成负的，这是逻辑的问题，不是事务的问题。
+
+** C（consistency）
+一致性，事务结束时，数据库的主键约束，外键约束等其它特性，必须满足。（理解不深，觉得理所当然就该这样）
+
+** I（isolation）
+隔离性，同时运行的事务，应该相互隔离。并发控制和隔离性有关。
+
+** D（durability）
+持久性，完成的事务数据必须持久存储。
+
+就ACID四个属性而言，AC的可选择性较小，ID的自由度比较大。例如D，数据落盘是个很复杂的过程，真要每次事务提交都实打实的写硬盘，性能是无法接受的。通常借助日志，RAID卡缓存提高性能。并且有时候降低D来提升性能。I有4个级别，不同级别对性能和业务的影响是不一样的。
+
+* 锁
+MySQL的读分 =锁读= 和 =一般读= ，不特殊强调的话，都是指一般读，一般读不加锁。锁分读锁 =S= 和写锁 =X= 。另外，同样的SQL，在不同的隔离级别下，加的锁也不同。下面的论述相当不专业，只是为了辅助理解事务隔离级别。
+
+** Intention Locks
+主要指通过 ~SELECT ... LOCK IN SHARE MODE~ 和 ~SELECT ... FOR UPDATE~ 加的锁。前者加 =IS= 锁，后者加 =IX= 锁，他们和 =S= 和 =X= 略有不同。
+
+** Record Locks
+记录锁，可以理解为每个锁对应一个记录
+
+** Gap Locks
+范围锁，锁一个范围，适用于返回多条记录的查询。
+
+** Next-Key Locks
+配合Gap Locks使用，适用于没有边界的情况。例如 =WHERE id > 10= 。
+
+* 事务的隔离级别
+下面的陈述按照常用级别排序，从实例中可以看出，各个隔离级别锁数据的量是不一样的，这导致了性能的差异。同时，在并发时，理解SQL背后的锁，有助于理解业务逻辑是不是并发安全的。
+
+** 可重复读（REPEATABLE READ）
+所谓可重复读，就是在事务内部，所有查询都和第一次查询的结果相同（能看到首次查询前其它事务的提交，看不到之后其它事务的提交），但是可以看到本事务内的修改（虽然看不到其它事务的提交，但是如果修改，则可以看到）。写操作加写锁， =锁读= 加锁。这是MySQL的默认级别。
+例如：
+#+BEGIN_SRC ditta
+  Session A                                   |     Session B
+SELECT * FROM testt;                          |
++----+------+                                 |
+| id | n    |                                 |
++----+------+                                 |
+|  7 |  777 |                                 |
+|  9 |  900 |                                 |
++----+------+                                 |
+                                              |    START TRANSACTION;
+START TRANSACTION;                            |
+DELETE FROM testt WHERE id = 9;               |
+COMMIT;                                       |    -- 看到之前的事务
+                                              |    SELECT * FROM testt;
+                                              |    +----+------+
+                                              |    | id | n    |
+                                              |    +----+------+
+                                              |    |  7 |  777 |
+                                              |    +----+------+
+START TRANSACTION;                            |
+INSERT INTO testt(id, n) VALUES(8, 800);      |
+COMMIT;                                       |    -- 查询结果和首次查询一样
+                                              |    SELECT * FROM testt;
+                                              |    +----+------+
+                                              |    | id | n    |
+                                              |    +----+------+
+                                              |    |  7 |  777 |
+                                              |    +----+------+
+                                              |
+                                              |    -- 虽然看不到id=8的记录，但是可以更新
+                                              |    UPDATE testt SET n = 888 WHERE id = 8;
+                                              |
+                                              |    -- 更新之后可以看到id=8的记录
+                                              |    SELECT * FROM testt;
+                                              |    +----+------+
+                                              |    | id | n    |
+                                              |    +----+------+
+                                              |    |  7 |  777 |
+                                              |    |  8 |  888 |
+-- 看不到未提交的修改                         |    +----+------+
+SELECT * FROM testt;                          |
++----+------+                                 |
+| id | n    |                                 |
++----+------+                                 |
+|  7 |  777 |                                 |
+|  8 |  800 |                                 |
++----+------+                                 |    -- 更新加写锁 Record Locks
+                                              |    UPDATE testt SET n = 7 WHERE id = 7;
+START TRANSACTION;                            |
+-- 无法加写锁，超时                           |
+UPDATE testt SET n = 77 WHERE id = 7;         |
+ERROR 1205 (HY000): Lock wait timeout...      |    -- 加Gap Locks和 Next-Key Locks
+                                              |    SELECT * FROM testt SET n >= 8 FOR UPDATE;
+-- 因为Next-Key Locks，插入失败               |
+INSERT INTO testt(id, n) VALUES(9, 999);      |
+ERROR 1205 (HY000): Lock wait timeout...      |
+                                              |    ROLLBACK; START TRANSACTION;
+                                              |    -- 所有的行都加上了锁，虽然只有id = 8符合条件
+                                              |    UPDATE testt SET n = 0 WHERE n >= 800;
+UPDATE testt SET n = 77 WHERE id = 7;         |
+ERROR 1205 (HY000): Lock wait timeout...      |
+
+#+END_SRC
+
+** 读已提交（READ COMMITTED）
+事务内部可以读到其它事务提交的结果。这个导致 *幻读* （我理解幻读就是读到的数据不确定的意思），取决于业务逻辑，幻读不一定是个问题。它的另一个问题是 =锁读= 没有 Next-Key Locks。测试前需要设置隔离级别， =SET TRANSACTION ISOLATION LEVEL READ COMMITTED;= 。
+例如：
+#+BEGIN_SRC ditta
+  Session A                                   |      Session B
+                                              |    START TRANSACTION;
+                                              |    SELECT * FROM testt;
+                                              |    +----+------+
+                                              |    | id | n    |
+                                              |    +----+------+
+                                              |    |  7 |  777 |
+                                              |    |  8 |  888 |
+                                              |    +----+------+
+START TRANSACTION;                            |
+UPDATE testt SET n = 700 WHERE id = 7;        |
+COMMIT;                                       |    -- 看到其它事务的提交，不同于首次查询
+                                              |    SELECT * FROM testt;
+                                              |    +----+------+
+                                              |    | id | n    |
+                                              |    +----+------+
+                                              |    |  7 |  700 |
+                                              |    |  8 |  888 |
+                                              |    +----+------+
+                                              |
+                                              |    -- 加Gap Locks
+                                              |    SELECT * FROM testt WHERE id >= 7 LOCK IN SHARE MODE;
+START TRANSACTION;                            |
+-- 有IS锁，更新失败                           |
+UPDATE testt SET n = 800 WHERE id = 8;        |
+ERROR 1205 (HY000): Lock wait timeout...      |
+                                              |
+-- 没有Next-Key Locks，插入成功               |
+INSERT INTO testt(id, n) VALUES(9, 900);      |
+                                              |    ROLLBACK; START TRANSACTION;
+                                              |    -- 只有符合条件的id = 8才加锁
+                                              |    UPDATE testt SET n = 0 WHERE n >= 800;
+UPDATE testt SET n = 77 WHERE id = 7;         |
+#+END_SRC
+
+** 读未提交（READ UNCOMMITTED）
+可以读到未提交的数据。导致 *脏读* ，因为数据最终可能未提交。
+
+** 串行化（SERIALIZABLE）
+和重复读类似，除了所有的读都是 =LOCK IN SHARE MODE= ，写性能大大降低。
+
+* 读-修改-写
+回到最初的问题，默认隔离级别。读-修改-写，不是并发安全的，多个线程可以并发的读到相同的数据，然后各自修改，这不是业务需要的。可以使用 =SELECT ... FOR UPDATE= 防止并发读写。虽然可以使用 =锁读= 来控制锁，但是死锁的概率也大大提升。

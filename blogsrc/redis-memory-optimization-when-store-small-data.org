@@ -74,10 +74,10 @@ foreach (split //, $md5) {
   }
 }
 
-my $hash = $appid . join("", @chars[0 .. 2]);
+my $hash = join("", @chars[0 .. 2], chr(ord($chars[3]) & 0x1F));
 my $hashlen = length($hash);
 
-my $key = join("", @chars[3 .. @chars-1]);
+my $key = $appid . join("", @chars[3 .. @chars-1]);
 my $keylen = length("$key");
 
 print join("\r\n", "*4", '$4', "HSET", '$'.$hashlen, $hash, '$'.$keylen, $key, '$1', 1), "\r\n";
@@ -87,13 +87,15 @@ print join("\r\n", "*4", '$4', "HSET", '$'.$hashlen, $hash, '$'.$keylen, $key, '
 
 内存使用情况
 #+BEGIN_EXAMPLE
-8593 4052120  3.0 redis-server *:6379
+31908 4755016  3.5 redis-server *:6379
 
-used_memory_human:3.31G
-db0:keys=16733972,expires=0,avg_ttl=0
+used_memory_human:3.63G
+db0:keys=16733925,expires=0,avg_ttl=0
 #+END_EXAMPLE
 
-内存使用3.31G，比裸数据 ~(6+16)*10^9 = 2.2G~ 只多了50%左右。不仅是省内存，这种方式还有个优势，内存占用 *不会随着条目数线性增长* 。因为最多16777216个条目，就算数据导了2亿，也只是每个hash到平均12个左右。
+内存使用3.63G，比裸数据 ~(6+16)*10^9 = 2.2G~ 只多了65%左右。不仅是省内存，这种方式还有个优势，内存占用 *不会随着条目数线性增长* 。因为最多16777216个条目，就算数据导了2亿，也只是每个hash到平均12个左右。
+
+这里有个小技巧 ~my $hash = join("", @chars[0 .. 2], chr(ord($chars[3]) & 0x1F));~ , 因为这1亿数据其实只是32分之一的数据，为了保证key有足够数据，后面又补充了第4位的32种可能。
 
 * 额外需要关注的问题
 1. 本来准备把6位的数字转成4位的整数存储，可以额外节省200M，后来放弃了，因为数字转成int，各个语言的互操作性有隐患。

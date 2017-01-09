@@ -52,6 +52,10 @@ done
 # tail -n +2 file
 #+END_SRC
 
+** date 命令
+- ~date +%s~ 获取时间戳
+- ~date @1480065287~ 获取时间戳对应的时间
+
 * Net
 ** 测试网速
 - ~curl http://example.com/bigfile.txt >/dev/null -vv~ 会显示打开速度
