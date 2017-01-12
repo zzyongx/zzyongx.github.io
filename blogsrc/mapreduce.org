@@ -1,0 +1,43 @@
+#+TITLE: MapReduce 使用经验
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 陷阱
+** Mutability
+所有 *Writable* 类型都是可变的，例如Text，LongWritable等，不要保持对他们的引用，甚至 =for (Text value : values)= 都不能保持对value的引用，因为它们都指向同一个对象。
+
+看下面的代码，values是reduce的第二个参数，这样写正确吗？
+
+#+BEGIN_SRC java
+Text max = null;
+for (Text value : values) {
+  if (max == null) max = value;
+  else if (max.getLength() < value.getLength()) max = value;
+}
+#+END_SRC
+
+** 运行上下文
+我非常好奇为什么 *Configuration* 不能设置value是 *Object* 呢？因为我想在 *main* 里初始化一个对象，然后在map和reduce里面使用，后来发现不支持，于是我把它做成一个单例。在 *local* 模式下竟然可以运行，可是在 *distributed* 模式下不行，为什么？
+
+因为 *local* 模式， *main* *map* *reduce* 全在一个进程中运行， *main* 中初始化的单例对象， *map* 和 *reduce* 中可以使用。而在 *distributed* 模式下，这三者在不同机器的不同进程中运行，它们逻辑上是一个程序，但运行上是三个程序。只可以在 *main* 中设置 *Configuration* ， *map 和 *reduce* 中读取里面的值。
+
+* 技巧
+** 在Java7平台运行Java8应用
+当Hadoop、yarn和应用使用的Java版本不同时，需要配置应用自己的 =JAVA_HOME= （联想MapReduce的工作流程，想想为什么这样是可行的）， ~-D yarn.app.mapreduce.am.env=JAVA_HOME=/path_to_java8 -D mapreduce.admin.user.env=JAVA_HOME=/path_to_java8~
+
+** *local* 配置优化
+*** 加大java内存配置
+修改 =hadoop-env.sh= 的 ~HADOOP_CLIENT_OPTS~ 例如：~export HADOOP_CLIENT_OPTS="-Xmx1024m $HADOOP_CLIENT_OPTS"~
+
+*** 修改tmp目录到大磁盘
+修改 =mapred-site.xml= 的 =mapreduce.cluster.local.dir=
+
+* avro
+=avro= 是类似于 =protobuf= 的序列化机制，支持在mapreduce中使用。
+
+** *local* 模式注意事项
+hadoop内置了avro的lib，这个可能和应用使用的avro版本不一致，在 *local* 模式下需要配置两个环境变量。
+#+BEGIN_SRC bash
+export HADOOP_CLASSPATH=/path_to_you_jar
+export HADOOP_USER_CLASSPATH_FIRST=true
+#+END_SRC
