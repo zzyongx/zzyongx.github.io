@@ -3,8 +3,12 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
+* 有意思的站点
+[[https://karpathy.github.io/][Andrej Karpathy blog]]
+
 * 2017 丁酉年
 -------------
+[[blog:brower_200_from_disk_cache_vs_304][如何控制浏览器缓存]] <2017-02-28>
 
 ** 经验
 [[blog:mysql-acid-lock][MySQL的事务和锁]] <2017-01-09>

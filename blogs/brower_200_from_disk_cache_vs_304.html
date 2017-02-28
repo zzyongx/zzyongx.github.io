@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-02-28 二 15:27 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>如何控制浏览器缓存</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">如何控制浏览器缓存</h1>
+<p>
+WEB开发缓存优化第一原则：缓存离用户越近，性能越高。无疑，浏览器是离用户最近的。那么如何控制浏览器缓存呢？
+我以前错误的以为，如果没有显式告知浏览器缓存，那么浏览器就不会缓存，这引起了很大问题。
+</p>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> Last-Modified</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+如果没有指定 <b>Expires</b> 或 <b>Cache-Control</b> 但是指定了 <b>Last-Modified</b> ，浏览器会猜应该缓存多久。对多数浏览器而言，缓存的时长是 <code>（现在时间 - Last-Modified时间）* 10%</code> 。越老的文件缓存的时间越长。这种控制缓存的方式相当任性，最好显式指定缓存。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> Cache-Control 和 Expires</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+可以通过 <b>Cache-Control</b> 和 <b>Expires</b> 显式的指定缓存。 <b>Cache-Control</b> 的优先级高于 <b>Expires</b> 。 <b>Cache-Control</b> 指定相对时间，而 <b>Expires</b> 指定绝对时间。例如：
+</p>
+<ol class="org-ol">
+<li>Cache-Control: max-age=0                   不缓存</li>
+<li>Expires: 0                                 不缓存</li>
+<li>Cache-Control: max-age=60                  缓存60S</li>
+<li>Expires: Mon, 27 Feb 2017 05:08:53 GMT     在GMT时间2017-2-27 05:08:53过期</li>
+</ol>
+
+<p>
+除了过期时间，*Cache-Control* 还有其它选项，<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control">Cache-Control参考</a>。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3"><span class="section-number-2">3</span> 200 (from disk cache)、(from memory cache)</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+在chrome开发者工具中会看到 <b>Status 200</b> <b>Size (from disk cache)</b> <b>Size (from memory cache)</b> ，这个的含义是：从浏览器缓存中读取数据，不会真的访问server端。性能最高。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4"><span class="section-number-2">4</span> 304</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+如果缓存已经过期，会重新请求server端。如果缓存中有 <b>ETag</b> ，那么往server端发请求时会带着 <b>If-None-Match</b> ，值和 <b>ETag</b> 一致。如果缓存中有 <b>Last-Modified</b> ，那么往server端发请求时会带着 <b>If-Modified-Since</b> ，值和 <b>Last-Modified</b> 一致。 <b>If-None-Match</b> 优先级高于 <b>If-Modified-Since</b> ，如果服务端判定缓存仍然有效，返回304。虽然304对服务端有真实的请求，但是响应没有BODY，性能也很高。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">5</span> 实践</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+对于静态资源，推荐的做法是使用版本或签名作为文件名，更改内容时更新版本和签名，这样可以在浏览器端设置很长的过期时间。但是对于html，文件名不应该改变，应该通过减少缓存时间，甚至不设置缓存。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">6</span> nginx 配置</h2>
+<div class="outline-text-2" id="text-6">
+<pre class="example">
+# cache-control for static resource
+set $cache_control "";
+if ($uri ~ "\.(?:html|json)$") {
+  set $cache_control "private, max-age=0, must-revalidate";
+}
+if ($uri ~ "\.(?:jpg|jpeg|gif|png|ico|svg|mp4|ttf)$") {   # 100 days
+  set $cache_control "public, max-age=8640000";
+}
+if ($uri ~ "\.(?:css|js)$") {   # 1 day
+  set $cache_control "private, max-age=86400";
+}
+add_header Cache-Control $cache_control;
+</pre>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2017-02-28 二 15:27</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+#+TITLE: 如何控制浏览器缓存
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+WEB开发缓存优化第一原则：缓存离用户越近，性能越高。无疑，浏览器是离用户最近的。那么如何控制浏览器缓存呢？
+我以前错误的以为，如果没有显式告知浏览器缓存，那么浏览器就不会缓存，这引起了很大问题。
+
+* Last-Modified
+如果没有指定 *Expires* 或 *Cache-Control* 但是指定了 *Last-Modified* ，浏览器会猜应该缓存多久。对多数浏览器而言，缓存的时长是 =（现在时间 - Last-Modified时间）* 10%= 。越老的文件缓存的时间越长。这种控制缓存的方式相当任性，最好显式指定缓存。
+
+* Cache-Control 和 Expires
+可以通过 *Cache-Control* 和 *Expires* 显式的指定缓存。 *Cache-Control* 的优先级高于 *Expires* 。 *Cache-Control* 指定相对时间，而 *Expires* 指定绝对时间。例如：
+1. Cache-Control: max-age=0                   不缓存
+2. Expires: 0                                 不缓存
+3. Cache-Control: max-age=60                  缓存60S
+4. Expires: Mon, 27 Feb 2017 05:08:53 GMT     在GMT时间2017-2-27 05:08:53过期
+
+除了过期时间，*Cache-Control* 还有其它选项，[[https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control][Cache-Control参考]]。
+
+* 200 (from disk cache)、(from memory cache)
+在chrome开发者工具中会看到 *Status 200* *Size (from disk cache)* *Size (from memory cache)* ，这个的含义是：从浏览器缓存中读取数据，不会真的访问server端。性能最高。
+
+* 304
+如果缓存已经过期，会重新请求server端。如果缓存中有 *ETag* ，那么往server端发请求时会带着 *If-None-Match* ，值和 *ETag* 一致。如果缓存中有 *Last-Modified* ，那么往server端发请求时会带着 *If-Modified-Since* ，值和 *Last-Modified* 一致。 *If-None-Match* 优先级高于 *If-Modified-Since* ，如果服务端判定缓存仍然有效，返回304。虽然304对服务端有真实的请求，但是响应没有BODY，性能也很高。
+
+* 实践
+对于静态资源，推荐的做法是使用版本或签名作为文件名，更改内容时更新版本和签名，这样可以在浏览器端设置很长的过期时间。但是对于html，文件名不应该改变，应该通过减少缓存时间，甚至不设置缓存。
+
+* nginx 配置
+#+BEGIN_EXAMPLE
+# cache-control for static resource
+set $cache_control "";
+if ($uri ~ "\.(?:html|json)$") {
+  set $cache_control "private, max-age=0, must-revalidate";
+}
+if ($uri ~ "\.(?:jpg|jpeg|gif|png|ico|svg|mp4|ttf)$") {   # 100 days
+  set $cache_control "public, max-age=8640000";
+}
+if ($uri ~ "\.(?:css|js)$") {   # 1 day
+  set $cache_control "private, max-age=86400";
+}
+add_header Cache-Control $cache_control;
+#+END_EXAMPLE

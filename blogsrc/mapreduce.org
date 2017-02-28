@@ -41,3 +41,9 @@ hadoop内置了avro的lib，这个可能和应用使用的avro版本不一致，
 export HADOOP_CLASSPATH=/path_to_you_jar
 export HADOOP_USER_CLASSPATH_FIRST=true
 #+END_SRC
+
+** 修改模式
+新增字段时，为了兼容老数据，需要指定 =default= ，如果 =type= 是多个类型，则 =default= 类型必须和第一个相同，例如：
+#+BEGIN_EXAMPLE
+{"name": "uid", "type": ["null", "string"], "default": null}
+#+END_EXAMPLE
