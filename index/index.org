@@ -8,9 +8,18 @@
 
 * 2017 丁酉年
 -------------
-[[blog:brower_200_from_disk_cache_vs_304][如何控制浏览器缓存]] <2017-02-28>
-
 ** 经验
+
+[[blog:grep-command-examples][grep]] <2017-03-09>
+#+BEGIN_QUOTE
+grep 常用选项
+#+END_QUOTE
+
+[[blog:brower_200_from_disk_cache_vs_304][如何控制浏览器缓存]] <2017-02-28>
+#+BEGIN_QUOTE
+浏览器缓存是性能优化的关键，更关键的是，一旦缓存错误，因为无法控制浏览器，所以很难修复，所以一开始就要配置正确
+#+END_QUOTE
+
 [[blog:mysql-acid-lock][MySQL的事务和锁]] <2017-01-09>
 #+BEGIN_QUOTE
 MySQL的事务隔离级别和背后的锁

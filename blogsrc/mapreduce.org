@@ -21,6 +21,12 @@ for (Text value : values) {
 
 因为 *local* 模式， *main* *map* *reduce* 全在一个进程中运行， *main* 中初始化的单例对象， *map* 和 *reduce* 中可以使用。而在 *distributed* 模式下，这三者在不同机器的不同进程中运行，它们逻辑上是一个程序，但运行上是三个程序。只可以在 *main* 中设置 *Configuration* ， *map 和 *reduce* 中读取里面的值。
 
+** LOGGER
+在mapreduce程序中可以像通常的java程序一样使用 *slf4j* 等工具打印日志，但是在具体的 *Mapper* 和 *Reducer* 中不建议打印日志（含System.out），巨慢无比，可以使用 *Counter* 等排查工具，或者把文件复制到本地，用local模式运行。另外查看 *Mapper* 和 *Reduce* 中的日志，无法在标准输出中看到，应该在任务控制台看。
+
+** 强制结束mapreduce程序
+在命令行用 *Ctrl-C* 或者 *kill* 没办法真的停止mapreduce程序，必须使用专门的命令 =yarn application -kill <application-id>=
+
 * 技巧
 ** 在Java7平台运行Java8应用
 当Hadoop、yarn和应用使用的Java版本不同时，需要配置应用自己的 =JAVA_HOME= （联想MapReduce的工作流程，想想为什么这样是可行的）， ~-D yarn.app.mapreduce.am.env=JAVA_HOME=/path_to_java8 -D mapreduce.admin.user.env=JAVA_HOME=/path_to_java8~
