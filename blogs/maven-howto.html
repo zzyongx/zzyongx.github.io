@@ -3,30 +3,23 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2016-10-25 二 11:14 -->
-<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>Maven HowTo</title>
+<!-- 2017-03-12 日 11:19 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="zhengzhiyong" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
-  .title  { text-align: center;
-             margin-bottom: .2em; }
-  .subtitle { text-align: center;
-              font-size: medium;
-              font-weight: bold;
-              margin-top:0; }
+  .title  { text-align: center; }
   .todo   { font-family: monospace; color: red; }
-  .done   { font-family: monospace; color: green; }
-  .priority { font-family: monospace; color: orange; }
+  .done   { color: green; }
   .tag    { background-color: #eee; font-family: monospace;
             padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
-  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
   .underline { text-decoration: underline; }
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
@@ -65,14 +58,15 @@
   caption.t-above { caption-side: top; }
   caption.t-bottom { caption-side: bottom; }
   td, th { vertical-align:top;  }
-  th.org-right  { text-align: center;  }
-  th.org-left   { text-align: center;   }
-  th.org-center { text-align: center; }
-  td.org-right  { text-align: right;  }
-  td.org-left   { text-align: left;   }
-  td.org-center { text-align: center; }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
   dt { font-weight: bold; }
-  .footpara { display: inline; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
@@ -154,44 +148,48 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">1. maven 简介</a></li>
-<li><a href="#orgheadline2">2. 安装 maven</a></li>
-<li><a href="#orgheadline3">3. 创建项目</a></li>
-<li><a href="#orgheadline4">4. 样板 pom.xml</a></li>
-<li><a href="#orgheadline5">5. 常用的maven命令和选项</a></li>
-<li><a href="#orgheadline6">6. mvn test 常用选项</a></li>
-<li><a href="#orgheadline8">7. 管理依赖</a>
+<li><a href="#sec-1">1. maven 简介</a></li>
+<li><a href="#sec-2">2. 安装 maven</a></li>
+<li><a href="#sec-3">3. 修改maven源</a></li>
+<li><a href="#sec-4">4. 创建项目</a></li>
+<li><a href="#sec-5">5. 样板 pom.xml</a></li>
+<li><a href="#sec-6">6. 常用的maven命令和选项</a></li>
+<li><a href="#sec-7">7. mvn test 常用选项</a></li>
+<li><a href="#sec-8">8. 管理依赖</a>
 <ul>
-<li><a href="#orgheadline7">7.1. 处理maven仓库中不存在的库</a></li>
+<li><a href="#sec-8-1">8.1. 处理maven仓库中不存在的库</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline9">8. 打出多种格式的包</a></li>
-<li><a href="#orgheadline18">9. 常用的maven插件</a>
+<li><a href="#sec-9">9. 打出多种格式的包</a></li>
+<li><a href="#sec-10">10. 常用的maven插件</a>
 <ul>
-<li><a href="#orgheadline10">9.1. maven-compiler-plugin 插件</a></li>
-<li><a href="#orgheadline11">9.2. maven-war-plugin</a></li>
-<li><a href="#orgheadline12">9.3. maven-jar-plugin</a></li>
-<li><a href="#orgheadline13">9.4. maven-dependency-plugin</a></li>
-<li><a href="#orgheadline14">9.5. maven-assembly-plugin</a></li>
-<li><a href="#orgheadline15">9.6. jetty-maven-plugin</a></li>
-<li><a href="#orgheadline16">9.7. maven-pmd-plugin</a></li>
-<li><a href="#orgheadline17">9.8. findbugs-maven-plugin</a></li>
+<li><a href="#sec-10-1">10.1. maven-compiler-plugin 插件</a></li>
+<li><a href="#sec-10-2">10.2. maven-war-plugin</a></li>
+<li><a href="#sec-10-3">10.3. maven-jar-plugin</a></li>
+<li><a href="#sec-10-4">10.4. maven-dependency-plugin</a></li>
+<li><a href="#sec-10-5">10.5. maven-assembly-plugin</a></li>
+<li><a href="#sec-10-6">10.6. jetty-maven-plugin</a></li>
+<li><a href="#sec-10-7">10.7. maven-pmd-plugin</a></li>
+<li><a href="#sec-10-8">10.8. findbugs-maven-plugin</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> maven 简介</h2>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> maven 简介</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 我们先不谈maven是什么，我们先说，我们开发一个应用需要什么
 </p>
 <ul class="org-ul">
-<li>编译，测试，运行，打包</li>
-<li>管理依赖</li>
-<li>项目报告</li>
+<li>编译，测试，运行，打包
+</li>
+<li>管理依赖
+</li>
+<li>项目报告
+</li>
 </ul>
 <p>
 好的，maven以统一的形式提供了这些功能，虽然几乎所有功能都是以插件的形式提供的。
@@ -199,15 +197,15 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2"><span class="section-number-2">2</span> 安装 maven</h2>
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 安装 maven</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 安装很简单，下载源码，解压，把bin目录添加到 PATH 路径即可。
 </p>
 <div class="org-src-container">
 
-<pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">mvn -version</span>
+<pre class="src src-bash"># mvn -version
 Apache Maven 3.3.3 (7994120775791599e205a5524ec3e0dfe41d4a06; 2015-04-22T19:57:37+08:00)
 </pre>
 </div>
@@ -218,27 +216,44 @@ Apache Maven 3.3.3 (7994120775791599e205a5524ec3e0dfe41d4a06; 2015-04-22T19:57:3
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-2">
-<h2 id="orgheadline3"><span class="section-number-2">3</span> 创建项目</h2>
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 修改maven源</h2>
 <div class="outline-text-2" id="text-3">
+<p>
+maven的默认源在国内很慢，在 <code>$MAVEN_HOME/conf/settings.xml</code> 的 <b>mirrors</b> 下增加国内的maven镜像源，下载依赖时提速明显。
+</p>
+<pre class="example">
+&lt;mirror&gt;
+  &lt;id&gt;CN&lt;/id&gt;
+  &lt;name&gt;Aliyun Nexus&lt;/name&gt;
+  &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public&lt;/url&gt;
+  &lt;mirrorOf&gt;central&lt;/mirrorOf&gt;
+&lt;/mirror&gt;
+</pre>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 创建项目</h2>
+<div class="outline-text-2" id="text-4">
 <p>
 要使用maven，项目必须符合一定的目录规范，最简单的方法就是用maven来创建项目。
 </p>
 <div class="org-src-container">
 
-<pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">mvn archetype:generate -DgroupId=example -DartifactId=howto -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</span>
-<span style="color: #ffff00;"># </span><span style="color: #ffff00;">tree howto</span>
+<pre class="src src-bash"># mvn archetype:generate -DgroupId=example -DartifactId=howto -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+# tree howto
 howto/
-&#9500;&#9472;&#9472; pom.xml
-&#9492;&#9472;&#9472; src
-    &#9500;&#9472;&#9472; main
-    &#9474;&#160; &#9492;&#9472;&#9472; java
-    &#9474;&#160;&#160;     &#9492;&#9472;&#9472; example
-    &#9474;&#160;&#160;         &#9492;&#9472;&#9472; App.java
-    &#9492;&#9472;&#9472; test
-        &#9492;&#9472;&#9472; java
-            &#9492;&#9472;&#9472; example
-                &#9492;&#9472;&#9472; AppTest.java
+├── pom.xml
+└── src
+    ├── main
+    │  └── java
+    │       └── example
+    │           └── App.java
+    └── test
+        └── java
+            └── example
+                └── AppTest.java
 </pre>
 </div>
 </div>
@@ -246,18 +261,18 @@ howto/
 
 
 
-<div id="outline-container-orgheadline4" class="outline-2">
-<h2 id="orgheadline4"><span class="section-number-2">4</span> 样板 pom.xml</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 样板 pom.xml</h2>
+<div class="outline-text-2" id="text-5">
 <p>
 除了目录结构外，pom.xml 是 maven 的核心， <code>package</code> 是包的类型 <code>jar</code> 或者 <code>war</code> ， <code>properties</code> 中定义的值可以在其它地方引用， <code>dependencies</code> 定义依赖， <code>build</code> 定义构建过程需要的插件， <code>reporting</code> 定义构建完后的一些报告插件。maven的大部分功能都是通过插件提供的，后面会说一些比较有用的插件。
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-xml">&lt;<span style="color: #0000ff; font-weight: bold;">project</span> <span style="color: #0000ff; font-weight: bold;">xmlns</span>=<span style="color: #00ff00;">"</span><span style="color: #00ff00;">http://maven.apache.org/POM/4.0.0</span><span style="color: #00ff00;">"</span>
-         <span style="color: #0000ff; font-weight: bold;">xmlns</span>:<span style="color: #ffff00;">xsi</span>=<span style="color: #00ff00;">"</span><span style="color: #00ff00;">http://www.w3.org/2001/XMLSchema-instance</span><span style="color: #00ff00;">"</span>
-         <span style="color: #0000ff; font-weight: bold;">xsi</span>:<span style="color: #ffff00;">schemaLocation</span>=<span style="color: #00ff00;">"</span><span style="color: #00ff00;">http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd</span><span style="color: #00ff00;">"</span>&gt;
+<pre class="src src-xml">&lt;<span style="color: #0000ff; font-weight: bold;">project</span> <span style="color: #483d8b;">xmlns</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">http://maven.apache.org/POM/4.0.0</span><span style="color: #8b2252;">"</span>
+         <span style="color: #483d8b;">xmlns</span>:<span style="color: #a0522d;">xsi</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">http://www.w3.org/2001/XMLSchema-instance</span><span style="color: #8b2252;">"</span>
+         <span style="color: #483d8b;">xsi</span>:<span style="color: #a0522d;">schemaLocation</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd</span><span style="color: #8b2252;">"</span>&gt;
 
   &lt;<span style="color: #0000ff; font-weight: bold;">modelVersion</span>&gt;4.0.0&lt;/<span style="color: #0000ff; font-weight: bold;">modelVersion</span>&gt;
   &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;example&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
@@ -300,7 +315,7 @@ howto/
       &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.hibernate&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
       &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;hibernate-validator&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
       &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;5.2.4.Final&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;    
+    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
     &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
       &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.aspectj&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
       &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;aspectjweaver&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
@@ -368,7 +383,7 @@ howto/
         &lt;<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
           &lt;<span style="color: #0000ff; font-weight: bold;">excludeFilterFile</span>&gt;findbugs-exclude.xml&lt;/<span style="color: #0000ff; font-weight: bold;">excludeFilterFile</span>&gt;
         &lt;/<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;      
+      &lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
     &lt;/<span style="color: #0000ff; font-weight: bold;">plugins</span>&gt;
   &lt;/<span style="color: #0000ff; font-weight: bold;">reporting</span>&gt;
 &lt;/<span style="color: #0000ff; font-weight: bold;">project</span>&gt;
@@ -377,15 +392,20 @@ howto/
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">5</span> 常用的maven命令和选项</h2>
-<div class="outline-text-2" id="text-5">
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 常用的maven命令和选项</h2>
+<div class="outline-text-2" id="text-6">
 <ul class="org-ul">
-<li>mvn compile 编译</li>
-<li>mvn package 打 <code>war</code> 或者 <code>jar</code> 包</li>
-<li>mvn clean 清除 package 或其它过程中产生的中间文件</li>
-<li>mvn dependency:help 查看 dependency 插件的帮助</li>
-<li>mvn site 查看项目报告，把 target/site 配置到 http doc 目录，可以以web方式查看</li>
+<li>mvn compile 编译
+</li>
+<li>mvn package 打 <code>war</code> 或者 <code>jar</code> 包
+</li>
+<li>mvn clean 清除 package 或其它过程中产生的中间文件
+</li>
+<li>mvn dependency:help 查看 dependency 插件的帮助
+</li>
+<li>mvn site 查看项目报告，把 target/site 配置到 http doc 目录，可以以web方式查看
+</li>
 </ul>
 
 <p>
@@ -399,41 +419,47 @@ howto/
 </div>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6"><span class="section-number-2">6</span> mvn test 常用选项</h2>
-<div class="outline-text-2" id="text-6">
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> mvn test 常用选项</h2>
+<div class="outline-text-2" id="text-7">
 <ul class="org-ul">
-<li>-Dtest=TestCircle 只测试 TestCircle</li>
-<li>-Dtest=TestCi*le  模糊匹配</li>
-<li>-Dtest=TestSquare,TestCi*le 指定多个</li>
-<li>-Dtest=TestCircle#mytest 指定方法</li>
-<li>-Dtest=TestCircle#test* 模糊匹配</li>
-<li>-Dtest=TestCircle#testOne+testTwo 指定多个方法</li>
+<li>-Dtest=TestCircle 只测试 TestCircle
+</li>
+<li>-Dtest=TestCi*le  模糊匹配
+</li>
+<li>-Dtest=TestSquare,TestCi*le 指定多个
+</li>
+<li>-Dtest=TestCircle#mytest 指定方法
+</li>
+<li>-Dtest=TestCircle#test* 模糊匹配
+</li>
+<li>-Dtest=TestCircle#testOne+testTwo 指定多个方法
+</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-2">
-<h2 id="orgheadline8"><span class="section-number-2">7</span> 管理依赖</h2>
-<div class="outline-text-2" id="text-7">
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 管理依赖</h2>
+<div class="outline-text-2" id="text-8">
 <p>
 通过 <code>dependency</code> 填写依赖，maven会在本地缓存一份数据 <code>$HOME/.m2/repository</code>
 依赖管理是个很便捷的东西。c和c++就没有类似的项目，Makefile 里面指定的依赖额外安装。
 </p>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7"><span class="section-number-3">7.1</span> 处理maven仓库中不存在的库</h3>
-<div class="outline-text-3" id="text-7-1">
+<div id="outline-container-sec-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> 处理maven仓库中不存在的库</h3>
+<div class="outline-text-3" id="text-8-1">
 <p>
 有时候会碰到jar包不在标准maven仓库的情况，这时有两种选择，一种是自己搭建maven仓库，另一种是把jar把安装到maven缓存中，这里介绍第二种方法。
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">download jar</span>
+<pre class="src src-bash"># download jar
 curl http://path-to-jar/org.patchca.patchca-0.6.0.jar -o org.patchca.patchca-0.6.0.jar
-<span style="color: #ffff00;"># </span><span style="color: #ffff00;">install jar to local mvn cache</span>
+# install jar to local mvn cache
 mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patchca -DartifactId=patchca -Dversion=0.6.0 -Dpackaging=jar
 </pre>
 </div>
@@ -441,9 +467,9 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-2">
-<h2 id="orgheadline9"><span class="section-number-2">8</span> 打出多种格式的包</h2>
-<div class="outline-text-2" id="text-8">
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> 打出多种格式的包</h2>
+<div class="outline-text-2" id="text-9">
 <p>
 假设应用除了提供web接口（这需要应用打包成war），还提供了一些小命令（这些小命令对war里面的class有依赖），此时除了war外，再打包出一个jar包供小命令用是个不错的选择。
 </p>
@@ -454,30 +480,30 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-orgheadline18" class="outline-2">
-<h2 id="orgheadline18"><span class="section-number-2">9</span> 常用的maven插件</h2>
-<div class="outline-text-2" id="text-9">
-</div><div id="outline-container-orgheadline10" class="outline-3">
-<h3 id="orgheadline10"><span class="section-number-3">9.1</span> maven-compiler-plugin 插件</h3>
-<div class="outline-text-3" id="text-9-1">
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> 常用的maven插件</h2>
+<div class="outline-text-2" id="text-10">
+</div><div id="outline-container-sec-10-1" class="outline-3">
+<h3 id="sec-10-1"><span class="section-number-3">10.1</span> maven-compiler-plugin 插件</h3>
+<div class="outline-text-3" id="text-10-1">
 <p>
 编译插件，配置编译选项
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="section-number-3">9.2</span> maven-war-plugin</h3>
-<div class="outline-text-3" id="text-9-2">
+<div id="outline-container-sec-10-2" class="outline-3">
+<h3 id="sec-10-2"><span class="section-number-3">10.2</span> maven-war-plugin</h3>
+<div class="outline-text-3" id="text-10-2">
 <p>
 打war包插件，配置打包选项
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><span class="section-number-3">9.3</span> maven-jar-plugin</h3>
-<div class="outline-text-3" id="text-9-3">
+<div id="outline-container-sec-10-3" class="outline-3">
+<h3 id="sec-10-3"><span class="section-number-3">10.3</span> maven-jar-plugin</h3>
+<div class="outline-text-3" id="text-10-3">
 <p>
 打jar包插件，不包含依赖
 </p>
@@ -502,9 +528,9 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13"><span class="section-number-3">9.4</span> maven-dependency-plugin</h3>
-<div class="outline-text-3" id="text-9-4">
+<div id="outline-container-sec-10-4" class="outline-3">
+<h3 id="sec-10-4"><span class="section-number-3">10.4</span> maven-dependency-plugin</h3>
+<div class="outline-text-3" id="text-10-4">
 <p>
 提取所有的依赖
 </p>
@@ -532,9 +558,9 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14"><span class="section-number-3">9.5</span> maven-assembly-plugin</h3>
-<div class="outline-text-3" id="text-9-5">
+<div id="outline-container-sec-10-5" class="outline-3">
+<h3 id="sec-10-5"><span class="section-number-3">10.5</span> maven-assembly-plugin</h3>
+<div class="outline-text-3" id="text-10-5">
 <p>
 打独立运行的jar包，build-plugins段
 </p>
@@ -564,34 +590,34 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-orgheadline15" class="outline-3">
-<h3 id="orgheadline15"><span class="section-number-3">9.6</span> jetty-maven-plugin</h3>
-<div class="outline-text-3" id="text-9-6">
+<div id="outline-container-sec-10-6" class="outline-3">
+<h3 id="sec-10-6"><span class="section-number-3">10.6</span> jetty-maven-plugin</h3>
+<div class="outline-text-3" id="text-10-6">
 <p>
-jetty插件，通过 mvn jetty:run-war 运行war包，查看 <a href="#orgheadline4">4</a>
-虽然通过 jetty:run 也可以运行，但有时候会引起问题，尤其是关于slf4j的。run-war 相当于执行了 mvn package ，更接近真实的环境。
+jetty插件，通过 mvn jetty:run-war 运行war包，查看 <a href="#sec-5">5</a>
+虽然通过 <b>jetty:run</b> 也可以运行，但有时候会引起问题，尤其是关于 <b>slf4j</b> 的。例如：把依赖 <b>slf4j-api</b> 设置为 <b>compile</b> ，但是使用 <b>jetty:run</b> 却会加载 <b>slf4j-api</b> 。推荐使用 <b>jetty:run-war</b> 此时执行的是war包中的内容， <b>slf4j-api</b> 肯定不在里面，并且因为更接近真实环境，更能减少上线的bug。
 </p>
 
 <p>
-通过jetty插件运行程序使用的是maven的日志配置，在 <code>$MAVEN_HOME/conf/logging/simplelogger.properties</code> 文件中，默认基本是 info，通过增加 <code>org.slf4j.simpleLogger.log.example=debug</code> 把example包(及子包)下的日志级别设置为debug，用于调试example包。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgheadline16" class="outline-3">
-<h3 id="orgheadline16"><span class="section-number-3">9.7</span> maven-pmd-plugin</h3>
-<div class="outline-text-3" id="text-9-7">
-<p>
-源码分析插件，发现隐藏的bug，参考 <a href="#orgheadline4">4</a>
+通过jetty插件运行程序使用的是maven的日志配置，在 <code>$MAVEN_HOME/conf/logging/simplelogger.properties</code> 文件中，默认基本是 info，通过增加 <code>org.slf4j.simpleLogger.log.example=debug</code> 把example包(及子包)下的日志级别设置为debug，用于调试example包。如果 <b>jetty:run</b> 出现了 <b>SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder"</b> ，试试 <b>jetty:run-war</b> 。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline17" class="outline-3">
-<h3 id="orgheadline17"><span class="section-number-3">9.8</span> findbugs-maven-plugin</h3>
-<div class="outline-text-3" id="text-9-8">
+<div id="outline-container-sec-10-7" class="outline-3">
+<h3 id="sec-10-7"><span class="section-number-3">10.7</span> maven-pmd-plugin</h3>
+<div class="outline-text-3" id="text-10-7">
 <p>
-代码静态分析，发现隐藏的bug，参考 <a href="#orgheadline4">4</a>
+源码分析插件，发现隐藏的bug，参考 <a href="#sec-5">5</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-10-8" class="outline-3">
+<h3 id="sec-10-8"><span class="section-number-3">10.8</span> findbugs-maven-plugin</h3>
+<div class="outline-text-3" id="text-10-8">
+<p>
+代码静态分析，发现隐藏的bug，参考 <a href="#sec-5">5</a>
 </p>
 </div>
 </div>
@@ -599,7 +625,8 @@ jetty插件，通过 mvn jetty:run-war 运行war包，查看 <a href="#orgheadli
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2016-10-25 二 11:14</p>
+<p class="date">Created: 2017-03-12 日 11:19</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

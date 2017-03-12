@@ -18,6 +18,17 @@ Apache Maven 3.3.3 (7994120775791599e205a5524ec3e0dfe41d4a06; 2015-04-22T19:57:3
 
 能正确运行，说明安装成功
 
+* 修改maven源
+maven的默认源在国内很慢，在 ~$MAVEN_HOME/conf/settings.xml~ 的 *mirrors* 下增加国内的maven镜像源，下载依赖时提速明显。
+#+BEGIN_EXAMPLE
+<mirror>
+  <id>CN</id>
+  <name>Aliyun Nexus</name>
+  <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+  <mirrorOf>central</mirrorOf>
+</mirror>
+#+END_EXAMPLE
+
 * 创建项目
 要使用maven，项目必须符合一定的目录规范，最简单的方法就是用maven来创建项目。
 #+BEGIN_SRC bash
@@ -38,7 +49,7 @@ howto/
 
 
 
-* 样板 pom.xml 
+* 样板 pom.xml
 除了目录结构外，pom.xml 是 maven 的核心， ~package~ 是包的类型 ~jar~ 或者 ~war~ ， ~properties~ 中定义的值可以在其它地方引用， ~dependencies~ 定义依赖， ~build~ 定义构建过程需要的插件， ~reporting~ 定义构建完后的一些报告插件。maven的大部分功能都是通过插件提供的，后面会说一些比较有用的插件。
 
 #+BEGIN_SRC xml
@@ -87,7 +98,7 @@ howto/
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
       <version>5.2.4.Final</version>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.aspectj</groupId>
       <artifactId>aspectjweaver</artifactId>
@@ -101,7 +112,7 @@ howto/
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -155,7 +166,7 @@ howto/
         <configuration>
           <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </reporting>
 </project>
@@ -274,9 +285,9 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 
 ** jetty-maven-plugin
 jetty插件，通过 mvn jetty:run-war 运行war包，查看 [[样板 pom.xml]]
-虽然通过 jetty:run 也可以运行，但有时候会引起问题，尤其是关于slf4j的。run-war 相当于执行了 mvn package ，更接近真实的环境。
+虽然通过 *jetty:run* 也可以运行，但有时候会引起问题，尤其是关于 *slf4j* 的。例如：把依赖 *slf4j-api* 设置为 *compile* ，但是使用 *jetty:run* 却会加载 *slf4j-api* 。推荐使用 *jetty:run-war* 此时执行的是war包中的内容， *slf4j-api* 肯定不在里面，并且因为更接近真实环境，更能减少上线的bug。
 
-通过jetty插件运行程序使用的是maven的日志配置，在 ~$MAVEN_HOME/conf/logging/simplelogger.properties~ 文件中，默认基本是 info，通过增加 ~org.slf4j.simpleLogger.log.example=debug~ 把example包(及子包)下的日志级别设置为debug，用于调试example包。
+通过jetty插件运行程序使用的是maven的日志配置，在 ~$MAVEN_HOME/conf/logging/simplelogger.properties~ 文件中，默认基本是 info，通过增加 ~org.slf4j.simpleLogger.log.example=debug~ 把example包(及子包)下的日志级别设置为debug，用于调试example包。如果 *jetty:run* 出现了 *SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder"* ，试试 *jetty:run-war* 。
 
 ** maven-pmd-plugin
 源码分析插件，发现隐藏的bug，参考 [[样板 pom.xml]]
