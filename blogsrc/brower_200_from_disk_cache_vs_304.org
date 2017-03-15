@@ -31,13 +31,49 @@ WEB开发缓存优化第一原则：缓存离用户越近，性能越高。无�
 # cache-control for static resource
 set $cache_control "";
 if ($uri ~ "\.(?:html|json)$") {
-  set $cache_control "private, max-age=0, must-revalidate";
+  set $cache_control "public, max-age=0, must-revalidate";
 }
 if ($uri ~ "\.(?:jpg|jpeg|gif|png|ico|svg|mp4|ttf)$") {   # 100 days
   set $cache_control "public, max-age=8640000";
 }
 if ($uri ~ "\.(?:css|js)$") {   # 1 day
-  set $cache_control "private, max-age=86400";
+  set $cache_control "public, max-age=86400";
 }
 add_header Cache-Control $cache_control;
 #+END_EXAMPLE
+
+* 浏览器如何请求资源
+浏览器请求资源的方式影响缓存的使用（浏览器间有不同），资源分主资源和子资源。直接在地址栏输入的是主资源，主资源自己请求的资源是子资源。看例子， =api/test= 设置了 ~Cache-Control: max-age=60,private~ ，但是没有设置 *ETag* 和 *Last-Modified* ， =test.html= 是静态页面，它包含了 =api/test= 子资源，另外 *XHR* 请求也属于子资源请求。
+
+1. =http://dev/api/test=
+
+2. =http://dev/test.html= 内容是
+#+BEGIN_SRC html
+<script src="http://dev/api/test"></script>
+<a href="http://dev/api/test">Test</a>
+#+END_SRC
+
+在浏览器的地址栏输入上面的两个地址：其中1没有使用缓存，虽然 =api/test= 设置了缓存，但是并没有使用（因为是主资源，所以总是发请求，且没有 *ETag* 和 *Last-Modified* 所以没有返回304）。2包含了两个资源，再次刷新，test.html 返回304（因为它是主资源，所以总是请求服务端）， =api/test= 使用缓存（在chrome中）。但是在firefox中 =api/test= 也没有使用缓存，只有点击Test打开连接时 =api/test= 才使用了缓存。
+
+除了在地址栏输入地址，点击刷新按钮，摁F5，还可以通过 =Ctl-F5= 强制刷新，此时所有的缓存都被忽略（老版本的IE不支持）。
+
+了解这些并没有太多用，但是如果你想测试接口的缓存效果，发现每次刷新都没有使用缓存，可能是浏览器请求资源方式的缘故。
+
+* Cache-Control 注意事项
+** max-age=0，no-cache，no-store 的区别
+- max-age=0 的意思是缓存，但是不使用它，当从服务端获取资源失败时，可以考虑使用。
+- no-cache 的意思是缓存，但是不使用它，仅当从服务端返回了304时，才使用。
+- no-store 的意思是不缓存。
+
+** private
+private 对浏览器没有太多意义，更多的是针对CDN或充当CDN的nginx之类，它告诉CDN不要缓存此类响应。例如：同一个url，针对cookie中的用户不同，返回不同的内容，应该是private的，此时CDN就不应该缓存。
+
+** 浏览器请求时带着：max-age=0
+这是告诉CDN不要使用缓存的内容，把请求代理到upstream服务器。
+
+* 浏览器之间的差异
+各家浏览器基于自己对缓存和性能的理解，对缓存的处理不同，以上描述不是对所有浏览器都适用，但没有本质影响。
+
+* 参考资料
+1. [[https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching][Google Developer HTTP 缓存]]
+2. [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching][MDN HTTP Caching]]

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-02-28 二 15:27 -->
+<!-- 2017-03-15 三 12:34 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>如何控制浏览器缓存</title>
@@ -217,22 +217,107 @@ WEB开发缓存优化第一原则：缓存离用户越近，性能越高。无�
 # cache-control for static resource
 set $cache_control "";
 if ($uri ~ "\.(?:html|json)$") {
-  set $cache_control "private, max-age=0, must-revalidate";
+  set $cache_control "public, max-age=0, must-revalidate";
 }
 if ($uri ~ "\.(?:jpg|jpeg|gif|png|ico|svg|mp4|ttf)$") {   # 100 days
   set $cache_control "public, max-age=8640000";
 }
 if ($uri ~ "\.(?:css|js)$") {   # 1 day
-  set $cache_control "private, max-age=86400";
+  set $cache_control "public, max-age=86400";
 }
 add_header Cache-Control $cache_control;
 </pre>
 </div>
 </div>
+
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7"><span class="section-number-2">7</span> 浏览器如何请求资源</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+浏览器请求资源的方式影响缓存的使用（浏览器间有不同），资源分主资源和子资源。直接在地址栏输入的是主资源，主资源自己请求的资源是子资源。看例子， <code>api/test</code> 设置了 <code>Cache-Control: max-age=60,private</code> ，但是没有设置 <b>ETag</b> 和 <b>Last-Modified</b> ， <code>test.html</code> 是静态页面，它包含了 <code>api/test</code> 子资源，另外 <b>XHR</b> 请求也属于子资源请求。
+</p>
+
+<ol class="org-ol">
+<li><code>http://dev/api/test</code></li>
+
+<li><code>http://dev/test.html</code> 内容是</li>
+</ol>
+<div class="org-src-container">
+
+<pre class="src src-html">&lt;<span style="color: #0000ff; font-weight: bold;">script</span> <span style="color: #ffff00;">src</span>=<span style="color: #00ff00;">"http://dev/api/test"</span>&gt;&lt;/<span style="color: #0000ff; font-weight: bold;">script</span>&gt;
+&lt;<span style="color: #0000ff; font-weight: bold;">a</span> <span style="color: #ffff00;">href</span>=<span style="color: #00ff00;">"http://dev/api/test"</span>&gt;Test&lt;/<span style="color: #0000ff; font-weight: bold;">a</span>&gt;
+</pre>
+</div>
+
+<p>
+在浏览器的地址栏输入上面的两个地址：其中1没有使用缓存，虽然 <code>api/test</code> 设置了缓存，但是并没有使用（因为是主资源，所以总是发请求，且没有 <b>ETag</b> 和 <b>Last-Modified</b> 所以没有返回304）。2包含了两个资源，再次刷新，test.html 返回304（因为它是主资源，所以总是请求服务端）， <code>api/test</code> 使用缓存（在chrome中）。但是在firefox中 <code>api/test</code> 也没有使用缓存，只有点击Test打开连接时 <code>api/test</code> 才使用了缓存。
+</p>
+
+<p>
+除了在地址栏输入地址，点击刷新按钮，摁F5，还可以通过 <code>Ctl-F5</code> 强制刷新，此时所有的缓存都被忽略（老版本的IE不支持）。
+</p>
+
+<p>
+了解这些并没有太多用，但是如果你想测试接口的缓存效果，发现每次刷新都没有使用缓存，可能是浏览器请求资源方式的缘故。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-2">
+<h2 id="orgheadline11"><span class="section-number-2">8</span> Cache-Control 注意事项</h2>
+<div class="outline-text-2" id="text-8">
+</div><div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">8.1</span> max-age=0，no-cache，no-store 的区别</h3>
+<div class="outline-text-3" id="text-8-1">
+<ul class="org-ul">
+<li>max-age=0 的意思是缓存，但是不使用它，当从服务端获取资源失败时，可以考虑使用。</li>
+<li>no-cache 的意思是缓存，但是不使用它，仅当从服务端返回了304时，才使用。</li>
+<li>no-store 的意思是不缓存。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><span class="section-number-3">8.2</span> private</h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+private 对浏览器没有太多意义，更多的是针对CDN或充当CDN的nginx之类，它告诉CDN不要缓存此类响应。例如：同一个url，针对cookie中的用户不同，返回不同的内容，应该是private的，此时CDN就不应该缓存。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><span class="section-number-3">8.3</span> 浏览器请求时带着：max-age=0</h3>
+<div class="outline-text-3" id="text-8-3">
+<p>
+这是告诉CDN不要使用缓存的内容，把请求代理到upstream服务器。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-2">
+<h2 id="orgheadline12"><span class="section-number-2">9</span> 浏览器之间的差异</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+各家浏览器基于自己对缓存和性能的理解，对缓存的处理不同，以上描述不是对所有浏览器都适用，但没有本质影响。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-2">
+<h2 id="orgheadline13"><span class="section-number-2">10</span> 参考资料</h2>
+<div class="outline-text-2" id="text-10">
+<ol class="org-ol">
+<li><a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching">Google Developer HTTP 缓存</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching">MDN HTTP Caching</a></li>
+</ol>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-02-28 二 15:27</p>
+<p class="date">Created: 2017-03-15 三 12:34</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
