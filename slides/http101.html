@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>HTTP 101</title>
+<meta name="author" content="(郑志勇)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="../reveal.js/css/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="../reveal.js/css/local.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">HTTP 101</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-03-29 三 18:42</p>
+</section>
+
+<section>
+<section id="slide-orgheadline1">
+<h2 id="orgheadline1">HTTP/1.1 简介</h2>
+<ul>
+<li>基于TCP的应用层协议</li>
+<li>文本协议</li>
+<li>请求应答模式</li>
+<li>无状态</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline2">
+<h2 id="orgheadline2">何为协议</h2>
+<ul>
+<li>协议是约定</li>
+<li>用于异构系统通信</li>
+<li>协议是用来遵守的</li>
+<li>不遵守是普遍存在的</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline9">
+<h2 id="orgheadline9">HTTP协议</h2>
+<ul>
+<li>请求方法</li>
+<li>请求PATH和QueryString</li>
+<li>响应状态码</li>
+<li>请求/响应 Header</li>
+<li>请求/响应 Body</li>
+<li>Header用来描述协议元信息，Header Name不区分大小写</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline3">
+<h3 id="orgheadline3">Chrome Developer Tools</h3>
+
+<div class="figure">
+<p><img src="../images/http101/http-get.png" alt="http-get.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline4">
+<h3 id="orgheadline4">curl</h3>
+
+<div class="figure">
+<p><img src="../images/http101/http-put.png" alt="http-put.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline5">
+<h3 id="orgheadline5">tcpdump</h3>
+
+<div class="figure">
+<p><img src="../images/http101/http-tcpdump.png" alt="http-tcpdump.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline6">
+<h3 id="orgheadline6">HTTP协议组成</h3>
+<pre class="example">
+METHOD PATH[?QUERY_STRING] HTTP_VERSION
+REQ_HEADER_NAME_1: REQ_HEADER_VALUE_1
+REQ_HEADER_NAME_2: REQ_HEADER_VALUE_2
+
+[REQ_HTTP_BODY]
+HTTP_VERSION HTTP_STATUS_CODE HTTP_STATUS_MESSAGE
+RESP_HEADER_NAME_1: RESP_HEADER_VALUE_1
+RESP_HEADER_NAME_2: RESP_HEADER_VALUE_2
+
+[RESP_HTTP_BODY]
+</pre>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline7">
+<h3 id="orgheadline7">文本协议的妙处</h3>
+
+<div class="figure">
+<p><img src="../images/http101/cat-nc.png" alt="cat-nc.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline8">
+<h3 id="orgheadline8">HTTP 方法</h3>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">方法</th>
+<th scope="col" class="org-left">语义</th>
+<th scope="col" class="org-left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">GET</td>
+<td class="org-left">查</td>
+<td class="org-left">可缓存，不改变服务端状态</td>
+</tr>
+
+<tr>
+<td class="org-left">POST</td>
+<td class="org-left">增</td>
+<td class="org-left">不幂等</td>
+</tr>
+
+<tr>
+<td class="org-left">PUT</td>
+<td class="org-left">改</td>
+<td class="org-left">类似POST，幂等</td>
+</tr>
+
+<tr>
+<td class="org-left">DELETE</td>
+<td class="org-left">删</td>
+<td class="org-left">请求无BODY</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline17">
+<h2 id="orgheadline17">重要的HTTP HEADER</h2>
+<ul>
+<li>控制数据格式，压缩</li>
+<li>控制缓存</li>
+<li>保持状态</li>
+<li>安全提示</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline10">
+<h3 id="orgheadline10">Connection（REQ）</h3>
+<p>
+取值 <code>close</code> 或 <code>keep-alive</code>
+</p>
+
+<p>
+keep-alive HTTP请求结束，TCP连接不关闭
+</p>
+
+<p>
+区别于TCP的KeepAlive
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline11">
+<h3 id="orgheadline11">Host （REQ）</h3>
+<p>
+请求的主机名，多用于虚拟主机
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline12">
+<h3 id="orgheadline12">Accept（REQ）</h3>
+<p>
+客户端用来表明自己支持的（或需要的）数据格式。多用于服务端可以提供多种格式时。
+</p>
+
+<p>
+例如：
+</p>
+<ul>
+<li><code>Accept: image/webp,*/*</code> 服务端可以知道客户端支持webp格式</li>
+<li><code>Accept: application/json</code> 服务端需要返回json格式的数据，且只能返回json</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline13">
+<h3 id="orgheadline13">Content-Type</h3>
+<p>
+表明Body的数据格式
+</p>
+
+<p>
+例如：
+</p>
+<ul>
+<li>常见的Req Content-Type: <code>application/x-www-form-urlencoded</code> <code>multipart/form-data</code> 等</li>
+<li>常见的Resp Content-Type: <code>application/json; charset=utf-8</code> <code>text/html; charset=utf-8</code></li>
+
+</ul>
+
+<p>
+这里charset用来表明使用的字符集
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline14">
+<h3 id="orgheadline14">Content-Length 或 Transfer-Encoding（RESP）</h3>
+<ul>
+<li>已知Body大小时，用Content-Length，多用于静态资源</li>
+<li>未知Body大小时，用 <code>Transfer-Encoding:chunked</code>, 多用于动态资源</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline15">
+<h3 id="orgheadline15">Accept-Encoding（REQ） 和 Content-Encoding</h3>
+<ul>
+<li>Accept-Encoding 用于表明客户端是否支持压缩以及压缩的类型</li>
+<li>Content-Encoding 表明响应的压缩类型</li>
+
+</ul>
+
+<p>
+例如：
+</p>
+<ul>
+<li>Accept-Encoding: gzip, deflate, sdch, br</li>
+<li>Content-Encoding: gzip</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline16">
+<h3 id="orgheadline16">Cookie</h3>
+<p>
+HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登陆态。开发中的注意事项：
+</p>
+<ul>
+<li>cookie设置为 HttpOnly</li>
+<li>cookie的名字要独一无二，尤其是子域和域的cookie绝对不能用相同的</li>
+<li>cookie是客户端保存的，服务端控制力弱</li>
+<li>服务端查找用户cookie，模拟用户请求，用于测试和复现问题</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline21">
+<h2 id="orgheadline21">XSS 和 CSRF</h2>
+<div class="outline-text-2" id="text-orgheadline21">
+</div></section>
+</section>
+<section>
+<section id="slide-orgheadline18">
+<h3 id="orgheadline18">XSS</h3>
+<p>
+依赖浏览器，浏览器不严格区分数据和代码，通过在数据中加入代码，浏览器加载页面时执行代码。预防方法是检查输入数据，过滤掉代码部分或者破坏代码部分（例如，半角转成全角）
+</p>
+
+<p>
+预防XSS时需要考虑数据除了在浏览器端，还可能在移动端APP展示。
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline19">
+<h3 id="orgheadline19">CSRF</h3>
+<p>
+诱导用户打开链接获益。例如：利用诱导用户打开转账链接（如果GET请求就可以转账的话）。预防方法是，GET方法只读取数据，POST方法忽略querystring的key-value，PUT、DELETE方法只能用AJAX请求，由于SOP，CSRF攻击无效。
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline20">
+<h3 id="orgheadline20">SOP 和 CORS</h3>
+<ul>
+<li>都是浏览器的行为</li>
+<li>SOP  Same-origin policy 不允许AJAX访问不同源的资源</li>
+<li>CORS Cross-Origin Resource Sharing 服务器可以配置提示浏览器可以访问</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline22">
+<h2 id="orgheadline22">抓站攻击</h2>
+<ul>
+<li>模拟客户端，调用服务端接口，消耗服务端资源（短信，缓存等）</li>
+<li>除了IP，服务端对客户端一无所知</li>
+<li>借助验证码，判断客户端是人还是其它，但验证码可以被破解</li>
+<li>借助统计，机器学习区分客户端是人还是其它</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline29">
+<h2 id="orgheadline29">HTTP 缓存</h2>
+<div class="outline-text-2" id="text-orgheadline29">
+</div></section>
+</section>
+<section>
+<section id="slide-orgheadline26">
+<h3 id="orgheadline26">客户端缓存</h3>
+<ul>
+<li>各个浏览器行为不一样</li>
+<li>F5刷新 vs Ctl-F5刷新</li>
+<li>浏览器区分主资源和子资源</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline23">
+<h4 id="orgheadline23">默认缓存</h4>
+<ul>
+<li>没有显式指定缓存</li>
+<li>有Last-Modified Header</li>
+<li>缓存时长（现在时间-Last-Modify时间）* 10%，文件越老缓存越长</li>
+<li>多见于静态文件</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline24">
+<h4 id="orgheadline24">Cache-Control</h4>
+<ul>
+<li>优先于Expires</li>
+<li>相对时间，可以防止集中过期</li>
+<li>控制更灵活</li>
+<li>范例1：max-age=0, no-cache, no-store, private</li>
+<li>范例2：max-age=300, public</li>
+<li>WEB框架（如Spring）默认不缓存</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline25">
+<h4 id="orgheadline25">Expires</h4>
+<ul>
+<li>绝对时间</li>
+<li>范例1：0</li>
+<li>范例2：Mon, 27 Feb 2017 05:08:53 GM</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline27">
+<h3 id="orgheadline27">Cdn、Proxy 缓存</h3>
+<ul>
+<li>静态资源</li>
+<li>public的动态资源</li>
+<li>缓存的失效同浏览器</li>
+<li>缓存的强制失效</li>
+<li>缓存的命中率</li>
+<li>使用tmpfs</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline28">
+<h3 id="orgheadline28">Web服务器缓存</h3>
+<ul>
+<li>场景技术：Redis Memcached</li>
+<li>缓存粒度、时间</li>
+<li>缓存失效</li>
+<li>缓存命中率</li>
+<li>根据内容使用缓存分区（分别LRU，命中率）</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline30">
+<h2 id="orgheadline30">Restful 风格</h2>
+<ul>
+<li>HTTP-Method 表示动作</li>
+<li>PATH 表示资源，资源应该是名词</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline31">
+<h2 id="orgheadline31">HTTPS</h2>
+<ul>
+<li>基于SSL的HTTP协议</li>
+<li>有效预防各种攻击（DNS劫持、网络窃听、网络钓鱼）</li>
+<li>SSL连接建立很慢</li>
+
+</ul>
+
+<p>
+除了证书额外花钱外，HTTPS连接建立慢是其一大劣势
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline32">
+<h2 id="orgheadline32">HTTP 优化</h2>
+<ul>
+<li>使用多级缓存</li>
+<li>使用压缩</li>
+<li>共享域名，统一资源多个域名访问</li>
+<li>减少请求数量，（JS、CSS、图片合并）</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline36">
+<h2 id="orgheadline36">HTTP/2</h2>
+<ul>
+<li>用于HTTPS</li>
+<li>单一连接</li>
+<li>PIPELINE</li>
+<li>二进制协议</li>
+<li>依赖于浏览器和web服务器</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline33">
+<h3 id="orgheadline33">请求应答和Pipeline</h3>
+<ul>
+<li>请求应答：请求1（等响应）响应1，请求2（等响应）响应2</li>
+<li>pipeline：请求1、请求2，请求3，等响应，响应1，响应2，响应3</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline34">
+<h3 id="orgheadline34">HTTP/2 如何提升性能</h3>
+<ul>
+<li>单一连接提升HTTPS性能</li>
+<li>pipeline提升http性能</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline35">
+<h3 id="orgheadline35">HTTP/2 性能和网络关系（来自NGINX公司）</h3>
+<ul>
+<li>在RTT小于20ms时，HTTP/1.x 和 HTTP/2差别不大</li>
+<li>RTT在30ms和250ms之间时，HTTP/2小胜</li>
+<li>RTT大于250ms时，HTTP/1.x有优势</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline38">
+<h2 id="orgheadline38">HTTP服务器</h2>
+<ul>
+<li>理解HTTP协议</li>
+<li>把HTTP请求转成服务器内部数据结构</li>
+<li>把内部数据结构按需弄成另外的数据结构</li>
+<li>把另外的数据结构转成HTTP响应输出</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline37">
+<h3 id="orgheadline37">极简HTTP服务器</h3>
+<div class="org-src-container">
+
+<pre  class="src src-bash"><span style="color: #00ffff; font-weight: bold;">while</span> (true); <span style="color: #00ffff; font-weight: bold;">do</span> cat ~/rootproxy | nc -l 9000; <span style="color: #00ffff; font-weight: bold;">done</span>
+</pre>
+</div>
+
+<p>
+可以用来模拟接口服务器做自动化测试
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline44">
+<h2 id="orgheadline44">HTTP调试</h2>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">阶段</th>
+<th scope="col" class="org-left">工具</th>
+<th scope="col" class="org-left">重点关注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">输入</td>
+<td class="org-left">curl，tcpdump</td>
+<td class="org-left">请求Header</td>
+</tr>
+
+<tr>
+<td class="org-left">WEB服务器</td>
+<td class="org-left">jdb，各种Log</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">输出</td>
+<td class="org-left">tcpdump</td>
+<td class="org-left">响应Header</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline39">
+<h3 id="orgheadline39">tcpdump 查看输入输出</h3>
+<p>
+<code>tcpdump -nn -i any -p tcp and port 9001 -A -s0</code>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline40">
+<h3 id="orgheadline40">curl</h3>
+<p>
+模拟输入 path，querystring， header，body等
+例如： <code>curl -X PUT 'dev/api//bg/order/809,810/selfexp' -d 'address=12&amp;time=12' -H "Cookie: token=31415949:yYtgvRVHYg5Vd"</code>
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline43">
+<h3 id="orgheadline43">问题排查举例</h3>
+<ul>
+<li>深刻理解HTTP请求的内涵，尤其是Header</li>
+<li>tcpdump 查看HTTP请求的输入输出</li>
+<li>curl 模拟请求</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline41">
+<h4 id="orgheadline41">使用Header控制数据压缩</h4>
+<ul>
+<li>使用 nginx-lua-capture 请求后端，返回JSON数据</li>
+<li>测试环境正常，线上无法解析JSON</li>
+<li>tcpdump 发现线上返回的数据是乱码，Header <code>Content-Encoding:gzip</code> 表明是压缩</li>
+<li>请求增加 Header <code>Accept-Encoding: ""</code> 表明自己不想要服务端压缩</li>
+<li>返回未压缩JSON，问题解决</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline42">
+<h4 id="orgheadline42">使用Header控制返回的数据格式</h4>
+<ul>
+<li>RestTemplate 无法将JSON响应转成对象</li>
+<li>{"code": 401, "message": "Unauthorized"} 和 "{\"code\": 401, \"message\": \"Unauthorized\"}" 的区别</li>
+<li>应该返回前者，并且curl的确返回前者，但tcpdump发现RestTemplate返回的是后者</li>
+<li>curl请求的Accept Header是 <code>*/*</code>, 而RestTemplate请求的Accept Header是 <code>application/json; */*</code></li>
+<li>curl响应的Content-Type Header是 <code>text/plain; charset=UTF-8</code> 而RestTemplate的是 <code>application/json</code></li>
+<li>服务端不遵守协议，大多数客户端（例如libcurl）也不严格，严格遵守的 RestTemplate 受到惩罚</li>
+<li>修改 RestTemplate的 Accept Header为 <code>*/*</code> 问题解决</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline45">
+<h2 id="orgheadline45">Q/A</h2>
+</section>
+</section>
+</div>
+</div>
+<script src="../reveal.js/lib/js/head.min.js"></script>
+<script src="../reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
