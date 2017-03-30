@@ -27,7 +27,7 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1 class="title">HTTP 101</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-03-29 三 18:42</p>
+<section id="sec-title-slide"><h1 class="title">HTTP 101</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-03-30 四 10:11</p>
 </section>
 
 <section>
@@ -64,6 +64,7 @@
 <li>请求PATH和QueryString</li>
 <li>响应状态码</li>
 <li>请求/响应 Header</li>
+
 <li>请求/响应 Body</li>
 <li>Header用来描述协议元信息，Header Name不区分大小写</li>
 
@@ -358,6 +359,17 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 <li>借助统计，机器学习区分客户端是人还是其它</li>
 
 </ul>
+
+<aside class="notes">
+<p>
+例如：/user/perm?entity=317 如果允许PROXY缓存，并且缓存的key是$uri$args，
+</p>
+
+<p>
+那么<code>/user/perm?entity=317&amp;sn={random}</code> 很容易同一个内容缓存多份。
+</p>
+
+</aside>
 
 </section>
 </section>

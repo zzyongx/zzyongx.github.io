@@ -25,6 +25,7 @@
 - 请求PATH和QueryString
 - 响应状态码
 - 请求/响应 Header
+
 - 请求/响应 Body
 - Header用来描述协议元信息，Header Name不区分大小写
 
@@ -132,6 +133,12 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 - 除了IP，服务端对客户端一无所知
 - 借助验证码，判断客户端是人还是其它，但验证码可以被破解
 - 借助统计，机器学习区分客户端是人还是其它
+
+#+BEGIN_NOTES
+例如：/user/perm?entity=317 如果允许PROXY缓存，并且缓存的key是$uri$args，
+
+那么~/user/perm?entity=317&sn={random}~ 很容易同一个内容缓存多份。
+#+END_NOTES
 
 * HTTP 缓存
 ** 客户端缓存
