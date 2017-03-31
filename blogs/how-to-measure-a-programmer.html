@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-03-31 五 15:28 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>如何评价一个程序员</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">如何评价一个程序员</h1>
+<p>
+我相信，沟通高效、思维敏捷、逻辑清晰、执行力强，这些都是非常宝贵的品质，也能够感同身受。但是，终究不够量化，还是需要工作上的成绩来体现，那么如何衡量工作上的成绩？
+</p>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">1</span> 线上代码的正确性和稳定性</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+业务的正确性和稳定性永远是第一位的，如果程序员的代码经常导致业务错误和不可用，那么他的所有优点立马化为乌有。在明确是代码的问题后，还需要关注他是否做了努力来避免问题。代码的正确性和稳定性由如下手段保障：
+</p>
+</div>
+
+<div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 程序员自测</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+程序员写代码测试API保障程序正确，注意是写代码测试，这保障了测试可重复和可自动化。如果写了大量的有效（所谓有效，指尽量模拟真实场景）测试代码，仍然漏掉了某些情况，是值得原谅的。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> 重要业务需要专门测试介入</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+自测充分后，如果业务对正确性要求极高，需要专门的测试介入。程序设计需要对测试友好，比如测试数据的支持。
+</p>
+
+<p>
+测试是事前保证，对用户没有影响。故障的发现和恢复属于事后挽救，不良后果已经产生，果断止损把影响降低到最小。越早发现，修复越快，影响也越小。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">1.3</span> 快速精准发现问题</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+尽量把错误码（返回给用户）细化，把内部错误（用户无感）暴露出来，监控到这些错误，及时告知开发。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">1.4</span> 程序必须可以回滚</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+上线时必须考虑回滚的可能，必须支持回滚。例如：新旧程序API兼容，数据格式（数据库，缓存等）兼容，不兼容的有版本区分。有时候需要前后端代码一起回滚。
+</p>
+
+<p>
+最好一次上线一个功能，降低故障影响和回滚难度，如果是版本升级，功能太多，事前测试一定要充分。如果事前测试充分（简单粗暴的使用覆盖度和测试代码行数衡量），那么故障不会发生，如果事后挽救及时，那么故障影响会尽量降低。程序员要关注上述四个环节，如果都尽力了，并不能苛求太多。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">2</span> 能正确评估工作的重要性和优先级</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+程序员往往对重要性的理解有误，认为代码才是重要的。业务和业务的稳定才是重要的。以业务的重要性衡量工作的优先级和重要性，以业务的受影响程度衡量BUG的优先级和重要性。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7"><span class="section-number-2">3</span> 代码的干净整洁</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+没有多余代码，无用的代码被删除。可能有用，但现在没用的代码，不应该出现在代码主分支，可以使用自己的私有分支保留这些。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8"><span class="section-number-2">4</span> 代码的易读性</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+逻辑应该简单直白。例如： <code>Set&lt;String&gt; DAYS = Stream.of("2017-04-01").collect(Collectors.toSet());</code> 就不如 <code>Set&lt;String&gt; DAYS = new HashSet&lt;&gt;(Arrays.asList("2017-04-01"));</code>
+除非业务需要，设计应该简单。例如：ID的设计，数据库保证了 <b>UNIQUE</b> ，就该直接 <b>INSERT</b> ，等数据库报错，再随机生成新的，而不是 <b>INSERT</b> 前 <b>SELECT</b> 一下。
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2017-03-31 五 15:28</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
