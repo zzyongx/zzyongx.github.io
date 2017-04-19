@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-04-19 三 12:16 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>极简编码风格</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">极简编码风格</h1>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 缩进</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>两个空格</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> 留白</h2>
+<div class="outline-text-2" id="text-2">
+<ul class="org-ul">
+<li><code>if</code> <code>else</code> 等关键字左右1个空格</li>
+<li>比较操作符、逻辑运算符、算术操作符等左右1个空格</li>
+<li><code>{</code> 前面一个空格</li>
+<li><code>if</code> <code>for</code> 块儿如果换行，用花括号</li>
+<li>行超过100字符换行（不强制）</li>
+<li>连续8行没有空行考虑使用函数代替</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3"><span class="section-number-2">3</span> 字符</h2>
+<div class="outline-text-2" id="text-3">
+<ul class="org-ul">
+<li>源码UTF8</li>
+<li>使用unix换行符</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4"><span class="section-number-2">4</span> 代码块</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>嵌套不超过3层</li>
+<li>函数长度不超过50行</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">5</span> 重复代码</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>杜绝相似、重复代码</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">6</span> 函数命名表达函数的作用而不是函数的实现途径</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+例如：如果是管理Redis缓存那么，CacheManager的名字优于RedisManager。
+如果是用randomUUID实现了随机字符串，getRandomString的名字优于getRandomUuidString、getUuidString。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7"><span class="section-number-2">7</span> 关于数据库</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li>字段少用NOT NULL，不利于业务变更</li>
+<li>不用字符串类型做PrimaryKey，优先用自增ID</li>
+<li>不写复杂SQL</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8"><span class="section-number-2">8</span> 关于Java数据类型</h2>
+<div class="outline-text-2" id="text-8">
+<ul class="org-ul">
+<li>不用BigDecimal，涉及到金额，优先考虑减小单位，例如用"分"代替"元"做单位</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-2">
+<h2 id="orgheadline9"><span class="section-number-2">9</span> 关于错误和异常</h2>
+<div class="outline-text-2" id="text-9">
+<ul class="org-ul">
+<li>需要捕获，然后重新抛出，或转成错误码返回的异常，改成RuntimeException类型的</li>
+<li>尽可能多的返回错误信息。例如 String valid(); 返回错误信息，由于 boolean valid(); 仅仅返回对错</li>
+<li>不轻易封装错误或异常。env.getRequiredProperty("x") 优于 String x = env.getProperty("x") 然后检查x是不是null</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-2">
+<h2 id="orgheadline10"><span class="section-number-2">10</span> 关于错误日志</h2>
+<div class="outline-text-2" id="text-10">
+<ul class="org-ul">
+<li>优先通过返回错误信息的方式表达错误，而不是记录错误日志，然后返回false</li>
+<li>错误日志要能够定位错误。logger.warn("name format error"); 这种日志毫无用处</li>
+<li>优先用占位符而不是连接符。logger.debug("name format error {}", name); 而不是 logger.debug("name format error " + name);</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2017-04-19 三 12:16</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

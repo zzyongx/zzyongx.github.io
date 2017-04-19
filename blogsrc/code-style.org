@@ -9,8 +9,9 @@
 - =if= =else= 等关键字左右1个空格
 - 比较操作符、逻辑运算符、算术操作符等左右1个空格
 - ={= 前面一个空格
-- =if= =for= 块儿如果换行，用花括号 
+- =if= =for= 块儿如果换行，用花括号
 - 行超过100字符换行（不强制）
+- 连续8行没有空行考虑使用函数代替
 
 * 字符
 - 源码UTF8
@@ -22,3 +23,25 @@
 
 * 重复代码
 - 杜绝相似、重复代码
+
+* 函数命名表达函数的作用而不是函数的实现途径
+例如：如果是管理Redis缓存那么，CacheManager的名字优于RedisManager。
+如果是用randomUUID实现了随机字符串，getRandomString的名字优于getRandomUuidString、getUuidString。
+
+* 关于数据库
+- 字段少用NOT NULL，不利于业务变更
+- 不用字符串类型做PrimaryKey，优先用自增ID
+- 不写复杂SQL
+
+* 关于Java数据类型
+- 不用BigDecimal，涉及到金额，优先考虑减小单位，例如用"分"代替"元"做单位
+
+* 关于错误和异常
+- 需要捕获，然后重新抛出，或转成错误码返回的异常，改成RuntimeException类型的
+- 尽可能多的返回错误信息。例如 String valid(); 返回错误信息，由于 boolean valid(); 仅仅返回对错
+- 不轻易封装错误或异常。env.getRequiredProperty("x") 优于 String x = env.getProperty("x") 然后检查x是不是null
+
+* 关于错误日志
+- 优先通过返回错误信息的方式表达错误，而不是记录错误日志，然后返回false
+- 错误日志要能够定位错误。logger.warn("name format error"); 这种日志毫无用处
+- 优先用占位符而不是连接符。logger.debug("name format error {}", name); 而不是 logger.debug("name format error " + name);
