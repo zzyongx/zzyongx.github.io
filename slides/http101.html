@@ -27,7 +27,7 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1 class="title">HTTP 101</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-03-30 四 10:11</p>
+<section id="sec-title-slide"><h1 class="title">HTTP 101</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-04-20 四 15:35</p>
 </section>
 
 <section>
@@ -57,8 +57,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline9">
-<h2 id="orgheadline9">HTTP协议</h2>
+<section id="slide-orgheadline10">
+<h2 id="orgheadline10">HTTP协议</h2>
 <ul>
 <li>请求方法</li>
 <li>请求PATH和QueryString</li>
@@ -74,7 +74,18 @@
 </section>
 <section>
 <section id="slide-orgheadline3">
-<h3 id="orgheadline3">Chrome Developer Tools</h3>
+<h3 id="orgheadline3">URL的组成</h3>
+<p>
+scheme:[//[user[:password]@]host[:port]][/path][?query][#fragment]
+<a href="http://plus.sogou.com/api/account">http://plus.sogou.com/api/account</a>
+&lt;img src="<i>/plus.sogou.com</i>image/1234.png" /&gt;
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline4">
+<h3 id="orgheadline4">Chrome Developer Tools</h3>
 
 <div class="figure">
 <p><img src="../images/http101/http-get.png" alt="http-get.png" />
@@ -84,8 +95,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline4">
-<h3 id="orgheadline4">curl</h3>
+<section id="slide-orgheadline5">
+<h3 id="orgheadline5">curl</h3>
 
 <div class="figure">
 <p><img src="../images/http101/http-put.png" alt="http-put.png" />
@@ -95,8 +106,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline5">
-<h3 id="orgheadline5">tcpdump</h3>
+<section id="slide-orgheadline6">
+<h3 id="orgheadline6">tcpdump</h3>
 
 <div class="figure">
 <p><img src="../images/http101/http-tcpdump.png" alt="http-tcpdump.png" />
@@ -106,8 +117,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline6">
-<h3 id="orgheadline6">HTTP协议组成</h3>
+<section id="slide-orgheadline7">
+<h3 id="orgheadline7">HTTP协议组成</h3>
 <pre class="example">
 METHOD PATH[?QUERY_STRING] HTTP_VERSION
 REQ_HEADER_NAME_1: REQ_HEADER_VALUE_1
@@ -124,8 +135,8 @@ RESP_HEADER_NAME_2: RESP_HEADER_VALUE_2
 </section>
 </section>
 <section>
-<section id="slide-orgheadline7">
-<h3 id="orgheadline7">文本协议的妙处</h3>
+<section id="slide-orgheadline8">
+<h3 id="orgheadline8">文本协议的妙处</h3>
 
 <div class="figure">
 <p><img src="../images/http101/cat-nc.png" alt="cat-nc.png" />
@@ -135,8 +146,8 @@ RESP_HEADER_NAME_2: RESP_HEADER_VALUE_2
 </section>
 </section>
 <section>
-<section id="slide-orgheadline8">
-<h3 id="orgheadline8">HTTP 方法</h3>
+<section id="slide-orgheadline9">
+<h3 id="orgheadline9">HTTP 方法</h3>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -184,8 +195,8 @@ RESP_HEADER_NAME_2: RESP_HEADER_VALUE_2
 </section>
 </section>
 <section>
-<section id="slide-orgheadline17">
-<h2 id="orgheadline17">重要的HTTP HEADER</h2>
+<section id="slide-orgheadline18">
+<h2 id="orgheadline18">重要的HTTP HEADER</h2>
 <ul>
 <li>控制数据格式，压缩</li>
 <li>控制缓存</li>
@@ -197,8 +208,8 @@ RESP_HEADER_NAME_2: RESP_HEADER_VALUE_2
 </section>
 </section>
 <section>
-<section id="slide-orgheadline10">
-<h3 id="orgheadline10">Connection（REQ）</h3>
+<section id="slide-orgheadline11">
+<h3 id="orgheadline11">Connection（REQ）</h3>
 <p>
 取值 <code>close</code> 或 <code>keep-alive</code>
 </p>
@@ -214,8 +225,8 @@ keep-alive HTTP请求结束，TCP连接不关闭
 </section>
 </section>
 <section>
-<section id="slide-orgheadline11">
-<h3 id="orgheadline11">Host （REQ）</h3>
+<section id="slide-orgheadline12">
+<h3 id="orgheadline12">Host （REQ）</h3>
 <p>
 请求的主机名，多用于虚拟主机
 </p>
@@ -223,8 +234,8 @@ keep-alive HTTP请求结束，TCP连接不关闭
 </section>
 </section>
 <section>
-<section id="slide-orgheadline12">
-<h3 id="orgheadline12">Accept（REQ）</h3>
+<section id="slide-orgheadline13">
+<h3 id="orgheadline13">Accept（REQ）</h3>
 <p>
 客户端用来表明自己支持的（或需要的）数据格式。多用于服务端可以提供多种格式时。
 </p>
@@ -241,8 +252,8 @@ keep-alive HTTP请求结束，TCP连接不关闭
 </section>
 </section>
 <section>
-<section id="slide-orgheadline13">
-<h3 id="orgheadline13">Content-Type</h3>
+<section id="slide-orgheadline14">
+<h3 id="orgheadline14">Content-Type</h3>
 <p>
 表明Body的数据格式
 </p>
@@ -263,8 +274,8 @@ keep-alive HTTP请求结束，TCP连接不关闭
 </section>
 </section>
 <section>
-<section id="slide-orgheadline14">
-<h3 id="orgheadline14">Content-Length 或 Transfer-Encoding（RESP）</h3>
+<section id="slide-orgheadline15">
+<h3 id="orgheadline15">Content-Length 或 Transfer-Encoding（RESP）</h3>
 <ul>
 <li>已知Body大小时，用Content-Length，多用于静态资源</li>
 <li>未知Body大小时，用 <code>Transfer-Encoding:chunked</code>, 多用于动态资源</li>
@@ -274,8 +285,8 @@ keep-alive HTTP请求结束，TCP连接不关闭
 </section>
 </section>
 <section>
-<section id="slide-orgheadline15">
-<h3 id="orgheadline15">Accept-Encoding（REQ） 和 Content-Encoding</h3>
+<section id="slide-orgheadline16">
+<h3 id="orgheadline16">Accept-Encoding（REQ） 和 Content-Encoding</h3>
 <ul>
 <li>Accept-Encoding 用于表明客户端是否支持压缩以及压缩的类型</li>
 <li>Content-Encoding 表明响应的压缩类型</li>
@@ -294,8 +305,8 @@ keep-alive HTTP请求结束，TCP连接不关闭
 </section>
 </section>
 <section>
-<section id="slide-orgheadline16">
-<h3 id="orgheadline16">Cookie</h3>
+<section id="slide-orgheadline17">
+<h3 id="orgheadline17">Cookie</h3>
 <p>
 HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登陆态。开发中的注意事项：
 </p>
@@ -310,14 +321,14 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline21">
-<h2 id="orgheadline21">XSS 和 CSRF</h2>
-<div class="outline-text-2" id="text-orgheadline21">
+<section id="slide-orgheadline22">
+<h2 id="orgheadline22">XSS 和 CSRF</h2>
+<div class="outline-text-2" id="text-orgheadline22">
 </div></section>
 </section>
 <section>
-<section id="slide-orgheadline18">
-<h3 id="orgheadline18">XSS</h3>
+<section id="slide-orgheadline19">
+<h3 id="orgheadline19">XSS</h3>
 <p>
 依赖浏览器，浏览器不严格区分数据和代码，通过在数据中加入代码，浏览器加载页面时执行代码。预防方法是检查输入数据，过滤掉代码部分或者破坏代码部分（例如，半角转成全角）
 </p>
@@ -329,8 +340,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline19">
-<h3 id="orgheadline19">CSRF</h3>
+<section id="slide-orgheadline20">
+<h3 id="orgheadline20">CSRF</h3>
 <p>
 诱导用户打开链接获益。例如：利用诱导用户打开转账链接（如果GET请求就可以转账的话）。预防方法是，GET方法只读取数据，POST方法忽略querystring的key-value，PUT、DELETE方法只能用AJAX请求，由于SOP，CSRF攻击无效。
 </p>
@@ -338,8 +349,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline20">
-<h3 id="orgheadline20">SOP 和 CORS</h3>
+<section id="slide-orgheadline21">
+<h3 id="orgheadline21">SOP 和 CORS</h3>
 <ul>
 <li>都是浏览器的行为</li>
 <li>SOP  Same-origin policy 不允许AJAX访问不同源的资源</li>
@@ -350,8 +361,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline22">
-<h2 id="orgheadline22">抓站攻击</h2>
+<section id="slide-orgheadline23">
+<h2 id="orgheadline23">抓站攻击</h2>
 <ul>
 <li>模拟客户端，调用服务端接口，消耗服务端资源（短信，缓存等）</li>
 <li>除了IP，服务端对客户端一无所知</li>
@@ -374,14 +385,14 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline29">
-<h2 id="orgheadline29">HTTP 缓存</h2>
-<div class="outline-text-2" id="text-orgheadline29">
+<section id="slide-orgheadline30">
+<h2 id="orgheadline30">HTTP 缓存</h2>
+<div class="outline-text-2" id="text-orgheadline30">
 </div></section>
 </section>
 <section>
-<section id="slide-orgheadline26">
-<h3 id="orgheadline26">客户端缓存</h3>
+<section id="slide-orgheadline27">
+<h3 id="orgheadline27">客户端缓存</h3>
 <ul>
 <li>各个浏览器行为不一样</li>
 <li>F5刷新 vs Ctl-F5刷新</li>
@@ -392,8 +403,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline23">
-<h4 id="orgheadline23">默认缓存</h4>
+<section id="slide-orgheadline24">
+<h4 id="orgheadline24">默认缓存</h4>
 <ul>
 <li>没有显式指定缓存</li>
 <li>有Last-Modified Header</li>
@@ -405,8 +416,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline24">
-<h4 id="orgheadline24">Cache-Control</h4>
+<section id="slide-orgheadline25">
+<h4 id="orgheadline25">Cache-Control</h4>
 <ul>
 <li>优先于Expires</li>
 <li>相对时间，可以防止集中过期</li>
@@ -420,8 +431,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline25">
-<h4 id="orgheadline25">Expires</h4>
+<section id="slide-orgheadline26">
+<h4 id="orgheadline26">Expires</h4>
 <ul>
 <li>绝对时间</li>
 <li>范例1：0</li>
@@ -432,8 +443,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline27">
-<h3 id="orgheadline27">Cdn、Proxy 缓存</h3>
+<section id="slide-orgheadline28">
+<h3 id="orgheadline28">Cdn、Proxy 缓存</h3>
 <ul>
 <li>静态资源</li>
 <li>public的动态资源</li>
@@ -447,8 +458,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline28">
-<h3 id="orgheadline28">Web服务器缓存</h3>
+<section id="slide-orgheadline29">
+<h3 id="orgheadline29">Web服务器缓存</h3>
 <ul>
 <li>场景技术：Redis Memcached</li>
 <li>缓存粒度、时间</li>
@@ -461,8 +472,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline30">
-<h2 id="orgheadline30">Restful 风格</h2>
+<section id="slide-orgheadline31">
+<h2 id="orgheadline31">Restful 风格</h2>
 <ul>
 <li>HTTP-Method 表示动作</li>
 <li>PATH 表示资源，资源应该是名词</li>
@@ -472,8 +483,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline31">
-<h2 id="orgheadline31">HTTPS</h2>
+<section id="slide-orgheadline32">
+<h2 id="orgheadline32">HTTPS</h2>
 <ul>
 <li>基于SSL的HTTP协议</li>
 <li>有效预防各种攻击（DNS劫持、网络窃听、网络钓鱼）</li>
@@ -488,8 +499,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline32">
-<h2 id="orgheadline32">HTTP 优化</h2>
+<section id="slide-orgheadline33">
+<h2 id="orgheadline33">HTTP 优化</h2>
 <ul>
 <li>使用多级缓存</li>
 <li>使用压缩</li>
@@ -501,8 +512,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline36">
-<h2 id="orgheadline36">HTTP/2</h2>
+<section id="slide-orgheadline37">
+<h2 id="orgheadline37">HTTP/2</h2>
 <ul>
 <li>用于HTTPS</li>
 <li>单一连接</li>
@@ -515,8 +526,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline33">
-<h3 id="orgheadline33">请求应答和Pipeline</h3>
+<section id="slide-orgheadline34">
+<h3 id="orgheadline34">请求应答和Pipeline</h3>
 <ul>
 <li>请求应答：请求1（等响应）响应1，请求2（等响应）响应2</li>
 <li>pipeline：请求1、请求2，请求3，等响应，响应1，响应2，响应3</li>
@@ -526,8 +537,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline34">
-<h3 id="orgheadline34">HTTP/2 如何提升性能</h3>
+<section id="slide-orgheadline35">
+<h3 id="orgheadline35">HTTP/2 如何提升性能</h3>
 <ul>
 <li>单一连接提升HTTPS性能</li>
 <li>pipeline提升http性能</li>
@@ -537,8 +548,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline35">
-<h3 id="orgheadline35">HTTP/2 性能和网络关系（来自NGINX公司）</h3>
+<section id="slide-orgheadline36">
+<h3 id="orgheadline36">HTTP/2 性能和网络关系（来自NGINX公司）</h3>
 <ul>
 <li>在RTT小于20ms时，HTTP/1.x 和 HTTP/2差别不大</li>
 <li>RTT在30ms和250ms之间时，HTTP/2小胜</li>
@@ -549,8 +560,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline38">
-<h2 id="orgheadline38">HTTP服务器</h2>
+<section id="slide-orgheadline39">
+<h2 id="orgheadline39">HTTP服务器</h2>
 <ul>
 <li>理解HTTP协议</li>
 <li>把HTTP请求转成服务器内部数据结构</li>
@@ -562,8 +573,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline37">
-<h3 id="orgheadline37">极简HTTP服务器</h3>
+<section id="slide-orgheadline38">
+<h3 id="orgheadline38">极简HTTP服务器</h3>
 <div class="org-src-container">
 
 <pre  class="src src-bash"><span style="color: #00ffff; font-weight: bold;">while</span> (true); <span style="color: #00ffff; font-weight: bold;">do</span> cat ~/rootproxy | nc -l 9000; <span style="color: #00ffff; font-weight: bold;">done</span>
@@ -577,8 +588,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline44">
-<h2 id="orgheadline44">HTTP调试</h2>
+<section id="slide-orgheadline45">
+<h2 id="orgheadline45">HTTP调试</h2>
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -620,8 +631,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline39">
-<h3 id="orgheadline39">tcpdump 查看输入输出</h3>
+<section id="slide-orgheadline40">
+<h3 id="orgheadline40">tcpdump 查看输入输出</h3>
 <p>
 <code>tcpdump -nn -i any -p tcp and port 9001 -A -s0</code>
 </p>
@@ -629,8 +640,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline40">
-<h3 id="orgheadline40">curl</h3>
+<section id="slide-orgheadline41">
+<h3 id="orgheadline41">curl</h3>
 <p>
 模拟输入 path，querystring， header，body等
 例如： <code>curl -X PUT 'dev/api//bg/order/809,810/selfexp' -d 'address=12&amp;time=12' -H "Cookie: token=31415949:yYtgvRVHYg5Vd"</code>
@@ -639,8 +650,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline43">
-<h3 id="orgheadline43">问题排查举例</h3>
+<section id="slide-orgheadline44">
+<h3 id="orgheadline44">问题排查举例</h3>
 <ul>
 <li>深刻理解HTTP请求的内涵，尤其是Header</li>
 <li>tcpdump 查看HTTP请求的输入输出</li>
@@ -651,8 +662,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline41">
-<h4 id="orgheadline41">使用Header控制数据压缩</h4>
+<section id="slide-orgheadline42">
+<h4 id="orgheadline42">使用Header控制数据压缩</h4>
 <ul>
 <li>使用 nginx-lua-capture 请求后端，返回JSON数据</li>
 <li>测试环境正常，线上无法解析JSON</li>
@@ -665,8 +676,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline42">
-<h4 id="orgheadline42">使用Header控制返回的数据格式</h4>
+<section id="slide-orgheadline43">
+<h4 id="orgheadline43">使用Header控制返回的数据格式</h4>
 <ul>
 <li>RestTemplate 无法将JSON响应转成对象</li>
 <li>{"code": 401, "message": "Unauthorized"} 和 "{\"code\": 401, \"message\": \"Unauthorized\"}" 的区别</li>
@@ -681,8 +692,8 @@ HTTP是无状态协议，使用cookie来记录两端的状态，例如记录登�
 </section>
 </section>
 <section>
-<section id="slide-orgheadline45">
-<h2 id="orgheadline45">Q/A</h2>
+<section id="slide-orgheadline46">
+<h2 id="orgheadline46">Q/A</h2>
 </section>
 </section>
 </div>

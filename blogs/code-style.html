@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-04-19 三 12:16 -->
+<!-- 2017-04-25 二 12:45 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>极简编码风格</title>
@@ -152,10 +152,11 @@ for the JavaScript code in this tag.
 <h1 class="title">极简编码风格</h1>
 
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> 缩进</h2>
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 缩进和对齐</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
-<li>两个空格</li>
+<li>两个空格缩进</li>
+<li>相同语义的常理、变量、参数对齐</li>
 </ul>
 </div>
 </div>
@@ -170,6 +171,7 @@ for the JavaScript code in this tag.
 <li><code>if</code> <code>for</code> 块儿如果换行，用花括号</li>
 <li>行超过100字符换行（不强制）</li>
 <li>连续8行没有空行考虑使用函数代替</li>
+<li>?: 表达式如果要换行，在？处换</li>
 </ul>
 </div>
 </div>
@@ -195,17 +197,40 @@ for the JavaScript code in this tag.
 </div>
 
 <div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">5</span> 重复代码</h2>
+<h2 id="orgheadline5"><span class="section-number-2">5</span> 有效代码越少越好</h2>
 <div class="outline-text-2" id="text-5">
 <ul class="org-ul">
+<li>没用的代码立即删掉，不允许有没用的代码</li>
 <li>杜绝相似、重复代码</li>
 </ul>
 </div>
 </div>
 
 <div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6"><span class="section-number-2">6</span> 函数命名表达函数的作用而不是函数的实现途径</h2>
+<h2 id="orgheadline6"><span class="section-number-2">6</span> 关于IDE</h2>
 <div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li>IDE的自动format工具，太二，不建议使用</li>
+<li>代码不符合规范，不许拿IDE自动做的当借口</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7"><span class="section-number-2">7</span> 变量定义不允许跨行</h2>
+<div class="outline-text-2" id="text-7">
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #00ffff; font-weight: bold;">public</span> <span style="color: #00ffff; font-weight: bold;">static</span> <span style="color: #00ffff; font-weight: bold;">final</span> <span style="color: #00ff00;">String</span> <span style="color: #ffff00;">v1</span>,
+               <span style="color: #ffff00;">v2</span>;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8"><span class="section-number-2">8</span> 函数命名表达函数的作用而不是函数的实现途径</h2>
+<div class="outline-text-2" id="text-8">
 <p>
 例如：如果是管理Redis缓存那么，CacheManager的名字优于RedisManager。
 如果是用randomUUID实现了随机字符串，getRandomString的名字优于getRandomUuidString、getUuidString。
@@ -213,29 +238,99 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7"><span class="section-number-2">7</span> 关于数据库</h2>
-<div class="outline-text-2" id="text-7">
+<div id="outline-container-orgheadline9" class="outline-2">
+<h2 id="orgheadline9"><span class="section-number-2">9</span> 关于名字</h2>
+<div class="outline-text-2" id="text-9">
 <ul class="org-ul">
+<li>Lambda 表达式不允许超过5行，否则使用命名函数，匿名函数太长（又没有函数名字标明含义）不容易理解</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-2">
+<h2 id="orgheadline10"><span class="section-number-2">10</span> 关于测试</h2>
+<div class="outline-text-2" id="text-10">
+<ul class="org-ul">
+<li>测试不要糊弄</li>
+<li>每个线上的BUG修复后，都要有相应的测试代码入 Git</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-2">
+<h2 id="orgheadline11"><span class="section-number-2">11</span> 关于数据库</h2>
+<div class="outline-text-2" id="text-11">
+<ul class="org-ul">
+<li>数据库定义（表，索引等）入 Git</li>
+<li>sql 关键字大写，index要有名字</li>
 <li>字段少用NOT NULL，不利于业务变更</li>
 <li>不用字符串类型做PrimaryKey，优先用自增ID</li>
+<li>涉及到直接操作数据库的，需要两个人一起操作，以免误操作</li>
 <li>不写复杂SQL</li>
+<li>基于非UNIQUE KEY的查询一定要有LIMIT，哪怕是个很大的值</li>
+<li>时间等范围字段不要出现在联合索引的前面</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-2">
-<h2 id="orgheadline8"><span class="section-number-2">8</span> 关于Java数据类型</h2>
-<div class="outline-text-2" id="text-8">
+<div id="outline-container-orgheadline12" class="outline-2">
+<h2 id="orgheadline12"><span class="section-number-2">12</span> 关于Git</h2>
+<div class="outline-text-2" id="text-12">
+<ul class="org-ul">
+<li>和程序有关的一切都入git，包括但不限于：cron，sql，日常脚本等</li>
+<li>及时commit，一个单独的功能完成即可commit</li>
+<li>及时merge-request</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-2">
+<h2 id="orgheadline13"><span class="section-number-2">13</span> 关于Java数据类型</h2>
+<div class="outline-text-2" id="text-13">
 <ul class="org-ul">
 <li>不用BigDecimal，涉及到金额，优先考虑减小单位，例如用"分"代替"元"做单位</li>
+<li>如果不可能为null，不允许使用Integer代替int，其它类似</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-2">
-<h2 id="orgheadline9"><span class="section-number-2">9</span> 关于错误和异常</h2>
-<div class="outline-text-2" id="text-9">
+<div id="outline-container-orgheadline14" class="outline-2">
+<h2 id="orgheadline14"><span class="section-number-2">14</span> 关于Java import</h2>
+<div class="outline-text-2" id="text-14">
+<ul class="org-ul">
+<li>不允许import static 方法</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline15" class="outline-2">
+<h2 id="orgheadline15"><span class="section-number-2">15</span> 关于Java第三方库</h2>
+<div class="outline-text-2" id="text-15">
+<ul class="org-ul">
+<li>JDK有的功能，不许使用第三方库</li>
+<li>新增第三方库到pom需要团队其它成员讨论</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline16" class="outline-2">
+<h2 id="orgheadline16"><span class="section-number-2">16</span> 关于逻辑</h2>
+<div class="outline-text-2" id="text-16">
+<p>
+要有逻辑，而不是堆砌判断，像堵窟窿一样
+</p>
+<div class="org-src-container">
+
+<pre class="src src-java"><span style="color: #00ffff; font-weight: bold;">return</span> project == <span style="color: #ff00ff;">null</span> || !project.getXmKey().equals(xmKey);
+<span style="color: #00ffff; font-weight: bold;">return</span> isNull(project) || (isNotBlank(xmKey) &amp;&amp; !Objects.equals(xmKey, project.getXmKey()))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-2">
+<h2 id="orgheadline17"><span class="section-number-2">17</span> 关于错误和异常</h2>
+<div class="outline-text-2" id="text-17">
 <ul class="org-ul">
 <li>需要捕获，然后重新抛出，或转成错误码返回的异常，改成RuntimeException类型的</li>
 <li>尽可能多的返回错误信息。例如 String valid(); 返回错误信息，由于 boolean valid(); 仅仅返回对错</li>
@@ -244,9 +339,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline10" class="outline-2">
-<h2 id="orgheadline10"><span class="section-number-2">10</span> 关于错误日志</h2>
-<div class="outline-text-2" id="text-10">
+<div id="outline-container-orgheadline18" class="outline-2">
+<h2 id="orgheadline18"><span class="section-number-2">18</span> 关于错误日志</h2>
+<div class="outline-text-2" id="text-18">
 <ul class="org-ul">
 <li>优先通过返回错误信息的方式表达错误，而不是记录错误日志，然后返回false</li>
 <li>错误日志要能够定位错误。logger.warn("name format error"); 这种日志毫无用处</li>
@@ -254,10 +349,19 @@ for the JavaScript code in this tag.
 </ul>
 </div>
 </div>
+
+<div id="outline-container-orgheadline19" class="outline-2">
+<h2 id="orgheadline19"><span class="section-number-2">19</span> 关于错误码或ID之类的数字</h2>
+<div class="outline-text-2" id="text-19">
+<p>
+一定要按照类型分区，便于记忆或增加，还可以避免重复。例如手动分配的项目ID，按照部门划分区间，可以避免项目ID重复。A部门1000开始，B部门2000开始。
+</p>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-04-19 三 12:16</p>
+<p class="date">Created: 2017-04-25 二 12:45</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

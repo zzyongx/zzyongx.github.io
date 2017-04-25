@@ -2,8 +2,9 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
-* 缩进
-- 两个空格
+* 缩进和对齐
+- 两个空格缩进
+- 相同语义的常理、变量、参数对齐
 
 * 留白
 - =if= =else= 等关键字左右1个空格
@@ -12,6 +13,7 @@
 - =if= =for= 块儿如果换行，用花括号
 - 行超过100字符换行（不强制）
 - 连续8行没有空行考虑使用函数代替
+- ?: 表达式如果要换行，在？处换
 
 * 字符
 - 源码UTF8
@@ -21,20 +23,63 @@
 - 嵌套不超过3层
 - 函数长度不超过50行
 
-* 重复代码
+* 有效代码越少越好
+- 没用的代码立即删掉，不允许有没用的代码
 - 杜绝相似、重复代码
+
+* 关于IDE
+- IDE的自动format工具，太二，不建议使用
+- 代码不符合规范，不许拿IDE自动做的当借口
+
+* 变量定义不允许跨行
+#+BEGIN_SRC java
+public static final String v1,
+               v2;
+#+END_SRC
 
 * 函数命名表达函数的作用而不是函数的实现途径
 例如：如果是管理Redis缓存那么，CacheManager的名字优于RedisManager。
 如果是用randomUUID实现了随机字符串，getRandomString的名字优于getRandomUuidString、getUuidString。
 
+* 关于名字
+- Lambda 表达式不允许超过5行，否则使用命名函数，匿名函数太长（又没有函数名字标明含义）不容易理解
+
+* 关于测试
+- 测试不要糊弄
+- 每个线上的BUG修复后，都要有相应的测试代码入 Git
+
 * 关于数据库
+- 数据库定义（表，索引等）入 Git
+- sql 关键字大写，index要有名字
 - 字段少用NOT NULL，不利于业务变更
 - 不用字符串类型做PrimaryKey，优先用自增ID
+- 涉及到直接操作数据库的，需要两个人一起操作，以免误操作
 - 不写复杂SQL
+- 基于非UNIQUE KEY的查询一定要有LIMIT，哪怕是个很大的值
+- 时间等范围字段不要出现在联合索引的前面
+
+* 关于Git
+- 和程序有关的一切都入git，包括但不限于：cron，sql，日常脚本等
+- 及时commit，一个单独的功能完成即可commit
+- 及时merge-request
 
 * 关于Java数据类型
 - 不用BigDecimal，涉及到金额，优先考虑减小单位，例如用"分"代替"元"做单位
+- 如果不可能为null，不允许使用Integer代替int，其它类似
+
+* 关于Java import
+- 不允许import static 方法
+
+* 关于Java第三方库
+- JDK有的功能，不许使用第三方库
+- 新增第三方库到pom需要团队其它成员讨论
+
+* 关于逻辑
+要有逻辑，而不是堆砌判断，像堵窟窿一样
+#+BEGIN_SRC java
+return project == null || !project.getXmKey().equals(xmKey);
+return isNull(project) || (isNotBlank(xmKey) && !Objects.equals(xmKey, project.getXmKey()))
+#+END_SRC
 
 * 关于错误和异常
 - 需要捕获，然后重新抛出，或转成错误码返回的异常，改成RuntimeException类型的
@@ -45,3 +90,6 @@
 - 优先通过返回错误信息的方式表达错误，而不是记录错误日志，然后返回false
 - 错误日志要能够定位错误。logger.warn("name format error"); 这种日志毫无用处
 - 优先用占位符而不是连接符。logger.debug("name format error {}", name); 而不是 logger.debug("name format error " + name);
+
+* 关于错误码或ID之类的数字
+一定要按照类型分区，便于记忆或增加，还可以避免重复。例如手动分配的项目ID，按照部门划分区间，可以避免项目ID重复。A部门1000开始，B部门2000开始。

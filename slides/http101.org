@@ -29,6 +29,11 @@
 - 请求/响应 Body
 - Header用来描述协议元信息，Header Name不区分大小写
 
+** URL的组成
+scheme:[//[user[:password]@]host[:port]][/path][?query][#fragment]
+http://plus.sogou.com/api/account
+<img src="//plus.sogou.com/image/1234.png" />
+
 ** Chrome Developer Tools
 [[../images/http101/http-get.png]]
 
