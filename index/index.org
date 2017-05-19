@@ -14,6 +14,9 @@
 1. 有MVP（minimum viable product），通过MVP展示想法，和人沟通
 2. 论证做的好处、不做的坏处，最后落实到增加盈利或降低成本
 
+** 笔记
+[[blog:a-managers-faq][一个管理者的FAQ]] <2017-05-19>
+
 ** 经验
 [[blog:grep-command-examples][grep]] <2017-03-09>
 #+BEGIN_QUOTE

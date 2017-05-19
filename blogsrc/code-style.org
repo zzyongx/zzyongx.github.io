@@ -26,6 +26,7 @@
 
 * 有效代码越少越好
 - 没用的代码立即删掉，不允许有没用的代码
+- 宁可写重复的代码，也不写难懂的，不好维护的代码，例如通过拦截器做复杂的权限控制
 - 杜绝相似、重复代码
 
 * 关于IDE
@@ -69,7 +70,7 @@ public static final String v1,
 - 如果不可能为null，不允许使用Integer代替int，其它类似
 
 * 关于Java import
-- 不允许import static 方法
+- 不允许import static 方法/变量
 
 * 关于Java第三方库
 - JDK有的功能，不许使用第三方库
