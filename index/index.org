@@ -18,6 +18,8 @@
 [[blog:a-managers-faq][一个管理者的FAQ]] <2017-05-19>
 
 ** 经验
+[[blog:https-SNI][https如何支持虚拟主机]] <2017-05-20>
+
 [[blog:grep-command-examples][grep]] <2017-03-09>
 #+BEGIN_QUOTE
 grep 常用选项
