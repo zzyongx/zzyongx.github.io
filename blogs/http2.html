@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>HTTP2 简介</title>
-<!-- 2017-05-21 日 18:20 -->
+<!-- 2017-05-21 日 18:25 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="zhengzhiyong" />
@@ -232,7 +232,7 @@ HTTP/2 还规定了服务器PUSH，但是nginx还没有实现这点。
 <h3 id="sec-3-1"><span class="section-number-3">3.1</span> HTTPS 连接昂贵的两个原因</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
-<li>连接时服务端需要更多的CPU，私钥机密对称密钥
+<li>连接建立时服务端使用私钥解密对称密钥，需要不菲的CPU
 </li>
 <li>建立SSL/TLS连接需要额外的三次握手，容易放大RTT的影响
 </li>
@@ -281,7 +281,7 @@ HTTP/2 还规定了服务器PUSH，但是nginx还没有实现这点。
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2017-05-21 日 18:20</p>
+<p class="date">Created: 2017-05-21 日 18:25</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
