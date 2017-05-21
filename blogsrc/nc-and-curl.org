@@ -2,11 +2,33 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
-nc和curl是做IT必知必会的，一个用于tcp，一个用于http。这里记录一些使用经验和踩过的坑。
+nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一些使用经验和踩过的坑。
+
+* nc
+** 参数
+- 无参数 连接tcp端口
+- -z 探测端口是否存活，端口可以是范围，例如：6379-6400
+- -w <timeout> 设置连接超时
+- -l <port> 监听端口，模拟服务器
+- -v 打印详细信息
+
+** 例子：
+*** 模拟http请求
+=echo -e "GET / HTTP/1.0\r\nHost: zzyongx.github.io\r\n\r\n" | nc 127.0.0.1 80=
+
+*** 文件传输
+- 准备发送文件README.org =cat README.org | nc -l 8080=
+- 获取文件 =nc 127.0.0.1 8080 > README.org=
+
+*** 探测端口存活，超时1s
+=nc -vz -w 1 www.sogou.com 80=
+
+*** 扫描端口 6379-6400
+=nc -vz -w 1 127.0.0.1 6379-6400=
 
 * curl
 
-** 参数部分
+** 常用参数
 *** -X
 ~-X~ 指定HTTP方法，常用的是~GET POST PUT DELETE~ ，如果不指定，默认是~GET~ 。如果指定了~-d~ 参数（或者类似--data-binary之类），则是~POST~ ，如果现实指定了~-X POST~ ，则需要~-d~ 或类似的参数。
 
@@ -26,22 +48,8 @@ nc和curl是做IT必知必会的，一个用于tcp，一个用于http。这里�
 *** -vv
 用于查看请求过程，包括连接的IP，请求的方法、URL、Header，响应的状态码、Header，这个是输出到标准输出的。
 
-** 请求Header
-通过查看请求Header，可以知道我们指定的参数是否正确，请求是否正确。例如：Content-Length 可以知道发送的数据大小对不对。很多Header做测试很方便。
+*** -w
+可以将http请求的一些内部细节格式化输出。例如 =curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"= 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
 
-*** Host
-请求的Host，如果请求的URL中地址是IP，可能需要指定Host。
-
-*** Content-Type
-请求的内容类型，规范的程序中，这个很关键，因为服务端根据Content-Type解析收到的数据。
-
-*** Content-Length
-请求的数据长度
-
-*** Accept
-客户端接收什么Content-Type的数据，服务端根据客户端的能力，来返回不同的数据。例如 ~Accept: text/html,image/webp~ 中的webp表明客户端接收webp格式的图片，就可以返回图片的webp形式，节省带宽。如果Accept中没有这个，服务端可能就返回jpg的了。可以用来测试服务端。
-
-*** Accept-Encoding
-客户端接收的数据压缩格式。可以测试服务端配置的压缩是否生效，也可以服务端用来探测客户端能力。例如 ~Accept-Encoding:gzip, deflate, sdch~ 中表明客户端接收gzip压缩、sdch压缩。sdch压缩时google发明的，可能只有chrome浏览器支持。服务端可以根据这些数据，判断返回数据是否压缩，以什么格式压缩。
-
-
+** 常用法
+*** xyz

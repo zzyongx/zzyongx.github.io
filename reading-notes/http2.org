@@ -37,6 +37,10 @@ HTTP/2 还规定了服务器PUSH，但是nginx还没有实现这点。
 * HTTP/2 和 HTTPS
 这两者本来没有任何关系，但是现在主流浏览器只有在HTTPS时才启用HTTP2，所以为了使用HTTP2，服务端只能配置成HTTPS模式的。主要还是HTTPS的连接更昂贵，在HTTPS上启用HTTP/2收益更大。
 
+** HTTPS 连接昂贵的两个原因
+- 连接时服务端需要更多的CPU，私钥机密对称密钥
+- 建立SSL/TLS连接需要额外的三次握手，容易放大RTT的影响
+
 * 性能
 - 在RTT小于20ms时，HTTP/1.x 和 HTTP/2差别不大
 - RTT在30ms和250ms之间时，HTTP/2小胜

@@ -3,8 +3,8 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>nc 和 curl</title>
-<!-- 2017-05-21 日 18:02 -->
+<title>如何面试一家公司</title>
+<!-- 2017-05-20 六 17:30 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="zhengzhiyong" />
@@ -143,159 +143,83 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">nc 和 curl</h1>
+<h1 class="title">如何面试一家公司</h1>
 <p>
-nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一些使用经验和踩过的坑。
+本文是 <a href="https://medium.freecodecamp.com/how-to-interview-as-a-developer-candidate-b666734f12dd">How to interview a company</a> 的阅读笔记。面试是双向的过程，公司在面试候选人，候选人也在默默观察公司。通常一个面试官在面试结束时，会问候选人有什么想了解的。作者给出了自己积攒多年的问题，候选人可以通过这些问题了解公司，面试官也可以通过这些问题看看自己部门是否符合候选人的标准。
+</p>
+
+<p>
+对不同的面试官有不同的问题，同一个问题也会问不同的面试官，然后对比这些面试官的答案。
 </p>
 
 <div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> nc</h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> 面向软件工程师的问题</h2>
 <div class="outline-text-2" id="text-1">
 </div><div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 参数</h3>
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 如何了解自己每天需要做什么</h3>
 <div class="outline-text-3" id="text-1-1">
-<ul class="org-ul">
-<li>无参数 连接tcp端口
-</li>
-<li>-z 探测端口是否存活，端口可以是范围，例如：6379-6400
-</li>
-<li>-w &lt;timeout&gt; 设置连接超时
-</li>
-<li>-l &lt;port&gt; 监听端口，模拟服务器
-</li>
-<li>-v 打印详细信息
-</li>
-</ul>
+<p>
+通过这个可以了解公司的工作是否有计划，团队内部的配合是否流畅
+</p>
 </div>
 </div>
 
 <div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 例子：</h3>
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 使用什么样的版本控制工具</h3>
 <div class="outline-text-3" id="text-1-2">
-</div><div id="outline-container-sec-1-2-1" class="outline-4">
-<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> 模拟http请求</h4>
-<div class="outline-text-4" id="text-1-2-1">
 <p>
-<code>echo -e "GET / HTTP/1.0\r\nHost: zzyongx.github.io\r\n\r\n" | nc 127.0.0.1 80</code>
+通过版本控制工具，可以延伸到开发工具，上线流程，质量保证等，可以观察公司的技术栈是否陈旧，自动化程度是否高。
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-1-2-2" class="outline-4">
-<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> 文件传输</h4>
-<div class="outline-text-4" id="text-1-2-2">
-<ul class="org-ul">
-<li>准备发送文件README.org <code>cat README.org | nc -l 8080</code>
-</li>
-<li>获取文件 <code>nc 127.0.0.1 8080 &gt; README.org</code>
-</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-sec-1-2-3" class="outline-4">
-<h4 id="sec-1-2-3"><span class="section-number-4">1.2.3</span> 探测端口存活，超时1s</h4>
-<div class="outline-text-4" id="text-1-2-3">
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> 这个工作吸引你的地方</h3>
+<div class="outline-text-3" id="text-1-3">
 <p>
-<code>nc -vz -w 1 www.sogou.com 80</code>
+如果连面试官都不清楚这份工作吸引他的地方，那就微妙了。
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-1-2-4" class="outline-4">
-<h4 id="sec-1-2-4"><span class="section-number-4">1.2.4</span> 扫描端口 6379-6400</h4>
-<div class="outline-text-4" id="text-1-2-4">
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> 如何写测试，如何持续集成，如何发现修理bug</h3>
+<div class="outline-text-3" id="text-1-4">
 <p>
-<code>nc -vz -w 1 127.0.0.1 6379-6400</code>
+热心测试是个好信号，但也要了解测试的程度，对质量的要求，衡量标准，自动化程度等
 </p>
-</div>
 </div>
 </div>
 </div>
 
 <div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> curl</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> 面向工程师主管的问题</h2>
 <div class="outline-text-2" id="text-2">
 </div><div id="outline-container-sec-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 常用参数</h3>
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 你最后一次写代码是什么时候</h3>
 <div class="outline-text-3" id="text-2-1">
-</div><div id="outline-container-sec-2-1-1" class="outline-4">
-<h4 id="sec-2-1-1"><span class="section-number-4">2.1.1</span> -X</h4>
-<div class="outline-text-4" id="text-2-1-1">
 <p>
-<code>-X</code> 指定HTTP方法，常用的是<code>GET POST PUT DELETE</code> ，如果不指定，默认是<code>GET</code> 。如果指定了<code>-d</code> 参数（或者类似&#x2013;data-binary之类），则是<code>POST</code> ，如果现实指定了<code>-X POST</code> ，则需要<code>-d</code> 或类似的参数。
+很多人喜欢技术背景比较强的主管
 </p>
-</div>
-</div>
-
-<div id="outline-container-sec-2-1-2" class="outline-4">
-<h4 id="sec-2-1-2"><span class="section-number-4">2.1.2</span> -H</h4>
-<div class="outline-text-4" id="text-2-1-2">
-<p>
-指定请求的Header，通常指定Host，Cookie之类。例如： <code>-H 'Host: www.test.com'</code> 。当我们POST数据的时候，如果数据比较大，curl可能自动加上<code>Expect: 100-continue</code> ，如果服务端不支持这个Header，需要手动禁掉，方法是传递一个空Header <code>-H 'Expect:'</code>
-</p>
-</div>
-</div>
-
-<div id="outline-container-sec-2-1-3" class="outline-4">
-<h4 id="sec-2-1-3"><span class="section-number-4">2.1.3</span> -d</h4>
-<div class="outline-text-4" id="text-2-1-3">
-<p>
-<code>-d</code> 参数用于 <code>PUT</code> 或者 <code>POST</code> 的请求Body，如果没有<code>-H</code> 指定Header，那么默认是 <code>application/x-www-form-urlencoded</code>
-例如 <code>-d 'data you want post'</code> 请求body是 <code>data you want post</code> 更常见的形式是 <code>-d 'name=foo&amp;age=18'</code> 这种querystring的形式。如果数据存在文件里，使用<code>-d '@/path/to/file'</code> ，这里把文件<code>/path/to/file</code>的内容作为Body。
-</p>
-</div>
-</div>
-
-<div id="outline-container-sec-2-1-4" class="outline-4">
-<h4 id="sec-2-1-4"><span class="section-number-4">2.1.4</span> &#x2013;data-binary</h4>
-<div class="outline-text-4" id="text-2-1-4">
-<p>
-名字具有误导性，和二进制无关，作用和 <code>-d</code> 参数相同，只有一点 <code>-d</code> 参数指定文件作为上传内容时，curl会过滤换行（也可能还有别的），所以如果希望服务端读到和上传内容一样的数据，用<code>--data-binary</code> ，此时你可能需要用<code>-H</code> 指定<code>Content-Type</code> 。
-</p>
-</div>
-</div>
-
-<div id="outline-container-sec-2-1-5" class="outline-4">
-<h4 id="sec-2-1-5"><span class="section-number-4">2.1.5</span> &#x2013;user</h4>
-<div class="outline-text-4" id="text-2-1-5">
-<p>
-用于指定basic认证的用户名和密码，例如&#x2013;user name:pass
-</p>
-</div>
-</div>
-
-<div id="outline-container-sec-2-1-6" class="outline-4">
-<h4 id="sec-2-1-6"><span class="section-number-4">2.1.6</span> -vv</h4>
-<div class="outline-text-4" id="text-2-1-6">
-<p>
-用于查看请求过程，包括连接的IP，请求的方法、URL、Header，响应的状态码、Header，这个是输出到标准输出的。
-</p>
-</div>
-</div>
-
-<div id="outline-container-sec-2-1-7" class="outline-4">
-<h4 id="sec-2-1-7"><span class="section-number-4">2.1.7</span> -w</h4>
-<div class="outline-text-4" id="text-2-1-7">
-<p>
-可以将http请求的一些内部细节格式化输出。例如 <code>curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"</code> 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
-</p>
-</div>
 </div>
 </div>
 
 <div id="outline-container-sec-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 常用法</h3>
-<div class="outline-text-3" id="text-2-2">
-</div><div id="outline-container-sec-2-2-1" class="outline-4">
-<h4 id="sec-2-2-1"><span class="section-number-4">2.2.1</span> xyz</h4>
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 你如何安排工作</h3>
 </div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> 团队目前最大的挑战是什么</h3>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> 如何考核员工</h3>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2017-05-21 日 18:02</p>
+<p class="date">Created: 2017-05-20 六 17:30</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
