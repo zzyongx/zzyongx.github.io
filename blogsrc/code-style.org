@@ -68,6 +68,7 @@ public static final String v1,
 * 关于Java数据类型
 - 不用BigDecimal，涉及到金额，优先考虑减小单位，例如用"分"代替"元"做单位
 - 如果不可能为null，不允许使用Integer代替int，其它类似
+- 如果int、long类型参与到字符串的+里面，使用String.valueOf()。例如 ='"' + 5= 和 ="\"" + 5= 完全不同，为了避免转义，很容易写成前者。
 
 * 关于Java import
 - 不允许import static 方法/变量
