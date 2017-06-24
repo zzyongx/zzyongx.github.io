@@ -23,32 +23,53 @@
 就ACID四个属性而言，AC的可选择性较小，ID的自由度比较大。例如D，数据落盘是个很复杂的过程，真要每次事务提交都实打实的写硬盘，性能是无法接受的。通常借助日志，RAID卡缓存提高性能。并且有时候降低D来提升性能。I有4个级别，不同级别对性能和业务的影响是不一样的。
 
 * 锁
-MySQL的读分 =锁读= 和 =一般读= ，不特殊强调的话，都是指一般读，一般读不加锁。锁分读锁 =S= 和写锁 =X= 。另外，同样的SQL，在不同的隔离级别下，加的锁也不同。下面的论述相当不专业，只是为了辅助理解事务隔离级别。
+MySQL的读分 =锁读= 和 =一般读= ，不特殊强调的话，都是指一般读，一般读不加锁。锁分读锁 =S= 和写锁 =X= 。另外，同样的SQL，在不同的隔离级别下，加的锁也不同。下面的论述相当不专业，只是为了辅助理解事务隔离级别。可以通过 =SHOW ENGINE INNODB STATUS= 看到锁的详细信息，但也依赖mysql的版本，我在=percona 5.6.22-72.0=中能看到每个锁的信息，但是=percona 5.6.24-72.2=中却看不到。
 
 ** Intention Locks (意向锁)
-Intention Locks是表级锁，但不一定锁整个表，如果where字句有索引的化，。通过 ~SELECT ... LOCK IN SHARE MODE~ 和 ~SELECT ... FOR UPDATE~ 加Intention Locks。前者加 =IS= 锁，后者加 =IX= 锁，他们和 =S= 和 =X= 的兼容情况时：
+Intention Locks，仅仅表明了加锁的意向，它是表级锁，并且无法单独存在。 ~SELECT ... LOCK IN SHARE MODE~ 加 =IS= 锁， ~SELECT ... FOR UPDATE~ 和写操作加 =IX= 锁。 =IS= =IX= =S= 和 =X= 的兼容情况是：
 |    | X        | IX         | S          | IS         |
 | X  | Conflict | Conflict   | Conflict   | Conflict   |
 | IX | Conflict | Compatible | Conflict   | Compatible |
 | S  | Conflict | Conflict   | Compatible | Compatible |
 | IS | Conflict | Compatible | Compatible |Compatible  |
 
+例1：
+~SELECT * FROM students WHERE id = 75 LOCK IN SHARE MODE;~ 加了IS锁和S锁，S锁是行锁
+#+BEGIN_EXAMPLE
+TABLE LOCK table `test`.`students` trx id 1886524 lock mode IS
+RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`students` trx id 1886524 lock mode S locks rec but not gap
+#+END_EXAMPLE
+
+更新操作后升级为写锁 ~UPDATE students SET age = 15 WHERE id = 75~
+#+BEGIN_EXAMPLE
+TABLE LOCK table `test`.`students` trx id 1886532 lock mode IS
+RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`students` trx id 1886532 lock mode S locks rec but not gap
+TABLE LOCK table `test`.`students` trx id 1886532 lock mode IX
+RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`students` trx id 1886532 lock_mode X locks rec but not gap
+#+END_EXAMPLE
+
+例2：
+~SELECT * FROM students WHERE id = 75 FOR UPDATE;~ 加了IX锁和X锁，X 是行锁
+#+BEGIN_EXAMPLE
+TABLE LOCK table `test`.`students` trx id 1886526 lock mode IX
+RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`students` trx id 1886526 lock_mode X locks rec but not gap
+#+END_EXAMPLE
+
+例3：
+~SELECT * FROM students WHERE age > 15 LOCK IN SHARE MODE;~ 虽然结果集为空，但还是锁住了整张表，因为where子句没有索引
+#+BEGIN_EXAMPLE
+TABLE LOCK table `test`.`students` trx id 1886537 lock mode IS
+RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`students` trx id 1886537 lock mode S
+#+END_EXAMPLE
+
 ** Record Locks
-记录锁，可以理解为每个锁对应一个记录。例如
+记录锁，可以理解为每个锁对应一个记录。例如 ~UPDATE students SET age = 15 WHERE id = 75;~ 这里id是primary key，如果id是unique，也是记录锁。
 
 ** Gap Locks
-范围锁，锁一个范围，适用于返回多条记录的查询。
+应该是锁住一个范围的意思。不是特别理解。
 
 ** Next-Key Locks
-配合Gap Locks使用，适用于没有边界的情况。例如 =WHERE id > 10= 。
-
-* 死锁
-偶尔死锁不是大问题，只要重试即可。减低死锁的方法：
-1. 不同事务，操作表的顺序尽量相同
-2. 事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。
-
-* 锁冲突
-锁冲突会降低并发，例如使用mysql做计数器。
+用于防止幻读的，等于 record lock + gap lock，下界开区间，上界闭区间。但是我没想明白这个是如何解决幻读的。例如事务A： =SELECT * FROM students WHERE id > 75= ，然后事务B：新增了id=79并提交，此时事务A再次执行刚才的查询，结果是一样的，而事务A执行期间没加任何锁。
 
 * 事务的隔离级别
 下面的陈述按照常用级别排序，从实例中可以看出，各个隔离级别锁数据的量是不一样的，这导致了性能的差异。同时，在并发时，理解SQL背后的锁，有助于理解业务逻辑是不是并发安全的。
@@ -95,7 +116,7 @@ COMMIT;                                       |    -- 查询结果和首次查�
                                               |    +----+------+
                                               |    |  7 |  777 |
                                               |    |  8 |  888 |
--- 看不到未提交的修改                         |    +----+------+
+-- 看不到未提交的修改                            |    +----+------+
 SELECT * FROM testt;                          |
 +----+------+                                 |
 | id | n    |                                 |
@@ -105,11 +126,11 @@ SELECT * FROM testt;                          |
 +----+------+                                 |    -- 更新加写锁 Record Locks
                                               |    UPDATE testt SET n = 7 WHERE id = 7;
 START TRANSACTION;                            |
--- 无法加写锁，超时                           |
+-- 无法加写锁，超时                              |
 UPDATE testt SET n = 77 WHERE id = 7;         |
-ERROR 1205 (HY000): Lock wait timeout...      |    -- 加Intention Locks
+ERROR 1205 (HY000): Lock wait timeout...      |    -- 加 Next Key Lock
                                               |    SELECT * FROM testt SET n >= 8 FOR UPDATE;
--- 因为Intention Lock是表锁，插入失败         |
+-- 因为Next Key Lock，超时                      |
 INSERT INTO testt(id, n) VALUES(9, 999);      |
 ERROR 1205 (HY000): Lock wait timeout...      |
                                               |    ROLLBACK; START TRANSACTION;
@@ -167,3 +188,11 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 
 * 读-修改-写
 回到最初的问题，默认隔离级别。读-修改-写，不是并发安全的，多个线程可以并发的读到相同的数据，然后各自修改，这不是业务需要的。可以使用 =SELECT ... FOR UPDATE= 防止并发读写。虽然可以使用 =锁读= 来控制锁，但是死锁的概率也大大提升。
+
+* 锁冲突
+锁冲突会降低并发，例如使用mysql做计数器。
+
+* 死锁
+偶尔死锁不是大问题，只要重试即可。减低死锁的方法：
+1. 不同事务，操作表的顺序尽量相同
+2. 事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。
