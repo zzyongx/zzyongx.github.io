@@ -3,23 +3,30 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>MySQL InnoDB Locking and Transaction</title>
-<!-- 2017-06-24 六 15:02 -->
+<!-- 2017-06-30 五 14:38 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>MySQL InnoDB Locking and Transaction</title>
 <meta  name="generator" content="Org-mode" />
-<meta  name="author" content="zhengzhiyong" />
+<meta  name="author" content="root" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
-  .title  { text-align: center; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
   .todo   { font-family: monospace; color: red; }
-  .done   { color: green; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
   .tag    { background-color: #eee; font-family: monospace;
             padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
-  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
   .underline { text-decoration: underline; }
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
@@ -58,15 +65,14 @@
   caption.t-above { caption-side: top; }
   caption.t-bottom { caption-side: bottom; }
   td, th { vertical-align:top;  }
-  th.right  { text-align: center;  }
-  th.left   { text-align: center;   }
-  th.center { text-align: center; }
-  td.right  { text-align: right;  }
-  td.left   { text-align: left;   }
-  td.center { text-align: center; }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
   dt { font-weight: bold; }
-  .footpara:nth-child(2) { display: inline; }
-  .footpara { display: block; }
+  .footpara { display: inline; }
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
@@ -148,16 +154,16 @@ for the JavaScript code in this tag.
 事情起源于同事的一个问题，读表-修改-写表，在事务内完成，是否有并发问题？我想当然的以为没问题，不然要事务干什么？缺乏对事务的深入思考。事实是，这样有并发问题，如果不使用锁，是没法保证并发安全的。那么锁和事务是什么关系呢？
 </p>
 
-<div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> 事务</h2>
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">1</span> 事务</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 一般而言，如果数据库支持ACID属性，那么它就支持事务。事务只是数据库的一个特性而已，不是说有了事务，一些问题被神奇的解决了。还需要思考问题的内在逻辑。
 </p>
 </div>
 
-<div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> A（atomicity）</h3>
+<div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> A（atomicity）</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 原子性，事务内的所有操作，要么都做（ <code>COMMIT</code> ），要么都不做（ <code>ROLLBACK</code> ）。但做的对不对，不管。
@@ -166,8 +172,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> C（consistency）</h3>
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> C（consistency）</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 一致性，事务结束时，数据库的主键约束，外键约束等其它特性，必须满足。（理解不深，觉得理所当然就该这样）
@@ -175,8 +181,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-sec-1-3" class="outline-3">
-<h3 id="sec-1-3"><span class="section-number-3">1.3</span> I（isolation）</h3>
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">1.3</span> I（isolation）</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 隔离性，同时运行的事务，应该相互隔离。并发控制和隔离性有关。
@@ -184,8 +190,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-sec-1-4" class="outline-3">
-<h3 id="sec-1-4"><span class="section-number-3">1.4</span> D（durability）</h3>
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">1.4</span> D（durability）</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 持久性，完成的事务数据必须持久存储。
@@ -198,16 +204,16 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 锁</h2>
+<div id="outline-container-orgheadline10" class="outline-2">
+<h2 id="orgheadline10"><span class="section-number-2">2</span> 锁</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 MySQL的读分 <code>锁读</code> 和 <code>一般读</code> ，不特殊强调的话，都是指一般读，一般读不加锁。锁分读锁 <code>S</code> 和写锁 <code>X</code> 。另外，同样的SQL，在不同的隔离级别下，加的锁也不同。下面的论述相当不专业，只是为了辅助理解事务隔离级别。可以通过 <code>SHOW ENGINE INNODB STATUS</code> 看到锁的详细信息，但也依赖mysql的版本，我在<code>percona 5.6.22-72.0</code>中能看到每个锁的信息，但是<code>percona 5.6.24-72.2</code>中却看不到。
 </p>
 </div>
 
-<div id="outline-container-sec-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Intention Locks (意向锁)</h3>
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">2.1</span> Intention Locks (意向锁)</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 Intention Locks，仅仅表明了加锁的意向，它是表级锁，并且无法单独存在。 <code>SELECT ... LOCK IN SHARE MODE</code> 加 <code>IS</code> 锁， <code>SELECT ... FOR UPDATE</code> 和写操作加 <code>IX</code> 锁。 <code>IS</code> <code>IX</code> <code>S</code> 和 <code>X</code> 的兼容情况是：
@@ -216,55 +222,55 @@ Intention Locks，仅仅表明了加锁的意向，它是表级锁，并且无�
 
 
 <colgroup>
-<col  class="left" />
+<col  class="org-left" />
 
-<col  class="left" />
+<col  class="org-left" />
 
-<col  class="left" />
+<col  class="org-left" />
 
-<col  class="left" />
+<col  class="org-left" />
 
-<col  class="left" />
+<col  class="org-left" />
 </colgroup>
 <tbody>
 <tr>
-<td class="left">&#xa0;</td>
-<td class="left">X</td>
-<td class="left">IX</td>
-<td class="left">S</td>
-<td class="left">IS</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">X</td>
+<td class="org-left">IX</td>
+<td class="org-left">S</td>
+<td class="org-left">IS</td>
 </tr>
 
 <tr>
-<td class="left">X</td>
-<td class="left">Conflict</td>
-<td class="left">Conflict</td>
-<td class="left">Conflict</td>
-<td class="left">Conflict</td>
+<td class="org-left">X</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Conflict</td>
 </tr>
 
 <tr>
-<td class="left">IX</td>
-<td class="left">Conflict</td>
-<td class="left">Compatible</td>
-<td class="left">Conflict</td>
-<td class="left">Compatible</td>
+<td class="org-left">IX</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Compatible</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Compatible</td>
 </tr>
 
 <tr>
-<td class="left">S</td>
-<td class="left">Conflict</td>
-<td class="left">Conflict</td>
-<td class="left">Compatible</td>
-<td class="left">Compatible</td>
+<td class="org-left">S</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Compatible</td>
+<td class="org-left">Compatible</td>
 </tr>
 
 <tr>
-<td class="left">IS</td>
-<td class="left">Conflict</td>
-<td class="left">Compatible</td>
-<td class="left">Compatible</td>
-<td class="left">Compatible</td>
+<td class="org-left">IS</td>
+<td class="org-left">Conflict</td>
+<td class="org-left">Compatible</td>
+<td class="org-left">Compatible</td>
+<td class="org-left">Compatible</td>
 </tr>
 </tbody>
 </table>
@@ -308,8 +314,8 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-sec-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Record Locks</h3>
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">2.2</span> Record Locks</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 记录锁，可以理解为每个锁对应一个记录。例如 <code>UPDATE students SET age = 15 WHERE id = 75;</code> 这里id是primary key，如果id是unique，也是记录锁。
@@ -317,8 +323,8 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-sec-2-3" class="outline-3">
-<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Gap Locks</h3>
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">2.3</span> Gap Locks</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 应该是锁住一个范围的意思。不是特别理解。
@@ -326,8 +332,8 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-sec-2-4" class="outline-3">
-<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Next-Key Locks</h3>
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><span class="section-number-3">2.4</span> Next-Key Locks</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 用于防止幻读的，等于 record lock + gap lock，下界开区间，上界闭区间。但是我没想明白这个是如何解决幻读的。例如事务A： <code>SELECT * FROM students WHERE id &gt; 75</code> ，然后事务B：新增了id=79并提交，此时事务A再次执行刚才的查询，结果是一样的，而事务A执行期间没加任何锁。
@@ -336,16 +342,16 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-sec-3" class="outline-2">
-<h2 id="sec-3"><span class="section-number-2">3</span> 事务的隔离级别</h2>
+<div id="outline-container-orgheadline15" class="outline-2">
+<h2 id="orgheadline15"><span class="section-number-2">3</span> 事务的隔离级别</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 下面的陈述按照常用级别排序，从实例中可以看出，各个隔离级别锁数据的量是不一样的，这导致了性能的差异。同时，在并发时，理解SQL背后的锁，有助于理解业务逻辑是不是并发安全的。
 </p>
 </div>
 
-<div id="outline-container-sec-3-1" class="outline-3">
-<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 可重复读（REPEATABLE READ）</h3>
+<div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><span class="section-number-3">3.1</span> 可重复读（REPEATABLE READ）</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 所谓可重复读，就是在事务内部，所有查询都和第一次查询的结果相同（能看到首次查询前其它事务的提交，看不到之后其它事务的提交），但是可以看到本事务内的修改（虽然看不到其它事务的提交，但是如果修改，则可以看到）。写操作加写锁， <code>锁读</code> 加锁。这是MySQL的默认级别。
@@ -418,8 +424,8 @@ ERROR 1205 (HY000): Lock wait timeout...      |
 </div>
 </div>
 
-<div id="outline-container-sec-3-2" class="outline-3">
-<h3 id="sec-3-2"><span class="section-number-3">3.2</span> 读已提交（READ COMMITTED）</h3>
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">3.2</span> 读已提交（READ COMMITTED）</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 事务内部可以读到其它事务提交的结果。这个导致 <b>幻读</b> （我理解幻读就是读到的数据不确定的意思），取决于业务逻辑，幻读不一定是个问题。它的另一个问题是 <code>锁读</code> 没有 Next-Key Locks。测试前需要设置隔离级别， <code>SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code> 。
@@ -465,8 +471,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-sec-3-3" class="outline-3">
-<h3 id="sec-3-3"><span class="section-number-3">3.3</span> 读未提交（READ UNCOMMITTED）</h3>
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="section-number-3">3.3</span> 读未提交（READ UNCOMMITTED）</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 可以读到未提交的数据。导致 <b>脏读</b> ，因为数据最终可能未提交。
@@ -474,8 +480,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-sec-3-4" class="outline-3">
-<h3 id="sec-3-4"><span class="section-number-3">3.4</span> 串行化（SERIALIZABLE）</h3>
+<div id="outline-container-orgheadline14" class="outline-3">
+<h3 id="orgheadline14"><span class="section-number-3">3.4</span> 串行化（SERIALIZABLE）</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 和重复读类似，除了所有的读都是 <code>LOCK IN SHARE MODE</code> ，写性能大大降低。
@@ -484,8 +490,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-sec-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> 读-修改-写</h2>
+<div id="outline-container-orgheadline16" class="outline-2">
+<h2 id="orgheadline16"><span class="section-number-2">4</span> 读-修改-写</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 回到最初的问题，默认隔离级别。读-修改-写，不是并发安全的，多个线程可以并发的读到相同的数据，然后各自修改，这不是业务需要的。可以使用 <code>SELECT ... FOR UPDATE</code> 防止并发读写。虽然可以使用 <code>锁读</code> 来控制锁，但是死锁的概率也大大提升。
@@ -493,8 +499,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-sec-5" class="outline-2">
-<h2 id="sec-5"><span class="section-number-2">5</span> 锁冲突</h2>
+<div id="outline-container-orgheadline17" class="outline-2">
+<h2 id="orgheadline17"><span class="section-number-2">5</span> 锁冲突</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 锁冲突会降低并发，例如使用mysql做计数器。
@@ -502,25 +508,77 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-sec-6" class="outline-2">
-<h2 id="sec-6"><span class="section-number-2">6</span> 死锁</h2>
+<div id="outline-container-orgheadline19" class="outline-2">
+<h2 id="orgheadline19"><span class="section-number-2">6</span> 死锁</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 偶尔死锁不是大问题，只要重试即可。减低死锁的方法：
 </p>
 <ol class="org-ol">
-<li>不同事务，操作表的顺序尽量相同
-</li>
-<li>事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。
-</li>
+<li>不同事务，操作表的顺序尽量相同</li>
+<li>事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。</li>
 </ol>
+</div>
+
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18"><span class="section-number-3">6.1</span> 单纯INSERT引起的死锁</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+这个死锁是工作中碰到的，参考：<a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html">Locks Set by Different SQL Statements in InnoDB</a>
+</p>
+
+<p>
+<code>CREATE TABLE students (id int(11) AUTO_INCREMENT PRIMARY KEY, name VARCHAR(32), phone VARCHAR(15), UNIQUE KEY(phone));</code>
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-ditta">session A                                                 | session B                                               | session C
+START TRANSACTION;                                        |                                                         |
+-- INSERT 加了 X 锁                                       | START TRANSACTION;                                      |
+INSERT INTO students VALUES(null, 'xw', '15810183239');   |                                                         | START TRANSACTION;
+                                                          | -- phone重复，等待 S 锁                                 | -- phone重复，等待S锁
+                                                          | INSERT INTO students VALUES(null, 'xw', '15810183239'); | INSERT INTO students VALUES(null, 'xw', '15810183239');
+ROLLBACK;                                                 |                                                         |
+                                                          | -- A回滚，获取S锁，插入需要S锁升级为X锁，引发死锁       | -- A回滚，获取S锁，插入需要S锁升级为X锁，引发死锁
+</pre>
+</div>
+
+<p>
+这里主要是事务A回滚，B和C同时获取了S锁，因此它们无法将S锁升级为X锁，于是死锁。在编程实践中，回滚可能是框架做的，例如：INSERT后的某个操作抛出异常，框架回滚了事务。
+</p>
+
+<p>
+死锁信息
+</p>
+<pre class="example">
+(1) TRANSACTION:
+TRANSACTION 1886591, ACTIVE 7 sec inserting
+mysql tables in use 1, locked 1
+LOCK WAIT 4 lock struct(s), heap size 1184, 2 row lock(s), undo log entries 1
+MySQL thread id 5028, OS thread handle 0x7f1468c6f700, query id 1917874 localhost root update
+insert into students values(null, 'xw', '15810183239')
+(1) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 842 page no 4 n bits 72 index `phone` of table `test`.`students` trx id 1886591 lock_mode X insert intention waiting
+(2) TRANSACTION:
+TRANSACTION 1886590, ACTIVE 20 sec inserting
+mysql tables in use 1, locked 1
+4 lock struct(s), heap size 1184, 2 row lock(s), undo log entries 1
+MySQL thread id 5013, OS thread handle 0x7f145f53b700, query id 1917863 localhost root update
+insert into students values(null, 'xw', '15810183239')
+(2) HOLDS THE LOCK(S):
+RECORD LOCKS space id 842 page no 4 n bits 72 index `phone` of table `test`.`students` trx id 1886590 lock mode S
+(2) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 842 page no 4 n bits 72 index `phone` of table `test`.`students` trx id 1886590 lock_mode X insert intention waiting
+WE ROLL BACK TRANSACTION (2)
+</pre>
+</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2017-06-24 六 15:02</p>
-<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="author">Author: root</p>
+<p class="date">Created: 2017-06-30 五 14:38</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

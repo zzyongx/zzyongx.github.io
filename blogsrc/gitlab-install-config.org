@@ -13,13 +13,16 @@ gitlab 是开源的github，除了是git，还能用作code-review，并作为je
 配置的模板是 =/opt/gitlab/etc/gitlab.rb.template= ，复制到 =/etc/gitlab/gitlab.rb= ，配置都在这个文件里面。
 
 ** 需要关注的配置项
-- =external_url= gitlab的uri前缀，例如 =http://git.example.com= 
+- =external_url= gitlab的uri前缀，例如 =http://git.example.com=
 - =git_data_dir= git的数据地址，例如 =/path-to-big-disk=
 - =unicorn['port']= ruby服务器的端口
 - =nginx['listen_port']= nginx服务器的端口，nginx服务器是ruby服务器的代理
 
 ** 应用配置
 =gitlab-ctl reconfigure= 应用配置，并重新启动。每次配置变更，重新运行这个命令即可，命令输出中包含了和之前配置的diff。
+
+* 反向代理
+如果配置了反向代理，例如nginx，务必配置 ~proxy_set_header Host $host;~ 另外需要设置允许的文件大小 ~client_max_body_size 50M;~
 
 * 邮件配置及问题诊断
 

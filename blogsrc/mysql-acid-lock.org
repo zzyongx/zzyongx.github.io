@@ -196,3 +196,44 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 偶尔死锁不是大问题，只要重试即可。减低死锁的方法：
 1. 不同事务，操作表的顺序尽量相同
 2. 事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。
+
+** 单纯INSERT引起的死锁
+这个死锁是工作中碰到的，参考：[[https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html][Locks Set by Different SQL Statements in InnoDB]]
+
+~CREATE TABLE students (id int(11) AUTO_INCREMENT PRIMARY KEY, name VARCHAR(32), phone VARCHAR(15), UNIQUE KEY(phone));~
+
+#+BEGIN_SRC ditta
+session A                                                 | session B                                               | session C
+START TRANSACTION;                                        |                                                         |
+-- INSERT 加了 X 锁                                       | START TRANSACTION;                                      |
+INSERT INTO students VALUES(null, 'xw', '15810183239');   |                                                         | START TRANSACTION;
+                                                          | -- phone重复，等待 S 锁                                 | -- phone重复，等待S锁
+                                                          | INSERT INTO students VALUES(null, 'xw', '15810183239'); | INSERT INTO students VALUES(null, 'xw', '15810183239');
+ROLLBACK;                                                 |                                                         |
+                                                          | -- A回滚，获取S锁，插入需要S锁升级为X锁，引发死锁       | -- A回滚，获取S锁，插入需要S锁升级为X锁，引发死锁
+#+END_SRC
+
+这里主要是事务A回滚，B和C同时获取了S锁，因此它们无法将S锁升级为X锁，于是死锁。在编程实践中，回滚可能是框架做的，例如：INSERT后的某个操作抛出异常，框架回滚了事务。
+
+死锁信息
+#+BEGIN_EXAMPLE
+(1) TRANSACTION:
+TRANSACTION 1886591, ACTIVE 7 sec inserting
+mysql tables in use 1, locked 1
+LOCK WAIT 4 lock struct(s), heap size 1184, 2 row lock(s), undo log entries 1
+MySQL thread id 5028, OS thread handle 0x7f1468c6f700, query id 1917874 localhost root update
+insert into students values(null, 'xw', '15810183239')
+(1) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 842 page no 4 n bits 72 index `phone` of table `test`.`students` trx id 1886591 lock_mode X insert intention waiting
+(2) TRANSACTION:
+TRANSACTION 1886590, ACTIVE 20 sec inserting
+mysql tables in use 1, locked 1
+4 lock struct(s), heap size 1184, 2 row lock(s), undo log entries 1
+MySQL thread id 5013, OS thread handle 0x7f145f53b700, query id 1917863 localhost root update
+insert into students values(null, 'xw', '15810183239')
+(2) HOLDS THE LOCK(S):
+RECORD LOCKS space id 842 page no 4 n bits 72 index `phone` of table `test`.`students` trx id 1886590 lock mode S
+(2) WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 842 page no 4 n bits 72 index `phone` of table `test`.`students` trx id 1886590 lock_mode X insert intention waiting
+WE ROLL BACK TRANSACTION (2)
+#+END_EXAMPLE
