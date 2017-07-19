@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-06-30 五 14:38 -->
+<!-- 2017-07-03 一 10:50 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>MySQL InnoDB Locking and Transaction</title>
@@ -517,6 +517,7 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 <ol class="org-ol">
 <li>不同事务，操作表的顺序尽量相同</li>
 <li>事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。</li>
+<li>如果确信不影响业务，可以降低事务的隔离级别。例如 spring 中 <code>@Transactional(isolation = Isolation.READ_COMMITTED)</code></li>
 </ol>
 </div>
 
@@ -578,7 +579,7 @@ WE ROLL BACK TRANSACTION (2)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-06-30 五 14:38</p>
+<p class="date">Created: 2017-07-03 一 10:50</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

@@ -1,0 +1,18 @@
+#+TITLE: 阅读笔记(2017)
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* Etsy 是如何压缩图片的
+除了压缩算法（PNG，JPEG，WEBP）外，图片"质量"（压缩比的倒数）是决定图片大小的关键因素，"质量"越高图片越小。不同的图片对"质量"的敏感程度不同，例如，同样的"质量"，关闭的电视比打开的电视看起来效果要好（关闭的电视屏幕是黑的）。核心在于"如何衡量图片的质量"。[[https://github.com/pornel/dssim][dssim]] 通过模拟人类视觉比较两幅图片的差异。通过和基准"质量"比较，不断降低"质量"，直到差异超过允许的范围。Etsy通过这种方法降低了25% - 30% 的图片大小，但也消耗了更多的CPU。
+
+笔记时间：<2017-07-10> 原文: [[https://codeascraft.com/2017/05/30/reducing-image-file-size-at-etsy/][Reducing Image File Size at Etsy]]
+
+* 使用 ZIP bombs 反击网站攻击者
+** 原理
+创建压缩比非常高的gzip文件， ~d if=/dev/zero bs=1M count=10240 | gzip > 10G.gzip~ 这个gzip文件只有10M，但是解压后有10G。针对攻击者，返回这个文件，web服务器或者自己的web程序设置Http Header ~Content-Encoding: gzip~ ，攻击者使用的http客户端看到这个Header，会自动解压，耗费大量的内存，cpu，磁盘，进而达到反击攻击者的目的。
+
+** 局限性
+1. 首先无法非常明确攻击者，万一反击正常用户（用户的app或者浏览器会崩溃），对网站造成二次伤害。
+2. 太依赖攻击者所用http客户端的行为，客户端不一定会自动解压。例如：如果不特殊设置，libcurl就不会自动解压。Apache的HttpClients虽然会，但是攻击者可以禁用这个。除非服务端总是返回gzip的响应，并且攻击者需要解析响应的内容。
+
+笔记时间：<2017-07-19> 原文：[[https://blog.haschek.at/2017/how-to-defend-your-website-with-zip-bombs.html][How to defend your website with ZIP bombs]]

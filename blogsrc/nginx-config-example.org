@@ -1,0 +1,31 @@
+#+TITLE: 各式各样的nginx配置
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 下载只在某台nginx存在的文件
+考虑一种情况，nginx生成了一个比较大的文件，放到本地磁盘，供客户临时使用。因为有多个nginx，当请求落到某台nginx时，nginx上不一定有这个文件，此时可以尝试其它nginx。
+为了应付确实没有这个文件的情况，可以用一个计数器，当尝试遍所有nginx时，返回404。下面的配置 =if= 使用了正则，是为了防止客户请求也有 =X-NotFound-Cnt= 造成死循环。同时重试的次数 =vvvv= 的个数远多于nginx的个数，因为重试不是严格轮询的，尽管如此，仍有概率遍历不到所有的nginx，尽管这个概率极低。
+
+#+BEGIN_SRC c
+upstream static {
+  server web01;
+  server web02;
+}
+
+server {
+  location /download {
+    root /data/tmp/
+    try_files $uri @download;
+  }
+
+  location @download {
+    set $try404 $http_x_notfound_cnt;
+    if ($try404 ~ "^vvvv") {
+      return 404;
+    }
+
+    proxy_set_header X-NotFound-Cnt "v$try404";
+    proxy_pass http://static;
+  }
+}
+#+END_SRC

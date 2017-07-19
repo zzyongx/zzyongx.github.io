@@ -33,7 +33,7 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 ~-X~ 指定HTTP方法，常用的是~GET POST PUT DELETE~ ，如果不指定，默认是~GET~ 。如果指定了~-d~ 参数（或者类似--data-binary之类），则是~POST~ ，如果现实指定了~-X POST~ ，则需要~-d~ 或类似的参数。
 
 *** -H
-指定请求的Header，通常指定Host，Cookie之类。例如： ~-H 'Host: www.test.com'~ 。当我们POST数据的时候，如果数据比较大，curl可能自动加上~Expect: 100-continue~ ，如果服务端不支持这个Header，需要手动禁掉，方法是传递一个空Header ~-H 'Expect:'~
+指定请求的Header，通常指定Host，Cookie之类。例如： ~-H 'Host: www.test.com'~ 。当我们POST数据的时候，如果数据比较大，curl可能自动加上~Expect: 100-continue~ ，如果服务端不支持这个Header，需要手动禁掉，方法是传递一个空Header ~-H 'Expect;'~  注意因为是空Header，必须用 =;= 替换 =:= 。
 
 *** -d
 ~-d~ 参数用于 ~PUT~ 或者 ~POST~ 的请求Body，如果没有~-H~ 指定Header，那么默认是 ~application/x-www-form-urlencoded~
@@ -47,6 +47,19 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 
 *** -vv
 用于查看请求过程，包括连接的IP，请求的方法、URL、Header，响应的状态码、Header，这个是输出到标准输出的。
+
+*** -o
+指定输出的文件名
+
+*** -Ss
+-s quiet模式，不显示进度和错误信息。-S 当发生错误时，显示错误信息，两者通常一起使用
+
+*** -f
+默认http 400以上的错误，curl的退出状态是0，指定 -f，如果发生400以上的错误，$? 为 22
+
+*** --compressed
+默认请求 =Accept-Encoding= 为空，服务端响应 =Content-Encoding= 为空。如果服务端总是返回 =Content-Encoding: gzip= ，此时 curl 不会自动解压。使用这个参数发送 =Accept-Encoding: deflate, gzip= ，如果服务端返回gzip，curl可以自动解压。
+如果是用libcurl编程，使用 =CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPT_ENCODING, char *enc);=
 
 *** -w
 可以将http请求的一些内部细节格式化输出。例如 =curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"= 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。

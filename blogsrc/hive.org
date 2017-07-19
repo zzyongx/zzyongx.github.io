@@ -1,0 +1,72 @@
+#+TITLE: hive howto
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: ^:nil
+#+OPTIONS: toc:nil
+
+* HIVE 数据库
+** SELECT * FROM DBS WHERE name = "data2017"
+| DB_ID | DESC | DB_LOCATION_URI                               | NAME  | OWNER_NAME | OWNER_TYPE |
+|-------+------+-----------------------------------------------+-------+------------+------------|
+|    *39* | NULL | =hdfs://cluster/user/hive/warehouse/sales.db= | sales | hadoop     | USER       |
+
+** SELECT * FROM TBLS WHERE db_id=39 AND tbl_name = "data2017";
+| TBL_ID | CREATE_TIME | DB_ID | LAST_ACCESS_TIME | OWNER  | RETENTION | SD_ID | TBL_NAME | TBL_TYPE      | VIEW_EXPANDED_TEXT | VIEW_ORIGINAL_TEXT |
+|--------+-------------+-------+------------------+--------+-----------+-------+----------+---------------+--------------------+--------------------|
+|    *656* |  1498106311 |    39 |                0 | hadoop |         0 |  *7606* | data2017 | MANAGED_TABLE | NULL               | NULL               |
+
+** SELECT * FROM PARTITIONS WHERE TBL_ID = 656;
+| PART_ID | CREATE_TIME | LAST_ACCESS_TIME | PART_NAME    | SD_ID | TBL_ID |
+|---------+-------------+------------------+--------------+-------+--------|
+|    6986 |  1498111021 |                0 | day=20170615 |  *7607* |    656 |
+
+** SELECT SD_ID, CD_ID, LOCATION, SERDE_ID FROM SDS WHERE SD_ID = 7606;
+| SD_ID | CD_ID | LOCATION                                               | SERDE_ID |
+|-------+-------+--------------------------------------------------------+----------|
+|  7606 |   *761* | =hdfs://cluster/user/hive/warehouse/sales.db/data2017= |     7606 |
+
+** SELECT SD_ID, CD_ID, LOCATION, SERDE_ID FROM SDS WHERE SD_ID = 7607;
+| SD_ID | CD_ID | LOCATION                                                            | SERDE_ID |
+|-------+-------+---------------------------------------------------------------------+----------|
+|  7607 |   *761* | ~hdfs://cluster/user/hive/warehouse/sales.db/data2017/day=20170615~ |     7607 |
+
+** SELECT * FROM COLUMNS_V2 WHERE CD_ID = 761;
+| CD_ID | COMMENT  | COLUMN_NAME | TYPE_NAME    | INTEGER_IDX |
+|-------+----------+-------------+--------------+-------------|
+|   761 | f1       | f1          | int          |           1 |
+|   761 | location | f2          | varchar(200) |           2 |
+独立于两个表名称不同，但是结构相同，则 *CD_ID* 相同。
+
+CD_ID 什么时候会不同呢？
+
+* HQL速查
+** 创建表
+
+*** CREATE TABLE newTable LIKE oldTable
+创建新表newTable，表结构、分区等和oldTable一模一样，例如： =CREATE TABLE data2017 LIKE data2016=
+
+** 插入数据
+
+*** INSERT OVERWRITE TABLE tableDst PARTITION(partCol1=val1) SELECT f1, f2 FROM tableSrc
+把 =SELECT= 的结果插入tableDst表，插入前先清空tableDst表，如果有tableDst表有分区的话，需要指定分区，例如： ~INSERT OVERWRITE TABLE data2017 PARTITION(day='20170615') SELECT f1, f2 FROM data2016 WHERE day='20160615'~
+
+*** INSERT INTO TABLE tableDst PARTITION(partCol1=val1) SELECT f1, f2 FROM tableSrc
+同上，但插入前不清空tableDst
+
+** 修改表属性
+*** ALTER TABLE tableName SET TBLPROPERTIES('EXTERNAL'='FALSE');
+把表改为 ~MANAGED~
+
+*** ALTER TABLE tableName PARTITION(partCol1=val1, partCol2=val2) SET LOCATION "hdfs://newpath"
+修改分区的位置
+
+** 查看表、表分区信息
+~DESCRIBE~ 比 ~SHOW~ 显示的信息更详细
+
+***  DESCRIBE FORMATTED tableName、DESCRIBE FORMATTED tableName PARTITION(partCol1=val1, partCol2=val2)
+例如： ~DESCRIBE FORMATTED data2017~  ~DESCRIBE FORMATTED data2017 PARTITION(day='20170615')~
+
+*** SHOW TABLE EXTENDED LIKE tableName、SHOW TABLE EXTENDED LIKE tableName PARTITION(partCol1=val1, partCol2=val2)
+例如： ~SHOW TABLE EXTENDED LIKE data2017~  ~SHOW TABLE EXTENDED LIKE data2017 PARTITION(day='20170615')~
+
+* hive 命令
+- hive --hiveconf hive.root.logger=DEBUG,console DEBUG模式运行hive客户端

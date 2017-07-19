@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-07-03 一 15:49 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>hive howto</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">hive howto</h1>
+
+<div id="outline-container-orgheadline7" class="outline-2">
+<h2 id="orgheadline7"><span class="section-number-2">1</span> HIVE 数据库</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> SELECT * FROM DBS WHERE name = "data2017"</h3>
+<div class="outline-text-3" id="text-1-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">DB_ID</th>
+<th scope="col" class="org-left">DESC</th>
+<th scope="col" class="org-left">DB_LOCATION_URI</th>
+<th scope="col" class="org-left">NAME</th>
+<th scope="col" class="org-left">OWNER_NAME</th>
+<th scope="col" class="org-left">OWNER_TYPE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><b>39</b></td>
+<td class="org-left">NULL</td>
+<td class="org-left"><code>hdfs://cluster/user/hive/warehouse/sales.db</code></td>
+<td class="org-left">sales</td>
+<td class="org-left">hadoop</td>
+<td class="org-left">USER</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> SELECT * FROM TBLS WHERE db_id=39 AND tbl_name = "data2017";</h3>
+<div class="outline-text-3" id="text-1-2">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">TBL_ID</th>
+<th scope="col" class="org-right">CREATE_TIME</th>
+<th scope="col" class="org-right">DB_ID</th>
+<th scope="col" class="org-right">LAST_ACCESS_TIME</th>
+<th scope="col" class="org-left">OWNER</th>
+<th scope="col" class="org-right">RETENTION</th>
+<th scope="col" class="org-left">SD_ID</th>
+<th scope="col" class="org-left">TBL_NAME</th>
+<th scope="col" class="org-left">TBL_TYPE</th>
+<th scope="col" class="org-left">VIEW_EXPANDED_TEXT</th>
+<th scope="col" class="org-left">VIEW_ORIGINAL_TEXT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><b>656</b></td>
+<td class="org-right">1498106311</td>
+<td class="org-right">39</td>
+<td class="org-right">0</td>
+<td class="org-left">hadoop</td>
+<td class="org-right">0</td>
+<td class="org-left"><b>7606</b></td>
+<td class="org-left">data2017</td>
+<td class="org-left">MANAGED_TABLE</td>
+<td class="org-left">NULL</td>
+<td class="org-left">NULL</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">1.3</span> SELECT * FROM PARTITIONS WHERE TBL_ID = 656;</h3>
+<div class="outline-text-3" id="text-1-3">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">PART_ID</th>
+<th scope="col" class="org-right">CREATE_TIME</th>
+<th scope="col" class="org-right">LAST_ACCESS_TIME</th>
+<th scope="col" class="org-left">PART_NAME</th>
+<th scope="col" class="org-left">SD_ID</th>
+<th scope="col" class="org-right">TBL_ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">6986</td>
+<td class="org-right">1498111021</td>
+<td class="org-right">0</td>
+<td class="org-left">day=20170615</td>
+<td class="org-left"><b>7607</b></td>
+<td class="org-right">656</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">1.4</span> SELECT SD_ID, CD_ID, LOCATION, SERDE_ID FROM SDS WHERE SD_ID = 7606;</h3>
+<div class="outline-text-3" id="text-1-4">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">SD_ID</th>
+<th scope="col" class="org-left">CD_ID</th>
+<th scope="col" class="org-left">LOCATION</th>
+<th scope="col" class="org-right">SERDE_ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">7606</td>
+<td class="org-left"><b>761</b></td>
+<td class="org-left"><code>hdfs://cluster/user/hive/warehouse/sales.db/data2017</code></td>
+<td class="org-right">7606</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">1.5</span> SELECT SD_ID, CD_ID, LOCATION, SERDE_ID FROM SDS WHERE SD_ID = 7607;</h3>
+<div class="outline-text-3" id="text-1-5">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">SD_ID</th>
+<th scope="col" class="org-left">CD_ID</th>
+<th scope="col" class="org-left">LOCATION</th>
+<th scope="col" class="org-right">SERDE_ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">7607</td>
+<td class="org-left"><b>761</b></td>
+<td class="org-left"><code>hdfs://cluster/user/hive/warehouse/sales.db/data2017/day=20170615</code></td>
+<td class="org-right">7607</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">1.6</span> SELECT * FROM COLUMNS_V2 WHERE CD_ID = 761;</h3>
+<div class="outline-text-3" id="text-1-6">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">CD_ID</th>
+<th scope="col" class="org-left">COMMENT</th>
+<th scope="col" class="org-left">COLUMN_NAME</th>
+<th scope="col" class="org-left">TYPE_NAME</th>
+<th scope="col" class="org-right">INTEGER_IDX</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">761</td>
+<td class="org-left">f1</td>
+<td class="org-left">f1</td>
+<td class="org-left">int</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">761</td>
+<td class="org-left">location</td>
+<td class="org-left">f2</td>
+<td class="org-left">varchar(200)</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table>
+<p>
+独立于两个表名称不同，但是结构相同，则 <b>CD_ID</b> 相同。
+</p>
+
+<p>
+CD_ID 什么时候会不同呢？
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline19" class="outline-2">
+<h2 id="orgheadline19"><span class="section-number-2">2</span> HQL速查</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><span class="section-number-3">2.1</span> 创建表</h3>
+<div class="outline-text-3" id="text-2-1">
+</div><div id="outline-container-orgheadline8" class="outline-4">
+<h4 id="orgheadline8"><span class="section-number-4">2.1.1</span> CREATE TABLE newTable LIKE oldTable</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<p>
+创建新表newTable，表结构、分区等和oldTable一模一样，例如： <code>CREATE TABLE data2017 LIKE data2016</code>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">2.2</span> 插入数据</h3>
+<div class="outline-text-3" id="text-2-2">
+</div><div id="outline-container-orgheadline10" class="outline-4">
+<h4 id="orgheadline10"><span class="section-number-4">2.2.1</span> INSERT OVERWRITE TABLE tableDst PARTITION(partCol1=val1) SELECT f1, f2 FROM tableSrc</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+把 <code>SELECT</code> 的结果插入tableDst表，插入前先清空tableDst表，如果有tableDst表有分区的话，需要指定分区，例如： <code>INSERT OVERWRITE TABLE data2017 PARTITION(day='20170615') SELECT f1, f2 FROM data2016 WHERE day='20160615'</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-4">
+<h4 id="orgheadline11"><span class="section-number-4">2.2.2</span> INSERT INTO TABLE tableDst PARTITION(partCol1=val1) SELECT f1, f2 FROM tableSrc</h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+同上，但插入前不清空tableDst
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15"><span class="section-number-3">2.3</span> 修改表属性</h3>
+<div class="outline-text-3" id="text-2-3">
+</div><div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13"><span class="section-number-4">2.3.1</span> ALTER TABLE tableName SET TBLPROPERTIES('EXTERNAL'='FALSE');</h4>
+<div class="outline-text-4" id="text-2-3-1">
+<p>
+把表改为 <code>MANAGED</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline14" class="outline-4">
+<h4 id="orgheadline14"><span class="section-number-4">2.3.2</span> ALTER TABLE tableName PARTITION(partCol1=val1, partCol2=val2) SET LOCATION "hdfs://newpath"</h4>
+<div class="outline-text-4" id="text-2-3-2">
+<p>
+修改分区的位置
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18"><span class="section-number-3">2.4</span> 查看表、表分区信息</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+<code>DESCRIBE</code> 比 <code>SHOW</code> 显示的信息更详细
+</p>
+</div>
+
+<div id="outline-container-orgheadline16" class="outline-4">
+<h4 id="orgheadline16"><span class="section-number-4">2.4.1</span> DESCRIBE FORMATTED tableName、DESCRIBE FORMATTED tableName PARTITION(partCol1=val1, partCol2=val2)</h4>
+<div class="outline-text-4" id="text-2-4-1">
+<p>
+例如： <code>DESCRIBE FORMATTED data2017</code>  <code>DESCRIBE FORMATTED data2017 PARTITION(day='20170615')</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-4">
+<h4 id="orgheadline17"><span class="section-number-4">2.4.2</span> SHOW TABLE EXTENDED LIKE tableName、SHOW TABLE EXTENDED LIKE tableName PARTITION(partCol1=val1, partCol2=val2)</h4>
+<div class="outline-text-4" id="text-2-4-2">
+<p>
+例如： <code>SHOW TABLE EXTENDED LIKE data2017</code>  <code>SHOW TABLE EXTENDED LIKE data2017 PARTITION(day='20170615')</code>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline20" class="outline-2">
+<h2 id="orgheadline20"><span class="section-number-2">3</span> hive 命令</h2>
+<div class="outline-text-2" id="text-3">
+<ul class="org-ul">
+<li>hive &#x2013;hiveconf hive.root.logger=DEBUG,console DEBUG模式运行hive客户端</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2017-07-03 一 15:49</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

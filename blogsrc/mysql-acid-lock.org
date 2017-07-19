@@ -196,6 +196,7 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 偶尔死锁不是大问题，只要重试即可。减低死锁的方法：
 1. 不同事务，操作表的顺序尽量相同
 2. 事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。
+3. 如果确信不影响业务，可以降低事务的隔离级别。例如 spring 中 ~@Transactional(isolation = Isolation.READ_COMMITTED)~
 
 ** 单纯INSERT引起的死锁
 这个死锁是工作中碰到的，参考：[[https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html][Locks Set by Different SQL Statements in InnoDB]]

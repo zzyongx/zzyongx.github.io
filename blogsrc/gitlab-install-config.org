@@ -17,6 +17,7 @@ gitlab 是开源的github，除了是git，还能用作code-review，并作为je
 - =git_data_dir= git的数据地址，例如 =/path-to-big-disk=
 - =unicorn['port']= ruby服务器的端口
 - =nginx['listen_port']= nginx服务器的端口，nginx服务器是ruby服务器的代理
+- =unicorn['worker_processes']= 调整 gitlab-rails 的进程个数，减少可以节约内存
 
 ** 应用配置
 =gitlab-ctl reconfigure= 应用配置，并重新启动。每次配置变更，重新运行这个命令即可，命令输出中包含了和之前配置的diff。
