@@ -60,6 +60,12 @@ grep 常用选项
 MySQL的事务隔离级别和背后的锁
 #+END_QUOTE
 
+** 翻译
+[[blog:tcpdump-tutorial][tcpdump指南]]
+#+BEGIN_QUOTE
+轻松掌握开发利器tcpdump
+#+END_QUOTE
+
 * 2016 丙申年
 ------------
 

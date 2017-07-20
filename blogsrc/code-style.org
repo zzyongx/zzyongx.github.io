@@ -86,7 +86,7 @@ return isNull(project) || (isNotBlank(xmKey) && !Objects.equals(xmKey, project.g
 
 * 关于错误和异常
 - 需要捕获，然后重新抛出，或转成错误码返回的异常，改成RuntimeException类型的
-- 尽可能多的返回错误信息。例如 String valid(); 返回错误信息，由于 boolean valid(); 仅仅返回对错
+- 尽可能多的返回错误信息。例如 String valid(); 返回错误信息，优于 boolean valid(); 仅仅返回对错
 - 不轻易封装错误或异常。env.getRequiredProperty("x") 优于 String x = env.getProperty("x") 然后检查x是不是null
 
 * 关于错误日志
