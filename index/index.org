@@ -42,6 +42,8 @@
 ** 笔记
 [[blog:a-managers-faq][一个管理者的FAQ]] <2017-05-19>
 
+[[blog:hashing-security][密码加盐哈希]] <2017-07-25>
+
 ** 经验
 [[blog:https-SNI][https如何支持虚拟主机]] <2017-05-20>
 
