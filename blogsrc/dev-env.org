@@ -1,0 +1,18 @@
+#+TITLE: 开发环境
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* windows
+** swan-desktop
+基于cygwin的xfce桌面，xfce4-terminal 很好用，支持标签。[[http://www.starlig.ht/][swan-desktop]]
+
+*** 安装fish
+fish是一个比较好用的shell ~spm -i fish~ 。但是安装官方建议放到 =.bash_profile= 的最后， =Swan Xfce4 Desktop= 可能无法启动。 手动 =exec fish= 也许是个好主意。
+
+*** 支持中文
+1. 安装ibus =spm -i ibus= =spm -i ibus-pinyin=
+2. 在 *会话和启动* 中配置ibus启动 =ibus-daemon=
+3. 在 =.bash_profile= 中配置 ~export GTK_IM_MODULE=ibus export XMODIFIERS=@im=ibus export QT_IM_MODULE=ibus~
+
+*** 启动windows程序
+~alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'~

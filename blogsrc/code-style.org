@@ -49,6 +49,7 @@ public static final String v1,
 * 关于测试
 - 测试不要糊弄
 - 每个线上的BUG修复后，都要有相应的测试代码入 Git
+- 测试用例自己构建测试数据（并在开始前清理残留的测试数据）
 
 * 关于数据库
 - 数据库定义（表，索引等）入 Git
@@ -59,16 +60,17 @@ public static final String v1,
 - 不写复杂SQL
 - 基于非UNIQUE KEY的查询一定要有LIMIT，哪怕是个很大的值
 - 时间等范围字段不要出现在联合索引的前面
+- 避免SQL注入，不允许拼接SQL，除非检查了SQL注入（例如：IN (1,2,3) 这种数字转成的字符串列表）
 
 * 关于Git
 - 和程序有关的一切都入git，包括但不限于：cron，sql，日常脚本等
 - 及时commit，一个单独的功能完成即可commit
-- 及时merge-request
+- 及时merge-request，mr 中要详细描述这次变更
 
 * 关于Java数据类型
 - 不用BigDecimal，涉及到金额，优先考虑减小单位，例如用"分"代替"元"做单位
 - 如果不可能为null，不允许使用Integer代替int，其它类似
-- 如果int、long类型参与到字符串的+里面，使用String.valueOf()。例如 ='"' + 5= 和 ="\"" + 5= 完全不同，为了避免转义，很容易写成前者。
+- 如果int、long类型参与到字符串的+里面，最好使用String.valueOf()。例如 ='"' + 5= 和 ="\"" + 5= 完全不同，为了避免转义，很容易写成前者。
 
 * 关于Java import
 - 不允许import static 方法/变量

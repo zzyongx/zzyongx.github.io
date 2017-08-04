@@ -2,6 +2,37 @@
 #+OPTIONS: toc:nil
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 
+* 利用前景理论引导用户行为
+1. 面对获得时，是风险规避的。比如：(1) 确定得到100块 (2) 80%的可能得到150块时，选择 (1)
+2. 面对损失是，是风险偏好的。比如：(1) 确定损失100块 (2) 80%的可能损失150块时，选择 (2)
+3. 对损失比对获得敏感，先赢100块然后输80块，和先输80块再赢100块，虽然都是赢20块，但后者更愉快。
+
+我感觉损失和获得也不能差太大，比如(1)确定得到100块和(2)80%的可能得到1000块，估计就选(2)了。
+
+* 成功科技产品的三个支柱
+产品的使命是传递"价值"给用户，员工，股东。给事情安排优先级是最重要的事情，GEM模型是安排优先级的一种参考
+1. Growth 增长。产品是否利于获取新用户，获取的成本是多少，是否对潜在用户更有吸引力了
+2. Engagement 活跃度。产品的活跃度是否提升，留存率如何
+3. Monetization 变现。产品创造的"价值"如何变现？巴菲特喜欢公司的特点：规模经济、网络效应、特许经营、习惯、品牌
+
+* 公司内不同团队合作
+1. 共同的核心利益和诉求
+2. 收益的共享
+
+* 我有一个想法
+在职场，我们往往有很多想法，希望从公司获取资源来支持这些想法。如何才能提高成功率呢？
+1. 有MVP（minimum viable product），通过MVP展示想法，和人沟通
+2. 论证做的好处、不做的坏处，最后落实到增加盈利或降低成本
+
+* 笔记: 为啥Google没有作出Instagram
+1. Google不能保持小团队，团队越大，产品迭代反而越慢，反之初创团队都比较小
+2. Google不能从单一功能做起，一次做太多功能，反之初创团队，都从单一功能做起，不加或者慢慢加功能
+3. Google必须使用统一的基础架构，反之初创团队的技术选择要灵活，一切以产品为中心
+4. Google很难践行“精益创业“，大公司的东西，不能不带光环，多平台，支撑海量用户，不能有BUG，阻碍了产品成功
+
+细想Google成功的领域，都是技术见长的，做产品还真是弱项。但技术强到一定程度，也没产品什么事儿了。
+
+
 * Etsy 是如何压缩图片的
 除了压缩算法（PNG，JPEG，WEBP）外，图片"质量"（压缩比的倒数）是决定图片大小的关键因素，"质量"越高图片越小。不同的图片对"质量"的敏感程度不同，例如，同样的"质量"，关闭的电视比打开的电视看起来效果要好（关闭的电视屏幕是黑的）。核心在于"如何衡量图片的质量"。[[https://github.com/pornel/dssim][dssim]] 通过模拟人类视觉比较两幅图片的差异。通过和基准"质量"比较，不断降低"质量"，直到差异超过允许的范围。Etsy通过这种方法降低了25% - 30% 的图片大小，但也消耗了更多的CPU。
 
@@ -31,3 +62,74 @@
 URI包含URL，URN以及其它。URN像人名（标识对象），URL像门牌号（如何找到对象）。URI常见的形式：scheme:[//[user[:password]@]host[:port]][/path][?query][#fragment]
 - URL ~ftp://example.org/resource.txt~
 - URI ~resource.txt~
+
+* 何为高级工程师
+- 能够独立完成任务
+- 理解风险，并能够降低风险。风险指一切妨碍产品成功的因素，包括技术的，产品设计的，时间分配的等。
+- 能够平衡系统的演化，新人、新功能加入，系统仍然处于可控状态。
+
+** 摆脱小小程序员
+- 跨领域思考（产品，设计，营销，管理）
+- 沟通时，如果技术细节不重要（大多数时候），不要陷入细节，要注意讨论的层次
+
+* 高效团队的5个特征
+** Dependability（可依赖性）
+团队成员会按时完成任务，并且结果符合预期
+
+** Structure and clarity
+高效团队有清晰的目标，并且团队内角色清晰
+
+** Meaning
+团队成员认为这项工作对自己有意义
+
+** Impact
+团队成员相信他们的工作对对公司有价值
+
+** Psychological Safety（心理安全）
+团队成员可以发表意见，提出问题，而没有戒心
+
+笔记时间：<2017-07-26> 原文：[[https://www.inc.com/michael-schneider/google-thought-they-knew-how-to-create-the-perfect.html][Google Spent 2 Years Studying 180 Teams. The Most Successful Ones Shared These 5 Traits]]
+
+* Twitter 停止增长（失败）的真正原因
+Twitter 更换了CEO，把自己定位为媒体、广告公司，限制基于Twitter API的第三方应用。这个定位，凭Twitter 自身的用户数据，没法和Google、Facebook匹敌。原CEO把Twitter定位为 *pulse of the planet* ，一家数据公司，也许能成功（谁知道呢）。
+
+笔记时间：<2017-07-27> 原文：[[https://exponents.co/the-pulse-of-the-planet-flatlined/][The Real Reason Twitter Is Failing To Grow]]
+
+* 高效 code review
+- 一次review的代码行数少于200-400行，用来review的时间越长，遗漏的bug越多
+- review 不要太快，一小时少于300-500行代码
+- 一次review至少用5分钟，但不要超过60-90分钟
+- 提起review前，尽量详细的描述这次变更（有益于再次思考功能变更，自己发现bug）
+- 量化code review的目标，（缺陷的数量，不当的设计等）
+- 使用（建立）code review 检查清单
+- 确保code review发现的缺陷被修复（测试用例）
+- code review用于发现程序的缺陷，而不是评价程序员优劣（代码复杂度不同）
+
+笔记时间：<2017-07-31> 原文：[[https://www.ibm.com/developerworks/rational/library/11-proven-practices-for-peer-review/][11 proven practices for more effective, efficient peer code review]]
+
+* 如何判断自己是不是好领导
+下面的问题是站在员工角度发问的
+
+1. 是否了解领导（工作）对员工的期望
+2. 是否有把工作做好需要的资源
+3. 是否有机会做自己最擅长的事情
+4. 最近7天，有没有因为工作做的好获得认可或表扬
+5. 领导是否只关心员工的工作，而不关心员工
+6. 是否有人关心员工的发展
+7. 员工的意见是否算数
+8. 相对公司的使命和目标，自己的工作是否重要
+9. 是否有很棒的同事
+10. 在工作中是否有好友
+11. 过去6个月，是否有人和你谈起过你的进步
+12. 过去1年，可有成长
+
+笔记时间：<2017-07-31> 原文：[[http://tomtunguz.com/how-to-tell-if-youre-a-great-manager/][How To Tell If You're A Great Manager]]
+
+#https://landing.google.com/sre/book/index.html
+#https://developers.google.com/web/updates/2017/04/headless-chrome
+
+1. package javafx.application does not exist
+cp /usr/java/jdk1.8.0_121/jre/lib/ext/jfxrt.jar /usr/lib/jvm/java-1.8.0-oracle.x86_64/jre/lib/ext
+
+2. .git directory is not found
+git init && git add . && git commit . -m "init"
