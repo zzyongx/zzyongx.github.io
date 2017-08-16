@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-05-25 四 11:51 -->
+<!-- 2017-08-16 三 12:53 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>各式各样的nginx配置</title>
@@ -186,10 +186,41 @@ server {
 </div>
 </div>
 </div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> http 请求自动跳转 https</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+我司的https证书是配置在公司级的proxy上，通过 http header <code>X-Forwarded-Proto</code> 告知upstream用户请求的是http还是https，如何把http请求跳转到https呢？
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-c">set $vscheme $http_x_forwarded_proto;
+<span style="color: #00ffff; font-weight: bold;">if</span> ($host = <span style="color: #00ff00;">"domin.inner"</span>) {   # &#20869;&#32593;&#22495;&#21517;&#20801;&#35768; http
+  set $vscheme <span style="color: #00ff00;">"https"</span>;
+}
+
+<span style="color: #00ffff; font-weight: bold;">if</span> ($uri ~ <span style="color: #00ff00;">"^/api/(x|y)$"</span>) {  # /api/x /api/y &#20801;&#35768;http
+  set $vscheme <span style="color: #00ff00;">"https"</span>;
+}
+
+<span style="color: #00ffff; font-weight: bold;">if</span> ($uri ~ <span style="color: #00ff00;">"^/api-internal/"</span>) {  # lua &#25318;&#25130; /api/x&#65292;&#36716;&#21457;&#21040; /api-internal
+  set $vscheme <span style="color: #00ff00;">"https"</span>;
+}
+
+<span style="color: #0000ff; font-weight: bold;"># &#26368;&#22909;&#20351;&#29992;308&#20195;&#26367;301</span>&#65292;&#38656;&#35201;nginx 1.13.0&#20043;&#21518;&#65292;308&#35201;&#27714;&#23458;&#25143;&#31471;&#19981;&#33021;&#25226;POST&#35831;&#27714;&#21464;&#25104;GET
+<span style="color: #00ffff; font-weight: bold;">if</span> ($vscheme != <span style="color: #00ff00;">"https"</span>) {
+  <span style="color: #00ffff; font-weight: bold;">return</span> 301 https:<span style="color: #ffff00;">//</span><span style="color: #ffff00;">$host$request_uri;</span>
+}
+</pre>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-05-25 四 11:51</p>
+<p class="date">Created: 2017-08-16 三 12:53</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

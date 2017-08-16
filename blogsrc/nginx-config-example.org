@@ -29,3 +29,26 @@ server {
   }
 }
 #+END_SRC
+
+* http 请求自动跳转 https
+我司的https证书是配置在公司级的proxy上，通过 http header =X-Forwarded-Proto= 告知upstream用户请求的是http还是https，如何把http请求跳转到https呢？
+
+#+BEGIN_SRC c
+set $vscheme $http_x_forwarded_proto;
+if ($host = "domin.inner") {   # 内网域名允许 http
+  set $vscheme "https";
+}
+
+if ($uri ~ "^/api/(x|y)$") {  # /api/x /api/y 允许http
+  set $vscheme "https";
+}
+
+if ($uri ~ "^/api-internal/") {  # lua 拦截 /api/x，转发到 /api-internal
+  set $vscheme "https";
+}
+
+# 最好使用308代替301，需要nginx 1.13.0之后，308要求客户端不能把POST请求变成GET
+if ($vscheme != "https") {
+  return 301 https://$host$request_uri;
+}
+#+END_SRC
