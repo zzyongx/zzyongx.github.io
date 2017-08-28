@@ -17,6 +17,11 @@
 ** 经验
 [[blog:https-SNI][https如何支持虚拟主机]] <2017-05-20>
 
+[[blog:azkaban][azkaban 常见问题]] <2017-08-25>
+#+BEGIN_QUOTE
+记录使用azkaban中遇到的问题
+#+END_QUOTE
+
 [[blog:grep-command-examples][grep]] <2017-03-09>
 #+BEGIN_QUOTE
 grep 常用选项
@@ -33,9 +38,14 @@ MySQL的事务隔离级别和背后的锁
 #+END_QUOTE
 
 ** 翻译
-[[blog:tcpdump-tutorial][tcpdump指南]]
+[[blog:tcpdump-tutorial][tcpdump指南]] <2017-07-20>
 #+BEGIN_QUOTE
 轻松掌握开发利器tcpdump
+#+END_QUOTE
+
+[[blog:openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs][openssl 必知必会]] <2017-08-24>
+#+BEGIN_QUOTE
+openssl 如何生成CSR，生成证书，查看证书
 #+END_QUOTE
 
 * 2016 丙申年

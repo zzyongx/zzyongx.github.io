@@ -1,0 +1,57 @@
+#+TITLE: azkaban
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+以下来自使用 =azkaban-3.30.1= ，不同版本可能有不同。用变量 =AZKABAN_WEB_ROOT= 和 =AZKABAN_EXEC_ROOT= 代指安装路径
+
+* 注意事项
+** 源码安装
+azkaban 不提供二进制下载，需要自己编译，编译过程需要从网络下载依赖，编译机最好能翻墙，方便依赖下载。
+
+** 数据库编码
+创建数据库指定utf-8编码
+=CREATE DATABASE azkaban DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci=
+
+** 任务的名称
+上传项目文件必须是zip格式，任务文件必须以 =.job= 做后缀。
+
+** 配置azkaban.execution.dir
+在 =executor= 的 =azkaban.properties= 上预先配置好 ~azkaban.execution.dir=/path/executions~ 这个目录保存了任务执行日志，如果等系统运行起来再改变，可能导致异常。
+
+* FAQ
+** Error: =HADOOP_HOME= is not set. Hadoop job types will not run properly.
+~export HADOOP_HOME=/usr/local/hadoop2.0~
+
+** Exception: java.lang.StackOverflowError thrown from the UncaughtExceptionHandler in thread "main"
+#+BEGIN_SRC bash
+# cat > conf/log4j.properties
+log4j.rootLogger=INFO,file
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=/path/server.log
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+#+END_SRC
+
+** Error injecting constructor, azkaban.executor.ExecutorManagerException: No active executor found
+1. 数据库 =INSERT INTO executors(host,port, active) VALUES("executor_ip", 12321, true)=
+2. 配置文件
+#+BEGIN_EXAMPLE
+executor.port=12321
+azkaban.use.multiple.executors=true
+azkaban.executorselector.filters=StaticRemainingFlowSize,MinimumFreeMemory,CpuStatus
+azkaban.executorselector.comparator.NumberOfAssignedFlowComparator=1
+azkaban.executorselector.comparator.Memory=1
+azkaban.executorselector.comparator.LastDispatched=1
+azkaban.executorselector.comparator.CpuUsage=1
+#+END_EXAMPLE
+
+** 浏览器打开页面加载css、js等404
+配置文件 ~web.resource.dir=$AZKABAN_WEB_ROOT/web~
+
+** Missing required property 'azkaban.native.lib'
+1. 在源码中找到 =execute-as-user.c= 编译 =gcc execute-as-user.c -o execute-as-user=
+2. =chown root execute-as-user && chmod 6050 execute-as-user=
+3. =mkdir -p $AZKABAN_EXEC_ROOT/plugins/jobtypes && cp execute-as-user AZKABAN_EXEC_ROOT/plugins/jobtypes=
+4. ~echo "azkaban.native.lib=$AZKABAN_EXEC_ROOT/plugins/jobtypes" > $AZKABAN_EXEC_ROOT/plugins/jobtypes/commonprivate.properties~
+5. 如果希望 ~type=command~ 类型的任务以root运行，添加 ~echo "execute.as.user=false" >> $AZKABAN_EXEC_ROOT/plugins/jobtypes/commonprivate.properties~
+6. 否则在executor上增加 =azkaban= 用户，任务以 =azkaban= 用户运行。

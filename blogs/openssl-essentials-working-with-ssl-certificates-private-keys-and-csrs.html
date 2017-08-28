@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-08-25 五 15:47 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>openssl 必知必会</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">openssl 必知必会</h1>
+<p>
+本文主要翻译自：<a href="https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs">OpenSSL Essentials: Working with SSL Certificates, Private Keys and CSRs</a>    部分参考自：<a href="http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html">Configuring SSL/TLS</a>
+</p>
+
+<p>
+<b>openssl</b> 是 <b>Public Key Infrastructure (PKI) and HTTPS (HTTP over TLS)</b> 领域的重要工具，用来生成 <b>CSR</b> ，生成证书，查看证书等。
+</p>
+
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 关于 Certificate Signing Requests (CSRs)</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+如果想从CA（具有资质的商业公司，签发SSL证书，是PKI系统的一部分）处获得证书，需要生成CSR。CSR中包含了公钥和其它信息，CA签发的证书中也包含了这两项信息。CSR中最重要其它信息是CN（Common Name），它应该等于FQDN（Fully Qualified Domain Name）。使用openssl命令生成CSR时，会提示填写这些信息。
+</p>
+
+<p>
+为了理解自签名证书，必须理解PKI系统。假设A想和B建立SSL连接，A需要获取B的证书（证书里面包含了B的公钥），A如何确定这个证书的确是B的，没有在传输过程中被篡改呢？如果B的证书是CA公司签发的，只需要用CA公司的证书验证一下就行了，那CA公司的证书又如何获取呢？如何保证CA公司的证书没有被纂改呢？答案是没有办法，只能选择信任。CA公司的证书一般内置在A系统中。
+</p>
+
+<p>
+所谓CA公司签名，其实是拿CA公司的私钥对B的公钥做签名，拿CA公司的公钥（在CA的证书中，可以公开获取）验证B的公钥签名。自签名证书说白了就是自己验证自己。需要把自签名证书手动添加到A系统中。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">2</span> 生成CSR</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">2.1</span> 生成CSR和私钥</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+<code>openssl req -newkey rsa:2048 -nodes -keyout domain.key -out domain.csr</code> <code>-nodes</code> 参数指示私钥不需要使用密码加密， <code>domain.key</code> 是生成的私钥， <code>domain.csr</code> 是生成的CSR。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">2.2</span> 使用已有私钥生成CSR</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+<code>openssl req -key domain.key -new -out domain.csr</code> <code>domain.key</code> 是已经存在的私钥
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">2.3</span> 使用已有证书生成新的CSR</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+<code>openssl x509 -in domain.crt -signkey domain.key -x509toreq -out domain.csr</code> <code>domain.crt</code> 是已经存在的证书， <code>domain.key</code> 是已经存在的私钥
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-2">
+<h2 id="orgheadline9"><span class="section-number-2">3</span> 生成SSL证书</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">3.1</span> 生成自签名证书</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+<code>openssl req -newkey rsa:2048 -nodes -keyout domain.key -x509 -days 365 -out domain.crt</code> <code>-x509</code> 指示创建自签名证书， <code>-days 365</code> 指定证书的有效期是365天
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">3.2</span> 根据已有私钥生成自签名证书</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<code>openssl req -key domain.key -new -x509 -days 365 -out domain.crt</code> <code>domain.key</code> 是已经存在的私钥
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">3.3</span> 根据已有私钥和CSR生成自签名证书</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<code>openssl x509 -signkey domain.key -in domain.csr -req -days 365 -out domain.crt</code> <code>domain.key</code> 是已经存在的私钥， <code>domain.csr</code> 是已经存在的CSR
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-2">
+<h2 id="orgheadline13"><span class="section-number-2">4</span> 查看证书</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><span class="section-number-3">4.1</span> 查看校验CSR</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+<code>openssl req -text -noout -verify -in domain.csr</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><span class="section-number-3">4.2</span> 查看自签名证书</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+<code>openssl req -text -noout -verify -in domain.csr</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">4.3</span> 查看CA签名的证书</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+<code>openssl verify -verbose -CAFile ca.crt domain.crt</code> <code>ca.crt</code> 是CA的证书
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline19" class="outline-2">
+<h2 id="orgheadline19"><span class="section-number-2">5</span> 私钥</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-orgheadline14" class="outline-3">
+<h3 id="orgheadline14"><span class="section-number-3">5.1</span> 创建私钥</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+<code>openssl genrsa -des3 -out domain.key 2048</code> <code>-des3</code> 需要输密码加密私钥
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15"><span class="section-number-3">5.2</span> 验证私钥</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+<code>openssl rsa -check -in domain.key</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline16" class="outline-3">
+<h3 id="orgheadline16"><span class="section-number-3">5.3</span> 验证证书、CSR和私钥一致</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+<code>openssl rsa -noout -modulus -in domain.key | openssl md5</code>
+<code>openssl x509 -noout -modulus -in domain.crt | openssl md5</code>
+<code>openssl req -noout -modulus -in domain.csr | openssl md5</code>
+这三个命令的输出一样
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-3">
+<h3 id="orgheadline17"><span class="section-number-3">5.4</span> 加密私钥</h3>
+<div class="outline-text-3" id="text-5-4">
+<p>
+<code>openssl rsa -des3 -in domain.key -out encrypted-domain.key</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18"><span class="section-number-3">5.5</span> 解密私钥</h3>
+<div class="outline-text-3" id="text-5-5">
+<p>
+<code>openssl rsa -in encrypted-domain.key -out domain.key</code>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline26" class="outline-2">
+<h2 id="orgheadline26"><span class="section-number-2">6</span> 验证证书格式</h2>
+<div class="outline-text-2" id="text-6">
+</div><div id="outline-container-orgheadline20" class="outline-3">
+<h3 id="orgheadline20"><span class="section-number-3">6.1</span> PEM 转 DER</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+<code>openssl x509 -in domain.crt -outform der -out domain.der</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-3">
+<h3 id="orgheadline21"><span class="section-number-3">6.2</span> DER 转 PEM</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+<code>openssl x509 -inform der -in domain.der -out domain.crt</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline22" class="outline-3">
+<h3 id="orgheadline22"><span class="section-number-3">6.3</span> PEM 转 PKCS7</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+<code>openssl crl2pkcs7 -nocrl -certfile domain.crt -certfile ca-chain.crt -out domain.p7b</code>
+把 <code>domain.crt</code> <code>ca-chain.crt</code> 放到一个文件中
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline23" class="outline-3">
+<h3 id="orgheadline23"><span class="section-number-3">6.4</span> PKCS7 转 PEM</h3>
+<div class="outline-text-3" id="text-6-4">
+<p>
+<code>openssl pkcs7 -in domain.p7b -print_certs -out domain.crt</code>
+<code>domain.crt</code> 中包含了两个证书
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline24" class="outline-3">
+<h3 id="orgheadline24"><span class="section-number-3">6.5</span> 把私钥和证书打包成PKCS12</h3>
+<div class="outline-text-3" id="text-6-5">
+<p>
+<code>openssl pkcs12 -inkey domain.key -in domain.crt -export -out domain.pfx</code>
+该命令会提示输入密码，留空不设置。
+</p>
+
+<p>
+如果有多级CA证书
+<code>cat domain.crt intermediate.crt [intermediate2.crt] ... rootCA.crt &gt; cert-chain.txt</code>
+<code>openssl pkcs12 -inkey domain.key -in cert-chain.txt -export -out domain.pkcs12</code>
+</p>
+
+<p>
+keytool是java工具，把PKCS12转成keystore，用于java软件，jetty，tomcat等。
+<code>keytool -importkeystore -srckeystore domain.pfx -srcstoretype PKCS12 -destkeystore keystore</code>
+</p>
+
+<p>
+使用keytool创建keystore
+<code>keytool -keystore keystore -alias jetty -genkey -keyalg RSA -sigalg SHA256withRSA</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline25" class="outline-3">
+<h3 id="orgheadline25"><span class="section-number-3">6.6</span> 把PKCS12转成PEM</h3>
+<div class="outline-text-3" id="text-6-6">
+<p>
+<code>openssl pkcs12 -in domain.pfx -nodes -out domain.combined.crt</code>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2017-08-25 五 15:47</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

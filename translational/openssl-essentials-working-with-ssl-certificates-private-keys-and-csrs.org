@@ -1,0 +1,95 @@
+#+TITLE: openssl 必知必会
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+本文主要翻译自：[[https://www.digitalocean.com/community/tutorials/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs][OpenSSL Essentials: Working with SSL Certificates, Private Keys and CSRs]]    部分参考自：[[http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html][Configuring SSL/TLS]]
+
+*openssl* 是 *Public Key Infrastructure (PKI) and HTTPS (HTTP over TLS)* 领域的重要工具，用来生成 *CSR* ，生成证书，查看证书等。
+
+* 关于 Certificate Signing Requests (CSRs)
+如果想从CA（具有资质的商业公司，签发SSL证书，是PKI系统的一部分）处获得证书，需要生成CSR。CSR中包含了公钥和其它信息，CA签发的证书中也包含了这两项信息。CSR中最重要其它信息是CN（Common Name），它应该等于FQDN（Fully Qualified Domain Name）。使用openssl命令生成CSR时，会提示填写这些信息。
+
+为了理解自签名证书，必须理解PKI系统。假设A想和B建立SSL连接，A需要获取B的证书（证书里面包含了B的公钥），A如何确定这个证书的确是B的，没有在传输过程中被篡改呢？如果B的证书是CA公司签发的，只需要用CA公司的证书验证一下就行了，那CA公司的证书又如何获取呢？如何保证CA公司的证书没有被纂改呢？答案是没有办法，只能选择信任。CA公司的证书一般内置在A系统中。
+
+所谓CA公司签名，其实是拿CA公司的私钥对B的公钥做签名，拿CA公司的公钥（在CA的证书中，可以公开获取）验证B的公钥签名。自签名证书说白了就是自己验证自己。需要把自签名证书手动添加到A系统中。
+
+* 生成CSR
+** 生成CSR和私钥
+=openssl req -newkey rsa:2048 -nodes -keyout domain.key -out domain.csr= =-nodes= 参数指示私钥不需要使用密码加密， =domain.key= 是生成的私钥， =domain.csr= 是生成的CSR。
+
+** 使用已有私钥生成CSR
+=openssl req -key domain.key -new -out domain.csr= =domain.key= 是已经存在的私钥
+
+** 使用已有证书生成新的CSR
+=openssl x509 -in domain.crt -signkey domain.key -x509toreq -out domain.csr= =domain.crt= 是已经存在的证书， =domain.key= 是已经存在的私钥
+
+* 生成SSL证书
+** 生成自签名证书
+=openssl req -newkey rsa:2048 -nodes -keyout domain.key -x509 -days 365 -out domain.crt= =-x509= 指示创建自签名证书， =-days 365= 指定证书的有效期是365天
+
+** 根据已有私钥生成自签名证书
+=openssl req -key domain.key -new -x509 -days 365 -out domain.crt= =domain.key= 是已经存在的私钥
+
+** 根据已有私钥和CSR生成自签名证书
+=openssl x509 -signkey domain.key -in domain.csr -req -days 365 -out domain.crt= =domain.key= 是已经存在的私钥， =domain.csr= 是已经存在的CSR
+
+* 查看证书
+** 查看校验CSR
+=openssl req -text -noout -verify -in domain.csr=
+
+** 查看自签名证书
+=openssl req -text -noout -verify -in domain.csr=
+
+** 查看CA签名的证书
+=openssl verify -verbose -CAFile ca.crt domain.crt= =ca.crt= 是CA的证书
+
+* 私钥
+** 创建私钥
+=openssl genrsa -des3 -out domain.key 2048= =-des3= 需要输密码加密私钥
+
+** 验证私钥
+=openssl rsa -check -in domain.key=
+
+** 验证证书、CSR和私钥一致
+=openssl rsa -noout -modulus -in domain.key | openssl md5=
+=openssl x509 -noout -modulus -in domain.crt | openssl md5=
+=openssl req -noout -modulus -in domain.csr | openssl md5=
+这三个命令的输出一样
+
+** 加密私钥
+=openssl rsa -des3 -in domain.key -out encrypted-domain.key=
+
+** 解密私钥
+=openssl rsa -in encrypted-domain.key -out domain.key=
+
+* 验证证书格式
+** PEM 转 DER
+=openssl x509 -in domain.crt -outform der -out domain.der=
+
+** DER 转 PEM
+=openssl x509 -inform der -in domain.der -out domain.crt=
+
+** PEM 转 PKCS7
+=openssl crl2pkcs7 -nocrl -certfile domain.crt -certfile ca-chain.crt -out domain.p7b=
+把 =domain.crt= =ca-chain.crt= 放到一个文件中
+
+** PKCS7 转 PEM
+=openssl pkcs7 -in domain.p7b -print_certs -out domain.crt=
+=domain.crt= 中包含了两个证书
+
+** 把私钥和证书打包成PKCS12
+=openssl pkcs12 -inkey domain.key -in domain.crt -export -out domain.pfx=
+该命令会提示输入密码，留空不设置。
+
+如果有多级CA证书
+=cat domain.crt intermediate.crt [intermediate2.crt] ... rootCA.crt > cert-chain.txt=
+=openssl pkcs12 -inkey domain.key -in cert-chain.txt -export -out domain.pkcs12=
+
+keytool是java工具，把PKCS12转成keystore，用于java软件，jetty，tomcat等。
+=keytool -importkeystore -srckeystore domain.pfx -srcstoretype PKCS12 -destkeystore keystore=
+
+使用keytool创建keystore
+=keytool -keystore keystore -alias jetty -genkey -keyalg RSA -sigalg SHA256withRSA=
+
+** 把PKCS12转成PEM
+=openssl pkcs12 -in domain.pfx -nodes -out domain.combined.crt=

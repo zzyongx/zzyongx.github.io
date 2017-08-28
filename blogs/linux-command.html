@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2016-11-07 一 11:27 -->
+<!-- 2017-08-28 一 19:11 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>linux命令备忘</title>
@@ -180,8 +180,8 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">2</span> 字符串</h2>
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">2</span> 字符串</h2>
 <div class="outline-text-2" id="text-2">
 </div><div id="outline-container-orgheadline4" class="outline-3">
 <h3 id="orgheadline4"><span class="section-number-3">2.1</span> 获取随机字符串</h3>
@@ -198,13 +198,23 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </p>
 </div>
 </div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">2.2</span> 二进制数据和16进制转换</h3>
+<div class="outline-text-3" id="text-2-2">
+<ol class="org-ol">
+<li>16进制转二进制 <code>echo "6F0AD0BFEE7D4B478AFED096E03CD80A" | xxd -r -p | base64</code></li>
+<li>二进制转16进制 <code>echo "bwrQv+59S0eK/tCW4DzYCg==" | base64 -d | xxd -l 16 -c 256 -p</code>  注意 <code>-l</code> 指定的是二进制的长度，必须指定对 <code>-c</code> 指定换行位置，用于数据较长时</li>
+</ol>
+</div>
+</div>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7"><span class="section-number-2">3</span> OpenSSL</h2>
+<div id="outline-container-orgheadline9" class="outline-2">
+<h2 id="orgheadline9"><span class="section-number-2">3</span> OpenSSL</h2>
 <div class="outline-text-2" id="text-3">
-</div><div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="section-number-3">3.1</span> HMAC</h3>
+</div><div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">3.1</span> HMAC</h3>
 <div class="outline-text-3" id="text-3-1">
 <div class="org-src-container">
 
@@ -218,13 +228,28 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </p>
 </div>
 </div>
+
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">3.2</span> 产生对称加密的秘钥</h3>
+<div class="outline-text-3" id="text-3-2">
+<ol class="org-ol">
+<li><code>openssl rand 32 -out keyfile</code> keyfile是二进制的</li>
+<li><code>openssl rand 32 -base64 -out keyfile.b64</code> keyfile.b64是base64的，除了正常的base64，文件末尾多了一个换行</li>
+<li><code>openssl rand 32 -hex -out keyfile.hex</code> keyfile.hex是十六进制的</li>
+<li><code>openssl enc -aes-256-ecb -in content -nosalt -a -A -K $(cat keyfile.hex) -out content.dec</code> 加密</li>
+<li><code>openssl enc -aes-256-ecb -in content.dec -nosalt -a -A -p -K $(cat keyfile.hex) -d</code> 解密</li>
+<li><code>openssl enc -aes-256-ecb -in content -nosalt -a -A -p -kfile keyfile</code> 加密，结果和4不同，kfile参数指定的key并不是加密使用的key</li>
+<li>4,5 使用 <code>-K</code> 指定了实际使用的key，用于不同语言间程序互操作，如果加解密都使用openssl，6也可以</li>
+</ol>
+</div>
+</div>
 </div>
 
-<div id="outline-container-orgheadline10" class="outline-2">
-<h2 id="orgheadline10"><span class="section-number-2">4</span> Bash</h2>
+<div id="outline-container-orgheadline13" class="outline-2">
+<h2 id="orgheadline13"><span class="section-number-2">4</span> Bash</h2>
 <div class="outline-text-2" id="text-4">
-</div><div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8"><span class="section-number-3">4.1</span> ssh 自动补全主机名</h3>
+</div><div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><span class="section-number-3">4.1</span> ssh 自动补全主机名</h3>
 <div class="outline-text-3" id="text-4-1">
 <div class="org-src-container">
 
@@ -240,8 +265,8 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9"><span class="section-number-3">4.2</span> 如何用命令删除文件的第一行</h3>
+<div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><span class="section-number-3">4.2</span> 如何用命令删除文件的第一行</h3>
 <div class="outline-text-3" id="text-4-2">
 <div class="org-src-container">
 
@@ -250,13 +275,23 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 </div>
+
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">4.3</span> date 命令</h3>
+<div class="outline-text-3" id="text-4-3">
+<ul class="org-ul">
+<li><code>date +%s</code> 获取时间戳</li>
+<li><code>date @1480065287</code> 获取时间戳对应的时间</li>
+</ul>
+</div>
+</div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-2">
-<h2 id="orgheadline12"><span class="section-number-2">5</span> Net</h2>
+<div id="outline-container-orgheadline15" class="outline-2">
+<h2 id="orgheadline15"><span class="section-number-2">5</span> Net</h2>
 <div class="outline-text-2" id="text-5">
-</div><div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="section-number-3">5.1</span> 测试网速</h3>
+</div><div id="outline-container-orgheadline14" class="outline-3">
+<h3 id="orgheadline14"><span class="section-number-3">5.1</span> 测试网速</h3>
 <div class="outline-text-3" id="text-5-1">
 <ul class="org-ul">
 <li><code>curl http://example.com/bigfile.txt &gt;/dev/null -vv</code> 会显示打开速度</li>
@@ -268,7 +303,7 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2016-11-07 一 11:27</p>
+<p class="date">Created: 2017-08-28 一 19:11</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

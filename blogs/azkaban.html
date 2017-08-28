@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-08-25 五 15:06 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>azkaban</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">azkaban</h1>
+<p>
+以下来自使用 <code>azkaban-3.30.1</code> ，不同版本可能有不同。用变量 <code>AZKABAN_WEB_ROOT</code> 和 <code>AZKABAN_EXEC_ROOT</code> 代指安装路径
+</p>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">1</span> 注意事项</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 源码安装</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+azkaban 不提供二进制下载，需要自己编译，编译过程需要从网络下载依赖，编译机最好能翻墙，方便依赖下载。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> 数据库编码</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+创建数据库指定utf-8编码
+<code>CREATE DATABASE azkaban DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">1.3</span> 任务的名称</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+上传项目文件必须是zip格式，任务文件必须以 <code>.job</code> 做后缀。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-3">
+<h3 id="orgheadline4"><span class="section-number-3">1.4</span> 配置azkaban.execution.dir</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+在 <code>executor</code> 的 <code>azkaban.properties</code> 上预先配置好 <code>azkaban.execution.dir=/search/odin/azkaban-exec-server/executions</code> 这个目录保存了任务执行日志，如果等系统运行起来再改变，可能导致异常。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-2">
+<h2 id="orgheadline11"><span class="section-number-2">2</span> FAQ</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-orgheadline6" class="outline-3">
+<h3 id="orgheadline6"><span class="section-number-3">2.1</span> Error: <code>HADOOP_HOME</code> is not set. Hadoop job types will not run properly.</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+<code>export HADOOP_HOME=/usr/local/hadoop2.0</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">2.2</span> Exception: java.lang.StackOverflowError thrown from the UncaughtExceptionHandler in thread "main"</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">cat &gt; conf/log4j.properties</span>
+log4j.rootLogger=INFO,file
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=/path/server.log
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">2.3</span> Error injecting constructor, azkaban.executor.ExecutorManagerException: No active executor found</h3>
+<div class="outline-text-3" id="text-2-3">
+<ol class="org-ol">
+<li>数据库 <code>INSERT INTO executors(host,port, active) VALUES("executor_ip", 12321, true)</code></li>
+<li>配置文件</li>
+</ol>
+<pre class="example">
+executor.port=12321
+azkaban.use.multiple.executors=true
+azkaban.executorselector.filters=StaticRemainingFlowSize,MinimumFreeMemory,CpuStatus
+azkaban.executorselector.comparator.NumberOfAssignedFlowComparator=1
+azkaban.executorselector.comparator.Memory=1
+azkaban.executorselector.comparator.LastDispatched=1
+azkaban.executorselector.comparator.CpuUsage=1
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><span class="section-number-3">2.4</span> 浏览器打开页面加载css、js等404</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+配置文件 <code>web.resource.dir=$AZKABAN_WEB_ROOT/web</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><span class="section-number-3">2.5</span> Missing required property 'azkaban.native.lib'</h3>
+<div class="outline-text-3" id="text-2-5">
+<ol class="org-ol">
+<li>在源码中找到 <code>execute-as-user.c</code> 编译 <code>gcc execute-as-user.c -o execute-as-user</code></li>
+<li><code>chown root execute-as-user &amp;&amp; chmod 6050 execute-as-user</code></li>
+<li><code>mkdir -p $AZKABAN_EXEC_ROOT/plugins/jobtypes &amp;&amp; cp execute-as-user AZKABAN_EXEC_ROOT/plugins/jobtypes</code></li>
+<li><code>echo "azkaban.native.lib=$AZKABAN_EXEC_ROOT/plugins/jobtypes" &gt; $AZKABAN_EXEC_ROOT/plugins/jobtypes/commonprivate.properties</code></li>
+<li>如果希望 <code>type=command</code> 类型的任务以root运行，添加 <code>echo "execute.as.user=false" &gt;&gt; $AZKABAN_EXEC_ROOT/plugins/jobtypes/commonprivate.properties</code></li>
+<li>否则在executor上增加 <code>azkaban</code> 用户，任务以 <code>azkaban</code> 用户运行。</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2017-08-25 五 15:06</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
