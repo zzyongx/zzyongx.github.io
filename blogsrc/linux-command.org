@@ -39,14 +39,20 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 
 可以用来检查编程结果的正确性
 
-** 产生对称加密的秘钥
-1. =openssl rand 32 -out keyfile= keyfile是二进制的
+** 对称加密
+1. =openssl rand 32 -out keyfile= 产生秘钥，keyfile是二进制的
 2. =openssl rand 32 -base64 -out keyfile.b64= keyfile.b64是base64的，除了正常的base64，文件末尾多了一个换行
 3. =openssl rand 32 -hex -out keyfile.hex= keyfile.hex是十六进制的
 4. =openssl enc -aes-256-ecb -in content -nosalt -a -A -K $(cat keyfile.hex) -out content.dec= 加密
 5. =openssl enc -aes-256-ecb -in content.dec -nosalt -a -A -p -K $(cat keyfile.hex) -d= 解密
 6. =openssl enc -aes-256-ecb -in content -nosalt -a -A -p -kfile keyfile= 加密，结果和4不同，kfile参数指定的key并不是加密使用的key
 7. 4,5 使用 =-K= 指定了实际使用的key，用于不同语言间程序互操作，如果加解密都使用openssl，6也可以
+
+** 非对称加密
+1. =openssl genrsa -out private.pem 1024= private.pem 是产生的私钥
+2. =openssl rsa -in private.pem -inform PEM -outform PEM -pubout -out public.pem= 根据私钥生成公钥
+3. =openssl rsautl -encrypt -pubin -inkey public.pem -in keyfile -out keyfile.enc= 用公钥加密对称秘钥
+4. =openssl rsautl -decrypt -inkey private.pem -in keyfile.enc -out keyfile.dec= 用私钥解密对称秘钥
 
 * Bash
 ** ssh 自动补全主机名

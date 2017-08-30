@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-08-28 一 19:11 -->
+<!-- 2017-08-29 二 10:20 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>linux命令备忘</title>
@@ -210,8 +210,8 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-2">
-<h2 id="orgheadline9"><span class="section-number-2">3</span> OpenSSL</h2>
+<div id="outline-container-orgheadline10" class="outline-2">
+<h2 id="orgheadline10"><span class="section-number-2">3</span> OpenSSL</h2>
 <div class="outline-text-2" id="text-3">
 </div><div id="outline-container-orgheadline7" class="outline-3">
 <h3 id="orgheadline7"><span class="section-number-3">3.1</span> HMAC</h3>
@@ -230,10 +230,10 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 
 <div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8"><span class="section-number-3">3.2</span> 产生对称加密的秘钥</h3>
+<h3 id="orgheadline8"><span class="section-number-3">3.2</span> 对称加密</h3>
 <div class="outline-text-3" id="text-3-2">
 <ol class="org-ol">
-<li><code>openssl rand 32 -out keyfile</code> keyfile是二进制的</li>
+<li><code>openssl rand 32 -out keyfile</code> 产生秘钥，keyfile是二进制的</li>
 <li><code>openssl rand 32 -base64 -out keyfile.b64</code> keyfile.b64是base64的，除了正常的base64，文件末尾多了一个换行</li>
 <li><code>openssl rand 32 -hex -out keyfile.hex</code> keyfile.hex是十六进制的</li>
 <li><code>openssl enc -aes-256-ecb -in content -nosalt -a -A -K $(cat keyfile.hex) -out content.dec</code> 加密</li>
@@ -243,13 +243,25 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </ol>
 </div>
 </div>
+
+<div id="outline-container-orgheadline9" class="outline-3">
+<h3 id="orgheadline9"><span class="section-number-3">3.3</span> 非对称加密</h3>
+<div class="outline-text-3" id="text-3-3">
+<ol class="org-ol">
+<li><code>openssl genrsa -out private.pem 1024</code> private.pem 是产生的私钥</li>
+<li><code>openssl rsa -in private.pem -inform PEM -outform PEM -pubout -out public.pem</code> 根据私钥生成公钥</li>
+<li><code>openssl rsautl -encrypt -pubin -inkey public.pem -in keyfile -out keyfile.enc</code> 用公钥加密对称秘钥</li>
+<li><code>openssl rsautl -decrypt -inkey private.pem -in keyfile.enc -out keyfile.dec</code> 用私钥解密对称秘钥</li>
+</ol>
+</div>
+</div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-2">
-<h2 id="orgheadline13"><span class="section-number-2">4</span> Bash</h2>
+<div id="outline-container-orgheadline14" class="outline-2">
+<h2 id="orgheadline14"><span class="section-number-2">4</span> Bash</h2>
 <div class="outline-text-2" id="text-4">
-</div><div id="outline-container-orgheadline10" class="outline-3">
-<h3 id="orgheadline10"><span class="section-number-3">4.1</span> ssh 自动补全主机名</h3>
+</div><div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><span class="section-number-3">4.1</span> ssh 自动补全主机名</h3>
 <div class="outline-text-3" id="text-4-1">
 <div class="org-src-container">
 
@@ -265,8 +277,8 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="section-number-3">4.2</span> 如何用命令删除文件的第一行</h3>
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">4.2</span> 如何用命令删除文件的第一行</h3>
 <div class="outline-text-3" id="text-4-2">
 <div class="org-src-container">
 
@@ -276,8 +288,8 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><span class="section-number-3">4.3</span> date 命令</h3>
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="section-number-3">4.3</span> date 命令</h3>
 <div class="outline-text-3" id="text-4-3">
 <ul class="org-ul">
 <li><code>date +%s</code> 获取时间戳</li>
@@ -287,11 +299,11 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline15" class="outline-2">
-<h2 id="orgheadline15"><span class="section-number-2">5</span> Net</h2>
+<div id="outline-container-orgheadline16" class="outline-2">
+<h2 id="orgheadline16"><span class="section-number-2">5</span> Net</h2>
 <div class="outline-text-2" id="text-5">
-</div><div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14"><span class="section-number-3">5.1</span> 测试网速</h3>
+</div><div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15"><span class="section-number-3">5.1</span> 测试网速</h3>
 <div class="outline-text-3" id="text-5-1">
 <ul class="org-ul">
 <li><code>curl http://example.com/bigfile.txt &gt;/dev/null -vv</code> 会显示打开速度</li>
@@ -303,7 +315,7 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-08-28 一 19:11</p>
+<p class="date">Created: 2017-08-29 二 10:20</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

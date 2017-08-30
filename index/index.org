@@ -15,12 +15,17 @@
 [[blog:hashing-security][密码加盐哈希]] <2017-07-25>
 
 ** 经验
-[[blog:https-SNI][https如何支持虚拟主机]] <2017-05-20>
+[[blog:iptables][iptables 指南]] <2017-08-30>
+#+BEGIN_QUOTE
+讲了程序员为何要学习iptables，以及iptables的用法
+#+END_QUOTE
 
 [[blog:azkaban][azkaban 常见问题]] <2017-08-25>
 #+BEGIN_QUOTE
 记录使用azkaban中遇到的问题
 #+END_QUOTE
+
+[[blog:https-SNI][https如何支持虚拟主机]] <2017-05-20>
 
 [[blog:grep-command-examples][grep]] <2017-03-09>
 #+BEGIN_QUOTE
