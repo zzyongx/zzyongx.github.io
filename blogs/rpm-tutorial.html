@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-09-06 三 17:20 -->
+<!-- 2017-09-08 五 18:11 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
-<title>开发环境</title>
+<title>rpm 指南</title>
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="root" />
 <style type="text/css">
@@ -149,46 +149,110 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">开发环境</h1>
+<h1 class="title">rpm 指南</h1>
+<p>
+<code>rpm</code> 是 <b>redhat</b> 的包格式。通常使用 <code>yum</code> 管理，不直接和 <code>rpm</code> 交互。但了解 <code>rpm</code> 非常有必要，尤其是输出是 <code>rpm包</code> 的时候。
+</p>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">1</span> windows</h2>
+<div id="outline-container-orgheadline1" class="outline-2">
+<h2 id="orgheadline1"><span class="section-number-2">1</span> rpm 常用选项</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4"><span class="section-number-3">1.1</span> swan-desktop</h3>
-<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li><code>-i</code> 安装rpm，如果已安装，报错 <code>rpm -i /path/redis-service-1.0.8-3.x86_64.rpm</code></li>
+<li><code>-U</code> 安装或升级rpm， <code>rpm -U /path/redis-service-1.0.8-3.x86_64.rpm</code></li>
+<li><code>-e</code> 卸载安装的rpm， <code>rpm -e redis-service</code></li>
+<li><code>-vh</code> 查看安装的详细过程， <code>rpm -Uvh redis-service-1.0.8-3.x86_64.rpm</code></li>
+
+<li><code>-q</code> 查询rpm的信息。通常配合下列参数使用， <code>rpm -q redis-service</code> 查看是否安装。
+<ul class="org-ul">
+<li><code>-a</code> 查看已经安装的所有rpm， <code>rpm -qa | grep redis</code> 查看redis-service是否安装。</li>
+<li><code>-l</code> 查看已经已经安装rpm中包含的文件， <code>rpm -ql redis-service</code></li>
+<li><code>-f</code> 查看文件所属的rpm， <code>rpm -qf /usr/local/bin/redis-server</code> ，如果查不到，可以看看是不是符号链接，使用真正的链接代替。</li>
+<li><code>-R</code> 查看依赖， <code>rpm -qR redis-service</code></li>
+<li><code>-i</code> 查看包的元信息， <code>rpm -qi redis-service</code></li>
+<li><code>--changelog</code> 查看changelog， <code>rpm -q --changelog redis-service</code>
+<ul class="org-ul">
+<li><code>-p</code> 指定查询的rpm包，通常配合上述参数使用，默认是系统安装的， <code>rpm -qlp redis-service-1.0.8-3.x86_64.rpm</code> 通常查看rpm包是否包含预期的文件。</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> 提取rpm包的内容</h2>
+<div class="outline-text-2" id="text-2">
 <p>
-基于cygwin的xfce桌面，xfce4-terminal 很好用，支持标签。<a href="http://www.starlig.ht/">swan-desktop</a>
+不安装提取rpm包的内容。 <code>rpm2cpio redis-service-1.0.8-3.x86_64.rpm | cpio -idmv</code>
 </p>
 </div>
+</div>
 
-<div id="outline-container-orgheadline1" class="outline-4">
-<h4 id="orgheadline1"><span class="section-number-4">1.1.1</span> 安装fish</h4>
-<div class="outline-text-4" id="text-1-1-1">
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4"><span class="section-number-2">3</span> 打包rpm</h2>
+<div class="outline-text-2" id="text-3">
+<ol class="org-ol">
+<li>编写 <code>spec</code> 文件</li>
+<li>用 <code>tar czvf redis-service-1.0.8-3.tar.gz source</code> 打包源码，并放到 <code>/root/rpmbuild/SOURCE</code> 目录</li>
+<li>打包rpm， <code>rpmbuild -bb redis-service.spec</code></li>
+</ol>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-3">
+<h3 id="orgheadline3"><span class="section-number-3">3.1</span> spec 文件样例</h3>
+<div class="outline-text-3" id="text-3-1">
 <p>
-fish是一个比较好用的shell <code>spm -i fish</code> 。但是安装官方建议放到 <code>.bash_profile</code> 的最后， <code>Swan Xfce4 Desktop</code> 可能无法启动。 手动 <code>exec fish</code> 也许是个好主意。
+<code>spec</code> 文件本身比较复杂，但只需掌握常用的知识，就可以打出自己的rpm包，这里给出一个例子，并附带简单的注释，用 <code>#</code> 标记。
 </p>
-</div>
-</div>
 
-<div id="outline-container-orgheadline2" class="outline-4">
-<h4 id="orgheadline2"><span class="section-number-4">1.1.2</span> 支持中文</h4>
-<div class="outline-text-4" id="text-1-1-2">
-<ol class="org-ol">
-<li>安装ibus <code>spm -i ibus</code> <code>spm -i ibus-pinyin</code></li>
-<li>在 <b>会话和启动</b> 中配置ibus启动 <code>ibus-daemon</code></li>
-<li>在 <code>.bash_profile</code> 中配置 <code>export GTK_IM_MODULE=ibus export XMODIFIERS=@im=ibus export QT_IM_MODULE=ibus</code></li>
-</ol>
-</div>
-</div>
+<div class="org-src-container">
 
-<div id="outline-container-orgheadline3" class="outline-4">
-<h4 id="orgheadline3"><span class="section-number-4">1.1.3</span> 启动windows程序</h4>
-<div class="outline-text-4" id="text-1-1-3">
-<ol class="org-ol">
-<li>配置windows别名 <code>alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'</code></li>
-<li>配置pandoc别名 <code>alias chrome='/cygdrive/c/Users/zhengzhiyong/AppData/Local/Pandoc/pandoc'</code></li>
-</ol>
+<pre class="src src-spec">Name:      redis-service                            # rpm包的名字
+Version:   1.0.8                                    # 版本
+Release:   3                                        # release 号
+Summary:   redis-service                            # rpm包的简单描述
+Group:     cache                                    # 所属的组
+License:   Apache2                                  # 软件的licence
+Source0:   redis-service-1.0.8.tar.gz               # 源码的位置，上述 *步骤2*
+BuildRoot: /var/tmp/redis-service                   # 打包环境的root，见下面的 =$RPM_BUILD_ROOT= ，=%install= 时模拟安装位置
+BuildRequires: libevent-devel &gt;= 1.4.13             # 打包时的依赖
+Requires: libevent &gt;= 1.4.13                        # 安装时的依赖
+AutoReqProv: no                                     # 禁止打包工具自动添加依赖
+
+%description                                        # 描述段，详细描述rpm包
+cache service based on redis
+
+%prep                                               # build预处理
+%setup -q                                           # 这个宏解压源码，需要是 =tar.gz= 格式
+
+%build                                              # build，make、maven等做编译，shell片段
+ make clean &amp;&amp; make
+
+%install                                            # 安装，记得 =$RPM_BUILD_ROOT= 不然就安装到本机的真实目录
+ mkdir -p $RPM_BUILD_ROOT/usr/local/bin
+ cp build/znode $RPM_BUILD_ROOT/usr/local/bin
+ mkdir -p $RPM_BUILD_ROOT/etc/cron.d
+ cp conf/znode.cron $RPM_BUILD_ROOT/etc/cron.d
+
+%files                                              # 需要复制到rpm中的文件，以 =$RPM_BUILD_ROOT= 为根
+%defattr(-,root,root)                               # 设置文件的默认属性
+/usr/local/bin
+
+%config                                             # 标记为config的文件不会被卸载，update也会不会覆盖
+/etc/cron.d/
+
+%clean                                              # build结束，清理
+rm -rf $RPM_BUILD_ROOT
+
+%post                                               # 打包结束，清理
+
+%changelog                                          # changelog，标准格式
+ * Fri Sep  8 2017 Zhiyong Zheng &lt;iamzhengzhiyong@gmail.com&gt; -1.0.8-3
+ - Bugfix: xxxx
+
+ * Tue Sep  5 2017 Zhiyong Zheng &lt;iamzhengzhiyong@gmail.com&gt; -1.0.8-2
+ - Changes: yyy
+</pre>
 </div>
 </div>
 </div>
@@ -196,7 +260,7 @@ fish是一个比较好用的shell <code>spm -i fish</code> 。但是安装官方
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-09-06 三 17:20</p>
+<p class="date">Created: 2017-09-08 五 18:11</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

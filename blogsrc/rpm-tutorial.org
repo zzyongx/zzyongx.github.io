@@ -1,0 +1,79 @@
+#+TITLE: rpm 指南
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+=rpm= 是 *redhat* 的包格式。通常使用 =yum= 管理，不直接和 =rpm= 交互。但了解 =rpm= 非常有必要，尤其是输出是 =rpm包= 的时候。
+
+* rpm 常用选项
+- =-i= 安装rpm，如果已安装，报错 =rpm -i /path/redis-service-1.0.8-3.x86_64.rpm=
+- =-U= 安装或升级rpm， =rpm -U /path/redis-service-1.0.8-3.x86_64.rpm=
+- =-e= 卸载安装的rpm， =rpm -e redis-service=
+- =-vh= 查看安装的详细过程， =rpm -Uvh redis-service-1.0.8-3.x86_64.rpm=
+
+- =-q= 查询rpm的信息。通常配合下列参数使用， =rpm -q redis-service= 查看是否安装。
+  - =-a= 查看已经安装的所有rpm， =rpm -qa | grep redis= 查看redis-service是否安装。
+  - =-l= 查看已经已经安装rpm中包含的文件， =rpm -ql redis-service=
+  - =-f= 查看文件所属的rpm， =rpm -qf /usr/local/bin/redis-server= ，如果查不到，可以看看是不是符号链接，使用真正的链接代替。
+  - =-R= 查看依赖， =rpm -qR redis-service=
+  - =-i= 查看包的元信息， =rpm -qi redis-service=
+  - =--changelog= 查看changelog， =rpm -q --changelog redis-service=
+    - =-p= 指定查询的rpm包，通常配合上述参数使用，默认是系统安装的， =rpm -qlp redis-service-1.0.8-3.x86_64.rpm= 通常查看rpm包是否包含预期的文件。
+
+* 提取rpm包的内容
+不安装提取rpm包的内容。 =rpm2cpio redis-service-1.0.8-3.x86_64.rpm | cpio -idmv=
+
+* 打包rpm
+1. 编写 =spec= 文件
+2. 用 =tar czvf redis-service-1.0.8-3.tar.gz source= 打包源码，并放到 =/root/rpmbuild/SOURCE= 目录
+3. 打包rpm， =rpmbuild -bb redis-service.spec=
+
+** spec 文件样例
+=spec= 文件本身比较复杂，但只需掌握常用的知识，就可以打出自己的rpm包，这里给出一个例子，并附带简单的注释，用 =#= 标记。
+
+#+BEGIN_SRC spec
+Name:      redis-service                            # rpm包的名字
+Version:   1.0.8                                    # 版本
+Release:   3                                        # release 号
+Summary:   redis-service                            # rpm包的简单描述
+Group:     cache                                    # 所属的组
+License:   Apache2                                  # 软件的licence
+Source0:   redis-service-1.0.8.tar.gz               # 源码的位置，上述 *步骤2*
+BuildRoot: /var/tmp/redis-service                   # 打包环境的root，见下面的 =$RPM_BUILD_ROOT= ，=%install= 时模拟安装位置
+BuildRequires: libevent-devel >= 1.4.13             # 打包时的依赖
+Requires: libevent >= 1.4.13                        # 安装时的依赖
+AutoReqProv: no                                     # 禁止打包工具自动添加依赖
+
+%description                                        # 描述段，详细描述rpm包
+cache service based on redis
+
+%prep                                               # build预处理
+%setup -q                                           # 这个宏解压源码，需要是 =tar.gz= 格式
+
+%build                                              # build，make、maven等做编译，shell片段
+ make clean && make
+
+%install                                            # 安装，记得 =$RPM_BUILD_ROOT= 不然就安装到本机的真实目录
+ mkdir -p $RPM_BUILD_ROOT/usr/local/bin
+ cp build/znode $RPM_BUILD_ROOT/usr/local/bin
+ mkdir -p $RPM_BUILD_ROOT/etc/cron.d
+ cp conf/znode.cron $RPM_BUILD_ROOT/etc/cron.d
+
+%files                                              # 需要复制到rpm中的文件，以 =$RPM_BUILD_ROOT= 为根
+%defattr(-,root,root)                               # 设置文件的默认属性
+/usr/local/bin
+
+%config                                             # 标记为config的文件不会被卸载，update也会不会覆盖
+/etc/cron.d/
+
+%clean                                              # build结束，清理
+rm -rf $RPM_BUILD_ROOT
+
+%post                                               # 打包结束，清理
+
+%changelog                                          # changelog，标准格式
+ * Fri Sep  8 2017 Zhiyong Zheng <iamzhengzhiyong@gmail.com> -1.0.8-3
+ - Bugfix: xxxx
+
+ * Tue Sep  5 2017 Zhiyong Zheng <iamzhengzhiyong@gmail.com> -1.0.8-2
+ - Changes: yyy
+#+END_SRC

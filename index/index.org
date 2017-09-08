@@ -15,6 +15,11 @@
 [[blog:hashing-security][密码加盐哈希]] <2017-07-25>
 
 ** 经验
+[[blog:rpm-tutorial][rpm 指南]] <2017-09-08>
+#+BEGIN_QUOTE
+rpm 常用选项
+#+END_QUOTE
+
 [[blog:iptables][iptables 指南]] <2017-08-30>
 #+BEGIN_QUOTE
 讲了程序员为何要学习iptables，以及iptables的用法

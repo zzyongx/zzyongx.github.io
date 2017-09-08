@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-07-19 三 11:38 -->
+<!-- 2017-09-08 五 18:18 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>nc 和 curl</title>
@@ -154,11 +154,11 @@ for the JavaScript code in this tag.
 nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一些使用经验和踩过的坑。
 </p>
 
-<div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7"><span class="section-number-2">1</span> nc</h2>
+<div id="outline-container-orgheadline8" class="outline-2">
+<h2 id="orgheadline8"><span class="section-number-2">1</span> nc</h2>
 <div class="outline-text-2" id="text-1">
 </div><div id="outline-container-orgheadline1" class="outline-3">
-<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 参数</h3>
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 常用参数</h3>
 <div class="outline-text-3" id="text-1-1">
 <ul class="org-ul">
 <li>无参数 连接tcp端口</li>
@@ -170,8 +170,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="section-number-3">1.2</span> 例子：</h3>
+<div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">1.2</span> 例子：</h3>
 <div class="outline-text-3" id="text-1-2">
 </div><div id="outline-container-orgheadline2" class="outline-4">
 <h4 id="orgheadline2"><span class="section-number-4">1.2.1</span> 模拟http请求</h4>
@@ -209,17 +209,26 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </p>
 </div>
 </div>
+
+<div id="outline-container-orgheadline6" class="outline-4">
+<h4 id="orgheadline6"><span class="section-number-4">1.2.5</span> 模拟服务端接口</h4>
+<div class="outline-text-4" id="text-1-2-5">
+<p>
+假设要返回的数据在 response.json 中 <code>cat response.json | nc -l 8080</code> ，尤其适合tcp协议。
+</p>
+</div>
+</div>
 </div>
 </div>
 
-<div id="outline-container-orgheadline22" class="outline-2">
-<h2 id="orgheadline22"><span class="section-number-2">2</span> curl</h2>
+<div id="outline-container-orgheadline23" class="outline-2">
+<h2 id="orgheadline23"><span class="section-number-2">2</span> curl</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orgheadline19" class="outline-3">
-<h3 id="orgheadline19"><span class="section-number-3">2.1</span> 常用参数</h3>
+</div><div id="outline-container-orgheadline20" class="outline-3">
+<h3 id="orgheadline20"><span class="section-number-3">2.1</span> 常用参数</h3>
 <div class="outline-text-3" id="text-2-1">
-</div><div id="outline-container-orgheadline8" class="outline-4">
-<h4 id="orgheadline8"><span class="section-number-4">2.1.1</span> -X</h4>
+</div><div id="outline-container-orgheadline9" class="outline-4">
+<h4 id="orgheadline9"><span class="section-number-4">2.1.1</span> -X</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <p>
 <code>-X</code> 指定HTTP方法，常用的是<code>GET POST PUT DELETE</code> ，如果不指定，默认是<code>GET</code> 。如果指定了<code>-d</code> 参数（或者类似&#x2013;data-binary之类），则是<code>POST</code> ，如果现实指定了<code>-X POST</code> ，则需要<code>-d</code> 或类似的参数。
@@ -227,8 +236,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-4">
-<h4 id="orgheadline9"><span class="section-number-4">2.1.2</span> -H</h4>
+<div id="outline-container-orgheadline10" class="outline-4">
+<h4 id="orgheadline10"><span class="section-number-4">2.1.2</span> -H</h4>
 <div class="outline-text-4" id="text-2-1-2">
 <p>
 指定请求的Header，通常指定Host，Cookie之类。例如： <code>-H 'Host: www.test.com'</code> 。当我们POST数据的时候，如果数据比较大，curl可能自动加上<code>Expect: 100-continue</code> ，如果服务端不支持这个Header，需要手动禁掉，方法是传递一个空Header <code>-H 'Expect;'</code>  注意因为是空Header，必须用 <code>;</code> 替换 <code>:</code> 。
@@ -236,8 +245,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline10" class="outline-4">
-<h4 id="orgheadline10"><span class="section-number-4">2.1.3</span> -d</h4>
+<div id="outline-container-orgheadline11" class="outline-4">
+<h4 id="orgheadline11"><span class="section-number-4">2.1.3</span> -d</h4>
 <div class="outline-text-4" id="text-2-1-3">
 <p>
 <code>-d</code> 参数用于 <code>PUT</code> 或者 <code>POST</code> 的请求Body，如果没有<code>-H</code> 指定Header，那么默认是 <code>application/x-www-form-urlencoded</code>
@@ -246,8 +255,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-4">
-<h4 id="orgheadline11"><span class="section-number-4">2.1.4</span> &#x2013;data-binary</h4>
+<div id="outline-container-orgheadline12" class="outline-4">
+<h4 id="orgheadline12"><span class="section-number-4">2.1.4</span> &#x2013;data-binary</h4>
 <div class="outline-text-4" id="text-2-1-4">
 <p>
 名字具有误导性，和二进制无关，作用和 <code>-d</code> 参数相同，只有一点 <code>-d</code> 参数指定文件作为上传内容时，curl会过滤换行（也可能还有别的），所以如果希望服务端读到和上传内容一样的数据，用<code>--data-binary</code> ，此时你可能需要用<code>-H</code> 指定<code>Content-Type</code> 。
@@ -255,8 +264,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-4">
-<h4 id="orgheadline12"><span class="section-number-4">2.1.5</span> &#x2013;user</h4>
+<div id="outline-container-orgheadline13" class="outline-4">
+<h4 id="orgheadline13"><span class="section-number-4">2.1.5</span> &#x2013;user</h4>
 <div class="outline-text-4" id="text-2-1-5">
 <p>
 用于指定basic认证的用户名和密码，例如&#x2013;user name:pass
@@ -264,8 +273,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-4">
-<h4 id="orgheadline13"><span class="section-number-4">2.1.6</span> -vv</h4>
+<div id="outline-container-orgheadline14" class="outline-4">
+<h4 id="orgheadline14"><span class="section-number-4">2.1.6</span> -vv</h4>
 <div class="outline-text-4" id="text-2-1-6">
 <p>
 用于查看请求过程，包括连接的IP，请求的方法、URL、Header，响应的状态码、Header，这个是输出到标准输出的。
@@ -273,8 +282,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline14" class="outline-4">
-<h4 id="orgheadline14"><span class="section-number-4">2.1.7</span> -o</h4>
+<div id="outline-container-orgheadline15" class="outline-4">
+<h4 id="orgheadline15"><span class="section-number-4">2.1.7</span> -o</h4>
 <div class="outline-text-4" id="text-2-1-7">
 <p>
 指定输出的文件名
@@ -282,8 +291,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline15" class="outline-4">
-<h4 id="orgheadline15"><span class="section-number-4">2.1.8</span> -Ss</h4>
+<div id="outline-container-orgheadline16" class="outline-4">
+<h4 id="orgheadline16"><span class="section-number-4">2.1.8</span> -Ss</h4>
 <div class="outline-text-4" id="text-2-1-8">
 <p>
 -s quiet模式，不显示进度和错误信息。-S 当发生错误时，显示错误信息，两者通常一起使用
@@ -291,8 +300,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline16" class="outline-4">
-<h4 id="orgheadline16"><span class="section-number-4">2.1.9</span> -f</h4>
+<div id="outline-container-orgheadline17" class="outline-4">
+<h4 id="orgheadline17"><span class="section-number-4">2.1.9</span> -f</h4>
 <div class="outline-text-4" id="text-2-1-9">
 <p>
 默认http 400以上的错误，curl的退出状态是0，指定 -f，如果发生400以上的错误，$? 为 22
@@ -300,8 +309,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline17" class="outline-4">
-<h4 id="orgheadline17"><span class="section-number-4">2.1.10</span> &#x2013;compressed</h4>
+<div id="outline-container-orgheadline18" class="outline-4">
+<h4 id="orgheadline18"><span class="section-number-4">2.1.10</span> &#x2013;compressed</h4>
 <div class="outline-text-4" id="text-2-1-10">
 <p>
 默认请求 <code>Accept-Encoding</code> 为空，服务端响应 <code>Content-Encoding</code> 为空。如果服务端总是返回 <code>Content-Encoding: gzip</code> ，此时 curl 不会自动解压。使用这个参数发送 <code>Accept-Encoding: deflate, gzip</code> ，如果服务端返回gzip，curl可以自动解压。
@@ -310,8 +319,8 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline18" class="outline-4">
-<h4 id="orgheadline18"><span class="section-number-4">2.1.11</span> -w</h4>
+<div id="outline-container-orgheadline19" class="outline-4">
+<h4 id="orgheadline19"><span class="section-number-4">2.1.11</span> -w</h4>
 <div class="outline-text-4" id="text-2-1-11">
 <p>
 可以将http请求的一些内部细节格式化输出。例如 <code>curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"</code> 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
@@ -320,18 +329,23 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline21" class="outline-3">
-<h3 id="orgheadline21"><span class="section-number-3">2.2</span> 常用法</h3>
+<div id="outline-container-orgheadline22" class="outline-3">
+<h3 id="orgheadline22"><span class="section-number-3">2.2</span> 常用法</h3>
 <div class="outline-text-3" id="text-2-2">
-</div><div id="outline-container-orgheadline20" class="outline-4">
-<h4 id="orgheadline20"><span class="section-number-4">2.2.1</span> xyz</h4>
+</div><div id="outline-container-orgheadline21" class="outline-4">
+<h4 id="orgheadline21"><span class="section-number-4">2.2.1</span> 请求指定的服务器</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+<code>curl http://ip/api -H "Host:domain"</code> ip 是指定的服务器，domain是正常请求使用的域名。
+</p>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-07-19 三 11:38</p>
+<p class="date">Created: 2017-09-08 五 18:18</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

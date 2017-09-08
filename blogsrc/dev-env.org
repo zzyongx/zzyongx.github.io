@@ -15,4 +15,5 @@ fish是一个比较好用的shell ~spm -i fish~ 。但是安装官方建议放�
 3. 在 =.bash_profile= 中配置 ~export GTK_IM_MODULE=ibus export XMODIFIERS=@im=ibus export QT_IM_MODULE=ibus~
 
 *** 启动windows程序
-~alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'~
+1. 配置windows别名 ~alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'~
+2. 配置pandoc别名 ~alias chrome='/cygdrive/c/Users/zhengzhiyong/AppData/Local/Pandoc/pandoc'~

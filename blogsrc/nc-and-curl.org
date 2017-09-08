@@ -5,7 +5,7 @@
 nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一些使用经验和踩过的坑。
 
 * nc
-** 参数
+** 常用参数
 - 无参数 连接tcp端口
 - -z 探测端口是否存活，端口可以是范围，例如：6379-6400
 - -w <timeout> 设置连接超时
@@ -25,6 +25,9 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 
 *** 扫描端口 6379-6400
 =nc -vz -w 1 127.0.0.1 6379-6400=
+
+*** 模拟服务端接口
+假设要返回的数据在 response.json 中 =cat response.json | nc -l 8080= ，尤其适合tcp协议。
 
 * curl
 
@@ -65,4 +68,5 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 可以将http请求的一些内部细节格式化输出。例如 =curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"= 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
 
 ** 常用法
-*** xyz
+*** 请求指定的服务器
+=curl http://ip/api -H "Host:domain"= ip 是指定的服务器，domain是正常请求使用的域名。
