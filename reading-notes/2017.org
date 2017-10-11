@@ -125,11 +125,7 @@ Twitter 更换了CEO，把自己定位为媒体、广告公司，限制基于Twi
 
 笔记时间：<2017-07-31> 原文：[[http://tomtunguz.com/how-to-tell-if-youre-a-great-manager/][How To Tell If You're A Great Manager]]
 
-#https://landing.google.com/sre/book/index.html
-#https://developers.google.com/web/updates/2017/04/headless-chrome
+* 90% 同意原则
+在某件事的讨论中，通常只有10%的部分我们意见向左，而我们花了90%的时间讨论它。是否值得？在讨论中，记录下讨论的点，分别标注一致和不一致，如果一致的点足够多，可以暂时推进进度，就暂时搁置不一致的点。
 
-1. package javafx.application does not exist
-cp /usr/java/jdk1.8.0_121/jre/lib/ext/jfxrt.jar /usr/lib/jvm/java-1.8.0-oracle.x86_64/jre/lib/ext
-
-2. .git directory is not found
-git init && git add . && git commit . -m "init"
+笔记时间：<2017-09-11> 原文：[[https://wanqu.co/a/5536/2017-08-22-the-90-agreement-rule-hacker-noon.html][The 90% agreement rule]]

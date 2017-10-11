@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-07-31 一 13:52 -->
+<!-- 2017-09-11 一 15:00 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>阅读笔记(2017)</title>
@@ -152,8 +152,77 @@ for the JavaScript code in this tag.
 <h1 class="title">阅读笔记(2017)</h1>
 
 <div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> Etsy 是如何压缩图片的</h2>
+<h2 id="orgheadline1"><span class="section-number-2">1</span> 利用前景理论引导用户行为</h2>
 <div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>面对获得时，是风险规避的。比如：(1) 确定得到100块 (2) 80%的可能得到150块时，选择 (1)</li>
+<li>面对损失是，是风险偏好的。比如：(1) 确定损失100块 (2) 80%的可能损失150块时，选择 (2)</li>
+<li>对损失比对获得敏感，先赢100块然后输80块，和先输80块再赢100块，虽然都是赢20块，但后者更愉快。</li>
+</ol>
+
+<p>
+我感觉损失和获得也不能差太大，比如(1)确定得到100块和(2)80%的可能得到1000块，估计就选(2)了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-2">
+<h2 id="orgheadline2"><span class="section-number-2">2</span> 成功科技产品的三个支柱</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+产品的使命是传递"价值"给用户，员工，股东。给事情安排优先级是最重要的事情，GEM模型是安排优先级的一种参考
+</p>
+<ol class="org-ol">
+<li>Growth 增长。产品是否利于获取新用户，获取的成本是多少，是否对潜在用户更有吸引力了</li>
+<li>Engagement 活跃度。产品的活跃度是否提升，留存率如何</li>
+<li>Monetization 变现。产品创造的"价值"如何变现？巴菲特喜欢公司的特点：规模经济、网络效应、特许经营、习惯、品牌</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-2">
+<h2 id="orgheadline3"><span class="section-number-2">3</span> 公司内不同团队合作</h2>
+<div class="outline-text-2" id="text-3">
+<ol class="org-ol">
+<li>共同的核心利益和诉求</li>
+<li>收益的共享</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-2">
+<h2 id="orgheadline4"><span class="section-number-2">4</span> 我有一个想法</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+在职场，我们往往有很多想法，希望从公司获取资源来支持这些想法。如何才能提高成功率呢？
+</p>
+<ol class="org-ol">
+<li>有MVP（minimum viable product），通过MVP展示想法，和人沟通</li>
+<li>论证做的好处、不做的坏处，最后落实到增加盈利或降低成本</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-2">
+<h2 id="orgheadline5"><span class="section-number-2">5</span> 笔记: 为啥Google没有作出Instagram</h2>
+<div class="outline-text-2" id="text-5">
+<ol class="org-ol">
+<li>Google不能保持小团队，团队越大，产品迭代反而越慢，反之初创团队都比较小</li>
+<li>Google不能从单一功能做起，一次做太多功能，反之初创团队，都从单一功能做起，不加或者慢慢加功能</li>
+<li>Google必须使用统一的基础架构，反之初创团队的技术选择要灵活，一切以产品为中心</li>
+<li>Google很难践行“精益创业“，大公司的东西，不能不带光环，多平台，支撑海量用户，不能有BUG，阻碍了产品成功</li>
+</ol>
+
+<p>
+细想Google成功的领域，都是技术见长的，做产品还真是弱项。但技术强到一定程度，也没产品什么事儿了。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">6</span> Etsy 是如何压缩图片的</h2>
+<div class="outline-text-2" id="text-6">
 <p>
 除了压缩算法（PNG，JPEG，WEBP）外，图片"质量"（压缩比的倒数）是决定图片大小的关键因素，"质量"越高图片越小。不同的图片对"质量"的敏感程度不同，例如，同样的"质量"，关闭的电视比打开的电视看起来效果要好（关闭的电视屏幕是黑的）。核心在于"如何衡量图片的质量"。<a href="https://github.com/pornel/dssim">dssim</a> 通过模拟人类视觉比较两幅图片的差异。通过和基准"质量"比较，不断降低"质量"，直到差异超过允许的范围。Etsy通过这种方法降低了25% - 30% 的图片大小，但也消耗了更多的CPU。
 </p>
@@ -164,21 +233,21 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-2">
-<h2 id="orgheadline4"><span class="section-number-2">2</span> 使用 ZIP bombs 反击网站攻击者</h2>
-<div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2"><span class="section-number-3">2.1</span> 原理</h3>
-<div class="outline-text-3" id="text-2-1">
+<div id="outline-container-orgheadline9" class="outline-2">
+<h2 id="orgheadline9"><span class="section-number-2">7</span> 使用 ZIP bombs 反击网站攻击者</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">7.1</span> 原理</h3>
+<div class="outline-text-3" id="text-7-1">
 <p>
 创建压缩比非常高的gzip文件， <code>d if=/dev/zero bs=1M count=10240 | gzip &gt; 10G.gzip</code> 这个gzip文件只有10M，但是解压后有10G。针对攻击者，返回这个文件，web服务器或者自己的web程序设置Http Header <code>Content-Encoding: gzip</code> ，攻击者使用的http客户端看到这个Header，会自动解压，耗费大量的内存，cpu，磁盘，进而达到反击攻击者的目的。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3"><span class="section-number-3">2.2</span> 局限性</h3>
-<div class="outline-text-3" id="text-2-2">
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">7.2</span> 局限性</h3>
+<div class="outline-text-3" id="text-7-2">
 <ol class="org-ol">
 <li>首先无法非常明确攻击者，万一反击正常用户（用户的app或者浏览器会崩溃），对网站造成二次伤害。</li>
 <li>太依赖攻击者所用http客户端的行为，客户端不一定会自动解压。例如：如果不特殊设置，libcurl就不会自动解压。Apache的HttpClients虽然会，但是攻击者可以禁用这个。除非服务端总是返回gzip的响应，并且攻击者需要解析响应的内容。</li>
@@ -191,9 +260,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">3</span> 如何review的代码</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-orgheadline10" class="outline-2">
+<h2 id="orgheadline10"><span class="section-number-2">8</span> 如何review的代码</h2>
+<div class="outline-text-2" id="text-8">
 <ul class="org-ul">
 <li>团队要有code style的原则</li>
 <li>要有具体的规矩，不违反规矩就没问题</li>
@@ -202,9 +271,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-2">
-<h2 id="orgheadline6"><span class="section-number-2">4</span> 10x 工程师 10x 团队</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-orgheadline11" class="outline-2">
+<h2 id="orgheadline11"><span class="section-number-2">9</span> 10x 工程师 10x 团队</h2>
+<div class="outline-text-2" id="text-9">
 <p>
 大家都喜欢10x工程师，什么是10x工程师呢？10x工程师传递10x的价值，而不是写10x的代码。对比 1.25 x 1.25 x &#x2026; 1.25 = 1.25<sup>10</sup> = 9.31 和 0.75 x 0.75 x &#x2026; 0.75 = 0.75<sup>10</sup> = 0.056 直白说 10x 的工程师是综合素质更好的工程师，例如：调试能力，了解HTTP协议更多，会使用tcpdump，沟通高效等，综合起来这样的工程师做事更快。
 </p>
@@ -215,9 +284,9 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7"><span class="section-number-2">5</span> URI URL URN</h2>
-<div class="outline-text-2" id="text-5">
+<div id="outline-container-orgheadline12" class="outline-2">
+<h2 id="orgheadline12"><span class="section-number-2">10</span> URI URL URN</h2>
+<div class="outline-text-2" id="text-10">
 <p>
 URI包含URL，URN以及其它。URN像人名（标识对象），URL像门牌号（如何找到对象）。URI常见的形式：scheme:[//[user[:password]@]host[:port]][/path][?query][#fragment]
 </p>
@@ -228,9 +297,9 @@ URI包含URL，URN以及其它。URN像人名（标识对象），URL像门牌�
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-2">
-<h2 id="orgheadline9"><span class="section-number-2">6</span> 何为高级工程师</h2>
-<div class="outline-text-2" id="text-6">
+<div id="outline-container-orgheadline14" class="outline-2">
+<h2 id="orgheadline14"><span class="section-number-2">11</span> 何为高级工程师</h2>
+<div class="outline-text-2" id="text-11">
 <ul class="org-ul">
 <li>能够独立完成任务</li>
 <li>理解风险，并能够降低风险。风险指一切妨碍产品成功的因素，包括技术的，产品设计的，时间分配的等。</li>
@@ -238,9 +307,9 @@ URI包含URL，URN以及其它。URN像人名（标识对象），URL像门牌�
 </ul>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8"><span class="section-number-3">6.1</span> 摆脱小小程序员</h3>
-<div class="outline-text-3" id="text-6-1">
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="section-number-3">11.1</span> 摆脱小小程序员</h3>
+<div class="outline-text-3" id="text-11-1">
 <ul class="org-ul">
 <li>跨领域思考（产品，设计，营销，管理）</li>
 <li>沟通时，如果技术细节不重要（大多数时候），不要陷入细节，要注意讨论的层次</li>
@@ -249,48 +318,48 @@ URI包含URL，URN以及其它。URN像人名（标识对象），URL像门牌�
 </div>
 </div>
 
-<div id="outline-container-orgheadline15" class="outline-2">
-<h2 id="orgheadline15"><span class="section-number-2">7</span> 高效团队的5个特征</h2>
-<div class="outline-text-2" id="text-7">
-</div><div id="outline-container-orgheadline10" class="outline-3">
-<h3 id="orgheadline10"><span class="section-number-3">7.1</span> Dependability（可依赖性）</h3>
-<div class="outline-text-3" id="text-7-1">
+<div id="outline-container-orgheadline20" class="outline-2">
+<h2 id="orgheadline20"><span class="section-number-2">12</span> 高效团队的5个特征</h2>
+<div class="outline-text-2" id="text-12">
+</div><div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15"><span class="section-number-3">12.1</span> Dependability（可依赖性）</h3>
+<div class="outline-text-3" id="text-12-1">
 <p>
 团队成员会按时完成任务，并且结果符合预期
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="section-number-3">7.2</span> Structure and clarity</h3>
-<div class="outline-text-3" id="text-7-2">
+<div id="outline-container-orgheadline16" class="outline-3">
+<h3 id="orgheadline16"><span class="section-number-3">12.2</span> Structure and clarity</h3>
+<div class="outline-text-3" id="text-12-2">
 <p>
 高效团队有清晰的目标，并且团队内角色清晰
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><span class="section-number-3">7.3</span> Meaning</h3>
-<div class="outline-text-3" id="text-7-3">
+<div id="outline-container-orgheadline17" class="outline-3">
+<h3 id="orgheadline17"><span class="section-number-3">12.3</span> Meaning</h3>
+<div class="outline-text-3" id="text-12-3">
 <p>
 团队成员认为这项工作对自己有意义
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13"><span class="section-number-3">7.4</span> Impact</h3>
-<div class="outline-text-3" id="text-7-4">
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18"><span class="section-number-3">12.4</span> Impact</h3>
+<div class="outline-text-3" id="text-12-4">
 <p>
 团队成员相信他们的工作对对公司有价值
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14"><span class="section-number-3">7.5</span> Psychological Safety（心理安全）</h3>
-<div class="outline-text-3" id="text-7-5">
+<div id="outline-container-orgheadline19" class="outline-3">
+<h3 id="orgheadline19"><span class="section-number-3">12.5</span> Psychological Safety（心理安全）</h3>
+<div class="outline-text-3" id="text-12-5">
 <p>
 团队成员可以发表意见，提出问题，而没有戒心
 </p>
@@ -302,9 +371,9 @@ URI包含URL，URN以及其它。URN像人名（标识对象），URL像门牌�
 </div>
 </div>
 
-<div id="outline-container-orgheadline16" class="outline-2">
-<h2 id="orgheadline16"><span class="section-number-2">8</span> Twitter 停止增长（失败）的真正原因</h2>
-<div class="outline-text-2" id="text-8">
+<div id="outline-container-orgheadline21" class="outline-2">
+<h2 id="orgheadline21"><span class="section-number-2">13</span> Twitter 停止增长（失败）的真正原因</h2>
+<div class="outline-text-2" id="text-13">
 <p>
 Twitter 更换了CEO，把自己定位为媒体、广告公司，限制基于Twitter API的第三方应用。这个定位，凭Twitter 自身的用户数据，没法和Google、Facebook匹敌。原CEO把Twitter定位为 <b>pulse of the planet</b> ，一家数据公司，也许能成功（谁知道呢）。
 </p>
@@ -315,9 +384,9 @@ Twitter 更换了CEO，把自己定位为媒体、广告公司，限制基于Twi
 </div>
 </div>
 
-<div id="outline-container-orgheadline17" class="outline-2">
-<h2 id="orgheadline17"><span class="section-number-2">9</span> 高效 code review</h2>
-<div class="outline-text-2" id="text-9">
+<div id="outline-container-orgheadline22" class="outline-2">
+<h2 id="orgheadline22"><span class="section-number-2">14</span> 高效 code review</h2>
+<div class="outline-text-2" id="text-14">
 <ul class="org-ul">
 <li>一次review的代码行数少于200-400行，用来review的时间越长，遗漏的bug越多</li>
 <li>review 不要太快，一小时少于300-500行代码</li>
@@ -335,9 +404,9 @@ Twitter 更换了CEO，把自己定位为媒体、广告公司，限制基于Twi
 </div>
 </div>
 
-<div id="outline-container-orgheadline18" class="outline-2">
-<h2 id="orgheadline18"><span class="section-number-2">10</span> 如何判断自己是不是好领导</h2>
-<div class="outline-text-2" id="text-10">
+<div id="outline-container-orgheadline23" class="outline-2">
+<h2 id="orgheadline23"><span class="section-number-2">15</span> 如何判断自己是不是好领导</h2>
+<div class="outline-text-2" id="text-15">
 <p>
 下面的问题是站在员工角度发问的
 </p>
@@ -360,16 +429,25 @@ Twitter 更换了CEO，把自己定位为媒体、广告公司，限制基于Twi
 <p>
 笔记时间：<span class="timestamp-wrapper"><span class="timestamp">&lt;2017-07-31 一&gt; </span></span> 原文：<a href="http://tomtunguz.com/how-to-tell-if-youre-a-great-manager/">How To Tell If You're A Great Manager</a>
 </p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline24" class="outline-2">
+<h2 id="orgheadline24"><span class="section-number-2">16</span> 90% 同意原则</h2>
+<div class="outline-text-2" id="text-16">
+<p>
+在某件事的讨论中，通常只有10%的部分我们意见向左，而我们花了90%的时间讨论它。是否值得？在讨论中，记录下讨论的点，分别标注一致和不一致，如果一致的点足够多，可以暂时推进进度，就暂时搁置不一致的点。
+</p>
 
 <p>
-#<a href="https://landing.google.com/sre/book/index.html">https://landing.google.com/sre/book/index.html</a>
+笔记时间：<span class="timestamp-wrapper"><span class="timestamp">&lt;2017-09-11 一&gt; </span></span> 原文：<a href="https://wanqu.co/a/5536/2017-08-22-the-90-agreement-rule-hacker-noon.html">The 90% agreement rule</a>
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-07-31 一 13:52</p>
+<p class="date">Created: 2017-09-11 一 15:00</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
