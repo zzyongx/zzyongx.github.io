@@ -58,6 +58,10 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 1. =openssl dgst -sha256 -sign private.pem -out /tmp/sign.sha256 datafile= 私钥签名
 2. =openssl dgst -sha256 -verify public.pem -signature /tmp/sign.sha256 datafile= 公钥验证签名
 
+* Image
+** 改变图片大小
+ =convert big.png -resize 20% small.png= =convert= 可以看做ImageMagick库的命令行版本。
+
 * Bash
 ** ssh 自动补全主机名
 #+BEGIN_SRC bash

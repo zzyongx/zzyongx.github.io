@@ -129,3 +129,12 @@ Twitter 更换了CEO，把自己定位为媒体、广告公司，限制基于Twi
 在某件事的讨论中，通常只有10%的部分我们意见向左，而我们花了90%的时间讨论它。是否值得？在讨论中，记录下讨论的点，分别标注一致和不一致，如果一致的点足够多，可以暂时推进进度，就暂时搁置不一致的点。
 
 笔记时间：<2017-09-11> 原文：[[https://wanqu.co/a/5536/2017-08-22-the-90-agreement-rule-hacker-noon.html][The 90% agreement rule]]
+
+* 解决 ~EADDRNOTAVAIL~
+端口是非常宝贵的资源，最多65536个，当没有可用的端口时 =connect= 报错 =ADDRNOTAVAIL= 。当web服务器作为客户端（连接redis/mysql）产生大量短连接时，会耗尽端口。解决方法是：
+1. 开启 ~net.ipv4.tcp_tw_reuse~
+2. 增加 ~net.ipv4.ip_local_port_range~
+3. 增加IP数量
+4. 尽量使用长连接（不仅节约端口，还有效率提升）
+
+笔记时间：<2017-10-16> 原文：[[http://www.cnxct.com/coping-with-the-tcp-time_wait-state-on-busy-linux-servers-in-chinese-and-dont-enable-tcp_tw_recycle/][不要在linux上启用net.ipv4.tcp_tw_recycle参数]]
