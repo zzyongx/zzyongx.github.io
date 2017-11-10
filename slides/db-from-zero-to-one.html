@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>数据库系统的构建、使用、优化</title>
+<meta name="author" content="(郑志勇)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="/reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="/reveal.js/css/theme/moon.css" id="theme"/>
+
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '/reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">数据库系统的构建、使用、优化</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-10-27 五 11:43</p>
+</section>
+<section id="table-of-contents">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#/slide-orgheadline7">1. 基础知识</a>
+<ul>
+<li><a href="#/slide-orgheadline1">1.1. 算法时间复杂度</a></li>
+<li><a href="#/slide-orgheadline2">1.2. 数据库背景下的复杂度</a></li>
+<li><a href="#/slide-orgheadline3">1.3. 算法复杂度的意义</a></li>
+<li><a href="#/slide-orgheadline6">1.4. 数据库的基本要素</a>
+<ul>
+<li><a href="#/slide-orgheadline4">1.4.1. 数据</a></li>
+<li><a href="#/slide-orgheadline5">1.4.2. 数据的操作</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline9">2. 公司员工库</a>
+<ul>
+<li><a href="#/slide-orgheadline8">2.1. 表和JSON</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline12">3. 文本数据库(V1)</a>
+<ul>
+<li><a href="#/slide-orgheadline10">3.1. 简单，却功能完备</a></li>
+<li><a href="#/slide-orgheadline11">3.2. 文本数据库的问题</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline39">4. 内存数据库(V2)</a>
+<ul>
+<li><a href="#/slide-orgheadline13">4.1. V1到V2的启示</a></li>
+<li><a href="#/slide-orgheadline14">4.2. 数据的组成</a></li>
+<li><a href="#/slide-orgheadline15">4.3. 读写锁</a></li>
+<li><a href="#/slide-orgheadline16">4.4. O(N) 的根源</a></li>
+<li><a href="#/slide-orgheadline22">4.5. 数组</a>
+<ul>
+<li><a href="#/slide-orgheadline17">4.5.1. 数组的特点</a></li>
+<li><a href="#/slide-orgheadline18">4.5.2. 基于数组的优化</a></li>
+<li><a href="#/slide-orgheadline19">4.5.3. 继续数组的优化</a></li>
+<li><a href="#/slide-orgheadline20">4.5.4. 根据谁排序</a></li>
+<li><a href="#/slide-orgheadline21">4.5.5. 数组的启示</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline24">4.6. 哈希</a>
+<ul>
+<li><a href="#/slide-orgheadline23">4.6.1. 哈希的特点</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline26">4.7. B+树</a>
+<ul>
+<li><a href="#/slide-orgheadline25">4.7.1. B+树</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline28">4.8. 位图索引</a>
+<ul>
+<li><a href="#/slide-orgheadline27">4.8.1. 位图索引</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline29">4.9. 索引是什么</a></li>
+<li><a href="#/slide-orgheadline30">4.10. 数据的内存表示</a></li>
+<li><a href="#/slide-orgheadline31">4.11. 数据的操作</a></li>
+<li><a href="#/slide-orgheadline32">4.12. 业务查询</a></li>
+<li><a href="#/slide-orgheadline33">4.13. 索引的构建</a></li>
+<li><a href="#/slide-orgheadline34">4.14. 索引的选择</a></li>
+<li><a href="#/slide-orgheadline35">4.15. 索引的代价</a></li>
+<li><a href="#/slide-orgheadline36">4.16. 优化Name索引</a></li>
+<li><a href="#/slide-orgheadline37">4.17. 优化Name的得失</a></li>
+<li><a href="#/slide-orgheadline38">4.18. 内存数据库的缺点</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline53">5. 标准数据库(V3)</a>
+<ul>
+<li><a href="#/slide-orgheadline40">5.1. 数组和B+树</a></li>
+<li><a href="#/slide-orgheadline41">5.2. 数组的改进</a></li>
+<li><a href="#/slide-orgheadline42">5.3. 数组的改进（图）</a></li>
+<li><a href="#/slide-orgheadline43">5.4. 数组和磁盘文件</a></li>
+<li><a href="#/slide-orgheadline44">5.5. 利用数组的思路改进磁盘</a></li>
+<li><a href="#/slide-orgheadline45">5.6. 标准数据库的数据分布</a></li>
+<li><a href="#/slide-orgheadline46">5.7. 聚簇索引</a></li>
+<li><a href="#/slide-orgheadline47">5.8. 覆盖索引</a></li>
+<li><a href="#/slide-orgheadline50">5.9. JOIN</a>
+<ul>
+<li><a href="#/slide-orgheadline48">5.9.1. 无索引JOIN</a></li>
+<li><a href="#/slide-orgheadline49">5.9.2. 索引JSON</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline51">5.10. 其它常见操作</a></li>
+<li><a href="#/slide-orgheadline52">5.11. 优化行存储</a></li>
+</ul>
+</li>
+<li><a href="#/slide-orgheadline54">6. 优化从何时开始</a></li>
+</ul>
+</div>
+</div>
+</section>
+
+<section>
+<section id="slide-orgheadline7">
+<h2 id="orgheadline7"><span class="section-number-2">1</span> 基础知识</h2>
+<ul>
+<li>数组</li>
+<li>哈希</li>
+<li>B+树</li>
+<li>算法复杂度</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline1">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> 算法时间复杂度</h3>
+<ul>
+<li>O(1)      array[n], 哈希</li>
+<li>O(N)      全表扫描</li>
+<li>O(logN)   B树索引</li>
+<li>O(N*logN) 归并排序</li>
+<li>O(N*N)    集合的交、并</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline2">
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> 数据库背景下的复杂度</h3>
+<ul>
+<li>磁盘IO非常昂贵</li>
+<li>是否顺序读取</li>
+<li>IO次数和IO块儿次数</li>
+<li>复杂度受可用内存影响</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline3">
+<h3 id="orgheadline3"><span class="section-number-3">1.3</span> 算法复杂度的意义</h3>
+<ul>
+<li>结果集和IO次数的比例</li>
+<li>内存消耗</li>
+<li>预估查询的耗时</li>
+<li>预估查询的并发</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline6">
+<h3 id="orgheadline6"><span class="section-number-3">1.4</span> 数据库的基本要素</h3>
+<ul>
+<li>数据</li>
+<li>操作</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline4">
+<h4 id="orgheadline4"><span class="section-number-4">1.4.1</span> 数据</h4>
+<ul>
+<li>数据量</li>
+<li>业务的数据特点</li>
+<li>数据的操作特点</li>
+<li>优化都是基于（业务）查询和数据的分布的</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline5">
+<h4 id="orgheadline5"><span class="section-number-4">1.4.2</span> 数据的操作</h4>
+<ul>
+<li>读</li>
+<li>增</li>
+<li>改（可选）</li>
+<li>删（可选）</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline9">
+<h2 id="orgheadline9"><span class="section-number-2">2</span> 公司员工库</h2>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">ID</td>
+<td class="org-left">Name</td>
+<td class="org-left">Birthday</td>
+<td class="org-left">Gender</td>
+</tr>
+
+<tr>
+<td class="org-right">1011</td>
+<td class="org-left">王小明</td>
+<td class="org-left">7月1日</td>
+<td class="org-left">男</td>
+</tr>
+
+<tr>
+<td class="org-right">1012</td>
+<td class="org-left">张壮壮</td>
+<td class="org-left">3月2日</td>
+<td class="org-left">男</td>
+</tr>
+
+<tr>
+<td class="org-right">1032</td>
+<td class="org-left">张静</td>
+<td class="org-left">4月5日</td>
+<td class="org-left">女</td>
+</tr>
+
+<tr>
+<td class="org-right">1033</td>
+<td class="org-left">王丫</td>
+<td class="org-left">9月10日</td>
+<td class="org-left">女</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline8">
+<h3 id="orgheadline8"><span class="section-number-3">2.1</span> 表和JSON</h3>
+<p>
+[{"ID": 1011, "Name": "王小明", "Birthday": "7月1日",  "Gender": "男"},
+</p>
+
+<p>
+{"ID": 1012, "Name": "张壮壮", "Birthday": "3月2日",  "Gender": "男"},
+</p>
+
+<p>
+{"ID": 1032, "Name": "张静",   "Birthday": "4月5日",  "Gender": "女"},
+</p>
+
+<p>
+{"ID": 1033, "Name": "王丫",   "Birthday": "9月10日", "Gender": "女"}]
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline12">
+<h2 id="orgheadline12"><span class="section-number-2">3</span> 文本数据库(V1)</h2>
+<ul>
+<li>接请求，加锁，读文件</li>
+<li>反序列化，JSON</li>
+<li>增删改查</li>
+<li>JSON，序列化</li>
+<li>写文件，释放锁，返回请求</li>
+<li>如有必要，返回前，同步文件到备机</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline10">
+<h3 id="orgheadline10"><span class="section-number-3">3.1</span> 简单，却功能完备</h3>
+<ul>
+<li>完整性</li>
+<li>持久性</li>
+<li>高可用</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline11">
+<h3 id="orgheadline11"><span class="section-number-3">3.2</span> 文本数据库的问题</h3>
+<ul>
+<li>O(N) 的操作性能</li>
+<li>磁盘IO浪费</li>
+<li>JSON浪费磁盘</li>
+<li>JSON序列化和反序列化浪费CPU</li>
+<li>互斥锁</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline39">
+<h2 id="orgheadline39"><span class="section-number-2">4</span> 内存数据库(V2)</h2>
+<ul>
+<li>(启动阶段) 加载数据，构建索引</li>
+<li>接请求，读写锁</li>
+<li>增删改查</li>
+<li>如果有修改，写入增量文件</li>
+<li>释放锁，返回请求</li>
+<li>如有必要，返回前，同步增量到备机</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline13">
+<h3 id="orgheadline13"><span class="section-number-3">4.1</span> V1到V2的启示</h3>
+<ul>
+<li>缓存是最伟大的优化</li>
+<li>缓存一致性是复杂的根源</li>
+<li>预计算</li>
+<li>空间换时间</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline14">
+<h3 id="orgheadline14"><span class="section-number-3">4.2</span> 数据的组成</h3>
+<ul>
+<li>数据文件，定期dump</li>
+<li>增量文件，顺序IO</li>
+<li>增量文件和数据文件合起来是全部数据</li>
+<li>所有的数据放入内存（数组形式）</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline15">
+<h3 id="orgheadline15"><span class="section-number-3">4.3</span> 读写锁</h3>
+<ul>
+<li>并发读</li>
+<li>独占写</li>
+<li>粒度是表</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline16">
+<h3 id="orgheadline16"><span class="section-number-3">4.4</span> O(N) 的根源</h3>
+<ul>
+<li>数据的组织形式</li>
+<li>数组的很多操作是O(N)的</li>
+<li>基于数组的优化</li>
+<li>基于其它索引的优化</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline22">
+<h3 id="orgheadline22"><span class="section-number-3">4.5</span> 数组</h3>
+<div class="outline-text-3" id="text-4-5">
+</div></section>
+</section>
+<section>
+<section id="slide-orgheadline17">
+<h4 id="orgheadline17"><span class="section-number-4">4.5.1</span> 数组的特点</h4>
+<ul>
+<li>位置宣示关系</li>
+<li>关系表示很廉价，无需额外指针</li>
+<li>维护关系可能很昂贵</li>
+
+</ul>
+
+<div class="figure">
+<p><img src="./array.png" alt="array.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline18">
+<h4 id="orgheadline18"><span class="section-number-4">4.5.2</span> 基于数组的优化</h4>
+<ul>
+<li>有序</li>
+<li>增 删 改 O(N)</li>
+<li>二分查找 O(logN)</li>
+<li>已知下标 O(1)</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline19">
+<h4 id="orgheadline19"><span class="section-number-4">4.5.3</span> 继续数组的优化</h4>
+<ul>
+<li>大小数组</li>
+<li>大数组假删</li>
+<li>增，改在小数组</li>
+<li>定期合并，排序O(N*logN)</li>
+<li>加锁粒度的变化</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline20">
+<h4 id="orgheadline20"><span class="section-number-4">4.5.4</span> 根据谁排序</h4>
+<ul>
+<li>ID，Name，Birthday，Gender ？</li>
+<li>查询决定优化</li>
+<li>如果有多种查询，咋办</li>
+<li>数组不能同时满足两种有序</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline21">
+<h4 id="orgheadline21"><span class="section-number-4">4.5.5</span> 数组的启示</h4>
+<ul>
+<li>有序是关键</li>
+<li>排序的是指针</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline24">
+<h3 id="orgheadline24"><span class="section-number-3">4.6</span> 哈希</h3>
+
+<div class="figure">
+<p><img src="./hash.png" alt="hash.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline23">
+<h4 id="orgheadline23"><span class="section-number-4">4.6.1</span> 哈希的特点</h4>
+<ul>
+<li>无序</li>
+<li>增删改查 O(1)</li>
+<li>用于Hash的Key必须是确定的</li>
+<li>额外的指针</li>
+<li>value 指向数组下标</li>
+<li>缺少局部性</li>
+
+</ul>
+
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline26">
+<h3 id="orgheadline26"><span class="section-number-3">4.7</span> B+树</h3>
+
+<div class="figure">
+<p><img src="./btree.png" alt="btree.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline25">
+<h4 id="orgheadline25"><span class="section-number-4">4.7.1</span> B+树</h4>
+<ul>
+<li>Key不必完整</li>
+<li>有序</li>
+<li>增删改查 O(logN)</li>
+<li>额外的指针</li>
+<li>value 指向数组下标</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline28">
+<h3 id="orgheadline28"><span class="section-number-3">4.8</span> 位图索引</h3>
+
+<div class="figure">
+<p><img src="./bitmap.png" alt="bitmap.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline27">
+<h4 id="orgheadline27"><span class="section-number-4">4.8.1</span> 位图索引</h4>
+<ul>
+<li>Key的个数有限</li>
+<li>索引非常小bits</li>
+<li>索引可压缩</li>
+<li>支持位图索引的数据库不多</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline29">
+<h3 id="orgheadline29"><span class="section-number-3">4.9</span> 索引是什么</h3>
+<ul>
+<li>根据Key找到Value的数据结构</li>
+<li>Key 可以完整或不完整</li>
+<li>Key 可以是一个区间</li>
+<li>Value 可以是一个或多个</li>
+<li>Value 是最终值或值的位置</li>
+<li>哈希和B+树都可以构建索引</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline30">
+<h3 id="orgheadline30"><span class="section-number-3">4.10</span> 数据的内存表示</h3>
+
+<div class="figure">
+<p><img src="./mem-layout.png" alt="mem-layout.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline31">
+<h3 id="orgheadline31"><span class="section-number-3">4.11</span> 数据的操作</h3>
+<ul>
+<li>无序数组</li>
+<li>删除数组时，不移动数据</li>
+<li>空闲列表</li>
+<li>索引指向数组下标</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline32">
+<h3 id="orgheadline32"><span class="section-number-3">4.12</span> 业务查询</h3>
+<ul>
+<li>根据ID查询</li>
+<li>根据姓名查询（全部或部分)</li>
+<li>根据生日区间查询</li>
+<li>根据男女查询</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline33">
+<h3 id="orgheadline33"><span class="section-number-3">4.13</span> 索引的构建</h3>
+<ul>
+<li>基于ID的Hash索引</li>
+<li>基于姓名的B树索引</li>
+<li>基于生日区间的B树索引</li>
+<li>基于男女的位图索引</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline34">
+<h3 id="orgheadline34"><span class="section-number-3">4.14</span> 索引的选择</h3>
+<ul>
+<li>优先选择B树索引</li>
+<li>哈希索引的效率很高，但缺乏局部性</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline35">
+<h3 id="orgheadline35"><span class="section-number-3">4.15</span> 索引的代价</h3>
+<ul>
+<li>额外的存储（可选）</li>
+<li>降低了增删改的速度</li>
+<li>不可忽视的内存占用</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline36">
+<h3 id="orgheadline36"><span class="section-number-3">4.16</span> 优化Name索引</h3>
+<ul>
+<li>B树的每个节点还是要字符串比较的</li>
+<li>姓名的特点</li>
+<li>姓名倒过来存，如静张</li>
+<li>如果存储的是URL效果更明显</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline37">
+<h3 id="orgheadline37"><span class="section-number-3">4.17</span> 优化Name的得失</h3>
+<ul>
+<li>效率更高</li>
+<li>失去了按姓前缀查找</li>
+<li>无法前缀压缩</li>
+<li>得到的结果不直观</li>
+<li>需要编程来保证这个约束</li>
+<li>join操作和外建约束</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline38">
+<h3 id="orgheadline38"><span class="section-number-3">4.18</span> 内存数据库的缺点</h3>
+<ul>
+<li>启动慢，数据加载和索引构建</li>
+<li>冷热数据没有分级</li>
+<li>数据库大小受限</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline53">
+<h2 id="orgheadline53"><span class="section-number-2">5</span> 标准数据库(V3)</h2>
+<div class="outline-text-2" id="text-5">
+</div></section>
+</section>
+<section>
+<section id="slide-orgheadline40">
+<h3 id="orgheadline40"><span class="section-number-3">5.1</span> 数组和B+树</h3>
+<ul>
+<li>连续存储 vs 离散存储</li>
+<li>位置联系 vs 指针联系</li>
+<li>改，删 O(N) vs O(NlogN)</li>
+<li>内存连续 vs 内存碎片</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline41">
+<h3 id="orgheadline41"><span class="section-number-3">5.2</span> 数组的改进</h3>
+<ul>
+<li>数组有序</li>
+<li>大数组分成小数组（40M）</li>
+<li>小数组用指针连接</li>
+<li>小数组可以合并和分裂</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline42">
+<h3 id="orgheadline42"><span class="section-number-3">5.3</span> 数组的改进（图）</h3>
+
+<div class="figure">
+<p><img src="./array-split.png" alt="array-split.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline43">
+<h3 id="orgheadline43"><span class="section-number-3">5.4</span> 数组和磁盘文件</h3>
+<ul>
+<li>连续存储</li>
+<li>插入，删除O(N)</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline44">
+<h3 id="orgheadline44"><span class="section-number-3">5.5</span> 利用数组的思路改进磁盘</h3>
+<ul>
+<li>Primary Key 有序</li>
+<li>磁盘分块儿（文件的一段区间）</li>
+<li>B+树一个节点一个磁盘块儿（略小）</li>
+<li>区分索引文件和数据文件</li>
+<li>索引的值指向Primary Key</li>
+<li>总是用到聚簇索引，只有顺序IO</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline45">
+<h3 id="orgheadline45"><span class="section-number-3">5.6</span> 标准数据库的数据分布</h3>
+
+<div class="figure">
+<p><img src="./disk-layout.png" alt="disk-layout.png" />
+</p>
+</div>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline46">
+<h3 id="orgheadline46"><span class="section-number-3">5.7</span> 聚簇索引</h3>
+<ul>
+<li>Key 顺序分布在磁盘上</li>
+<li>IO 是连续的</li>
+<li>只有一个聚簇索引</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline47">
+<h3 id="orgheadline47"><span class="section-number-3">5.8</span> 覆盖索引</h3>
+<ul>
+<li>不是索引类型</li>
+<li>select 的字段全在索引中</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline50">
+<h3 id="orgheadline50"><span class="section-number-3">5.9</span> JOIN</h3>
+<ul>
+<li>A(M) JOIN B(N)</li>
+<li>依赖统计A和B的磁盘块儿数M和N</li>
+<li>磁盘IO的缘故 A * B != B * A</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline48">
+<h4 id="orgheadline48"><span class="section-number-4">5.9.1</span> 无索引JOIN</h4>
+<ul>
+<li>扫描A，排序的小临时表</li>
+<li>B 同</li>
+<li>归并</li>
+<li>磁盘IO 2*(O(M)+O(N))</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline49">
+<h4 id="orgheadline49"><span class="section-number-4">5.9.2</span> 索引JSON</h4>
+<ul>
+<li>索引本身有序</li>
+<li>一趟归并</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline51">
+<h3 id="orgheadline51"><span class="section-number-3">5.10</span> 其它常见操作</h3>
+<ul>
+<li>GROUP BY</li>
+<li>ORDER BY</li>
+<li>LIMIT offset,count</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline52">
+<h3 id="orgheadline52"><span class="section-number-3">5.11</span> 优化行存储</h3>
+<ul>
+<li>优化前, 70+</li>
+
+</ul>
+<p>
+{"ID": 1011, "Name": "王小明", "Birthday": "7月1日", "Gender": "男"}
+</p>
+<ul>
+<li>优化后</li>
+
+</ul>
+<p>
+表结构文件： int32, char[], int16, int8
+行数据：4 + (1 + 6) + 2 + 1 = 14
+</p>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline54">
+<h2 id="orgheadline54"><span class="section-number-2">6</span> 优化从何时开始</h2>
+<ul>
+<li>存储选型</li>
+<li>数据建模</li>
+<li>具体查询</li>
+<li>提前规划和过早优化</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="/reveal.js/lib/js/head.min.js"></script>
+<script src="/reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+width: 1200,
+height: 800,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '/reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '/reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '/reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '/reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
