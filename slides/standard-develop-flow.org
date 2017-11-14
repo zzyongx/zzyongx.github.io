@@ -1,0 +1,84 @@
+#+Title: 标准开发流程
+#+Author: 郑志勇
+#+Email: zhengzhiyong@sogou-inc.com
+
+#+OPTIONS: num:nil toc:nil
+#+REVEAL_HLEVEL:3
+#+REVEAL_THEME: black
+#+REVEAL_TRANS: none
+#+REVEAL_EXTRA_CSS: ../reveal.js/css/local.css
+
+* 告警：慢接口超过阀值
+- 报警时断时续，时间分布上没有规律
+- 可以确定是某个http接口慢导致的
+
+* 告警时系统状态
+- 系统请求量无明显波动
+- Web服务器负载无明显变化
+- DB目前是黑盒
+
+* 定位手段
+- 逻辑代码足够简单（开发时）
+- 一切可度量
+- 抓大放小（MySQL vs redis）
+
+* 慢接口主要操作
+- redis：1-2次HEXISTS，0-2次HSET
+- MySQL：4-8次Update，基于UNIQUE KEY
+- 无CPU密集操作
+
+* 定位工具的选择
+- MyBatis记录的slowlog
+- Java Flame Graph （偏CPU）
+- perf4j （复杂）
+- 自己造轮子 （灵活）
+
+* 为什么自己造轮子
+- 逻辑代码足够简单
+- 轮子也可以足够简单
+
+* 自己造的轮子
+- 原代码： =add(findJedisPool(jedisPoolGroupA, udid), mkey, skey);=
+- 加上Profile： =Profile.apply(10, "JedisPoolGroupA::add", this::add, findJedisPool(jedisPoolGroupA, udid), mkey, skey);=
+- 日志： =DEBUG 16:38:17.700 [qtp1179381257-391] commons.utils.Profile - JedisPoolGroupA::add-redis.clients.jedis.JedisPool@5d140b8b-[B@3557304c-[B@40c73189 comsumes 11=
+
+* 初步确认原因
+- MySQL慢，4-8次Update出问题时耗时高达200ms以上
+- MySQL慢原因未知
+
+* 结合业务逻辑优化
+- MySQL Update主要是计数操作
+- 计数操作允许延迟
+- 极端情况允许丢失一定的计数
+
+* 优化手段
+- 本地计数，批量更新（i++ vs i+=10）
+- Bean必须线程安全
+- 批量更新必须异步
+
+* 批量更新的触发时机和条件
+- 定时 vs 计数时触发
+- 手动触发（？）
+- 时间跨度和累积条目
+- 程序退出时
+
+* 核心修改
+#+REVEAL_HTML: <img src="../images/batch-update-counter.png" style="margin-top: -100px; height: 700px;">
+
+* 重构
+- 顺手删除发现的废弃代码
+- 重构修改的代码不应该较多，否则单独建分支修改
+
+* 测试
+- 增加（完善）测试用例
+- 为测试方便增加手动触发接口
+
+* 上线观察
+- 尽快上线（不要拖延）
+- 观察慢接口报警是否消失
+
+* 总结
+- 代码简单是最好的方案
+- 问题原因要有理有据，不要猜
+- 随时重构
+- 随时增加测试用例，并且要自动化
