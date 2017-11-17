@@ -42,6 +42,9 @@
 - 加上Profile： =Profile.apply(10, "JedisPoolGroupA::add", this::add, findJedisPool(jedisPoolGroupA, udid), mkey, skey);=
 - 日志： =DEBUG 16:38:17.700 [qtp1179381257-391] commons.utils.Profile - JedisPoolGroupA::add-redis.clients.jedis.JedisPool@5d140b8b-[B@3557304c-[B@40c73189 comsumes 11=
 
+* 简单的Profile
+#+REVEAL_HTML: <img src="../images/profile.java.png" style="margin-top: -100px; height: 700px;">
+
 * 初步确认原因
 - MySQL慢，4-8次Update出问题时耗时高达200ms以上
 - MySQL慢原因未知
@@ -52,6 +55,7 @@
 - 极端情况允许丢失一定的计数
 
 * 优化手段
+- 从MySQL角度解决
 - 本地计数，批量更新（i++ vs i+=10）
 - Bean必须线程安全
 - 批量更新必须异步
@@ -60,7 +64,7 @@
 - 定时 vs 计数时触发
 - 手动触发（？）
 - 时间跨度和累积条目
-- 程序退出时
+- 程序退出时（更新还能异步吗？）
 
 * 核心修改
 #+REVEAL_HTML: <img src="../images/batch-update-counter.png" style="margin-top: -100px; height: 700px;">

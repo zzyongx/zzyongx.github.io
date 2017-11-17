@@ -1,6 +1,6 @@
-# -*- mode: org; -*-
-
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+
+# -*- mode: org; -*-
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
 
 #+HTML_HEAD: <script src="/jslib/jquery-2.1.4.min.js"></script>

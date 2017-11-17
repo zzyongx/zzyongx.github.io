@@ -1,0 +1,36 @@
+#+TITLE: Fibonacci 算法
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+HTML_HEAD: <script src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=AM_HTMLorMML"></script>
+#+OPTIONS: toc:nil
+
+本文是 [[https://www.nayuki.io/page/fast-fibonacci-algorithms][Fast Fibonacci algorithms]] 的阅读笔记。斐波那契函数的优化很有意思。
+
+斐波那契函数定义为：F(0) = 1, F(1) = 1, F(n) = F(n-1) + F(n-2)
+
+* 动态规划
+时间复杂度O(n), 为了计算F(n) 先计算F(2), F(3), ... F(n-1)。
+
+* 矩阵求幂
+时间复杂度是O(log(n))，把F(n) 的计算转成矩阵的幂，然后优化幂运算。
+#+BEGIN_EXPORT html
+当n = 1 时，显然 `[[1,1],[1,0]] = [[F(2),F(1)], [F(1),F(0)]]`
+
+假设 `[[1,1],[1,0]] ^n = [[F(n+1),F(n)], [F(n),F(n-1)]]` 则
+
+`[[1,1],[1,0]] ^(n+1) = [[1,1],[1,0]] ^n [[1,1],[1,0]] = [[F(n+1),F(n)], [F(n),F(n-1)]][[1,1],[1,0]]`
+
+`= [[F(n+1) + F[n], F(n+1)], [F(n) + F(n-1), F(n)]] = [[F(n+2), F(n+1)],[F(n+1), F(n)]]`
+#+END_EXPORT
+
+[[https://en.wikipedia.org/wiki/Exponentiation_by_squaring][Exponentiation by squaring]] 用于优化幂运算。时间复杂度由 O(n) 优化为 O(log(n)) 。
+#+BEGIN_EXPORT html
+如果n是奇数 `x ^n = x(x ^2) ^((n-1)/2)`
+
+如果n是偶数 `x ^n = x(x ^2) ^(n/2)`
+#+END_EXPORT
+
+* Fast doubling（更快）
+利用
+#+HTML: `[[1,1],[1,0]] ^n = [[F(n+1),F(n)], [F(n),F(n-1)]]`
+可以推测出
+#+HTML: `F(2n)=F(n)(2F(n+1)−F(n))` 和 `F(2n+1)=F(n+1)^2+F(n)^2`

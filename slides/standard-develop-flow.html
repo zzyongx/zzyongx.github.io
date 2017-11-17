@@ -27,7 +27,7 @@
 <body>
 <div class="reveal">
 <div class="slides">
-<section id="sec-title-slide"><h1 class="title">标准开发流程</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-11-14 二 18:31</p>
+<section id="sec-title-slide"><h1 class="title">标准开发流程</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2017-11-17 五 15:23</p>
 </section>
 
 <section>
@@ -115,7 +115,14 @@
 </section>
 <section>
 <section id="slide-orgheadline8">
-<h2 id="orgheadline8">初步确认原因</h2>
+<h2 id="orgheadline8">简单的Profile</h2>
+<img src="../images/profile.java.png" style="margin-top: -100px; height: 700px;">
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline9">
+<h2 id="orgheadline9">初步确认原因</h2>
 <ul>
 <li>MySQL慢，4-8次Update出问题时耗时高达200ms以上</li>
 <li>MySQL慢原因未知</li>
@@ -125,8 +132,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline9">
-<h2 id="orgheadline9">结合业务逻辑优化</h2>
+<section id="slide-orgheadline10">
+<h2 id="orgheadline10">结合业务逻辑优化</h2>
 <ul>
 <li>MySQL Update主要是计数操作</li>
 <li>计数操作允许延迟</li>
@@ -137,9 +144,10 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline10">
-<h2 id="orgheadline10">优化手段</h2>
+<section id="slide-orgheadline11">
+<h2 id="orgheadline11">优化手段</h2>
 <ul>
+<li>从MySQL角度解决</li>
 <li>本地计数，批量更新（i++ vs i+=10）</li>
 <li>Bean必须线程安全</li>
 <li>批量更新必须异步</li>
@@ -149,28 +157,28 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline11">
-<h2 id="orgheadline11">批量更新的触发时机和条件</h2>
+<section id="slide-orgheadline12">
+<h2 id="orgheadline12">批量更新的触发时机和条件</h2>
 <ul>
 <li>定时 vs 计数时触发</li>
 <li>手动触发（？）</li>
 <li>时间跨度和累积条目</li>
-<li>程序退出时</li>
+<li>程序退出时（更新还能异步吗？）</li>
 
 </ul>
 
 </section>
 </section>
 <section>
-<section id="slide-orgheadline12">
-<h2 id="orgheadline12">核心修改</h2>
+<section id="slide-orgheadline13">
+<h2 id="orgheadline13">核心修改</h2>
 <img src="../images/batch-update-counter.png" style="margin-top: -100px; height: 700px;">
 
 </section>
 </section>
 <section>
-<section id="slide-orgheadline13">
-<h2 id="orgheadline13">重构</h2>
+<section id="slide-orgheadline14">
+<h2 id="orgheadline14">重构</h2>
 <ul>
 <li>顺手删除发现的废弃代码</li>
 <li>重构修改的代码不应该较多，否则单独建分支修改</li>
@@ -180,8 +188,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline14">
-<h2 id="orgheadline14">测试</h2>
+<section id="slide-orgheadline15">
+<h2 id="orgheadline15">测试</h2>
 <ul>
 <li>增加（完善）测试用例</li>
 <li>为测试方便增加手动触发接口</li>
@@ -191,8 +199,8 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline15">
-<h2 id="orgheadline15">上线观察</h2>
+<section id="slide-orgheadline16">
+<h2 id="orgheadline16">上线观察</h2>
 <ul>
 <li>尽快上线（不要拖延）</li>
 <li>观察慢接口报警是否消失</li>
@@ -202,13 +210,13 @@
 </section>
 </section>
 <section>
-<section id="slide-orgheadline16">
-<h2 id="orgheadline16">总结</h2>
+<section id="slide-orgheadline17">
+<h2 id="orgheadline17">总结</h2>
 <ul>
 <li>代码简单是最好的方案</li>
 <li>问题原因要有理有据，不要猜</li>
 <li>随时重构</li>
-<li>测试要自动化</li>
+<li>随时增加测试用例，并且要自动化</li>
 
 </ul>
 </section>
