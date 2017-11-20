@@ -1,0 +1,77 @@
+#+TITLE: 构造父进程为init的僵尸进程
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+僵尸进程的父进程为init，这非常不正常，僵尸进程的出现是因为进程缺乏父进程收割，而init作为父进程会定期收割子进程，这互相矛盾。先了解一些基本概念。
+
+* 孤儿进程和init
+每个进程都有父进程，这点从 =pstree= 可以看出，init是所有进程的祖先。当一个进程的父进程先于自己退出，它的父进程就变成了init进程。执行 =(sleep 30 &)= ，sleep进程变成了孤儿进程。注意这里的括号。
+
+* 僵尸进程
+僵尸进程（进程名称带有 =<defunct>= ），是进程退出了，但是父进程没有收割它（调用wait函数）。此时进程所占用的资源都被尽可能的释放了，但是仍然占用一个PID，直到父进程调用wait函数（获取进程的退出状态）。为了避免进程进入僵尸状态，父进程可以 =wait= 子进程，或者处理 =SIGCHLD= 信号，最简单的处理方式是 =signal(SIGCHLD, SIG_IGN)= 。 下面的shell演示了僵尸进程。
+
+#+BEGIN_SRC bash
+# (sleep 10 & exec /bin/sleep 60) &
+[7] 9005
+# ps -ef | grep sleep; sleep 10; echo "'sleep 10' becomes zombie"; ps -ef | grep sleep; echo "kill zombie's parent process ${!}, zombie disappeared"; kill ${!}; ps -ef | grep sleep
+root      9005 20790  0 16:33 pts/6    00:00:00 /bin/sleep 60
+root      9007  9005  0 16:33 pts/6    00:00:00 sleep 10
+root      9015 20790  0 16:33 pts/6    00:00:00 grep sleep
+'sleep 10' becomes zombie
+root      9005 20790  0 16:33 pts/6    00:00:00 /bin/sleep 60
+root      9007  9005  0 16:33 pts/6    00:00:00 [sleep] <defunct>
+root      9018 20790  0 16:33 pts/6    00:00:00 grep sleep
+kill zombie's parent process 9005, zombie disappeared
+root      9020 20790  0 16:33 pts/6    00:00:00 grep sleep
+#+END_SRC
+
+稍微解释下： =(sleep 10 & exec /bin/sleep 60)= 在子shell中启动sleep 10，然后用sleep 60替代子shell，此时sleep 60作为sleep 10的父进程，它显然不会收割sleep 10，所以sleep 10结束后就变成了僵尸进程。因为sleep 60肯定不会收割sleep 10，sleep 10只有等sleep 60结束，sleep 10的父进程变成init，init收割它。这里我们显式kill了sleep 60，让init收割sleep 10。
+
+* init 不收割僵尸进程
+这就怪了。init进程作为父进程，核心用处是收割子进程，那怎么还会有僵尸进程呢？有没有可能init无法成功收割呢？下面就尝试构造init无法收割的僵尸进程。
+
+准备程序： =gcc -Wall -o zombie zombie.c -lpthread=
+#+BEGIN_SRC c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
+
+void *routine(void *data) {
+  FILE *fp = fopen("/mnt/test", "a");
+  fprintf(fp, "pid %d\n", getpid());
+  fclose(fp);
+  return NULL;
+}int main(int argc, char *argv[]) {
+  pthread_t tid;
+  pthread_create(&tid, NULL, routine, NULL);
+  sleep(5);  // wait thread run
+  return EXIT_SUCCESS;
+}
+#+END_SRC
+
+#+BEGIN_SRC bash
+dd if=/dev/zero of=/search/filedisk bs=1k count=40960
+losetup /dev/loop0 /search/filedisk
+mkfs -t xfs -f /dev/loop0
+mount -t xfs /dev/loop0 /mnt
+
+fsfreeze -f /mnt/  # suspend access to an filesystem
+
+(./zombie &) &    # main call exit, becomes zombie, but one thread is hung in kernel, init can't reap it
+
+ps -ef | grep zombie # root     21913     1  0 17:00 pts/6    00:00:00 [zombie] <defunct>
+
+fsfreeze -u /mnt/  # remove hung condition, zombie disappeared
+
+losetup -d /dev/loop0
+umount /dev/loop0
+#+END_SRC
+
+从上面的测试看，进程调用exit（main return效果一样）则进程就处于退出状态，但是应该只是一个标记，正在执行的线程不会立即退出（参考：Cancellation Points）。如果线程陷在内核态，则线程不会退出，直到导致陷在内核态的条件解除。
+
+* 如何消除僵尸进程
+以上，正常情况不会有僵尸进程，如果有，可能是父进程没有收割。如果父进程是init，那么一定是程序无法正常退出。除了陷在内核态，应该还有很多我不知道的原因。不要想办法消除僵尸进程，应该想办法不出僵尸进程。
+虽然僵尸进程占资源极少，但是如果越积越多，最终会把内核进程表耗尽。值得关注。
+
+有传言说telinit可以重启init消除僵尸进程，对上面的例子无效，此外我想不出这种做法消除僵尸进程的机制，毕竟重启init不会导致陷在内核态的线程退出。
