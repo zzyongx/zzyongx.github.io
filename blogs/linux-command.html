@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-10-27 五 11:37 -->
+<!-- 2017-12-12 二 11:04 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>linux命令备忘</title>
@@ -267,12 +267,21 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-2">
-<h2 id="orgheadline13"><span class="section-number-2">4</span> Image</h2>
+<div id="outline-container-orgheadline14" class="outline-2">
+<h2 id="orgheadline14"><span class="section-number-2">4</span> Image</h2>
 <div class="outline-text-2" id="text-4">
 </div><div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><span class="section-number-3">4.1</span> 改变图片大小</h3>
+<h3 id="orgheadline12"><span class="section-number-3">4.1</span> 查看图片大小</h3>
 <div class="outline-text-3" id="text-4-1">
+<p>
+<code>identify big.png</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="section-number-3">4.2</span> 改变图片大小</h3>
+<div class="outline-text-3" id="text-4-2">
 <p>
 <code>convert big.png -resize 20% small.png</code> <code>convert</code> 可以看做ImageMagick库的命令行版本。
 </p>
@@ -280,11 +289,11 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline17" class="outline-2">
-<h2 id="orgheadline17"><span class="section-number-2">5</span> Bash</h2>
+<div id="outline-container-orgheadline20" class="outline-2">
+<h2 id="orgheadline20"><span class="section-number-2">5</span> Bash</h2>
 <div class="outline-text-2" id="text-5">
-</div><div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14"><span class="section-number-3">5.1</span> ssh 自动补全主机名</h3>
+</div><div id="outline-container-orgheadline15" class="outline-3">
+<h3 id="orgheadline15"><span class="section-number-3">5.1</span> ssh 自动补全主机名</h3>
 <div class="outline-text-3" id="text-5-1">
 <div class="org-src-container">
 
@@ -300,9 +309,23 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline15" class="outline-3">
-<h3 id="orgheadline15"><span class="section-number-3">5.2</span> 如何用命令删除文件的第一行</h3>
+<div id="outline-container-orgheadline16" class="outline-3">
+<h3 id="orgheadline16"><span class="section-number-3">5.2</span> ssh 保持心跳（客户端配置）</h3>
 <div class="outline-text-3" id="text-5-2">
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">cat &gt; /etc/ssh_config</span>
+Host *
+    ServerAliveInterval 300
+    ServerAliveCountMax 23
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-3">
+<h3 id="orgheadline17"><span class="section-number-3">5.3</span> 如何用命令跳过文件的第一行</h3>
+<div class="outline-text-3" id="text-5-3">
 <div class="org-src-container">
 
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">tail -n +2 file</span>
@@ -311,9 +334,22 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline16" class="outline-3">
-<h3 id="orgheadline16"><span class="section-number-3">5.3</span> date 命令</h3>
-<div class="outline-text-3" id="text-5-3">
+<div id="outline-container-orgheadline18" class="outline-3">
+<h3 id="orgheadline18"><span class="section-number-3">5.4</span> 如何删除海量文件</h3>
+<div class="outline-text-3" id="text-5-4">
+<div class="org-src-container">
+
+<pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">rm /var/spool/postfix/maildrop/* -f</span>
+-bash: /bin/rm: &#21442;&#25968;&#21015;&#34920;&#36807;&#38271;
+<span style="color: #ffff00;"># </span><span style="color: #ffff00;">find /var/spool/postfix/maildrop/ -type f -delete</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline19" class="outline-3">
+<h3 id="orgheadline19"><span class="section-number-3">5.5</span> date 命令</h3>
+<div class="outline-text-3" id="text-5-5">
 <ul class="org-ul">
 <li><code>date +%s</code> 获取时间戳</li>
 <li><code>date @1480065287</code> 获取时间戳对应的时间</li>
@@ -322,11 +358,11 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgheadline19" class="outline-2">
-<h2 id="orgheadline19"><span class="section-number-2">6</span> Net</h2>
+<div id="outline-container-orgheadline22" class="outline-2">
+<h2 id="orgheadline22"><span class="section-number-2">6</span> Net</h2>
 <div class="outline-text-2" id="text-6">
-</div><div id="outline-container-orgheadline18" class="outline-3">
-<h3 id="orgheadline18"><span class="section-number-3">6.1</span> 测试网速</h3>
+</div><div id="outline-container-orgheadline21" class="outline-3">
+<h3 id="orgheadline21"><span class="section-number-3">6.1</span> 测试网速</h3>
 <div class="outline-text-3" id="text-6-1">
 <ul class="org-ul">
 <li><code>curl http://example.com/bigfile.txt &gt;/dev/null -vv</code> 会显示打开速度</li>
@@ -338,7 +374,7 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-10-27 五 11:37</p>
+<p class="date">Created: 2017-12-12 二 11:04</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

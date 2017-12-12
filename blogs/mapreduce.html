@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-03-06 一 12:44 -->
+<!-- 2017-12-11 一 12:00 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>MapReduce 使用经验</title>
@@ -151,8 +151,8 @@ for the JavaScript code in this tag.
 <div id="content">
 <h1 class="title">MapReduce 使用经验</h1>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">1</span> 陷阱</h2>
+<div id="outline-container-orgheadline6" class="outline-2">
+<h2 id="orgheadline6"><span class="section-number-2">1</span> 陷阱</h2>
 <div class="outline-text-2" id="text-1">
 </div><div id="outline-container-orgheadline1" class="outline-3">
 <h3 id="orgheadline1"><span class="section-number-3">1.1</span> Mutability</h3>
@@ -207,13 +207,22 @@ for the JavaScript code in this tag.
 </p>
 </div>
 </div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">1.5</span> 使用 hadoop fs -copyFromLocal 复制文件</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+如果并发的向hadoop复制同一个文件，导致错误。 <code>hdfs.DFSClient: DataStreamer Exception org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException): No lease on /user/test/2017-12-11-09_log._COPYING_ (inode 252293331): File does not exist</code>
+</p>
+</div>
+</div>
 </div>
 
-<div id="outline-container-orgheadline10" class="outline-2">
-<h2 id="orgheadline10"><span class="section-number-2">2</span> 技巧</h2>
+<div id="outline-container-orgheadline11" class="outline-2">
+<h2 id="orgheadline11"><span class="section-number-2">2</span> 技巧</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="section-number-3">2.1</span> 在Java7平台运行Java8应用</h3>
+</div><div id="outline-container-orgheadline7" class="outline-3">
+<h3 id="orgheadline7"><span class="section-number-3">2.1</span> 在Java7平台运行Java8应用</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 当Hadoop、yarn和应用使用的Java版本不同时，需要配置应用自己的 <code>JAVA_HOME</code> （联想MapReduce的工作流程，想想为什么这样是可行的）， <code>-D yarn.app.mapreduce.am.env=JAVA_HOME=/path_to_java8 -D mapreduce.admin.user.env=JAVA_HOME=/path_to_java8</code>
@@ -221,11 +230,11 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9"><span class="section-number-3">2.2</span> <b>local</b> 配置优化</h3>
+<div id="outline-container-orgheadline10" class="outline-3">
+<h3 id="orgheadline10"><span class="section-number-3">2.2</span> <b>local</b> 配置优化</h3>
 <div class="outline-text-3" id="text-2-2">
-</div><div id="outline-container-orgheadline7" class="outline-4">
-<h4 id="orgheadline7"><span class="section-number-4">2.2.1</span> 加大java内存配置</h4>
+</div><div id="outline-container-orgheadline8" class="outline-4">
+<h4 id="orgheadline8"><span class="section-number-4">2.2.1</span> 加大java内存配置</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 修改 <code>hadoop-env.sh</code> 的 <code>HADOOP_CLIENT_OPTS</code> 例如：~export HADOOP<sub>CLIENT</sub><sub>OPTS</sub>="-Xmx1024m $HADOOP<sub>CLIENT</sub><sub>OPTS</sub>"~
@@ -233,8 +242,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-4">
-<h4 id="orgheadline8"><span class="section-number-4">2.2.2</span> 修改tmp目录到大磁盘</h4>
+<div id="outline-container-orgheadline9" class="outline-4">
+<h4 id="orgheadline9"><span class="section-number-4">2.2.2</span> 修改tmp目录到大磁盘</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 修改 <code>mapred-site.xml</code> 的 <code>mapreduce.cluster.local.dir</code>
@@ -244,16 +253,16 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-2">
-<h2 id="orgheadline13"><span class="section-number-2">3</span> avro</h2>
+<div id="outline-container-orgheadline14" class="outline-2">
+<h2 id="orgheadline14"><span class="section-number-2">3</span> avro</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-<code>avro</code> 是类似于 <code>protobuf</code> 的序列化机制，支持在mapreduce中使用。
+<code>avro</code> 是类似于 <code>protobuf</code> 的序列化机制，支持在mapreduce中使用。除了有schema外，avro降低了文件的大小。
 </p>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="section-number-3">3.1</span> <b>local</b> 模式注意事项</h3>
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">3.1</span> <b>local</b> 模式注意事项</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 hadoop内置了avro的lib，这个可能和应用使用的avro版本不一致，在 <b>local</b> 模式下需要配置两个环境变量。
@@ -267,8 +276,8 @@ hadoop内置了avro的lib，这个可能和应用使用的avro版本不一致，
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><span class="section-number-3">3.2</span> 修改模式</h3>
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="section-number-3">3.2</span> 修改模式</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 新增字段时，为了兼容老数据，需要指定 <code>default</code> ，如果 <code>type</code> 是多个类型，则 <code>default</code> 类型必须和第一个相同，例如：
@@ -282,7 +291,7 @@ hadoop内置了avro的lib，这个可能和应用使用的avro版本不一致，
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-03-06 一 12:44</p>
+<p class="date">Created: 2017-12-11 一 12:00</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

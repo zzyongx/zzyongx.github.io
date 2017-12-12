@@ -42,7 +42,9 @@ void *routine(void *data) {
   fprintf(fp, "pid %d\n", getpid());
   fclose(fp);
   return NULL;
-}int main(int argc, char *argv[]) {
+}
+
+int main(int argc, char *argv[]) {
   pthread_t tid;
   pthread_create(&tid, NULL, routine, NULL);
   sleep(5);  // wait thread run

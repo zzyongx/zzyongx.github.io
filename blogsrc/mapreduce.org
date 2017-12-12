@@ -27,6 +27,9 @@ for (Text value : values) {
 ** 强制结束mapreduce程序
 在命令行用 *Ctrl-C* 或者 *kill* 没办法真的停止mapreduce程序，必须使用专门的命令 =yarn application -kill <application-id>=
 
+** 使用 hadoop fs -copyFromLocal 复制文件
+如果并发的向hadoop复制同一个文件，导致错误。 =hdfs.DFSClient: DataStreamer Exception org.apache.hadoop.ipc.RemoteException(org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException): No lease on /user/test/2017-12-11-09_log._COPYING_ (inode 252293331): File does not exist=
+
 * 技巧
 ** 在Java7平台运行Java8应用
 当Hadoop、yarn和应用使用的Java版本不同时，需要配置应用自己的 =JAVA_HOME= （联想MapReduce的工作流程，想想为什么这样是可行的）， ~-D yarn.app.mapreduce.am.env=JAVA_HOME=/path_to_java8 -D mapreduce.admin.user.env=JAVA_HOME=/path_to_java8~
@@ -39,7 +42,7 @@ for (Text value : values) {
 修改 =mapred-site.xml= 的 =mapreduce.cluster.local.dir=
 
 * avro
-=avro= 是类似于 =protobuf= 的序列化机制，支持在mapreduce中使用。
+=avro= 是类似于 =protobuf= 的序列化机制，支持在mapreduce中使用。除了有schema外，avro降低了文件的大小。
 
 ** *local* 模式注意事项
 hadoop内置了avro的lib，这个可能和应用使用的avro版本不一致，在 *local* 模式下需要配置两个环境变量。

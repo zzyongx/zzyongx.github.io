@@ -59,6 +59,9 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 2. =openssl dgst -sha256 -verify public.pem -signature /tmp/sign.sha256 datafile= 公钥验证签名
 
 * Image
+** 查看图片大小
+=identify big.png=
+
 ** 改变图片大小
  =convert big.png -resize 20% small.png= =convert= 可以看做ImageMagick库的命令行版本。
 
@@ -74,9 +77,24 @@ for f in /etc/bash_completion.d/*; do
 done
 #+END_SRC
 
-** 如何用命令删除文件的第一行
+** ssh 保持心跳（客户端配置）
+#+BEGIN_SRC bash
+# cat > /etc/ssh_config
+Host *
+    ServerAliveInterval 300
+    ServerAliveCountMax 23
+#+END_SRC
+
+** 如何用命令跳过文件的第一行
 #+BEGIN_SRC bash
 # tail -n +2 file
+#+END_SRC
+
+** 如何删除海量文件
+#+BEGIN_SRC bash
+# rm /var/spool/postfix/maildrop/* -f
+-bash: /bin/rm: 参数列表过长
+# find /var/spool/postfix/maildrop/ -type f -delete
 #+END_SRC
 
 ** date 命令

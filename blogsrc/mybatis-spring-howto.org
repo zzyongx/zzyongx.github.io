@@ -27,12 +27,12 @@ public interface EmployeeMapper {
     public static String selectByName(Map<String, Object> param) {
       SQL sql = new SQL().SELECT("*").FROM(TABLE)
         .WHERE("name = #{name}");
-      
+
       Employee.Gender gender = (Employee.Gender) param.get("gender");
       if (gender != null) {
         sql.AND().WHERE("gender = #{gender}");
       }
-      
+
       return sql.toString();
     }
 
@@ -70,7 +70,7 @@ public interface EmployeeMapper {
       if (employee.getPhone() != Integer.MIN_VALUE) {
         sql.SET("phone = #{phone}");
       }
-      return sql.WHERE("id = #{id}").toString();        
+      return sql.WHERE("id = #{id}").toString();
     }
   }
 
@@ -105,6 +105,8 @@ public interface EmployeeMapper {
 这里通过注解将方法和其对应的SQL关联起来，注解很多，这里列出常用的。
 
 *注意* Mapper中方法不能重载
+
+*注意* MySQL类型 *BOOLEAN* 实际是 *tinyint(1)* ，对应于Java的类型也是 *Boolean*
 
 *** 通过 Select Insert Update Delete 注解绑定静态SQL
 如 ~findAll delete~ 所示，这里要求SQL都是编译时常量。静态SQL简单，但是缺乏一定的灵活性。
@@ -167,7 +169,7 @@ Mapper定义了函数到SQL的映射，可是怎么用呢？首先Mapper是个 *
 #+BEGIN_SRC java
 SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
 sqlSessionFactoryBean.setDataSource(dataSource);
-    
+
 SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) sqlSessionFactoryBean.getObject();
 sqlSessionFactory.getConfiguration().addMapper(EmployeeMapper.class);
 sqlSessionFactory.getConfiguration().getTypeHandlerRegistry().register(
@@ -199,7 +201,7 @@ Spring 自动绑定
 public SqlSessionFactory sqlSessionFactory() throws Exception {
   SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
   sqlSessionFactoryBean.setDataSource(dataSource);
-    
+
   SqlSessionFactory sqlSessionFactory = (SqlSessionFactory) sqlSessionFactoryBean.getObject();
   sqlSessionFactory.getConfiguration().getTypeHandlerRegistry().register(
     Employee.Gender.class, new EnumValueTypeHandler<Employee.Gender>(Employee.Gender.class));
@@ -260,7 +262,7 @@ public ArrayList<EmployeeMapper> dbHorizontalPartition() throws Exception {
     SqlSessionTemplate sqlSessionTemplate = new SqlSessionTemplate(sqlSessionFactory);
     employeeMapperList.add(sqlSessionTemplate.getMapper(EmployeeMapper.class));
   }
-    
+
   return employeeMapperList;
 }
 #+END_SRC
