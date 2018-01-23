@@ -13,9 +13,11 @@
 - =-q= 查询rpm的信息。通常配合下列参数使用， =rpm -q redis-service= 查看是否安装。
   - =-a= 查看已经安装的所有rpm， =rpm -qa | grep redis= 查看redis-service是否安装。
   - =-l= 查看已经已经安装rpm中包含的文件， =rpm -ql redis-service=
+  - =--dump= 相当于 =-l= 的加强版，列出文件的更详细信息，包括 =path size mtime filedigest mode owner group isconfig isdoc rdev symlink=
   - =-f= 查看文件所属的rpm， =rpm -qf /usr/local/bin/redis-server= ，如果查不到，可以看看是不是符号链接，使用真正的链接代替。
   - =-R= 查看依赖， =rpm -qR redis-service=
   - =-i= 查看包的元信息， =rpm -qi redis-service=
+  - =--scripts= 列出安装过程执行的脚本
   - =--changelog= 查看changelog， =rpm -q --changelog redis-service=
     - =-p= 指定查询的rpm包，通常配合上述参数使用，默认是系统安装的， =rpm -qlp redis-service-1.0.8-3.x86_64.rpm= 通常查看rpm包是否包含预期的文件。
 

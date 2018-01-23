@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-09-08 五 18:11 -->
+<!-- 2018-01-23 二 17:00 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>rpm 指南</title>
@@ -167,9 +167,11 @@ for the JavaScript code in this tag.
 <ul class="org-ul">
 <li><code>-a</code> 查看已经安装的所有rpm， <code>rpm -qa | grep redis</code> 查看redis-service是否安装。</li>
 <li><code>-l</code> 查看已经已经安装rpm中包含的文件， <code>rpm -ql redis-service</code></li>
+<li><code>--dump</code> 相当于 <code>-l</code> 的加强版，列出文件的更详细信息，包括 <code>path size mtime filedigest mode owner group isconfig isdoc rdev symlink</code></li>
 <li><code>-f</code> 查看文件所属的rpm， <code>rpm -qf /usr/local/bin/redis-server</code> ，如果查不到，可以看看是不是符号链接，使用真正的链接代替。</li>
 <li><code>-R</code> 查看依赖， <code>rpm -qR redis-service</code></li>
 <li><code>-i</code> 查看包的元信息， <code>rpm -qi redis-service</code></li>
+<li><code>--scripts</code> 列出安装过程执行的脚本</li>
 <li><code>--changelog</code> 查看changelog， <code>rpm -q --changelog redis-service</code>
 <ul class="org-ul">
 <li><code>-p</code> 指定查询的rpm包，通常配合上述参数使用，默认是系统安装的， <code>rpm -qlp redis-service-1.0.8-3.x86_64.rpm</code> 通常查看rpm包是否包含预期的文件。</li>
@@ -260,7 +262,7 @@ rm -rf $RPM_BUILD_ROOT
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-09-08 五 18:11</p>
+<p class="date">Created: 2018-01-23 二 17:00</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
