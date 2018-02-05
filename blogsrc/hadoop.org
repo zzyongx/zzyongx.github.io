@@ -1,0 +1,14 @@
+#+TITLE: Hadoop 使用经验
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* lzo vs snappy
+snappy 压缩优于 lzo，但是不支持split，lzo自身也不支持split，但是可以通过增加索引支持split。
+snappy 多用于本身可以split的文件格式的内部压缩，例如lzo
+
+* ORC
+** orc-schema
+字段在orc-schema中的顺序非常重要， =struct<i int, s string>= 不同于 =struct<s string, i int>= 。
+
+** zlib vs snappy
+ORC 默认使用zlib压缩，改用snappy压缩，降低压缩比，提升读性能
