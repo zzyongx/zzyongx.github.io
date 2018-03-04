@@ -1,0 +1,15 @@
+#+TITLE: 如何避免自己ddos自己
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+早些时间读到一篇文章， [[https://cloudplatform.googleblog.com/2016/11/how-to-avoid-a-self-inflicted-DDoS-Attack-CRE-life-lessons.html][how to avoid a self inflicted ddos]] ，觉得这都是常识，不相信自己会ddos自己。直到有天同事跟我打电话，说我把他们的接口干死了。我在上万台机器部署了分钟级cron，肯定被我ddos了，这里总结下，如何避免ddos自己。
+
+自己ddos自己，一般由客户端导致，通常和定时任务有关。为了避免ddos自己，应该特别注意：
+* 定时任务加上随机等待
+例如linux的cron中，经常可以看到 ~sleep $(($RANDOM\%30)) && <command>~ 这里执行 <command> 前随机等待30S，避免0s的峰值。
+
+* 失败重试采用指数时间间隔
+通常失败后重试，都是一个固定的时间间隔，例如：等待1s，然后重试，直到超过最大重试次数。暂时故障时，固定间隔重试会导致大量重试。此时可以采用指数间隔，例如第一次1s，第二次2s，第三次4s，第四次8s。还可以采用斐波那契间隔，第一次1s，第二次1s，第三次2s，第四次3s，第五次5s。斐波那契比指数重试间隔要小。
+
+* 客户端缓存
+对于不经常改变的内容，可以增加客户端缓存。

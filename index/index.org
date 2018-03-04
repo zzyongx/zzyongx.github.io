@@ -6,6 +6,14 @@
 * 有意思的站点
 [[https://karpathy.github.io/][Andrej Karpathy blog]]
 
+* 2018 戊戌年
+-------------
+
+** 经验
+[[blog:self-inflicted-ddos][如何避免自己ddos自己]] <2018-01-04>
+
+[[blog:develop-clients-like-mobile-app][像开发手机APP一样开发客户端]] <2018-01-04>
+
 * 2017 丁酉年
 -------------
 
