@@ -1,0 +1,8 @@
+#+TITLE: kafka ops
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+磁盘raid1
+
+配置 zookeeper 子目录，例如 localhost/cluster1
+delete.topic.enable=true

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>面向承诺的监控</title>
+<meta name="author" content="(郑志勇)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="../reveal.js/css/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="../reveal.js/css/local.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">面向承诺的监控</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2018-03-20 二 12:59</p>
+</section>
+
+<section>
+<section id="slide-orgheadline1">
+<h2 id="orgheadline1">三种redis监控，哪个好</h2>
+<ul>
+<li>监控进程存活</li>
+<li>监控端口存活</li>
+<li>执行GET/SET命令，监控运行结果和运行耗时</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline2">
+<h2 id="orgheadline2">什么是面向承诺的监控</h2>
+<ul>
+<li>承诺是对外的，就像契约，包括功能，性能，可用性</li>
+<li>关注承诺是否兑现</li>
+<li>关注承诺兑现的代价</li>
+<li>针对性强，工程化程度高</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline3">
+<h2 id="orgheadline3">不知道承诺了什么，就不知道测试什么</h2>
+<ul>
+<li>开发，测试老承诺是否有效，新承诺是否兑现</li>
+<li>重构，测试重构之前的承诺，重构后是否有效</li>
+<li>线上变更，测试变更后承诺是否还能兑现</li>
+<li>测试用例程序化，把承诺以某种形式固定下来</li>
+<li>好系统是程序化测试了所有承诺的系统</li>
+<li>可是真的知道承诺了什么吗？</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline4">
+<h2 id="orgheadline4">监控的前提：系统可观察</h2>
+<ul>
+<li>承诺的兑现情况，例如：http {"code": <span class="underline">code</span> }</li>
+<li>系统的内部状态，例如：日志，JMX，管理接口</li>
+<li>通过研究并深刻理解系统的配置参数挖掘内部指标</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline5">
+<h2 id="orgheadline5">报警和报表</h2>
+<ul>
+<li>仅当承诺没兑现时报警</li>
+<li>内部指标的监控有报表即可，避免影响真报警</li>
+<li>内部指标用于预警和优化成本</li>
+<li>区分现象和原因，避免头痛医头，脚痛医脚</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline6">
+<h2 id="orgheadline6">改进承诺</h2>
+<ul>
+<li>彻底排查故障，有故障历史</li>
+<li>故障有对应的检查清单，操作手册（最好程序化）</li>
+<li>没有文档化和程序化就没有传承</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline7">
+<h2 id="orgheadline7">如何衡量工作的效果</h2>
+<ul>
+<li>对外改善承诺</li>
+<li>对内降低兑现承诺的成本</li>
+<li>在高资源利用率和资源紧张之间平衡</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../reveal.js/lib/js/head.min.js"></script>
+<script src="../reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>

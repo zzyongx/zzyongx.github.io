@@ -2,6 +2,11 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
+升级git到最新版
+
+SSL connect error
+升级libcurl到最新版
+
 =git branch=
 =git branch -d branch-to-rm=
 =git branch -D branch-to-rm-anyway=
