@@ -6,3 +6,25 @@
 
 配置 zookeeper 子目录，例如 localhost/cluster1
 delete.topic.enable=true
+
+查看topic详情
+bin/kafka-topics.sh --describe --zookeeper $ZOOKEEPER --topic $TOPIC
+
+查看topic offset
+bin/kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list $BROKER --partitions 0,2,3,4,6 --topic $TOPIC
+
+修改 replication-factor
+bin/kafka-reassign-partitions.sh --zookeeper $ZOOKEEPER --execute --reassignment-json-file $TOPIC.rf.json
+
+bin/kafka-reassign-partitions.sh --zookeeper $ZOOKEEPER --verify --reassignment-json-file $TOPIC.rf.json
+$TOPIC.rf.json 必须合法json
+{"version":1,
+ "partitions": [
+   {"topic": "$TOPIC", "partition": 0, "replicas": [125,25]},
+   {"topic": "$TOPIC", "partition": 1, "replicas": [126,127]},
+   {"topic": "$TOPIC", "partition": 2, "replicas": [127,25]}
+ ]
+}
+
+修改 partitions
+bin/kafka-topics.sh --alter --zookeeper $ZOOKEEPER --partitions 32 --topic $TOPIC

@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2018-03-23 五 12:57 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<title>当开发人员说精通TCP/IP时，到底该精通什么</title>
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">当开发人员说精通TCP/IP时，到底该精通什么</h1>
+<p>
+经常看到招聘要求，精通 <code>TCP/IP</code> 。也经常有人自称精通 <code>TCP/IP</code> ，那么精通的标准是什么？我觉得对开发人员来讲，精通至少包含下面这些能力。
+</p>
+
+<div id="outline-container-orgheadline15" class="outline-2">
+<h2 id="orgheadline15"><span class="section-number-2">1</span> TCP/IP基本概念和关键系统调用</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-orgheadline1" class="outline-3">
+<h3 id="orgheadline1"><span class="section-number-3">1.1</span> TCP packet 的组成</h3>
+<div class="outline-text-3" id="text-1-1">
+
+<div class="figure">
+<p><img src="../images/2018/tcp-packet.jpg" alt="tcp-packet.jpg" />
+</p>
+</div>
+
+<p>
+注意：这里仅有源端口和目的端口，并且都是16位的。隐含的意思，1. 路由是IP层的事情，和TCP无关。 2. 端口是有限的，65536个，实际上能用的比这个还要少，什么时候端口会耗尽，端口耗尽怎么办？
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline2" class="outline-3">
+<h3 id="orgheadline2"><span class="section-number-3">1.2</span> IP header 的组成</h3>
+<div class="outline-text-3" id="text-1-2">
+
+<div class="figure">
+<p><img src="../images/2018/ip-header.jpg" alt="ip-header.jpg" />
+</p>
+</div>
+
+<p>
+这里包含了源IP和目的IP，路由是根据目的IP做的，理解这个才能理解导致UDP放大攻击，SYN-FLOOD攻击，TCP-RESET攻击。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline5" class="outline-3">
+<h3 id="orgheadline5"><span class="section-number-3">1.3</span> TCP面向连接 vs UDP无连接</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+所谓面向连接是说TCP有三次握手，并在握手后保留了对端的IP和端口信息，UDP没有这些，这也是为什么TCP不可用做放大攻击。这个连接是概念上的"连接"，假设A和B之间建立了TCP连接，拔掉A的网线，B并不知道A和它断开了连接，但是A有机会知道。如果B正在调用 <code>recv</code> 又没用设置超时和keepalive，那么B会一直阻塞下去。如果A正在调用 <code>recv</code> ，会不会一直阻塞下去取决于TCP实现。
+</p>
+
+<p>
+对TCP而言，连接必须有超时的概念，如果某个连接上一段时间没数据，关闭连接，否则会照成端口泄露。例如：利用 <code>epoll</code> 做多路复用，客户端建立连接，然后网络关闭，此时服务端保留了一个本质上断开的连接，但是它不知道。可以用nc模拟这个情况。 <code>nc -k -l 1234</code> 监听1234端口。 <code>cat &lt;(echo x) - | nc 127.0.0.1 1234</code> 模拟客户端连接。 <code>iptables -I OUTPUT -p tcp --dport 1234 -j REJECT --reject-with tcp-reset</code> iptables模拟断网。然后关闭客户端连接，删除iptables观察，仍处于连接状态。
+</p>
+
+<p>
+断网前，两个连接，18912是服务端，30530是客户端
+</p>
+<pre class="example">
+tcp        0      0 127.0.0.1:37160             127.0.0.1:1234              ESTABLISHED 30530/nc
+tcp        0      0 127.0.0.1:1234              127.0.0.1:37160             ESTABLISHED 18912/nc
+</pre>
+
+<p>
+断网后客户端退出，然后重新联网，客户端30530的连接不在了，但是服务端18912的连接还在，这个连接其实已经废了。
+</p>
+<pre class="example">
+tcp        0      0 127.0.0.1:1234              127.0.0.1:37160             ESTABLISHED 18912/nc
+</pre>
+
+<p>
+该测试在rhel6上有效，不排除nc的其它版本修复这个问题。除了超时，还可以使用tcp的keepalive发现异常关闭的连接，keepalive需要连接双方定时发心跳包，确认连接有效，对高性能服务器，这个可能影响性能。
+</p>
+
+<p>
+很多攻击都是基于源IP是可以伪造的，路由根据目的IP转发，伪造的请求可以到目标机器。
+</p>
+</div>
+
+<div id="outline-container-orgheadline3" class="outline-4">
+<h4 id="orgheadline3"><span class="section-number-4">1.3.1</span> UDP放大攻击</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<p>
+以 <code>DNS</code> 为例， <code>DNS</code> 的响应数据大概是请求的4倍，发送UDP请求时，把IP头中的源IP，改成被攻击机器的IP。 <code>DNS</code> 服务器把请求返回给被攻击IP。为什么没有 <code>TCP</code> 放大攻击，因为服务器没有被攻击IP的连接信息，返回RST。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline4" class="outline-4">
+<h4 id="orgheadline4"><span class="section-number-4">1.3.2</span> TCP-REST攻击</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<p>
+假设A和B之间建立了连接，C请求B，把源IP改成A的IP，发送RESET请求，B断开了A的连接。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline8" class="outline-3">
+<h3 id="orgheadline8"><span class="section-number-3">1.4</span> TCP 三次握手</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+假设A想和B上的80端口建立连接，A发送SYN，B回复ACK SYN，A回复ACK，握手完成。
+</p>
+</div>
+
+<div id="outline-container-orgheadline6" class="outline-4">
+<h4 id="orgheadline6"><span class="section-number-4">1.4.1</span> 对比B宕机和B上80端口没起来，那种情况A失败的快？</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<p>
+请求不存在的IP（宕机），发了 <code>SYN</code> 没人回 <code>ACK</code> ，只能超时后重发 <code>SYN</code> 。请求IP上不存在的端口，机器知道自己没这个端口，立即回 <code>RST</code> 。
+</p>
+
+<p>
+用nc测试不存在的IP，tcpdump抓包观察 <code>echo 'x' | nc -w 5 1.1.1.1 123</code> ，设置了5s超时，超时了才失败。
+</p>
+<pre class="example">
+17:43:04.610808 IP 10.146.110.179.59603 &gt; 1.1.1.1.123: Flags [S], seq 1993645787, win 14600, options [mss 1460,nop,wscale 8], length 0
+17:43:05.610495 IP 10.146.110.179.59603 &gt; 1.1.1.1.123: Flags [S], seq 1993645787, win 14600, options [mss 1460,nop,wscale 8], length 0
+17:43:07.610502 IP 10.146.110.179.59603 &gt; 1.1.1.1.123: Flags [S], seq 1993645787, win 14600, options [mss 1460,nop,wscale 8], length 0
+</pre>
+
+<p>
+用nc测试不存在的端口，tcpdump抓包观察 <code>echo 'x' | nc -w 5 127.0.0.1 123</code> ，瞬间失败
+</p>
+<pre class="example">
+17:44:32.135948 IP 127.0.0.1.50188 &gt; 127.0.0.1.123: Flags [S], seq 1866960262, win 65495, options [mss 65495,nop,wscale 8], length 0
+17:44:32.135961 IP 127.0.0.1.123 &gt; 127.0.0.1.50188: Flags [R.], seq 0, ack 1866960263, win 0, length 0
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgheadline7" class="outline-4">
+<h4 id="orgheadline7"><span class="section-number-4">1.4.2</span> 设置连接5s超时和3s超时有区别吗？</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<p>
+基本没区别，3s内发重发2次SYN，第3次重发在5s之后了，后2s白等了。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline11" class="outline-3">
+<h3 id="orgheadline11"><span class="section-number-3">1.5</span> TCP 关闭连接</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+这里不区分客户端和服务端，只分主动关闭还是被动关闭，先发FIN的是主动关闭。
+</p>
+</div>
+
+<div id="outline-container-orgheadline9" class="outline-4">
+<h4 id="orgheadline9"><span class="section-number-4">1.5.1</span> 主动关闭</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<p>
+调用 <code>close</code> 发送FIN进入 <code>FIN_WAIT_1</code> 状态后，有三种情况：
+</p>
+<ol class="org-ol">
+<li>收到ACK，进入 <code>FIN_WAIT_2</code> 状态，收到FIN，发送ACK，进入 <code>TIME_WAIT</code> 状态</li>
+<li>收到FIN，发送ACK（说明双方同时主动关闭连接），进入 <code>CLOSING</code> ，收到ACK，进入 <code>TIME_WAIT</code> 状态</li>
+<li>收到FIN ACK，发送ACK，进入 <code>TIME_WAIT</code></li>
+</ol>
+
+<p>
+如果发送了FIN，但是对方不调用 <code>close</code> 关闭连接，此时会停在 <code>FIN_WAIT_2</code> ， <code>net.ipv4.tcp_fin_timeout</code> 控制这个状态的超时时间。
+</p>
+
+<p>
+<code>TIME_WAIT</code> 需要等待2MSL（maximum segment lifetime）。网上有很多关于 <code>Too many connections in TIME_WAIT state</code> 问题的讨论，解决方法大致是：通过sysctl调整 <code>tcp_fin_timeout</code> <code>net.ipv4.tcp_tw_reuse</code> <code>ip_local_port_range</code> ，但是我认为 <code>TIME_WAIT</code> 太多是现象，而不是原因。 <code>TIME_WAIT</code> 造成的主要问题是端口耗尽，对于被动连接，根本就没这个问题。对于主动连接，可以使用长连接。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline10" class="outline-4">
+<h4 id="orgheadline10"><span class="section-number-4">1.5.2</span> 被动关闭</h4>
+<div class="outline-text-4" id="text-1-5-2">
+<p>
+收到FIN，发送ACK进入 <code>CLOSE_WAIT</code> ，调用 <code>close</code> ，发送FIN进入 <code>LAST_ACK</code> ，收到ACK（或等ACK超时），进入 <code>CLOSED</code>
+这里，如果进入 <code>CLOSE_WAIT</code> 状态后，因为bug或者逻辑错误，没有调用close，造成端口泄露。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline12" class="outline-3">
+<h3 id="orgheadline12"><span class="section-number-3">1.6</span> 相关系统调用</h3>
+<div class="outline-text-3" id="text-1-6">
+<p>
+服务端 <code>bind</code> 绑定IP和端口， <code>listen</code> 表明自己是被动连接， <code>accept</code> 接受处理建立好的连接， <code>accept</code> 返回前，TCP三次握手已经完成，那是操作系统的事儿。
+客户端 <code>connect</code> 主动连接。这里客户端也可以调用 <code>bind</code> 绑定IP端口。
+调用 <code>close</code> 主动关闭连接，被动关闭连接的一方，如果 <code>recv</code> 到size为0的数据，或者 <code>send</code> 失败，则明白连接已关闭，此时调用 <code>close</code> 关闭连接。
+</p>
+
+<p>
+注意：<code>send</code> 成功不代表对端接受到了数据，因为 <code>send</code> 只是发送到了 TCP 协议栈的buffer中，只有 <code>close</code> 成功才代表数据发送成功。
+利用iptables模拟网络问题 <code>iptables -I OUTPUT -p tcp --dport 1234 -j DROP</code> ，通过 <code>strace</code> 观察 <code>send/write</code> 函数的返回值可以观察到这一点。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline13" class="outline-3">
+<h3 id="orgheadline13"><span class="section-number-3">1.7</span> 端口的选择</h3>
+<div class="outline-text-3" id="text-1-7">
+<p>
+端口分三个段
+</p>
+<ol class="org-ol">
+<li>0-1024，需要root才能使用</li>
+<li>1024 - X，普通用户用来作为监听端口</li>
+<li>X - 65000，用来作为临时端口，即主动连接使用的端口</li>
+</ol>
+<p>
+这里X可以通过 <code>net.ipv4.ip_local_port_range</code> 配置，默认X是32768，如果改小了X的值，原有的监听端口可能起不来。有一次把jmx端口配置在19012，但是起不来，提示端口被占用。后来发现X的值被改成1024了，有个临时端口使用了19012，偏偏还有BUG，连接一直处于 <code>CLOSE_WAIT</code> 状态。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline14" class="outline-3">
+<h3 id="orgheadline14"><span class="section-number-3">1.8</span> RTT （Round Trip Time）</h3>
+<div class="outline-text-3" id="text-1-8">
+<p>
+简单测试：数据中心内 rtt &lt; 0.5ms，BJ数据中心间 rtt &lt; 2ms，BJ和GD数据中心间 10ms &lt; rtt &lt; 100ms。为什么要了解RTT？这对设置超时有意义，数据中心内，理论上设置10ms足够了，自己重新connect，比让TCP重试发第二个SYN要有意义。开发分布式系统时，系统内部也有各种超时。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgheadline16" class="outline-2">
+<h2 id="orgheadline16"><span class="section-number-2">2</span> 理解是什么是输入</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+程序的本质是，给定一个输入，捣鼓出一个输出。输入可能来自命令行参数，也可能来自网络，只是来自网络的请求不 <b>显然</b> 。网络程序最关键的是应用层协议，应用层协议有标准的，例如：HTTP，DNS。也有私有的，例如redis，kafka等。当我们要写一个网络程序时，要么用标准协议，例如HTTP，要么自己设计一个协议，例如：头4个字节表明数据长度，后面是JSON格式的数据。
+</p>
+
+<p>
+当自己设计协议时，我们清楚的知道，输入是什么（例如：上一个例子是JSON数据）。当用HTTP时，我们就糊涂了。以为HTTP就是一个URL，可能还有POST的数据。这只是HTTP协议重要的部分，但不是全部。HTTP协议还包括HTTP协议的版本，HTTP头。
+</p>
+
+<p>
+我曾配置nginx的 <code>proxy_pass</code> 到某个第三方地址，刚开始挺正常的，后来这个地址总是返回503。用curl访问该地址则正常。仔细对比curl和nginx对这个地址的输入，发现curl是 <code>HTTP/1.1</code> ，nginx 是 <code>HTTP/1.0</code> ，显然，第三方升级了服务。
+</p>
+
+<p>
+协议就是一套沟通语言，要考虑的很多。但不管怎么变，都是输入（往往网络请求和请求关联的后台数据（缓存，数据库）等共同构成输入），把握这个是关键。例如：检测温度的IOT设备定时发送检测到的温度，服务端用简单的程序接受数据。后来IOT设备升级，数量可能达到上百万，自己写的小程序肯定顶不住了，也得升级。这时得用多进程啦，epoll啦等高级技术了。如果IOT设备有能力，把发送 <code>10</code> 改成发送 <code>GET /10 HTTP/1.1\nHost:x\n\n</code> ，就回到了标准协议的路上。显然这里HTTP协议的有效负载很低，但是IOT设备发送温度时，可能还要发送它的编号等，问题不是很突出。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline17" class="outline-2">
+<h2 id="orgheadline17"><span class="section-number-2">3</span> 熟练使用工具</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+netstat，<a href="https://zzyongx.github.io/blogs/tcpdump-tutorial.html">tcpdump</a> ，<a href="https://zzyongx.github.io/blogs/iptables.html">iptables</a> 是我最常用的三个工具，netstat观察连接情况，tcpdump观察输入输出，iptables模拟网络异常。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline18" class="outline-2">
+<h2 id="orgheadline18"><span class="section-number-2">4</span> 了解TCP优化方法</h2>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2018-03-23 五 12:57</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

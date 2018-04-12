@@ -101,6 +101,9 @@ Host *
 - ~date +%s~ 获取时间戳
 - ~date @1480065287~ 获取时间戳对应的时间
 
+** 干掉有问题的nginx进程
+- ~ps -eo pcpu,bsdtime,pid,user,args | grep -e '[n]ginx: worker' | sort -k1 -r | perl -ane 'if ($F[0] * 1 > 95 || int($F[1]) > 60) { print "echo $_ kill ${F[2]}; sleep 1; kill -9 ${F[2]} \n" }' | bash -x~
+
 * Net
 ** 测试网速
 - ~curl http://example.com/bigfile.txt >/dev/null -vv~ 会显示打开速度
