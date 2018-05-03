@@ -1,0 +1,11 @@
+#+TITLE: 正向代理
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 正向代理服务器
+正向代理使用CONNECT方法，nginx不支持，使用squid。安装完成后配置下端口，就可以使用。
+
+* git 使用代理
+PROXYIP=192.168.10.5
+HTTPS_PROXY=$PROXYIP:8080 使用https
+HTTP_PROXY=$PROXYIP:8080 使用https

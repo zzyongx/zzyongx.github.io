@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>prometheus 101</title>
+<meta name="author" content="(郑志勇)"/>
+<style type="text/css">
+.underline { text-decoration: underline; }
+</style>
+<link rel="stylesheet" href="../reveal.js/css/reveal.css"/>
+
+<link rel="stylesheet" href="../reveal.js/css/theme/black.css" id="theme"/>
+
+<link rel="stylesheet" href="../reveal.js/css/local.css"/>
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+    if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = '../reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+    }
+</script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section id="sec-title-slide"><h1 class="title">prometheus 101</h1><h2 class="author">郑志勇</h2><p class="date">Created: 2018-05-02 三 13:59</p>
+</section>
+
+<section>
+<section id="slide-orgheadline1">
+<h2 id="orgheadline1">狭义的 prometheus</h2>
+<ul>
+<li>一个名叫 prometheus 程序</li>
+<li>数据抓取</li>
+<li>报警计算</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline2">
+<h2 id="orgheadline2">广义的 prometheus</h2>
+<ul>
+<li>exporter，独立的或者内嵌的</li>
+<li>prometheus 程序负责数据抓取和计算</li>
+<li>报警系统</li>
+<li>grafana 数据展示</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline3">
+<h2 id="orgheadline3">prometheus 的特点</h2>
+<ul>
+<li>服务视角，没有机器的概念</li>
+<li>以拉的方式收集数据</li>
+<li>可以做到秒级监控</li>
+<li>高度组件化，耦合极其松散</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline4">
+<h2 id="orgheadline4">prometheus 部署</h2>
+<ul>
+<li>根据机房，业务组成拆分，组成 prometheus 集群，满足扩展性</li>
+<li>多套prometheus集群并行运行，实现高可用</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline5">
+<h2 id="orgheadline5">metric 类型</h2>
+<ul>
+<li>Counter 计数器，用于递增</li>
+<li>Gauge 用于测量，值可增可减</li>
+<li>Histogram 类直方图表示数据</li>
+<li>Summary 分位值的方式表示数据</li>
+
+</ul>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline6">
+<h2 id="orgheadline6">metric 例子</h2>
+<pre class="example">
+private_dns_request_duration{quantile="0.5"} 73
+private_dns_request_duration{quantile="0.9"} 131
+private_dns_request_duration{quantile="0.95"} 153
+private_dns_request_duration_sum 4.746510912159e+12
+private_dns_request_duration_count 5.771085523e+09
+
+private_dns_request_duration_microseconds_bucket{domain="sogou",le="50"} 6.0282028e+07
+private_dns_request_duration_microseconds_bucket{domain="sogou",le="100"} 1.61380447e+08
+private_dns_request_duration_microseconds_bucket{domain="sogou",le="200"} 1.84621415e+08
+private_dns_request_duration_microseconds_bucket{domain="sogou",le="400"} 1.84977503e+08
+private_dns_request_duration_microseconds_bucket{domain="sogou",le="+Inf"} 1.85154741e+08
+private_dns_request_duration_microseconds_sum{domain="sogou"} 1.5514628146e+10
+private_dns_request_duration_microseconds_count{domain="sogou"} 1.85154741e+08
+
+private_dns_request_error{cache="hit",code="0",domain="oth",type="A"} 1.23025397e+08
+private_dns_request_error{cache="hit",code="0",domain="oth",type="MX"} 4
+private_dns_request_error{cache="hit",code="0",domain="sogou",type="A"} 1.50645251e+08
+private_dns_request_error{cache="hit",code="0",domain="sogou",type="MX"} 3.4301342e+07
+
+private_dns_request_total 5.77108555e+09
+</pre>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline7">
+<h2 id="orgheadline7">计算QPS</h2>
+<pre class="example">
+rate(private_dns_request_total{job="private_dns", idc="nm"}[1m])
+</pre>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline8">
+<h2 id="orgheadline8">计算延迟在400微秒的比例</h2>
+<pre class="example">
+sum(rate(
+  private_dns_request_duration_microseconds_bucket{job="private_dns", idc="zw", le="400", domain="oth"}[1m]
+)) / sum(rate(
+  private_dns_request_duration_microseconds_bucket{job="private_dns", idc="zw", le="+Inf", domain="oth"}[1m]
+))
+</pre>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline9">
+<h2 id="orgheadline9">计算报警</h2>
+<pre class="example">
+rate(http_proxy_request_error{domain="zhihu.sogou.com",protocode="404"}[1m]) &gt; 10
+or
+sum(rate(
+  http_proxy_request_error{domain="zhihu.sogou.com",protocode="404"}[1m]
+)) / sum(rate(
+  http_proxy_request_error{domain="zhihu.sogou.com"}[1m]
+)) &gt; 0.0001
+</pre>
+
+</section>
+</section>
+<section>
+<section id="slide-orgheadline10">
+<h2 id="orgheadline10">更多。。。</h2>
+<ul>
+<li>接口开放，对接 grafana</li>
+<li>类ELK机制，报警关联 ES 查询</li>
+<li>报警分析和统计</li>
+
+</ul>
+</section>
+</section>
+</div>
+</div>
+<script src="../reveal.js/lib/js/head.min.js"></script>
+<script src="../reveal.js/js/reveal.js"></script>
+
+<script>
+// Full list of configuration options available here:
+// https://github.com/hakimel/reveal.js#configuration
+Reveal.initialize({
+
+controls: true,
+progress: true,
+history: false,
+center: true,
+slideNumber: 'c',
+rollingLinks: false,
+keyboard: true,
+overview: true,
+
+theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+transition: Reveal.getQueryHash().transition || 'none', // default/cube/page/concave/zoom/linear/fade/none
+transitionSpeed: 'default',
+multiplex: {
+    secret: '', // null if client
+    id: '', // id, obtained from socket.io server
+    url: '' // Location of socket.io server
+},
+
+// Optional libraries used to extend on reveal.js
+dependencies: [
+ { src: '../reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+ { src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+ { src: '../reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+ { src: '../reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }]
+});
+</script>
+</body>
+</html>
