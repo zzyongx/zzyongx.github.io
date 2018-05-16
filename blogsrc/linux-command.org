@@ -85,6 +85,9 @@ Host *
     ServerAliveCountMax 23
 #+END_SRC
 
+** ssh 启动命令后台执行
+=ssh -f user@host 'whatever_command &>/dev/null &'= 重定向输出是关键
+
 ** 如何用命令跳过文件的第一行
 #+BEGIN_SRC bash
 # tail -n +2 file
