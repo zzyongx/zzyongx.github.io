@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2017-09-08 五 18:18 -->
+<!-- 2018-06-15 五 16:22 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="viewport" content="width=device-width, initial-scale=1" />
 <title>nc 和 curl</title>
@@ -221,11 +221,11 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline23" class="outline-2">
-<h2 id="orgheadline23"><span class="section-number-2">2</span> curl</h2>
+<div id="outline-container-orgheadline25" class="outline-2">
+<h2 id="orgheadline25"><span class="section-number-2">2</span> curl</h2>
 <div class="outline-text-2" id="text-2">
-</div><div id="outline-container-orgheadline20" class="outline-3">
-<h3 id="orgheadline20"><span class="section-number-3">2.1</span> 常用参数</h3>
+</div><div id="outline-container-orgheadline22" class="outline-3">
+<h3 id="orgheadline22"><span class="section-number-3">2.1</span> 常用参数</h3>
 <div class="outline-text-3" id="text-2-1">
 </div><div id="outline-container-orgheadline9" class="outline-4">
 <h4 id="orgheadline9"><span class="section-number-4">2.1.1</span> -X</h4>
@@ -320,8 +320,26 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 
 <div id="outline-container-orgheadline19" class="outline-4">
-<h4 id="orgheadline19"><span class="section-number-4">2.1.11</span> -w</h4>
+<h4 id="orgheadline19"><span class="section-number-4">2.1.11</span> -g</h4>
 <div class="outline-text-4" id="text-2-1-11">
+<p>
+当url中包含 <b>{}[]</b> 时使用，用于关闭 <a href="https://ec.haxx.se/cmdline-globbing.html">URL globbing parser</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline20" class="outline-4">
+<h4 id="orgheadline20"><span class="section-number-4">2.1.12</span> -D</h4>
+<div class="outline-text-4" id="text-2-1-12">
+<p>
+把响应header输出到指定的文件，用于获取header。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgheadline21" class="outline-4">
+<h4 id="orgheadline21"><span class="section-number-4">2.1.13</span> -w</h4>
+<div class="outline-text-4" id="text-2-1-13">
 <p>
 可以将http请求的一些内部细节格式化输出。例如 <code>curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"</code> 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
 </p>
@@ -329,11 +347,11 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 </div>
 
-<div id="outline-container-orgheadline22" class="outline-3">
-<h3 id="orgheadline22"><span class="section-number-3">2.2</span> 常用法</h3>
+<div id="outline-container-orgheadline24" class="outline-3">
+<h3 id="orgheadline24"><span class="section-number-3">2.2</span> 常用法</h3>
 <div class="outline-text-3" id="text-2-2">
-</div><div id="outline-container-orgheadline21" class="outline-4">
-<h4 id="orgheadline21"><span class="section-number-4">2.2.1</span> 请求指定的服务器</h4>
+</div><div id="outline-container-orgheadline23" class="outline-4">
+<h4 id="orgheadline23"><span class="section-number-4">2.2.1</span> 请求指定的服务器</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 <code>curl http://ip/api -H "Host:domain"</code> ip 是指定的服务器，domain是正常请求使用的域名。
@@ -345,7 +363,7 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2017-09-08 五 18:18</p>
+<p class="date">Created: 2018-06-15 五 16:22</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

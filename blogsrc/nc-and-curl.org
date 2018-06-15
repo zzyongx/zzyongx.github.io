@@ -64,6 +64,12 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 默认请求 =Accept-Encoding= 为空，服务端响应 =Content-Encoding= 为空。如果服务端总是返回 =Content-Encoding: gzip= ，此时 curl 不会自动解压。使用这个参数发送 =Accept-Encoding: deflate, gzip= ，如果服务端返回gzip，curl可以自动解压。
 如果是用libcurl编程，使用 =CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPT_ENCODING, char *enc);=
 
+*** -g
+当url中包含 *{}[]* 时使用，用于关闭 [[https://ec.haxx.se/cmdline-globbing.html][URL globbing parser]]
+
+*** -D
+把响应header输出到指定的文件，用于获取header。
+
 *** -w
 可以将http请求的一些内部细节格式化输出。例如 =curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"= 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
 
