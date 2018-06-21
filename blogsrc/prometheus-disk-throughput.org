@@ -1,0 +1,29 @@
+#+TITLE: 为prometheus测试磁盘吞吐量
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+在使用prometheus的过程中，发现磁盘容量是个瓶颈。prometheus使用时间序列数据库，磁盘读写以顺序为主，磁盘的吞吐量是主要的考虑因素。当时有单块儿300G的SAS盘（10000转2.5英寸，14块）和单块儿6000G的SATA盘（7200转3.5英寸，12块，外加一个480G的SSD）两种盘，前者有raid卡，后者没有raid卡，只能用lvm做raid。
+
+测试方式是：
+#+BEGIN_SRC bash
+dd if=/dev/zero count=10240000 of=/mnt/test/bigfile
+echo 3 > /proc/sys/vm/drop_caches && time cat /mnt/test/bigfile > /dev/null
+#+END_SRC
+
+测试结果：
+| 配置                 | 耗时                                |
+|----------------------+-------------------------------------|
+| SATA，SSD做缓存      | 20.7s                               |
+| 纯SSD                | 20.6s                               |
+| SATA，条带化12 + SSD | 13.7s                               |
+| SATA，条带化12       | 2.2s                                |
+| SAS，2块儿盘做RAID1  | 27s                                 |
+| SAS，14块儿盘做RAID5 | 2.5s（观察到一个15s的，但没法复现） |
+
+基本可以确定用SSD做缓存，在吞吐量上弱于RAID，RAID的吞吐能力约等于单盘的吞吐能力*盘数量。SATA盘和SAS盘在吞吐量上差别不是很大。
+
+最后选择了SAS盘，原因：
+1. lvm做raid，lv创建好之后，啥也没干呢，用dstat观察，磁盘IO就开始飙升。
+2. lvm做mirror，lv创建好后，磁盘IO用的少点，也有20-50M之多。
+3. lvm做raid、mirror，不好维护，更换坏盘需要命令配合，便利性和raid卡没法比。
+4. prometheus 做为监控系统，自身稳定可靠（好监控，好维护）比较重要。
