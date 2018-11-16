@@ -1,0 +1,22 @@
+#+TITLE: 关于 Neighbour table overflow
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* 缘起
+采用Prometheus收集监控数据，需要连接大量的机器，有时会有报错，"No buffer space available"。使用 Nagios 探测机器存活，有时也会有这个错误。同时dmesg里有错误，"Neighbour table overflow"。
+这个错误是什么意思呢？这得从链路层和IP层说起。
+
+* 链路层和IP层
+假设机器A想和机器B通信，B的IP地址是IPB。如果A和B处于同一个子网，那么A利用ARP协议，把IPB转成B的MAC地址，直接把数据发给B（在子网内广播，B发现数据帧的MAC地址是自己的，读取）。如果A和B处于不同的子网，那么A利用ARP协议获取网关的MAC地址，直接把数据发给网关（仍然是在子网内广播，网关发现数据帧的MAC地址是自己的，读取），网关把数据路由给下一站。
+
+* ARP缓存
+ARP协议把IP地址转成MAC地址，这个过程比较耗时，为此操作系统会缓存IP的MAC地址，称作ARP表，ARP表有大小限制，当需要缓存的ARP表项大于ARP表的大小限制时，就会出"Neighbour table overflow"，对应API的错误是"No buffer space available"。
+
+* 解决
+修改ARP表的大小限制。那该修改成多大呢？从上面的解释得知，至少和子网中能容纳的机器一样多。查看arp表的大小 ~arp -n | wc -l~ 。查看arp表的限制 ~sysctl -a | grep  net.ipv4.neigh.default.gc_thresh~ 。把下面的配置添加到 ~/etc/sysctl.conf~ 中，并运行 ~sysctl -p~ 。
+
+#+BEGIN_EXAMPLE
+net.ipv4.neigh.default.gc_thresh1 = 512
+net.ipv4.neigh.default.gc_thresh2 = 2048
+net.ipv4.neigh.default.gc_thresh3 = 4096
+#+END_EXAMPLE

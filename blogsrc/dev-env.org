@@ -19,9 +19,4 @@ fish是一个比较好用的shell ~spm -i fish~ 。但是安装官方建议放�
 2. 配置pandoc别名 ~alias chrome='/cygdrive/c/Users/zhengzhiyong/AppData/Local/Pandoc/pandoc'~
 
 * linux
-curl,git,emacs,global
-
-devtoolset-3-gcc
-devtoolset-3-gcc-c++
-
-scl enable devtoolset-3 bash
+curl,git,emacs,global,fortune-mod
