@@ -1,0 +1,13 @@
+#+TITLE: centos 安装 SystemTap
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 安装
+yum install -y systemtap systemtap-runtime
+yum install -y kernel-devel-$(uname -r)
+
+rpm -ivh http://debuginfo.centos.org/7/x86_64/kernel-debuginfo-$(uname -r).rpm
+rpm -ivh http://debuginfo.centos.org/7/x86_64/kernel-debuginfo-common-$(uname -m)-$(uname -r).rpm
+
+* 测试
+stap -v -e 'probe vfs.read {printf("read performed\n"); exit()}'

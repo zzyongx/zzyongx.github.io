@@ -1,0 +1,11 @@
+#+TITLE: 谁删了我的文件
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+我在线上服务器发现，刚生成的监控数据文件就被删除了，导致监控数据缺失。可到底是谁删除了我的文件？
+
+终极的解法是用 [[https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/systemtap_beginners_guide/index][SystemTap]] ，跟踪unlink系统调用。可是在线上用太费劲了，要安装内核调试信息。有没有简单的方法？
+
+因为不会有人故意删除，而和数据文件操作有关的程序都是bash写成的。所以，大概率是用rm命令删除的。为此，我重命名rm -> rm.impl，并写了定制版的rm ~echo 'ps -ef >> /tmp/rm.log' > rm && chmod a+x rm~ 。根据ps快照我找到了删我文件的程序。
+
+最终发现是关联脚本的一个BUG，会误删除正常的数据文件。这个bug也很有意思。 ~echo check-snap-ping | tr -dc [:print:]~ ，这个命令原意是只保留可打印字符，期待的输出是 ~check-snap-ping~ 。通常情况的确如此，除非执行命令的当前目录包含 ~:print~ 中以任何一个字符命名的文件。例如： ~touch i; echo check-snap-ping | tr -dc [:print:]~ ，则结果是 ~i~ 。因为 ~[]~ 是bash的通配符操作符， ~[:print:]~ 这里变成了匹配 ~:print~ 任何一个字符。这里线上机器的执行目录恰好一个叫 ~p~ 的文件，导致结果总是 ~p~ ，最初我草率以为是tr的bug，实在是谬之千里。加引号修复此bug， ~echo check-snap-ping | tr -dc '[:print:]'~ 。
