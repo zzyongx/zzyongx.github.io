@@ -7,6 +7,8 @@ gitlab 是开源的github，除了是git，还能用作code-review，并作为je
 * 安装
 我用的是linux，直接下载rpm包安装的。 ~rpm -ivh gitlab-ce-8.9.1-ce.1.el6.x86_64~ 一句话搞定。
 
+gitlab 是一整套的包，包括redis，postgres，nginx等等，手动管理非常麻烦，可以通过gitlab-ctl管理。
+
 * 配置
 
 ** 配置模板
@@ -50,3 +52,6 @@ gitlab_rails['smtp_authentication'] = "login"
 - =Client does not have permissions to send as this sender= ， =gitlab_email_from= 的配置可能必须和 =smtp_user_name= 一样
 
 只要有输出就好说，根据输出的内容Google就可以了。
+
+* 启动
+使用 =gitlab-ctl restart= 重启，可以解决很多问题，如果重启不行，就 =ps -ef | grep gitlab= 看看哪些进程没有被重启，手动kill掉，然后再重启。可以通过 =gitlab-ctl tail= 查看日志。

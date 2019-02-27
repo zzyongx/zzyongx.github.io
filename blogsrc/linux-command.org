@@ -56,7 +56,8 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 
 ** 私钥签名/公钥验证签名
 1. =openssl dgst -sha256 -sign private.pem -out /tmp/sign.sha256 datafile= 私钥签名
-2. =openssl dgst -sha256 -verify public.pem -signature /tmp/sign.sha256 datafile= 公钥验证签名
+2. =openssl dgst -sha256 -sign private.pem -hex -out /tmp/sign.sha256 datafile= 私钥签名，输出hex
+3. =openssl dgst -sha256 -verify public.pem -signature /tmp/sign.sha256 datafile= 公钥验证签名
 
 * Image
 ** 查看图片大小
@@ -104,6 +105,10 @@ Host *
 - ~date +%s~ 获取时间戳
 - ~date @1480065287~ 获取时间戳对应的时间
 
+** 输入换行和回车
+- echo "A,B" | tr ',' $'\n'   逗号转换行
+- echo "A,B" | tr ',' $'\t'   逗号转tab
+
 ** 干掉有问题的nginx进程
 - ~ps -eo pcpu,bsdtime,pid,user,args | grep -e '[n]ginx: worker' | sort -k1 -r | perl -ane 'if ($F[0] * 1 > 95 || int($F[1]) > 60) { print "echo $_ kill ${F[2]}; sleep 1; kill -9 ${F[2]} \n" }' | bash -x~
 
@@ -111,3 +116,14 @@ Host *
 ** 测试网速
 - ~curl http://example.com/bigfile.txt >/dev/null -vv~ 会显示打开速度
 - ~rsync -v example.com::path/bigfile.txt /bigfile.txt.`date +%s`~ 使用rsync，目标文件必须每次都不同
+
+* 比较两个排序的文件 comm
+假设有两个文件A B，每行一个IP，comm要求文件必须是排序的，如果已排序，可以忽略下面的sort命令
+** 交集
+~comm -12 <(sort A) <(sort B)~ 此外，还可以使用grep， ~grep -f A B~ 。
+
+** 差集 A - B
+~comm -23 <(sort A) <(sort B)~
+
+** 差集 B - A
+~comm -13 <(sort B) <(sort A)~
