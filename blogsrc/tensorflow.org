@@ -25,7 +25,7 @@ pip install pandas
 pip install scipy
 pip install sklearn
 
-jupyter-notebook --allow-root --ip=0.0.0.0 --no-browser --notebook-dir=~/jupyter-notebook
+jupyter-notebook --allow-root --ip=0.0.0.0 --no-browser --port 8846 --log-level=CRITICAL --notebook-dir=~/jupyter &
 %run test.py
 
 yum install openssl-devel ncurses-devel readline-devel bzip2-devel sqlite-devel zlib-devel bzip2-devel xz-devel
@@ -39,5 +39,6 @@ zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
 python3 -m pip install virtualenv
 virtualenv ~/python3
 source ~/python3/bin/activate
+deactivate
 
 #+END_SRC

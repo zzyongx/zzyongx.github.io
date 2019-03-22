@@ -127,3 +127,13 @@ Host *
 
 ** 差集 B - A
 ~comm -13 <(sort B) <(sort A)~
+
+* 比较两个文件
+** 普通比较
+vimdiff和diff
+
+** 忽略掉狭义的空行
+=diff -b file1 file2=
+
+** 忽略掉空行
+如果一行只包含空格，tab或者换行符，就算空行。 =diff <(grep -P '\w' file1) <(grep -P '\w' file2)=

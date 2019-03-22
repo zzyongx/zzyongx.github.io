@@ -60,6 +60,9 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 *** -f
 默认http 400以上的错误，curl的退出状态是0，指定 -f，如果发生400以上的错误，$? 为 22
 
+*** -m --connect-timeout
+=--connect-timeout= 指定连接超时， =-m= 指定请求超时。在一些版本的curl上碰到过指定了 =-m= 但是curl一直不退出的情况。
+
 *** --compressed
 默认请求 =Accept-Encoding= 为空，服务端响应 =Content-Encoding= 为空。如果服务端总是返回 =Content-Encoding: gzip= ，此时 curl 不会自动解压。使用这个参数发送 =Accept-Encoding: deflate, gzip= ，如果服务端返回gzip，curl可以自动解压。
 如果是用libcurl编程，使用 =CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ACCEPT_ENCODING, char *enc);=

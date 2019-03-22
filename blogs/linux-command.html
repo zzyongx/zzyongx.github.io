@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-02-20 三 13:51 -->
+<!-- 2019-03-22 五 09:49 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>linux命令备忘</title>
@@ -542,10 +542,42 @@ Host *
 </div>
 </div>
 </div>
+
+<div id="outline-container-orgda9a431" class="outline-2">
+<h2 id="orgda9a431"><span class="section-number-2">8</span> 比较两个文件</h2>
+<div class="outline-text-2" id="text-8">
+</div>
+<div id="outline-container-org338965b" class="outline-3">
+<h3 id="org338965b"><span class="section-number-3">8.1</span> 普通比较</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+vimdiff和diff
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb9e5b09" class="outline-3">
+<h3 id="orgb9e5b09"><span class="section-number-3">8.2</span> 忽略掉狭义的空行</h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+<code>diff -b file1 file2</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2fa387d" class="outline-3">
+<h3 id="org2fa387d"><span class="section-number-3">8.3</span> 忽略掉空行</h3>
+<div class="outline-text-3" id="text-8-3">
+<p>
+如果一行只包含空格，tab或者换行符，就算空行。 <code>diff &lt;(grep -P '\w' file1) &lt;(grep -P '\w' file2)</code>
+</p>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-02-20 三 13:51</p>
+<p class="date">Created: 2019-03-22 五 09:49</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
