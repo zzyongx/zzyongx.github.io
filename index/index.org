@@ -3,8 +3,8 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
-* 有意思的站点
-[[https://karpathy.github.io/][Andrej Karpathy blog]]
+* 值得收藏
+[[http://www.brendangregg.com/overview.html][Brendan Gregg]]
 
 * 2018 戊戌年
 -------------
