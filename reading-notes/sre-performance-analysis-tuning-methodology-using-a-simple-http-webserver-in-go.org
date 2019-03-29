@@ -1,0 +1,61 @@
+#+TITLE: 使用pprof调优go http server性能
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+本文是 [[https://medium.com/dm03514-tech-blog/sre-performance-analysis-tuning-methodology-using-a-simple-http-webserver-in-go-d475460f27ca][SRE: Performance Analysis: Tuning Methodology Using a Simple HTTP Webserver In Go]] 的阅读笔记，
+文中用到的代码可以在 [[https://github.com/dm03514/sre-tutorials/tree/master/performance/analysis-methodology-simple-http][analysis-methodology-simple-http]] 找到。
+
+* 目标
+99%的请求延迟低于60ms
+
+* 度量
+1. 使用 [[https://prometheus.io][prometheus]] 收集数据
+2. 使用 [[https://grafana.com/][grafana]] 作图
+
+* 来点压力
+使用 [[https://github.com/tsenart/vegeta][vegeta]] 来打压力。
+简单用法 =echo "POST http://localhost:8080" | vegeta attack -body tests/fixtures/age_no_match.json -rate=50 -duration=0 | tee results.bin | vegeta report=
+打压力之后，观看 grafana 中延迟和cpu的变化趋势。
+
+* 使用pprof
+在打压力前开启pprof数据收集 =curl http://localhost:8080/debug/pprof/profile?seconds=29 > cpu.1000_reqs_sec_no_optimizations.prof= 这里 ~seconds=29~ 是收集29秒的数据，时间跨度要超过打压力时间。
+
+然后启动 ~go tool pprof -http=0.0.0.0:12345 cpu.1000_reqs_sec_no_optimizations.prof~ ，
+通过浏览器 =http://localhost:12345/= 访问 profile 数据。其中 =VIEW->Flame Graph= 火焰图最直观。查看函数的耗时比例，有针对性的优化。
+
+* 个人心得
+压力和度量不是必须的，大部分时间，都是针对某个接口的优化。这时候 =time curl http://localhost:8080= 就能满足需求。通过火焰图找到哪慢之后，通常就比较好优化了。优化时有些注意事项：
+
+** 标准库和第三方库可能很慢
+此时通常不是他们实现的问题，而是用法不合适，例如反复调用 =strings.Split= 来解析字符串（内容来自 =/proc/net/tcp= ），先按行拆，再按空格拆（还要考虑多空格的问题），这带来两个问题，一个是多趟遍历，一个是多趟复制。如果是自己写逻辑解析字符串，可能只要一趟循环，一次复制，性能至少提高50%。
+
+** 语言内置的操作可能很慢
+=int= 和 =int64= 的转化，可能是零代价的，但是 =byte[]= 和 =string= 之间互转肯定不是，尽量避免这些开销（go的类型转换和C有很大不同）。如果可以，定义数组时一个合理的容量预估值可以显著提升性能，特别是数组大小从零增长到上万时。
+
+** 多考虑问题的特殊性
+考虑自己问题的特殊性（这相当于把解空间缩小了，自然解的更快），用特殊的方法。例如把字符串 =0500000A:8D72= 解析成IPv4的地址和端口 =10.0.0.5:36210= 。可能会先 =split= 再 =hexdecode= 再 =reverse= 之类，这就是泛化思路。实际上判断下长度是不是13，第8个字符是不是":"，就可以直接操作指定位置的数据了。性能至少提高50%。
+
+** 野路子也是好路子
+例如判断IP是不是私网地址，常规操作肯定是解析IP地址，然后判断在不在私网的CIDR段内。野路子是啥？如果IP是 =10.= 开头的直接判真，如果不是 =10.= =172.= =192.= 开头的直接判假，剩下的情况再走常规操作，这么下来，性能至少提高50%。
+
+** 不确定就试试
+把5个 =string= 和1个 =int= 格式化成一个字符串，用 =fmt.Sprintf= 是很自然的选择，当火焰图提示这块有问题时，可以试试把int转成string，然后手动拼接，说不定能提升50%，虽然代码丑了很多。
+
+** 保留profile的历史数据
+每次的profile数据放到不同的文件，对比每次修改的影响。
+
+** 火焰图和常识
+当火焰图提示某个函数耗时时，有两种可能。一种是真慢，一种是调用太多。例如在循环中，根据条件调用的函数，如果条件逻辑出了问题，导致调用次数多了数十倍，可能误导优化的方向。
+
+** 在大格局下考虑优化
+我曾花很多时间去优化一个接口，把性能提升了3倍，然而还是有很多超时。单看这个接口，已经没有优化空间了。从 =QPS= 上来看， =QPS= 并不大，但是 =QPS= 误导了我，因为它不是真的，我们没有秒级的数据。实际情况是，一个广泛部署的定时任务本来该在1分钟内随机执行，结果全在第0秒执行。修改这个问题后，超时消失了。从这个角度看，我之前所做的优化，意义就很小了。
+
+当HTTP接口的性能已经在一个合理范围内（什么算合理，看业务），从架构，业务等更大角度考虑优化。
+
+** 什么时候值得优化
+50%是很高的比例，但是效果却不一定显著，一天赚1块钱和1.5块钱其实没多大区别，因为本身就很小。但是一分钟赚1块钱和1.5块钱，区别可就大了，这就是累积效应。需要优化的场景：
+
+- 请求量很大的接口
+- 海量数据
+
+除了提升用户体验，优化的另一个好处是节约资源，这是老板实实在在能感受到的。

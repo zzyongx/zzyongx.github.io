@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-03-29 五 12:22 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>使用pprof调优go http server性能</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">使用pprof调优go http server性能</h1>
+<p>
+本文是 <a href="https://medium.com/dm03514-tech-blog/sre-performance-analysis-tuning-methodology-using-a-simple-http-webserver-in-go-d475460f27ca">SRE: Performance Analysis: Tuning Methodology Using a Simple HTTP Webserver In Go</a> 的阅读笔记，
+文中用到的代码可以在 <a href="https://github.com/dm03514/sre-tutorials/tree/master/performance/analysis-methodology-simple-http">analysis-methodology-simple-http</a> 找到。
+</p>
+
+<div id="outline-container-org2a224f2" class="outline-2">
+<h2 id="org2a224f2"><span class="section-number-2">1</span> 目标</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+99%的请求延迟低于60ms
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdda19fb" class="outline-2">
+<h2 id="orgdda19fb"><span class="section-number-2">2</span> 度量</h2>
+<div class="outline-text-2" id="text-2">
+<ol class="org-ol">
+<li>使用 <a href="https://prometheus.io">prometheus</a> 收集数据</li>
+<li>使用 <a href="https://grafana.com/">grafana</a> 作图</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org4377f0a" class="outline-2">
+<h2 id="org4377f0a"><span class="section-number-2">3</span> 来点压力</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+使用 <a href="https://github.com/tsenart/vegeta">vegeta</a> 来打压力。
+简单用法 <code>echo "POST http://localhost:8080" | vegeta attack -body tests/fixtures/age_no_match.json -rate=50 -duration=0 | tee results.bin | vegeta report</code>
+打压力之后，观看 grafana 中延迟和cpu的变化趋势。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4d0bbfe" class="outline-2">
+<h2 id="org4d0bbfe"><span class="section-number-2">4</span> 使用pprof</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+在打压力前开启pprof数据收集 <code>curl http://localhost:8080/debug/pprof/profile?seconds=29 &gt; cpu.1000_reqs_sec_no_optimizations.prof</code> 这里 <code>seconds=29</code> 是收集29秒的数据，时间跨度要超过打压力时间。
+</p>
+
+<p>
+然后启动 <code>go tool pprof -http=0.0.0.0:12345 cpu.1000_reqs_sec_no_optimizations.prof</code> ，
+通过浏览器 <code>http://localhost:12345/</code> 访问 profile 数据。其中 <code>VIEW-&gt;Flame Graph</code> 火焰图最直观。查看函数的耗时比例，有针对性的优化。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org75a24d6" class="outline-2">
+<h2 id="org75a24d6"><span class="section-number-2">5</span> 个人心得</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+压力和度量不是必须的，大部分时间，都是针对某个接口的优化。这时候 <code>time curl http://localhost:8080</code> 就能满足需求。通过火焰图找到哪慢之后，通常就比较好优化了。优化时有些注意事项：
+</p>
+</div>
+
+<div id="outline-container-orgff45169" class="outline-3">
+<h3 id="orgff45169"><span class="section-number-3">5.1</span> 标准库和第三方库可能很慢</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+此时通常不是他们实现的问题，而是用法不合适，例如反复调用 <code>strings.Split</code> 来解析字符串（内容来自 <code>/proc/net/tcp</code> ），先按行拆，再按空格拆（还要考虑多空格的问题），这带来两个问题，一个是多趟遍历，一个是多趟复制。如果是自己写逻辑解析字符串，可能只要一趟循环，一次复制，性能至少提高50%。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdc187f1" class="outline-3">
+<h3 id="orgdc187f1"><span class="section-number-3">5.2</span> 语言内置的操作可能很慢</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+<code>int</code> 和 <code>int64</code> 的转化，可能是零代价的，但是 <code>byte[]</code> 和 <code>string</code> 之间互转肯定不是，尽量避免这些开销（go的类型转换和C有很大不同）。如果可以，定义数组时一个合理的容量预估值可以显著提升性能，特别是数组大小从零增长到上万时。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org82d6a78" class="outline-3">
+<h3 id="org82d6a78"><span class="section-number-3">5.3</span> 多考虑问题的特殊性</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+考虑自己问题的特殊性（这相当于把解空间缩小了，自然解的更快），用特殊的方法。例如把字符串 <code>0500000A:8D72</code> 解析成IPv4的地址和端口 <code>10.0.0.5:36210</code> 。可能会先 <code>split</code> 再 <code>hexdecode</code> 再 <code>reverse</code> 之类，这就是泛化思路。实际上判断下长度是不是13，第8个字符是不是":"，就可以直接操作指定位置的数据了。性能至少提高50%。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orged23491" class="outline-3">
+<h3 id="orged23491"><span class="section-number-3">5.4</span> 野路子也是好路子</h3>
+<div class="outline-text-3" id="text-5-4">
+<p>
+例如判断IP是不是私网地址，常规操作肯定是解析IP地址，然后判断在不在私网的CIDR段内。野路子是啥？如果IP是 <code>10.</code> 开头的直接判真，如果不是 <code>10.</code> <code>172.</code> <code>192.</code> 开头的直接判假，剩下的情况再走常规操作，这么下来，性能至少提高50%。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org05158ec" class="outline-3">
+<h3 id="org05158ec"><span class="section-number-3">5.5</span> 不确定就试试</h3>
+<div class="outline-text-3" id="text-5-5">
+<p>
+把5个 <code>string</code> 和1个 <code>int</code> 格式化成一个字符串，用 <code>fmt.Sprintf</code> 是很自然的选择，当火焰图提示这块有问题时，可以试试把int转成string，然后手动拼接，说不定能提升50%，虽然代码丑了很多。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgde3a0f8" class="outline-3">
+<h3 id="orgde3a0f8"><span class="section-number-3">5.6</span> 保留profile的历史数据</h3>
+<div class="outline-text-3" id="text-5-6">
+<p>
+每次的profile数据放到不同的文件，对比每次修改的影响。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbb06ca1" class="outline-3">
+<h3 id="orgbb06ca1"><span class="section-number-3">5.7</span> 火焰图和常识</h3>
+<div class="outline-text-3" id="text-5-7">
+<p>
+当火焰图提示某个函数耗时时，有两种可能。一种是真慢，一种是调用太多。例如在循环中，根据条件调用的函数，如果条件逻辑出了问题，导致调用次数多了数十倍，可能误导优化的方向。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org856f93f" class="outline-3">
+<h3 id="org856f93f"><span class="section-number-3">5.8</span> 在大格局下考虑优化</h3>
+<div class="outline-text-3" id="text-5-8">
+<p>
+我曾花很多时间去优化一个接口，把性能提升了3倍，然而还是有很多超时。单看这个接口，已经没有优化空间了。从 <code>QPS</code> 上来看， <code>QPS</code> 并不大，但是 <code>QPS</code> 误导了我，因为它不是真的，我们没有秒级的数据。实际情况是，一个广泛部署的定时任务本来该在1分钟内随机执行，结果全在第0秒执行。修改这个问题后，超时消失了。从这个角度看，我之前所做的优化，意义就很小了。
+</p>
+
+<p>
+当HTTP接口的性能已经在一个合理范围内（什么算合理，看业务），从架构，业务等更大角度考虑优化。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0af697f" class="outline-3">
+<h3 id="org0af697f"><span class="section-number-3">5.9</span> 什么时候值得优化</h3>
+<div class="outline-text-3" id="text-5-9">
+<p>
+50%是很高的比例，但是效果却不一定显著，一天赚1块钱和1.5块钱其实没多大区别，因为本身就很小。但是一分钟赚1块钱和1.5块钱，区别可就大了，这就是累积效应。需要优化的场景：
+</p>
+
+<ul class="org-ul">
+<li>请求量很大的接口</li>
+<li>海量数据</li>
+</ul>
+
+<p>
+除了提升用户体验，优化的另一个好处是节约资源，这是老板实实在在能感受到的。
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2019-03-29 五 12:22</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
