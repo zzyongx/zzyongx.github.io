@@ -7,7 +7,14 @@
 
 ** 需要关注的配置
 1. =http_port 8080= 代理端口
-2. =http_access allow all= 访问ACL，否则会出403
+2. =http_access allow all= 访问ACL，否则会出403。这个ACL会带来安全问题，可以运行别人嗅探内网，尝试下面的ACL。
+
+*** 配置ACL
+#+BEGIN_EXAMPLE
+acl inet src 10.0.0.0/8
+http_access allow inet
+http_access deny all
+#+END_EXAMPLE
 
 ** 测试
 =curl http://www.baidu.com -x "host:port"= 最好在非本机测试，以检测acl没有问题。
@@ -19,3 +26,6 @@ HTTP_PROXY=$PROXYIP:8080 使用https
 
 * 利用代理对手机应用抓包
 这里使用PC上的夜神模拟器（[[http://noxandroidemulator.com/][Nox App Player]]），然后在 =设置->WLAN->WiredSSID(长按)= 配置代理为squid的地址，然后在squid上用 =tcpdump= 抓包即可。也可以直接在手机上配置代理，过程都是一样的。
+
+* 给nginx打上补丁
+前面说了nginx不支持CONNECT方法，但是nginx有很多squid不支持的优点。例如：把请求body打印到日志中。[[https://github.com/chobits/ngx_http_proxy_connect_module][ngx_http_proxy_connect_module]] 正是为此而来。

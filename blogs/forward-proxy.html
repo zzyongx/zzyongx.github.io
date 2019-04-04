@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-03-28 四 08:25 -->
+<!-- 2019-04-02 二 18:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>正向代理</title>
@@ -250,8 +250,19 @@ for the JavaScript code in this tag.
 <div class="outline-text-3" id="text-1-1">
 <ol class="org-ol">
 <li><code>http_port 8080</code> 代理端口</li>
-<li><code>http_access allow all</code> 访问ACL，否则会出403</li>
+<li><code>http_access allow all</code> 访问ACL，否则会出403。这个ACL会带来安全问题，可以运行别人嗅探内网，尝试下面的ACL。</li>
 </ol>
+</div>
+
+<div id="outline-container-org92b8a5e" class="outline-4">
+<h4 id="org92b8a5e"><span class="section-number-4">1.1.1</span> 配置ACL</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<pre class="example">
+acl inet src 10.0.0.0/8
+http_access allow inet
+http_access deny all
+</pre>
+</div>
 </div>
 </div>
 
@@ -284,10 +295,19 @@ HTTP<sub>PROXY</sub>=$PROXYIP:8080 使用https
 </p>
 </div>
 </div>
+
+<div id="outline-container-org9fd9270" class="outline-2">
+<h2 id="org9fd9270"><span class="section-number-2">4</span> 给nginx打上补丁</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+前面说了nginx不支持CONNECT方法，但是nginx有很多squid不支持的优点。例如：把请求body打印到日志中。<a href="https://github.com/chobits/ngx_http_proxy_connect_module">ngx<sub>http</sub><sub>proxy</sub><sub>connect</sub><sub>module</sub></a> 正是为此而来。
+</p>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-03-28 四 08:25</p>
+<p class="date">Created: 2019-04-02 二 18:43</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
