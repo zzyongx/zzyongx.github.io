@@ -1,4 +1,4 @@
-#+TITLE: 两个奇怪的梦，却和生活那么像
+#+TITLE: 两个奇怪的梦，却像极了生活
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
