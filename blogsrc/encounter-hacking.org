@@ -1,0 +1,54 @@
+#+TITLE: 腾讯云主机遭遇黑客入侵
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+先是收到腾讯云安全报警，“服务器疑似被黑客入侵”并提示了木马文件的位置。本文记录处理过程：
+
+* 大招
+如果数据可以从其它地方恢复，并且重新部署很容易，建议直接重装系统。
+
+* 加强sshd安全性
+- sshd禁用密码登陆
+- 排查所有用户的 =authorized_keys= 文件，看看有没有异常的key
+
+* 检查端口安全策略
+检查腾讯云的安全策略，看看是不是只开放了80和22端口。也可以先手动配置iptables。
+#+BEGIN_SRC bash
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --syn -j DROP
+#+END_SRC
+
+* 重新记录系统日志
+入侵者通常会删除 =/var/log= 下的重要日志，并关闭 =syslog=
+#+BEGIN_SRC bash
+
+# 启动syslog
+/etc/init.d/rsyslog start
+
+# 启动访问记录
+touch /var/log/wtmp
+chown root:utmp /var/log/wtmp
+chmod 0664 /var/log/wtmp
+
+#+END_SRC
+
+* 检查可疑进程
+先用 =netstat -tnlp= 检查可疑端口，kill掉相关进程。然后 =ps -ef= 检查可疑的进程，发现之后，顺便检查下父子进程。
+这里kill进程时用 =kill -9=
+
+* 检查可疑cron
+利用cron，入侵者可以定时启动自己。检查 ~/etc/crontab~ ~/etc/cron.d*~ ~/var/spool/cron~ ~/var/spool/cron/crontabs~ 这些路径。并通过 =/var/log/cron= 查看有没有可疑的cron执行。
+
+* 检查重要daemon进程
+检查 =crond= =sshd= 等具有root权限的daemon，以防他们被入侵者替换掉了，假装成正经进程的木马文件最可怕。
+
+* 删除木马文件
+在排查可疑进程，可疑cron时发现的文件，立即删除掉。隔段时间再检查下，以免有遗漏的进程或cron没被清理干净。
+
+* 预防最重要
+预防比治疗简单的多得多，不要心存侥幸。
+
+- 检查云主机的安全策略，只放开必要端口，开放端口的进程尽量别用ROOT运行
+- 禁用密码登陆
+- 备份重要数据，并作为常规流程

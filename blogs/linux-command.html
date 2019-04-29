@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-03-22 五 09:49 -->
+<!-- 2019-04-12 五 09:17 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>linux命令备忘</title>
@@ -316,6 +316,16 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </ol>
 </div>
 </div>
+
+<div id="outline-container-org70113ec" class="outline-3">
+<h3 id="org70113ec"><span class="section-number-3">2.3</span> linux命令行如何在单引号字符串中转义单引号</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+使用 <code>'"'"'</code> 例如： <code>echo "100 XY" | perl -an -e 'print "UPDATE TABLE test SET config='"'"'${F[1]}'"'"' WHERE id=${F[0]};\n"'</code>
+输出 <code>UPDATE TABLE test SET config='XY' WHERE id=100;</code>
+</p>
+</div>
+</div>
 </div>
 
 <div id="outline-container-orge4ed298" class="outline-2">
@@ -577,7 +587,7 @@ vimdiff和diff
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-03-22 五 09:49</p>
+<p class="date">Created: 2019-04-12 五 09:17</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

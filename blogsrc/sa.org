@@ -1,0 +1,11 @@
+#+TITLE: 系统管理员检查清单
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 磁盘
+- ssd盘还是普通盘
+- 如何做RAID
+- 文件系统怎么选
+- RAID还是JBOD(Just a bunch of disks，需要了解软件支持情况)
+- 操作系统的I/O Scheduler怎么选

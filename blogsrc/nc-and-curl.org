@@ -74,7 +74,7 @@ nc和curl是两大利器，一个用于tcp，一个用于http。这里记录一�
 把响应header输出到指定的文件，用于获取header。
 
 *** -w
-可以将http请求的一些内部细节格式化输出。例如 =curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect},ssldone:%{time_appconnect},code:%{http_code}\n"= 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
+可以将http请求的一些内部细节格式化输出。例如 =curl -so /dev/null https://www.sogou.com -w "tcp:%{time_connect}\tssldone:%{time_appconnect}\tcode:%{http_code}\tspeed_download:%{speed_download}\tsize_download:%{size_download}\n"= 可以打印出连接建立时间，ssl连接建立时间，进而分析https的性能。
 
 ** 常用法
 *** 请求指定的服务器

@@ -29,6 +29,10 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 1. 16进制转二进制 =echo "6F0AD0BFEE7D4B478AFED096E03CD80A" | xxd -r -p | base64=
 2. 二进制转16进制 ~echo "bwrQv+59S0eK/tCW4DzYCg==" | base64 -d | xxd -l 16 -c 256 -p~  注意 =-l= 指定的是二进制的长度，必须指定对 =-c= 指定换行位置，用于数据较长时
 
+** linux命令行如何在单引号字符串中转义单引号
+使用 ='"'"'= 例如： ~echo "100 XY" | perl -an -e 'print "UPDATE TABLE test SET config='"'"'${F[1]}'"'"' WHERE id=${F[0]};\n"'~
+输出 ~UPDATE TABLE test SET config='XY' WHERE id=100;~
+
 * OpenSSL
 
 ** HMAC
@@ -111,6 +115,16 @@ Host *
 
 ** 干掉有问题的nginx进程
 - ~ps -eo pcpu,bsdtime,pid,user,args | grep -e '[n]ginx: worker' | sort -k1 -r | perl -ane 'if ($F[0] * 1 > 95 || int($F[1]) > 60) { print "echo $_ kill ${F[2]}; sleep 1; kill -9 ${F[2]} \n" }' | bash -x~
+
+* sshd
+** 禁用密码登陆
+修改 =/etc/ssh/sshd_config= 配置文件
+#+BEGIN_EXAMPLE
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+UsePAM no
+#+END_EXAMPLE
+修改之后 =/etc/init.d/sshd reload= 。切记： *测试时新启终端，不要退出当前登陆，以免配置错误，再也无法登陆*
 
 * Net
 ** 测试网速
