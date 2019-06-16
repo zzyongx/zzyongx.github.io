@@ -18,5 +18,24 @@ fish是一个比较好用的shell ~spm -i fish~ 。但是安装官方建议放�
 1. 配置windows别名 ~alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'~
 2. 配置pandoc别名 ~alias chrome='/cygdrive/c/Users/zhengzhiyong/AppData/Local/Pandoc/pandoc'~
 
-* linux
+# linux
+## 基础库和软件
 curl,git,emacs,global,fortune-mod
+
+## 安装emacs的图形依赖
+sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev
+
+## 终端在tab中打开标签
+在终端菜单 编辑->首选项 中配置
+
+## 配置vpn
+apt-get install vpnc
+F=/usr/local/bin/vpnc.start; echo -e '#!/bin/bash\nvpnc /etc/vpnc/default.conf' > $F; chmod a+x $F
+
+## 配置bash_profile
+export PS1="[@zzyong \W]\$ "
+
+# golang
+tar -C /usr/local -xzf go1.12.6.linux-386.tar.gz
+echo 'export PATH=/usr/local/go/bin:$PATH' >> ~/.bash_profile
+echo 'export GOPATH=/data/zzyong/gitlab' >> ~/.bash_profile
