@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>从50余次错误中学得的8个系统设计原则</title>
+<!-- 2019-06-16 日 22:10 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">从50余次错误中学得的8个系统设计原则</h1>
+<p>
+原文：<a href="https://priyankvex.wordpress.com/2018/03/11/8-system-design-principles-i-learned-after-doing-it-wrong-more-than-50-times/">8 System Design Principles I learned After Doing It Wrong More than 50 Times!</a> 本文夹杂着很多我自己的感悟。
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 透过功能需求看底层问题</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+用户往往会说，我需要一个什么功能，而不会说我要解决一个什么问题。为此需要从用户的需求，挖掘整理出问题的本质，为这个本质需求设计功能。
+</p>
+
+<p>
+例如：产品已有功能是IM发送通知，用户提需求“IM发送通知的同时，用邮件也发送一份”，用户需要邮件是因为邮件翻阅历史通知更方便，本质需求是方便的查看通知历史，而不是邮件发送通知。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 如何让功能更健壮、稳定、可用</h2>
+<div class="outline-text-2" id="text-2">
+<ol class="org-ol">
+<li>功能的用户是谁，同样的功能，用户不同，功能的设计有很大不同
+</li>
+<li>功能的使用场景，例如：让运维人员快速回滚系统版本的产品一定要优先考虑移动端的操作性，这样用户可以随时随地操作。
+</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 首次迭代交付什么</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+按时交付足够好的产品，优于永远处于开发状态的完美产品。例如：线上日志检索系统，支持压缩格式的日志是完美状态，但用户90%的情况都是检索未压缩日志，这时就可用先不支持压缩日志。虽然不完美，但用户可用提前用上。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 基于现有功能迭代是否容易</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+我不太同意原文观点，我认为除非未来的功能路线图非常清楚，否则把现有功能实现好就行了。预测未来是困难的，不要为了未来渺茫的功能预留空间，未来到来时，重新设计也不会太困难。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 影响系统扩展的可能瓶颈是什么</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+也不完全同意原文观点，要考虑可扩展性，但不考虑无限扩展性。无论是计算还是存储，在某个阀值内某种架构是适当的，超过某个阀值，重新架构才是最好的选择，这个已经不能算是可扩展性了。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 收集什么数据，如何使用它们</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+对于一个产品而言，开发功能并上线，只是第一步，运维和运营才是关键。运维保证现在的功能正确对外提供服务，运营是扩大功能的用户，并为功能迭代寻找数据支撑。两者需要收集的数据可能有重合，但看数据的视角一般不同。
+</p>
+
+<p>
+运维人员通常需要访问量，耗时，正确性等数据，运营人员通常需要用户数，活跃度，功能使用情况等数据。这些数据大部分是产品上线前就要设计好，产品上线后可以直接收集的。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 代码的修改体验如何</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+核心代码要有测试，特别是会破坏数据完整性的代码。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 如何度量功能是否被正确提供</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+专门强调运维人员如何使用收集的数据。开发和测试保证的正确性，本质上是静态正确性，一是用户少，二是运行环境稳定。上线后要保证动态正确性，这时候用户多，数据也变得多样，并且运行环境不断变化，例如存储数据量变大了，可能导致性能问题。运维人员根据运行数据判断功能是否正确提供（服务是否正常）。系统可供收集的数据越多，判断服务是否正常越有把握。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> 我自己的一点经验：</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+系统一定要可回滚，这里不仅包括代码可回滚，还包括数据要先后兼容。只有系统可回滚，在上线时发现问题才能以最快的速度恢复。可回滚非常困难，尤其在升级涉及到大量数据的时候。
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2019-06-16 日 22:10</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

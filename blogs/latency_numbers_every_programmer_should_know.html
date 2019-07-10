@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>每个程序都应该知道的延迟数据</title>
+<!-- 2019-06-16 日 17:12 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">每个程序都应该知道的延迟数据</h1>
+<p>
+阅读笔记，原文来自：<a href="https://people.eecs.berkeley.edu/~rcs/research/interactive_latency.html">Latency Numbers Every Programmer Should Know</a>
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">操作\耗时</th>
+<th scope="col" class="left">1998</th>
+<th scope="col" class="left">1999</th>
+<th scope="col" class="left">2000</th>
+<th scope="col" class="left">2001</th>
+<th scope="col" class="left">2002</th>
+<th scope="col" class="left">2003</th>
+<th scope="col" class="left">2004</th>
+<th scope="col" class="left">2005</th>
+<th scope="col" class="left">2006</th>
+<th scope="col" class="left">2007</th>
+<th scope="col" class="left">2008</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">L1 cache reference</td>
+<td class="left">11ns</td>
+<td class="left">8ns</td>
+<td class="left">6ns</td>
+<td class="left">4ns</td>
+<td class="left">3ns</td>
+<td class="left">2ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+</tr>
+
+<tr>
+<td class="left">Branch mispredict</td>
+<td class="left">38ns</td>
+<td class="left">27ns</td>
+<td class="left">19ns</td>
+<td class="left">13ns</td>
+<td class="left">9ns</td>
+<td class="left">7ns</td>
+<td class="left">5ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+</tr>
+
+<tr>
+<td class="left">L2 cache reference</td>
+<td class="left">49ns</td>
+<td class="left">35ns</td>
+<td class="left">25ns</td>
+<td class="left">17ns</td>
+<td class="left">12ns</td>
+<td class="left">9ns</td>
+<td class="left">6ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+</tr>
+
+<tr>
+<td class="left">Mutex lock/unlock</td>
+<td class="left">189ns</td>
+<td class="left">133ns</td>
+<td class="left">94ns</td>
+<td class="left">67ns</td>
+<td class="left">47ns</td>
+<td class="left">33ns</td>
+<td class="left">24ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+</tr>
+
+<tr>
+<td class="left">Main memory reference</td>
+<td class="left">116ns</td>
+<td class="left">108ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+</tr>
+
+<tr>
+<td class="left">Send 2000 bytes over commodity network</td>
+<td class="left">91us</td>
+<td class="left">64us</td>
+<td class="left">45us</td>
+<td class="left">32us</td>
+<td class="left">23us</td>
+<td class="left">16us</td>
+<td class="left">11us</td>
+<td class="left">8us</td>
+<td class="left">6us</td>
+<td class="left">4us</td>
+<td class="left">3us</td>
+</tr>
+
+<tr>
+<td class="left">Compress 1KB wth Zippy</td>
+<td class="left">23us</td>
+<td class="left">16us</td>
+<td class="left">11us</td>
+<td class="left">8us</td>
+<td class="left">6us</td>
+<td class="left">4us</td>
+<td class="left">3us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+</tr>
+
+<tr>
+<td class="left">Read 1,000,000 bytes sequentially from memory</td>
+<td class="left">479us</td>
+<td class="left">380us</td>
+<td class="left">301us</td>
+<td class="left">239us</td>
+<td class="left">190us</td>
+<td class="left">151us</td>
+<td class="left">120us</td>
+<td class="left">95us</td>
+<td class="left">75us</td>
+<td class="left">60us</td>
+<td class="left">47us</td>
+</tr>
+
+<tr>
+<td class="left">SSD random read</td>
+<td class="left">18us</td>
+<td class="left">18us</td>
+<td class="left">18us</td>
+<td class="left">18us</td>
+<td class="left">18us</td>
+<td class="left">17us</td>
+<td class="left">17us</td>
+<td class="left">17us</td>
+<td class="left">17us</td>
+<td class="left">17us</td>
+<td class="left">17us</td>
+</tr>
+
+<tr>
+<td class="left">Read 1,000,000 bytes sequentially from SSD</td>
+<td class="left">8ms</td>
+<td class="left">6ms</td>
+<td class="left">5ms</td>
+<td class="left">4ms</td>
+<td class="left">3ms</td>
+<td class="left">2ms</td>
+<td class="left">2ms</td>
+<td class="left">2ms</td>
+<td class="left">1ms</td>
+<td class="left">987us</td>
+<td class="left">784us</td>
+</tr>
+
+<tr>
+<td class="left">Read 1,000,000 bytes sequentially from disk</td>
+<td class="left">40ms</td>
+<td class="left">28ms</td>
+<td class="left">20ms</td>
+<td class="left">14ms</td>
+<td class="left">10ms</td>
+<td class="left">9ms</td>
+<td class="left">8ms</td>
+<td class="left">7ms</td>
+<td class="left">6ms</td>
+<td class="left">5ms</td>
+<td class="left">4ms</td>
+</tr>
+
+<tr>
+<td class="left">Disk seek</td>
+<td class="left">11ms</td>
+<td class="left">11ms</td>
+<td class="left">10ms</td>
+<td class="left">9ms</td>
+<td class="left">9ms</td>
+<td class="left">8ms</td>
+<td class="left">8ms</td>
+<td class="left">7ms</td>
+<td class="left">7ms</td>
+<td class="left">6ms</td>
+<td class="left">6ms</td>
+</tr>
+</tbody>
+</table>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">操作\耗时</th>
+<th scope="col" class="left">2009</th>
+<th scope="col" class="left">2010</th>
+<th scope="col" class="left">2011</th>
+<th scope="col" class="left">2012</th>
+<th scope="col" class="left">2013</th>
+<th scope="col" class="left">2014</th>
+<th scope="col" class="left">2015</th>
+<th scope="col" class="left">2016</th>
+<th scope="col" class="left">2017</th>
+<th scope="col" class="left">2018</th>
+<th scope="col" class="left">2019</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">L1 cache reference</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+<td class="left">1ns</td>
+</tr>
+
+<tr>
+<td class="left">Branch mispredict</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+<td class="left">3ns</td>
+</tr>
+
+<tr>
+<td class="left">L2 cache reference</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+<td class="left">4ns</td>
+</tr>
+
+<tr>
+<td class="left">Mutex lock/unlock</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+<td class="left">17ns</td>
+</tr>
+
+<tr>
+<td class="left">Main memory reference</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+<td class="left">100ns</td>
+</tr>
+
+<tr>
+<td class="left">Send 2000 bytes over commodity network</td>
+<td class="left">2us</td>
+<td class="left">1us</td>
+<td class="left">1us</td>
+<td class="left">707ns</td>
+<td class="left">500ns</td>
+<td class="left">354ns</td>
+<td class="left">250ns</td>
+<td class="left">177ns</td>
+<td class="left">125ns</td>
+<td class="left">88ns</td>
+<td class="left">62ns</td>
+</tr>
+
+<tr>
+<td class="left">Compress 1KB wth Zippy</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+<td class="left">2us</td>
+</tr>
+
+<tr>
+<td class="left">Read 1,000,000 bytes sequentially from memory</td>
+<td class="left">38us</td>
+<td class="left">30us</td>
+<td class="left">24us</td>
+<td class="left">19us</td>
+<td class="left">15us</td>
+<td class="left">12us</td>
+<td class="left">9us</td>
+<td class="left">7us</td>
+<td class="left">6us</td>
+<td class="left">5us</td>
+<td class="left">4us</td>
+</tr>
+
+<tr>
+<td class="left">SSD random read</td>
+<td class="left">17us</td>
+<td class="left">17us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+<td class="left">16us</td>
+</tr>
+
+<tr>
+<td class="left">Read 1,000,000 bytes sequentially from SSD</td>
+<td class="left">622us</td>
+<td class="left">494us</td>
+<td class="left">392us</td>
+<td class="left">311us</td>
+<td class="left">247us</td>
+<td class="left">196us</td>
+<td class="left">156us</td>
+<td class="left">123us</td>
+<td class="left">98us</td>
+<td class="left">78us</td>
+<td class="left">62us</td>
+</tr>
+
+<tr>
+<td class="left">Read 1,000,000 bytes sequentially from disk</td>
+<td class="left">4ms</td>
+<td class="left">3ms</td>
+<td class="left">3ms</td>
+<td class="left">2ms</td>
+<td class="left">2ms</td>
+<td class="left">2ms</td>
+<td class="left">2ms</td>
+<td class="left">1ms</td>
+<td class="left">1ms</td>
+<td class="left">1ms</td>
+<td class="left">947us</td>
+</tr>
+
+<tr>
+<td class="left">Disk seek</td>
+<td class="left">5ms</td>
+<td class="left">5ms</td>
+<td class="left">5ms</td>
+<td class="left">4ms</td>
+<td class="left">4ms</td>
+<td class="left">4ms</td>
+<td class="left">4ms</td>
+<td class="left">3ms</td>
+<td class="left">3ms</td>
+<td class="left">3ms</td>
+<td class="left">3ms</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2019-06-16 日 17:12</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

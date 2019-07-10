@@ -1,0 +1,36 @@
+#+TITLE: 每个程序都应该知道的延迟数据
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+阅读笔记，原文来自：[[https://people.eecs.berkeley.edu/%7Ercs/research/interactive_latency.html][Latency Numbers Every Programmer Should Know]]
+
+| 操作\耗时                                     | 1998  | 1999  | 2000  | 2001  | 2002  | 2003  | 2004  | 2005  | 2006  | 2007  | 2008 |
+|-----------------------------------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+------|
+| L1 cache reference                            | 11ns  | 8ns   | 6ns   | 4ns   | 3ns   | 2ns   | 1ns   | 1ns   | 1ns   | 1ns   | 1ns  |
+| Branch mispredict                             | 38ns  | 27ns  | 19ns  | 13ns  | 9ns   | 7ns   | 5ns   | 3ns   | 3ns   | 3ns   | 3ns  |
+| L2 cache reference                            | 49ns  | 35ns  | 25ns  | 17ns  | 12ns  | 9ns   | 6ns   | 4ns   | 4ns   | 4ns   | 4ns  |
+| Mutex lock/unlock                             | 189ns | 133ns | 94ns  | 67ns  | 47ns  | 33ns  | 24ns  | 17ns  | 17ns  | 17ns  | 17ns |
+| Main memory reference                         | 116ns | 108ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns |
+| Send 2000 bytes over commodity network        | 91us  | 64us  | 45us  | 32us  | 23us  | 16us  | 11us  | 8us   | 6us   | 4us   |   3us |
+| Compress 1KB wth Zippy                        | 23us  | 16us  | 11us  | 8us   | 6us   | 4us   | 3us   | 2us   | 2us   | 2us   |  2us |
+| Read 1,000,000 bytes sequentially from memory | 479us | 380us | 301us | 239us | 190us | 151us | 120us | 95us  | 75us  | 60us  |  47us |
+| SSD random read                               | 18us  | 18us  | 18us  | 18us  | 18us  | 17us  | 17us  | 17us  | 17us  | 17us  | 17us |
+| Read 1,000,000 bytes sequentially from SSD    | 8ms   | 6ms   | 5ms   | 4ms   | 3ms   | 2ms   | 2ms   | 2ms   | 1ms   | 987us |  784us |
+| Read 1,000,000 bytes sequentially from disk   | 40ms  | 28ms  | 20ms  | 14ms  | 10ms  | 9ms   | 8ms   | 7ms   | 6ms   | 5ms   | 4ms  |
+| Disk seek                                     | 11ms  | 11ms  | 10ms  | 9ms   | 9ms   | 8ms   | 8ms   | 7ms   | 7ms   | 6ms   | 6ms  |
+
+| 操作\耗时                                     | 2009  | 2010  | 2011  | 2012  | 2013  | 2014  | 2015  | 2016  | 2017  | 2018  | 2019  |
+|-----------------------------------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------|
+| L1 cache reference                            | 1ns   | 1ns   | 1ns   | 1ns   | 1ns   | 1ns   | 1ns   | 1ns   | 1ns   | 1ns   | 1ns   |
+| Branch mispredict                             | 3ns   | 3ns   | 3ns   | 3ns   | 3ns   | 3ns   | 3ns   | 3ns   | 3ns   | 3ns   | 3ns   |
+| L2 cache reference                            | 4ns   | 4ns   | 4ns   | 4ns   | 4ns   | 4ns   | 4ns   | 4ns   | 4ns   | 4ns   | 4ns   |
+| Mutex lock/unlock                             | 17ns  | 17ns  | 17ns  | 17ns  | 17ns  | 17ns  | 17ns  | 17ns  | 17ns  | 17ns  | 17ns  |
+| Main memory reference                         | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns | 100ns |
+| Send 2000 bytes over commodity network        | 2us   | 1us   | 1us   | 707ns | 500ns | 354ns | 250ns | 177ns | 125ns | 88ns  | 62ns  |
+| Compress 1KB wth Zippy                        | 2us   | 2us   | 2us   | 2us   | 2us   | 2us   | 2us   | 2us   | 2us   | 2us   | 2us   |
+| Read 1,000,000 bytes sequentially from memory | 38us  | 30us  | 24us  | 19us  | 15us  | 12us  | 9us   | 7us   | 6us   | 5us   | 4us   |
+| SSD random read                               | 17us  | 17us  | 16us  | 16us  | 16us  | 16us  | 16us  | 16us  | 16us  | 16us  | 16us  |
+| Read 1,000,000 bytes sequentially from SSD    | 622us | 494us | 392us | 311us | 247us | 196us | 156us | 123us | 98us  | 78us  | 62us  |
+| Read 1,000,000 bytes sequentially from disk   | 4ms   | 3ms   | 3ms   | 2ms   | 2ms   | 2ms   | 2ms   | 1ms   | 1ms   | 1ms   | 947us |
+| Disk seek                                     | 5ms   | 5ms   | 5ms   | 4ms   | 4ms   | 4ms   | 4ms   | 3ms   | 3ms   | 3ms   | 3ms   |
