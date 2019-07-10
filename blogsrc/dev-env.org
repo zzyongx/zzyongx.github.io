@@ -18,5 +18,14 @@ fish是一个比较好用的shell ~spm -i fish~ 。但是安装官方建议放�
 1. 配置windows别名 ~alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'~
 2. 配置pandoc别名 ~alias chrome='/cygdrive/c/Users/zhengzhiyong/AppData/Local/Pandoc/pandoc'~
 
+** FAQ
+*** 使用spm报错
+$ spm -i vim-minimal
+Unable to start 'C:\Users\zhengzhiyong\AppData\Roaming\Swan\.cache\spm\setup-x86_64.exe': The operating system denied access to the specified file.
+
+修正方法：
+1. 删除 setup-x86_64.exe
+2. spm -u
+
 * linux
 curl,git,emacs,global,fortune-mod

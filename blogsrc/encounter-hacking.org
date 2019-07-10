@@ -31,6 +31,10 @@ touch /var/log/wtmp
 chown root:utmp /var/log/wtmp
 chmod 0664 /var/log/wtmp
 
+touch /var/log/lastlog
+chgrp utmp /var/log/lastlog
+chmod 0664 /var/log/lastlog
+
 #+END_SRC
 
 * 检查可疑进程

@@ -116,6 +116,10 @@ Host *
 ** 干掉有问题的nginx进程
 - ~ps -eo pcpu,bsdtime,pid,user,args | grep -e '[n]ginx: worker' | sort -k1 -r | perl -ane 'if ($F[0] * 1 > 95 || int($F[1]) > 60) { print "echo $_ kill ${F[2]}; sleep 1; kill -9 ${F[2]} \n" }' | bash -x~
 
+** 获取进程启动时间
+- =ls -ld /proc/<pid>=  这种方法比较好记
+- =ps -eo pid,cmd,etime=
+
 * sshd
 ** 禁用密码登陆
 修改 =/etc/ssh/sshd_config= 配置文件

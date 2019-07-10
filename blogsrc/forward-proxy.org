@@ -22,7 +22,7 @@ http_access deny all
 * git 使用代理
 PROXYIP=192.168.10.5
 HTTPS_PROXY=$PROXYIP:8080 使用https
-HTTP_PROXY=$PROXYIP:8080 使用https
+HTTP_PROXY=$PROXYIP:8080 使用http
 
 * 利用代理对手机应用抓包
 这里使用PC上的夜神模拟器（[[http://noxandroidemulator.com/][Nox App Player]]），然后在 =设置->WLAN->WiredSSID(长按)= 配置代理为squid的地址，然后在squid上用 =tcpdump= 抓包即可。也可以直接在手机上配置代理，过程都是一样的。
