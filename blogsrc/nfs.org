@@ -1,0 +1,16 @@
+#+TITLE: nfs ops
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 启动 nfs
+#+BEGIN_SRC bash
+systemctl start rpcbind
+systemctl start nfs-lock && systemctl enable nfs-lock
+systemctl start nfs && systemctl enable nfs
+#+END_SRC
+
+* 配置导出目录
+~echo "/data/partimag 10.0.0.0/8(rw,async)" >> /etc/exports && exportfs -a~
+
+* 挂载 nfs
+~mkdir -p /mnt/partimag && mount -F nfs.server:/data/partimag/ /mnt/partimag~
