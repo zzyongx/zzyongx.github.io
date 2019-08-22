@@ -6,6 +6,12 @@
 * 值得收藏
 [[http://www.brendangregg.com/overview.html][Brendan Gregg]]
 
+* 2019 己亥年
+--------------
+
+** 经验
+[[https://zzyongx.github.io/blogs/zombie_process_caused_by_systemd.html][排查systemd的bug引起的僵尸进程]] <2019-08-22>
+
 * 2018 戊戌年
 -------------
 

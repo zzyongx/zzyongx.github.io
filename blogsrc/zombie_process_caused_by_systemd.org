@@ -1,0 +1,28 @@
+#+TITLE: systemd的bug引起的僵死进程
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+起因是某台机器的监控程序出现大量僵尸进程。这个监控程序通过cron运行的，每分钟一次，因此很容易堆积大量僵尸进程，把系统拖死。
+
+* 试图复现，捕捉执行过程
+我们的程序名称是 =sogou-agent= ，因此我们用 =ps kstart_time -e -o lstart,cmd | grep sogou-agent | tail= 观察有没有新的僵尸出现。
+1. 手动执行
+2. 在=cron= 中用 =strace= 跟踪程序执行
+这两种方法都没有观察到新的僵死进程，但是去掉 =strace= 让程序自己执行，新的僵尸进程就出现了。
+
+* 不止监控程序有僵尸进程
+某次观察新的僵尸进程时使用了命令 =ps kstart_time -e -o lstart,cmd | grep defunct | tail= ，这个偶然的尝试发现不止监控进程有僵尸进程，其它程序包括ssh，strace也有僵尸进程。因为我们在cron中使用strace运行监控程序，所以strace变成了僵尸进程，没有sogou-agent的僵尸进程出现。
+
+* 观察systemd
+因为僵尸进程依赖systemd收割，怀疑是systemd的问题，发现三行可疑日志：
+#+BEGIN_EXAMPLE
+Aug 20 16:44:41 djt_41_191 systemd: Assertion 'pid >= 1' failed at src/core/unit.c:1996, function unit_watch_pid(). Aborting.
+Aug 20 16:44:41 djt_41_191 systemd: Caught <ABRT>, cannot fork for core dump: Cannot allocate memory
+Aug 20 16:44:41 djt_41_191 systemd: Freezing execution.
+#+END_EXAMPLE
+
+观察僵尸进程大量出现的时间点，和这个日志吻合，另外执行 =systemctl status= 报错 =Failed to read server status: Connection timed out= 。官方早已确认了这个bug，影响范围详见：https://access.redhat.com/solutions/3096191
+
+* 经验教训
+1. 监控程序之前出过多次僵尸进程，但都没保留现场，所以这次查看进程只看了监控程序，遗漏了重要信息。
+2. 多次翻看 =/var/log/message= 日志，但不够仔细，遗漏了那三行可疑的日志。
