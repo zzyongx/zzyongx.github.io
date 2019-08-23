@@ -1,0 +1,84 @@
+#+TITLE: nginx 缓存陷阱
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+接手的一个老系统，nginx做proxy，apache做upstream。某个请求总是返回MySQL连接错误，但是手动连接却没有问题。进一步排查发现nginx配置了cache，也就是某次请求upstream返回了错误，被nginx缓存住了，虽然后来upstream恢复了正常，但cache仍然继续返回错误。为了解决这个问题，我需要搞清两个问题：
+1. 如何控制什么样的响应被缓存
+2. 如何控制缓存时间
+
+* 测试配置文件
+相应的配置做了注释，并提示了注意事项。
+
+nginx.conf
+#+BEGIN_EXAMPLE
+# 配置缓存目录 /data/nginx/cache，必须确保目录存在，并且nobody用户可以写入（这里假设以nginx以nobody用户运行）
+# sudo -u nobody touch /data/nginx/cache/test 测试目录可用
+
+# keys_zone 配置的是缓存元数据的内存大小，max_size 是缓存所用磁盘大小
+# inactive 的含义是2h内没有访问的cache，被自动清除
+# use_temp_path=off upstream过来的响应直接写入缓存目录，避免二次拷贝
+
+proxy_cache_path /data/nginx/cache levels=2:2 keys_zone=content_cache:512m max_size=10g inactive=2h use_temp_path=off;
+#+END_EXAMPLE
+
+conf.d/test.cache.conf
+#+BEGIN_EXAMPLE
+# cache
+server {
+  listen       80;
+
+  # 必须为on，否则cache不生效
+  proxy_buffering on;
+
+  # 方便查看缓存是否生效，也可以把这个加入access log，方便统计
+  add_header X-Cache-Status $upstream_cache_status;
+  # cache 使用的 key
+  proxy_cache_key $proxy_host$request_uri;
+
+  location /t1 {
+    # 返回200的请求被缓存120小时
+    proxy_cache_valid 200 120h;
+    proxy_cache content_cache;
+
+    rewrite /t1/(.+)$ /$1 break;
+    proxy_pass http://127.0.0.1:9090;
+  }
+
+  location /t2 {
+    # 返回200的请求被缓存，缓存时间由upstream控制
+    proxy_cache_valid 200 0h;
+    proxy_cache content_cache;
+
+    rewrite /t2/(.+)$ /$1 break;
+    proxy_pass http://127.0.0.1:9090;
+  }
+}
+
+# upstream
+server {
+  listen 9090;
+  default_type "text/plain";
+
+  location /static {
+    return 200 "CACHED-STATIC@$request_uri";
+  }
+
+  location /max-age {
+    add_header Cache-Control "max-age=86400";
+    return 200 "CACHED-MAX-AGE@$request_uri";
+  }
+}
+#+END_EXAMPLE
+
+* 测试
+** proxy控制缓存时间
+t1 配置了 =proxy_cache_valid 200 120h= 只要 =127.0.0.1/t1/= 返回200 (static或max-age)，就会被缓存120h。这就带来一个问题：很多upstream，因为框架的原因，或者开发自身的原因，当（可恢复的）错误发生时，仍然返回了200，导致错误响应被缓存。
+
+** upstream控制缓存时间
+t2 配置了 =proxy_cache_valid 200 0h= 只有访问 =127.0.0.1/t2/max-age= 才会被缓存，static不会，因为upstream只给max-age配置了缓存。
+
+** 两种方式对比
+对于静态内容，或者不可恢复的错误（返回非200），我觉得都行，proxy控制可能更简单。对于动态内容，我觉得upstream控制比较好。缓存可以极大提升性能，可是缓存了错误的内容，恢复起来非常麻烦，动态内容upstream控制，可以降低风险。
+
+* 确保缓存正确
+因为缓存的存在，保证客户端获取的数据正确（过期的不算错误）尤为重要。为此可以在返回的数据中加入md5（由服务端生成，通过header或body返回），当md5校验失败时，重新获取（通过约定特殊的参数或header，以跳过缓存 =proxy_cache_bypass= ，同时服务端可以监控这些特殊参数或header发现问题）。

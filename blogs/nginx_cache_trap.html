@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-08-23 五 13:03 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nginx 缓存陷阱</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">nginx 缓存陷阱</h1>
+<p>
+接手的一个老系统，nginx做proxy，apache做upstream。某个请求总是返回MySQL连接错误，但是手动连接却没有问题。进一步排查发现nginx配置了cache，也就是某次请求upstream返回了错误，被nginx缓存住了，虽然后来upstream恢复了正常，但cache仍然继续返回错误。为了解决这个问题，我需要搞清两个问题：
+</p>
+<ol class="org-ol">
+<li>如何控制什么样的响应被缓存</li>
+<li>如何控制缓存时间</li>
+</ol>
+
+<div id="outline-container-org573ec96" class="outline-2">
+<h2 id="org573ec96"><span class="section-number-2">1</span> 测试配置文件</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+相应的配置做了注释，并提示了注意事项。
+</p>
+
+<p>
+nginx.conf
+</p>
+<pre class="example">
+# 配置缓存目录 /data/nginx/cache，必须确保目录存在，并且nobody用户可以写入（这里假设以nginx以nobody用户运行）
+# sudo -u nobody touch /data/nginx/cache/test 测试目录可用
+
+# keys_zone 配置的是缓存元数据的内存大小，max_size 是缓存所用磁盘大小
+# inactive 的含义是2h内没有访问的cache，被自动清除
+# use_temp_path=off upstream过来的响应直接写入缓存目录，避免二次拷贝
+
+proxy_cache_path /data/nginx/cache levels=2:2 keys_zone=content_cache:512m max_size=10g inactive=2h use_temp_path=off;
+</pre>
+
+<p>
+conf.d/test.cache.conf
+</p>
+<pre class="example">
+# cache
+server {
+  listen       80;
+
+  # 必须为on，否则cache不生效
+  proxy_buffering on;
+
+  # 方便查看缓存是否生效，也可以把这个加入access log，方便统计
+  add_header X-Cache-Status $upstream_cache_status;
+  # cache 使用的 key
+  proxy_cache_key $proxy_host$request_uri;
+
+  location /t1 {
+    # 返回200的请求被缓存120小时
+    proxy_cache_valid 200 120h;
+    proxy_cache content_cache;
+
+    rewrite /t1/(.+)$ /$1 break;
+    proxy_pass http://127.0.0.1:9090;
+  }
+
+  location /t2 {
+    # 返回200的请求被缓存，缓存时间由upstream控制
+    proxy_cache_valid 200 0h;
+    proxy_cache content_cache;
+
+    rewrite /t2/(.+)$ /$1 break;
+    proxy_pass http://127.0.0.1:9090;
+  }
+}
+
+# upstream
+server {
+  listen 9090;
+  default_type "text/plain";
+
+  location /static {
+    return 200 "CACHED-STATIC@$request_uri";
+  }
+
+  location /max-age {
+    add_header Cache-Control "max-age=86400";
+    return 200 "CACHED-MAX-AGE@$request_uri";
+  }
+}
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org055e0c9" class="outline-2">
+<h2 id="org055e0c9"><span class="section-number-2">2</span> 测试</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org1baa170" class="outline-3">
+<h3 id="org1baa170"><span class="section-number-3">2.1</span> proxy控制缓存时间</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+t1 配置了 <code>proxy_cache_valid 200 120h</code> 只要 <code>127.0.0.1/t1/</code> 返回200 (static或max-age)，就会被缓存120h。这就带来一个问题：很多upstream，因为框架的原因，或者开发自身的原因，当（可恢复的）错误发生时，仍然返回了200，导致错误响应被缓存。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgeea5a7b" class="outline-3">
+<h3 id="orgeea5a7b"><span class="section-number-3">2.2</span> upstream控制缓存时间</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+t2 配置了 <code>proxy_cache_valid 200 0h</code> 只有访问 <code>127.0.0.1/t2/max-age</code> 才会被缓存，static不会，因为upstream只给max-age配置了缓存。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbb4ee44" class="outline-3">
+<h3 id="orgbb4ee44"><span class="section-number-3">2.3</span> 两种方式对比</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+对于静态内容，或者不可恢复的错误（返回非200），我觉得都行，proxy控制可能更简单。对于动态内容，我觉得upstream控制比较好。缓存可以极大提升性能，可是缓存了错误的内容，恢复起来非常麻烦，动态内容upstream控制，可以降低风险。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5e49e77" class="outline-2">
+<h2 id="org5e49e77"><span class="section-number-2">3</span> 确保缓存正确</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+因为缓存的存在，保证客户端获取的数据正确（过期的不算错误）尤为重要。为此可以在返回的数据中加入md5（由服务端生成，通过header或body返回），当md5校验失败时，重新获取（通过约定特殊的参数或header，以跳过缓存 <code>proxy_cache_bypass</code> ，同时服务端可以监控这些特殊参数或header发现问题）。
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2019-08-23 五 13:03</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
