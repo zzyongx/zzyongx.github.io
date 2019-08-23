@@ -82,3 +82,19 @@ t2 配置了 =proxy_cache_valid 200 0h= 只有访问 =127.0.0.1/t2/max-age= 才�
 
 * 确保缓存正确
 因为缓存的存在，保证客户端获取的数据正确（过期的不算错误）尤为重要。为此可以在返回的数据中加入md5（由服务端生成，通过header或body返回），当md5校验失败时，重新获取（通过约定特殊的参数或header，以跳过缓存 =proxy_cache_bypass= ，同时服务端可以监控这些特殊参数或header发现问题）。
+
+* =proxy_cache_key= 的选择
+=proxy_cache_key= 默认使用host + uri，通常这不会有问题，但是碰到upstream根据客户端的能力返回不同的内容的时候，就有问题了。例如：根据客户端是否 *Accept* webp 返回webp格式的图片，根据客户端的 *Accept-Encoding* 返回压缩或不压缩的数据。这时虽然uri一样，但是返回给客户端的东西是不同的，此时根据uri缓存就有问题。
+
+** =Vary=
+此时upstream可以使用 =Vary= ，例如： =Vary：Accept= nginx 会为每类Accept缓存一份数据。
+
+** 自定义 =proxy_cache_key=
+=Vary= 是个很简洁的方法，但 =Accept= 的种类可能多达几十种，就会缓存几十份数据，但两份就够了，webp和非webp，这是极大的浪费和性能损失。此时自定义 =proxy_cache_key= 也许更好，虽然更复杂。
+#+BEGIN_EXAMPLE
+set $cachekey "$proxy_host$request_uri";
+if ($http_accept ~* "image/webp") {
+  set $cachekey "$proxy_host$request_uri/webp";
+}
+proxy_cache_key $cachekey;
+#+END_EXAMPLE

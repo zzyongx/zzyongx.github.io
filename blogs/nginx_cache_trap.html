@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-08-23 五 13:03 -->
+<!-- 2019-08-23 五 18:13 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>nginx 缓存陷阱</title>
@@ -358,10 +358,44 @@ t2 配置了 <code>proxy_cache_valid 200 0h</code> 只有访问 <code>127.0.0.1/
 </p>
 </div>
 </div>
+
+<div id="outline-container-orgd9a6a6a" class="outline-2">
+<h2 id="orgd9a6a6a"><span class="section-number-2">4</span> <code>proxy_cache_key</code> 的选择</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<code>proxy_cache_key</code> 默认使用host + uri，通常这不会有问题，但是碰到upstream根据客户端的能力返回不同的内容的时候，就有问题了。例如：根据客户端是否 <b>Accept</b> webp 返回webp格式的图片，根据客户端的 <b>Accept-Encoding</b> 返回压缩或不压缩的数据。这时虽然uri一样，但是返回给客户端的东西是不同的，此时根据uri缓存就有问题。
+</p>
+</div>
+
+<div id="outline-container-org2ca89fe" class="outline-3">
+<h3 id="org2ca89fe"><span class="section-number-3">4.1</span> <code>Vary</code></h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+此时upstream可以使用 <code>Vary</code> ，例如： <code>Vary：Accept</code> nginx 会为每类Accept缓存一份数据。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf395c7e" class="outline-3">
+<h3 id="orgf395c7e"><span class="section-number-3">4.2</span> 自定义 <code>proxy_cache_key</code></h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+<code>Vary</code> 是个很简洁的方法，但 <code>Accept</code> 的种类可能多达几十种，就会缓存几十份数据，但两份就够了，webp和非webp，这是极大的浪费和性能损失。此时自定义 <code>proxy_cache_key</code> 也许更好，虽然更复杂。
+</p>
+<pre class="example">
+set $cachekey "$proxy_host$request_uri";
+if ($http_accept ~* "image/webp") {
+  set $cachekey "$proxy_host$request_uri/webp";
+}
+proxy_cache_key $cachekey;
+</pre>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-08-23 五 13:03</p>
+<p class="date">Created: 2019-08-23 五 18:13</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
