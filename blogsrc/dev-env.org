@@ -28,10 +28,6 @@ Unable to start 'C:\Users\zhengzhiyong\AppData\Roaming\Swan\.cache\spm\setup-x86
 2. spm -u
 
 * linux
-## 基础库和软件
->>>>>>> f9250ee720da75e51f32ad1a6dacda80ecc1a8bc
-curl,git,emacs,global,fortune-mod
-
 ** 安装emacs的图形依赖
 ~sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev~
 
@@ -44,7 +40,7 @@ apt-get install vpnc
 F=/usr/local/bin/vpnc.start; echo -e '#!/bin/bash\nvpnc /etc/vpnc/default.conf' > $F; chmod a+x $F
 #+END_SRC
 
-** 配置bash_profile
+** 配置=bash_profile=
 export PS1="[@zzyong \W]\$ "
 
 * golang
@@ -53,3 +49,10 @@ tar -C /usr/local -xzf go1.12.6.linux-386.tar.gz
 echo 'export PATH=/usr/local/go/bin:$PATH' >> ~/.bash_profile
 echo 'export GOPATH=/data/zzyong/gitlab' >> ~/.bash_profile
 #+END_SRC
+
+* json
+** gofx
+[[https://github.com/antonmedv/gofx][gofx]] 是一款命令行json处理工具，可以 =格式化= json，和用 =jsonpath= 类似的方法获取json片段。
+
+** 浏览器DevTools
+=DevTools= 是浏览器提供的开发者调试工具，可以在它的控制台执行交互式js。首先把json加载到json变量里， =fetch("...").then(r => r.json()).then(j => json = j)= 现在可以使用js随意操作json了。

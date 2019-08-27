@@ -1,0 +1,9 @@
+#+TITLE: 心理学定律
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 达克效应（Dunning-Kruger effect）
+[[https://en.wikipedia.org/wiki/Dunning%E2%80%93Kruger_effect][Dunning-Kruger effect]] 是一种认知偏差，指的是能力欠缺的人有一种虚幻的自我优越感，错误地认为自己比真实情况更加优秀。Kruger和Dunning将其归咎于认知上的缺陷，能力欠缺的人无法认识到自身的无能，不能准确评估自身的能力。他们的研究还表明，反之，非常能干的人会低估他们的能力，错误地假定他们能够很容易完成的任务，别人也能够很容易地完成。
+
+王兴说：有担当的管理者一个重要的责任，就是把下属从愚昧之巅推到绝望之谷，至于他能否爬上开悟之坡，就看各人的造化了。
+[[../images/dunning-kruger-effect.jpg]]

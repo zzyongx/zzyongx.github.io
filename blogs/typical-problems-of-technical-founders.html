@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-08-26 一 17:04 -->
+<!-- 2019-08-27 二 11:55 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>开发环境</title>
+<title>技术人员做产品的盲区</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="root" />
 <style type="text/css">
@@ -232,181 +232,144 @@ for the JavaScript code in this tag.
  }
 /*]]>*///-->
 </script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
-</script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content">
-<h1 class="title">开发环境</h1>
+<h1 class="title">技术人员做产品的盲区</h1>
+<p>
+原文 <a href="https://qotoqot.com/blog/blind-spots/">Typical problems of technical founders</a> ，很多做技术的喜欢嘲笑产品经理，这是非常无知的。很多基础架构的产出（产品）都是面向公司内部的其它团队，如何让其它团队使用，是非常大的挑战！而这比销售创业产品要简单很多，对比之下，技术能力相形见绌。
+</p>
 
-<div id="outline-container-org00fd413" class="outline-2">
-<h2 id="org00fd413"><span class="section-number-2">1</span> windows</h2>
+<p>
+盲区具有毁灭性。你挣扎多年，直到意识到自己思维中显而易见的问题，一直在抹杀你的努力。在过去，直到花光六位数的投资，我才意识到项目基于的假设是错误的。尽管这让我认识到了自己的一些盲区，但我确信前方还有更大的盲区等着我。
+</p>
+
+<p>
+做软件生意是困难的，开发者构建自己的产品，也会碰到同样的问题。开发者的软件开发经历还会带来认知偏差。要完全消除这种偏差首先得认识它们。
+</p>
+
+<div id="outline-container-orge485dd1" class="outline-2">
+<h2 id="orge485dd1"><span class="section-number-2">1</span> 工程引力</h2>
 <div class="outline-text-2" id="text-1">
+<p>
+工程似乎有强大的引力，把我们从生意上拽走。对于非技术背景的企业主，开发是成本中心，他们的主要目标是构建盈利的生意，软件开发是一个代价高昂的阻碍。但是对开发者而言，编码相对简单，所以不假思索的添加功能，把软件复杂化。
+</p>
+
+<p>
+最糟的情况是，他们把添加功能当成挑战，并乐在其中。这或许有灵光的时候，但决策应该建立在市场调研上（和潜在的客户或现有客户沟通）。
+</p>
+
+<p>
+生意90%的结果，90%的努力都是编码无关的，它们应该是：售前、调研、市场、SEO、客户支持等。
+</p>
+
+<p>
+构建和维护内部工具是一个黑洞。一些工作似乎不可避免，但当他们耗时超过一周时，需要警惕，它的引力可能完全摧毁你的项目。大多数时间应该购买现成解决方案，短期看是一笔不小的开销，长期看却是省钱的。
+</p>
+
+<p>
+另一个危险稍小的问题是：借开发之名逃避企业琐事。纵然是困难的工程问题，看起来也比含糊不清的任务让人舒服。目标是盈利的生意，时刻围绕这个安排工作的优先级。
+</p>
 </div>
-<div id="outline-container-orga3637fe" class="outline-3">
-<h3 id="orga3637fe"><span class="section-number-3">1.1</span> swan-desktop</h3>
+
+<div id="outline-container-org8d07a62" class="outline-3">
+<h3 id="org8d07a62"><span class="section-number-3">1.1</span> 建议</h3>
 <div class="outline-text-3" id="text-1-1">
-<p>
-基于cygwin的xfce桌面，xfce4-terminal 很好用，支持标签。<a href="http://www.starlig.ht/">swan-desktop</a>
-</p>
-</div>
-
-<div id="outline-container-orga575b5e" class="outline-4">
-<h4 id="orga575b5e"><span class="section-number-4">1.1.1</span> 安装fish</h4>
-<div class="outline-text-4" id="text-1-1-1">
-<p>
-fish是一个比较好用的shell <code>spm -i fish</code> 。但是安装官方建议放到 <code>.bash_profile</code> 的最后， <code>Swan Xfce4 Desktop</code> 可能无法启动。 手动 <code>exec fish</code> 也许是个好主意。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org1f651e0" class="outline-4">
-<h4 id="org1f651e0"><span class="section-number-4">1.1.2</span> 支持中文</h4>
-<div class="outline-text-4" id="text-1-1-2">
 <ol class="org-ol">
-<li>安装ibus <code>spm -i ibus</code> <code>spm -i ibus-pinyin</code></li>
-<li>在 <b>会话和启动</b> 中配置ibus启动 <code>ibus-daemon</code></li>
-<li>在 <code>.bash_profile</code> 中配置 <code>export GTK_IM_MODULE=ibus export XMODIFIERS=@im=ibus export QT_IM_MODULE=ibus</code></li>
-</ol>
-</div>
-</div>
-
-<div id="outline-container-org6305826" class="outline-4">
-<h4 id="org6305826"><span class="section-number-4">1.1.3</span> 启动windows程序</h4>
-<div class="outline-text-4" id="text-1-1-3">
-<ol class="org-ol">
-<li>配置windows别名 <code>alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'</code></li>
-<li>配置pandoc别名 <code>alias chrome='/cygdrive/c/Users/zhengzhiyong/AppData/Local/Pandoc/pandoc'</code></li>
+<li>不在没有市场调研的情况下开发。</li>
+<li>使用成熟的技术栈。</li>
+<li>使用简单的方法，第三方服务、脚本等。</li>
+<li>编码是为生意服务的。</li>
 </ol>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org1e19b2e" class="outline-3">
-<h3 id="org1e19b2e"><span class="section-number-3">1.2</span> FAQ</h3>
-<div class="outline-text-3" id="text-1-2">
-</div>
-<div id="outline-container-org1d5f8b1" class="outline-4">
-<h4 id="org1d5f8b1"><span class="section-number-4">1.2.1</span> 使用spm报错</h4>
-<div class="outline-text-4" id="text-1-2-1">
-<p>
-$ spm -i vim-minimal
-Unable to start 'C:\Users\zhengzhiyong\AppData\Roaming\Swan\.cache\spm\setup-x86<sub>64.exe</sub>': The operating system denied access to the specified file.
-</p>
-
-<p>
-修正方法：
-</p>
-<ol class="org-ol">
-<li>删除 setup-x86<sub>64.exe</sub></li>
-<li>spm -u</li>
-</ol>
-</div>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org75eae25" class="outline-2">
-<h2 id="org75eae25"><span class="section-number-2">2</span> linux</h2>
+<div id="outline-container-org439cf35" class="outline-2">
+<h2 id="org439cf35"><span class="section-number-2">2</span> 过度思考和完美主义</h2>
 <div class="outline-text-2" id="text-2">
+<p>
+当设计和管理你的第一个独立产品时，会过于自由而不知所措。当我做第一个项目时，我用了一个月调研可行的技术方案，而这个方案最后还被抛弃了，期间没有写一行代码。
+</p>
+
+<p>
+为了避免这种情况，设置一些约束是必要的。例如：最多调研一周，然后挑选一个最好的。不要担心不完美。对产品而言，100%的完成度不是必须的。你可以提供比竞争对手功能少，但在解决某些问题上更优的产品。
+</p>
+
+<p>
+通常而已，特性不是好事情。每一个特性都会搅乱UI，引入BUG，让代码维护更复杂，增加支持成本。这是为什么 <code>mininum viable product</code> 如此高效的原因，它验证了核心思想，并且可以根据真实的市场反馈开发后续功能。
+</p>
+
+<p>
+客户不在乎产品代码是不是优雅，算法是不是复杂，他们"雇佣"产品解决问题。很多成功的软件都是在获取第一批用户后，慢慢改进质量的。另一方面，很多产品迷失于完美主义，迟迟不能发布。（你会什么招数不重要，重要的是解决问题。）
+</p>
 </div>
-<div id="outline-container-org7681e1e" class="outline-3">
-<h3 id="org7681e1e"><span class="section-number-3">2.1</span> 安装emacs的图形依赖</h3>
+
+<div id="outline-container-orgd43bdde" class="outline-3">
+<h3 id="orgd43bdde"><span class="section-number-3">2.1</span> 建议</h3>
 <div class="outline-text-3" id="text-2-1">
-<p>
-<code>sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev</code>
-</p>
-</div>
-</div>
-
-<div id="outline-container-org60e07bf" class="outline-3">
-<h3 id="org60e07bf"><span class="section-number-3">2.2</span> 终端在tab中打开标签</h3>
-<div class="outline-text-3" id="text-2-2">
-<p>
-在终端菜单 编辑-&gt;首选项 中配置
-</p>
-</div>
-</div>
-
-<div id="outline-container-org4ab0f88" class="outline-3">
-<h3 id="org4ab0f88"><span class="section-number-3">2.3</span> 配置vpn</h3>
-<div class="outline-text-3" id="text-2-3">
-<div class="org-src-container">
-<pre class="src src-bash">apt-get install vpnc
-<span style="color: #ffff00;">F</span>=/usr/local/bin/vpnc.start; <span style="color: #0000ff; font-weight: bold;">echo</span> -e <span style="color: #00ff00;">'#!/bin/bash\nvpnc /etc/vpnc/default.conf'</span> &gt; $<span style="color: #ffff00;">F</span>; chmod a+x $<span style="color: #ffff00;">F</span>
-</pre>
+<ol class="org-ol">
+<li>设立最后期限避免完美主义</li>
+<li>关注收益，而非特性</li>
+<li>尽早发布，让市场反馈指导后续改进</li>
+<li>从小目标开始</li>
+</ol>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgd373366" class="outline-3">
-<h3 id="orgd373366"><span class="section-number-3">2.4</span> 配置<code>bash_profile</code></h3>
-<div class="outline-text-3" id="text-2-4">
-<p>
-export PS1="[@zzyong \W]\$ "
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org90feb70" class="outline-2">
-<h2 id="org90feb70"><span class="section-number-2">3</span> golang</h2>
+<div id="outline-container-orgf992a3d" class="outline-2">
+<h2 id="orgf992a3d"><span class="section-number-2">3</span> 内向</h2>
 <div class="outline-text-2" id="text-3">
-<div class="org-src-container">
-<pre class="src src-bash">tar -C /usr/local -xzf go1.12.6.linux-386.tar.gz
-<span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">'export PATH=/usr/local/go/bin:$PATH'</span> &gt;&gt; ~/.bash_profile
-<span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">'export GOPATH=/data/zzyong/gitlab'</span> &gt;&gt; ~/.bash_profile
-</pre>
+<p>
+不喜欢社交的人，如果不强迫自己面向大众，他成功的概率会大大减小。没人会注意到你的产品，除非你在网上大声说你的产品。对于软件而言，病毒式传播的机会是必须的。
+</p>
+</div>
+
+<div id="outline-container-org6984abb" class="outline-3">
+<h3 id="org6984abb"><span class="section-number-3">3.1</span> 建议</h3>
+<div class="outline-text-3" id="text-3-1">
+<ol class="org-ol">
+<li>一周至少专注市场和推广一次。没什么可展示不要紧，聊你的想法和构建过程。</li>
+<li>别害羞联系你不认识的人，这是做生意的核心。</li>
+<li>经常获取反馈修正自己的感觉。</li>
+</ol>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org1277091" class="outline-2">
-<h2 id="org1277091"><span class="section-number-2">4</span> json</h2>
+<div id="outline-container-orgfbd67f6" class="outline-2">
+<h2 id="orgfbd67f6"><span class="section-number-2">4</span> 活在科技泡泡中</h2>
 <div class="outline-text-2" id="text-4">
-</div>
-<div id="outline-container-org77eb8ac" class="outline-3">
-<h3 id="org77eb8ac"><span class="section-number-3">4.1</span> gofx</h3>
-<div class="outline-text-3" id="text-4-1">
 <p>
-<a href="https://github.com/antonmedv/gofx">gofx</a> 是一款命令行json处理工具，可以 <code>格式化</code> json，和用 <code>jsonpath</code> 类似的方法获取json片段。
+现代软件开发的要求很高，我们必须不断学习、更新自己的技能，语言、框架、工具等。专业发展占用了大量工作之外的时间，所以软件工程师倾向于法制技术相关的爱好。不幸的是，过度专注技术在某种程度上降低了成功的可能。
 </p>
-</div>
+
+<p>
+首先，失去大多数用户如何使用软件的感觉，因为你一直和专业用户打交道。在技术社区，你经常看到人对 <code>slack</code> 成功的困惑，甚至愤怒，它只是一个基础的IRC，怎么如此受欢迎？android设备如此灵活和实惠，为什么iphone卖的这么好？通常的解释是：消费者被市场愚弄了，但这是一种懒惰思维。在用户体验方面，这些产品有很多值得学习的，这对非技术背景的用户而言很重要。
+</p>
+
+<p>
+当然，可以创造面向其它开发者的软件，但这条路上早已人满为患。同样的道理也适用于：当你能想到某个普通问题时，这个市场早已成熟并饱和。为此，必须离开技术泡泡，去探索其它行业鲜为人知的需求。
+</p>
 </div>
 
-<div id="outline-container-org07c4fc9" class="outline-3">
-<h3 id="org07c4fc9"><span class="section-number-3">4.2</span> 浏览器DevTools</h3>
-<div class="outline-text-3" id="text-4-2">
-<p>
-<code>DevTools</code> 是浏览器提供的开发者调试工具，可以在它的控制台执行交互式js。首先把json加载到json变量里， <code>fetch("...").then(r =&gt; r.json()).then(j =&gt; json = j)</code> 现在可以使用js随意操作json了。
-</p>
+<div id="outline-container-org8cf01f5" class="outline-3">
+<h3 id="org8cf01f5"><span class="section-number-3">4.1</span> 建议</h3>
+<div class="outline-text-3" id="text-4-1">
+<ol class="org-ol">
+<li>观察非技术人员如何使用软件，他们是怎么想的。</li>
+<li>学习流行产品，纵然你不喜欢它们的使用场景。</li>
+<li>寻找机会，接触不同行业，了解他们是如何运作的。</li>
+<li>每周花时间学习其它课题，例如设计、市场等。</li>
+</ol>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-08-26 一 17:04</p>
+<p class="date">Created: 2019-08-27 二 11:55</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

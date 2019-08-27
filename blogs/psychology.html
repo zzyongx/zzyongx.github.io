@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-08-26 一 17:04 -->
+<!-- 2019-08-27 二 09:54 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>开发环境</title>
+<title>心理学定律</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="root" />
 <style type="text/css">
@@ -232,181 +232,28 @@ for the JavaScript code in this tag.
  }
 /*]]>*///-->
 </script>
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
-</script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="content">
-<h1 class="title">开发环境</h1>
+<h1 class="title">心理学定律</h1>
 
-<div id="outline-container-org00fd413" class="outline-2">
-<h2 id="org00fd413"><span class="section-number-2">1</span> windows</h2>
+<div id="outline-container-org21cdc47" class="outline-2">
+<h2 id="org21cdc47"><span class="section-number-2">1</span> 达克效应（Dunning-Kruger effect）</h2>
 <div class="outline-text-2" id="text-1">
-</div>
-<div id="outline-container-orga3637fe" class="outline-3">
-<h3 id="orga3637fe"><span class="section-number-3">1.1</span> swan-desktop</h3>
-<div class="outline-text-3" id="text-1-1">
 <p>
-基于cygwin的xfce桌面，xfce4-terminal 很好用，支持标签。<a href="http://www.starlig.ht/">swan-desktop</a>
-</p>
-</div>
-
-<div id="outline-container-orga575b5e" class="outline-4">
-<h4 id="orga575b5e"><span class="section-number-4">1.1.1</span> 安装fish</h4>
-<div class="outline-text-4" id="text-1-1-1">
-<p>
-fish是一个比较好用的shell <code>spm -i fish</code> 。但是安装官方建议放到 <code>.bash_profile</code> 的最后， <code>Swan Xfce4 Desktop</code> 可能无法启动。 手动 <code>exec fish</code> 也许是个好主意。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org1f651e0" class="outline-4">
-<h4 id="org1f651e0"><span class="section-number-4">1.1.2</span> 支持中文</h4>
-<div class="outline-text-4" id="text-1-1-2">
-<ol class="org-ol">
-<li>安装ibus <code>spm -i ibus</code> <code>spm -i ibus-pinyin</code></li>
-<li>在 <b>会话和启动</b> 中配置ibus启动 <code>ibus-daemon</code></li>
-<li>在 <code>.bash_profile</code> 中配置 <code>export GTK_IM_MODULE=ibus export XMODIFIERS=@im=ibus export QT_IM_MODULE=ibus</code></li>
-</ol>
-</div>
-</div>
-
-<div id="outline-container-org6305826" class="outline-4">
-<h4 id="org6305826"><span class="section-number-4">1.1.3</span> 启动windows程序</h4>
-<div class="outline-text-4" id="text-1-1-3">
-<ol class="org-ol">
-<li>配置windows别名 <code>alias chrome='/cygdrive/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome'</code></li>
-<li>配置pandoc别名 <code>alias chrome='/cygdrive/c/Users/zhengzhiyong/AppData/Local/Pandoc/pandoc'</code></li>
-</ol>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org1e19b2e" class="outline-3">
-<h3 id="org1e19b2e"><span class="section-number-3">1.2</span> FAQ</h3>
-<div class="outline-text-3" id="text-1-2">
-</div>
-<div id="outline-container-org1d5f8b1" class="outline-4">
-<h4 id="org1d5f8b1"><span class="section-number-4">1.2.1</span> 使用spm报错</h4>
-<div class="outline-text-4" id="text-1-2-1">
-<p>
-$ spm -i vim-minimal
-Unable to start 'C:\Users\zhengzhiyong\AppData\Roaming\Swan\.cache\spm\setup-x86<sub>64.exe</sub>': The operating system denied access to the specified file.
+<a href="https://en.wikipedia.org/wiki/Dunning%E2%80%93Kruger_effect">Dunning-Kruger effect</a> 是一种认知偏差，指的是能力欠缺的人有一种虚幻的自我优越感，错误地认为自己比真实情况更加优秀。Kruger和Dunning将其归咎于认知上的缺陷，能力欠缺的人无法认识到自身的无能，不能准确评估自身的能力。他们的研究还表明，反之，非常能干的人会低估他们的能力，错误地假定他们能够很容易完成的任务，别人也能够很容易地完成。
 </p>
 
 <p>
-修正方法：
+王兴说：有担当的管理者一个重要的责任，就是把下属从愚昧之巅推到绝望之谷，至于他能否爬上开悟之坡，就看各人的造化了。
+<img src="../images/dunning-kruger-effect.jpg" alt="dunning-kruger-effect.jpg" />
 </p>
-<ol class="org-ol">
-<li>删除 setup-x86<sub>64.exe</sub></li>
-<li>spm -u</li>
-</ol>
-</div>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org75eae25" class="outline-2">
-<h2 id="org75eae25"><span class="section-number-2">2</span> linux</h2>
-<div class="outline-text-2" id="text-2">
-</div>
-<div id="outline-container-org7681e1e" class="outline-3">
-<h3 id="org7681e1e"><span class="section-number-3">2.1</span> 安装emacs的图形依赖</h3>
-<div class="outline-text-3" id="text-2-1">
-<p>
-<code>sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev</code>
-</p>
-</div>
-</div>
-
-<div id="outline-container-org60e07bf" class="outline-3">
-<h3 id="org60e07bf"><span class="section-number-3">2.2</span> 终端在tab中打开标签</h3>
-<div class="outline-text-3" id="text-2-2">
-<p>
-在终端菜单 编辑-&gt;首选项 中配置
-</p>
-</div>
-</div>
-
-<div id="outline-container-org4ab0f88" class="outline-3">
-<h3 id="org4ab0f88"><span class="section-number-3">2.3</span> 配置vpn</h3>
-<div class="outline-text-3" id="text-2-3">
-<div class="org-src-container">
-<pre class="src src-bash">apt-get install vpnc
-<span style="color: #ffff00;">F</span>=/usr/local/bin/vpnc.start; <span style="color: #0000ff; font-weight: bold;">echo</span> -e <span style="color: #00ff00;">'#!/bin/bash\nvpnc /etc/vpnc/default.conf'</span> &gt; $<span style="color: #ffff00;">F</span>; chmod a+x $<span style="color: #ffff00;">F</span>
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orgd373366" class="outline-3">
-<h3 id="orgd373366"><span class="section-number-3">2.4</span> 配置<code>bash_profile</code></h3>
-<div class="outline-text-3" id="text-2-4">
-<p>
-export PS1="[@zzyong \W]\$ "
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org90feb70" class="outline-2">
-<h2 id="org90feb70"><span class="section-number-2">3</span> golang</h2>
-<div class="outline-text-2" id="text-3">
-<div class="org-src-container">
-<pre class="src src-bash">tar -C /usr/local -xzf go1.12.6.linux-386.tar.gz
-<span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">'export PATH=/usr/local/go/bin:$PATH'</span> &gt;&gt; ~/.bash_profile
-<span style="color: #0000ff; font-weight: bold;">echo</span> <span style="color: #00ff00;">'export GOPATH=/data/zzyong/gitlab'</span> &gt;&gt; ~/.bash_profile
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org1277091" class="outline-2">
-<h2 id="org1277091"><span class="section-number-2">4</span> json</h2>
-<div class="outline-text-2" id="text-4">
-</div>
-<div id="outline-container-org77eb8ac" class="outline-3">
-<h3 id="org77eb8ac"><span class="section-number-3">4.1</span> gofx</h3>
-<div class="outline-text-3" id="text-4-1">
-<p>
-<a href="https://github.com/antonmedv/gofx">gofx</a> 是一款命令行json处理工具，可以 <code>格式化</code> json，和用 <code>jsonpath</code> 类似的方法获取json片段。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org07c4fc9" class="outline-3">
-<h3 id="org07c4fc9"><span class="section-number-3">4.2</span> 浏览器DevTools</h3>
-<div class="outline-text-3" id="text-4-2">
-<p>
-<code>DevTools</code> 是浏览器提供的开发者调试工具，可以在它的控制台执行交互式js。首先把json加载到json变量里， <code>fetch("...").then(r =&gt; r.json()).then(j =&gt; json = j)</code> 现在可以使用js随意操作json了。
-</p>
-</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-08-26 一 17:04</p>
+<p class="date">Created: 2019-08-27 二 09:54</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
