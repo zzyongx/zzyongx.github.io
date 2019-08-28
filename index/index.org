@@ -3,16 +3,22 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
-* 值得收藏
-[[http://www.brendangregg.com/overview.html][Brendan Gregg]]
-
 * 2019 己亥年
 --------------
 
 ** 经验
-[[https://zzyongx.github.io/blogs/zombie_process_caused_by_systemd.html][排查systemd的bug引起的僵尸进程]] <2019-08-22>
 
-[[https://zzyongx.github.io/blogs/nginx_cache_trap.html][nginx缓存陷阱]] <2019-08-23>
+[[blog:analyze-websites-ttfb][分析网站的TTFB]] <2019-08-27>
+
+[[blog:nginx_cache_trap][nginx缓存陷阱]] <2019-08-23>
+
+[[blog:zombie_process_caused_by_systemd][排查systemd的bug引起的僵尸进程]] <2019-08-22>
+
+** 笔记
+[[blog:dockfile-best-practices][Dockfile 最佳实践]] <2019-08-28>
+
+** 翻译
+[[blog:typical-problems-of-technical-founders][技术人员做产品的盲区]] <2019-08-27>
 
 * 2018 戊戌年
 -------------

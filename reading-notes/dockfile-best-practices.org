@@ -1,0 +1,26 @@
+#+TITLE: Dockfile 最佳实践
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+[[https://blog.docker.com/2019/07/intro-guide-to-dockerfile-best-practices/][英文]] [[https://mp.weixin.qq.com/s/wNCfYERWU3GOBHI2juTpmg][中文]] 这个中文翻译欠精确，建议看原文。核心是缓存（减少构建时间）和只保留必要的文件（减小构建体积）。
+
+* 减少构建时间
+1. 构建顺序影响缓存的利用效率，把不需要经常更改的放在前面
+2. 只拷贝需要的文件
+3. 把 =apt-get update & install= 之类的写在一行
+
+* 减小镜像体积
+1. 删除不必要的依赖
+2. 删除包管理工具的缓存， =RUN apt-get update && apt-get -y install --no-install-recommends openjdk-8-jdk && rm -rf /var/lib/apt/lists/*=
+*注意* 这里删除和安装要放在同一个指令里。
+
+* 可维护性
+1. 使用官方镜像做基础镜像
+2. 使用更具体的标签
+3. 选择体积最小的基础镜像
+
+* 可复现
+1. 从源码构建，代替复制构建好的程序
+2. 使用单独的步骤获取依赖（提高缓存效率，依赖不常变）
+3. 使用多阶段构建来删除构建时的依赖
+个人认为*可复现*意义不大
