@@ -1,7 +1,10 @@
-#+TITLE: 收藏的在线电子书
+#+TITLE: 收藏的资料
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
 * 前端
 ** HTML & CSS Is Hard
 [[https://internetingishard.com/html-and-css/][HTML & CSS Is Hard]] HTML和CSS入门书籍。
+
+** 每个 JavaScript 工程师都应懂的33个概念
+[[https://github.com/stephentian/33-js-concepts][每个 JavaScript 工程师都应懂的33个概念]]

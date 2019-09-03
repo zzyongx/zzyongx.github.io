@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-08-30 五 10:55 -->
+<!-- 2019-09-03 二 15:34 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>收藏的资料</title>
+<title>bash glob 简介</title>
 <meta name="generator" content="Org mode" />
-<meta name="author" content="root" />
+<meta name="author" content="zzyongx" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center;
@@ -235,34 +235,145 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">收藏的资料</h1>
-
-<div id="outline-container-org56153c6" class="outline-2">
-<h2 id="org56153c6"><span class="section-number-2">1</span> 前端</h2>
-<div class="outline-text-2" id="text-1">
-</div>
-<div id="outline-container-org6ca63a6" class="outline-3">
-<h3 id="org6ca63a6"><span class="section-number-3">1.1</span> HTML &amp; CSS Is Hard</h3>
-<div class="outline-text-3" id="text-1-1">
+<h1 class="title">bash glob 简介</h1>
 <p>
-<a href="https://internetingishard.com/html-and-css/">HTML &amp; CSS Is Hard</a> HTML和CSS入门书籍。
+glob是一种模式匹配规范，用于匹配文件名，内置在bash中。这里总结了glob的常见用法。
+</p>
+
+<div id="outline-container-org4b6c630" class="outline-2">
+<h2 id="org4b6c630"><span class="section-number-2">1</span> 准备环境</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<code>mkdir -p /tmp/test &amp;&amp; cd /tmp/test &amp;&amp; touch a1 a1b a2 a2b b1 b2 c1 c2 d1 d2 x xy xyy xz xzz</code> 。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgc2a42e6" class="outline-3">
-<h3 id="orgc2a42e6"><span class="section-number-3">1.2</span> 每个 JavaScript 工程师都应懂的33个概念</h3>
-<div class="outline-text-3" id="text-1-2">
+<div id="outline-container-orgd66b7f0" class="outline-2">
+<h2 id="orgd66b7f0"><span class="section-number-2">2</span> 匹配替换的时机</h2>
+<div class="outline-text-2" id="text-2">
 <p>
-<a href="https://github.com/stephentian/33-js-concepts">每个 JavaScript 工程师都应懂的33个概念</a>
+以命令 <code>ls a*</code> 为例，我们只写了一个参数 <code>a*</code> ，但是 <code>ls</code> 接收到4个参数 <code>a1  a1b  a2  a2b</code> 。在bash调用 <code>ls</code> 命令之前，完成了glob的模式匹配和替换。可以对比 <code>system("ls a*")</code> 和 <code>execv("/bin/ls", "/bin/ls", "a*")</code> 前者可以正常工作，因为它用<code>bash -c</code> 执行，后者不可以，因为没有bash做参数的匹配替换。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org660960c" class="outline-2">
+<h2 id="org660960c"><span class="section-number-2">3</span> 基础通配</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org77a33b2" class="outline-3">
+<h3 id="org77a33b2"><span class="section-number-3">3.1</span> 匹配任意字符</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+<code>*</code> 可以匹配任意多个任意字符
+</p>
+<ol class="org-ol">
+<li><code>a*b</code> 匹配 <code>a1b a2b</code></li>
+<li><code>a*</code> 匹配 <code>a1 a1b a2 a2b</code></li>
+<li><code>d1*</code> 匹配 <code>d1</code></li>
+<li><code>/tmp/*/b*</code> 匹配 <code>/tmp/test/b1 /tmp/test/b2</code></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgfab0431" class="outline-3">
+<h3 id="orgfab0431"><span class="section-number-3">3.2</span> 匹配一个字符</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<code>?</code> 可以匹配任意一个字符
+</p>
+<ol class="org-ol">
+<li><code>a?</code> 匹配 <code>a1 a2</code></li>
+<li><code>a??</code> 匹配 <code>a1b a2b</code></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org33acdbe" class="outline-3">
+<h3 id="org33acdbe"><span class="section-number-3">3.3</span> 匹配指定字符</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<code>[]</code> 匹配 <code>[]</code> 中指定的字符，和正则很像
+</p>
+<ol class="org-ol">
+<li><code>[ab]1</code> 匹配 <code>a1 b1</code></li>
+<li><code>[a-c]1</code> 匹配 <code>a1 b1 c1</code></li>
+<li><code>[^a-d]?</code> 匹配 <code>xy xz</code></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org5c771b3" class="outline-3">
+<h3 id="org5c771b3"><span class="section-number-3">3.4</span> 匹配指定字符串</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+<code>{}</code> 匹配 <code>{}</code> 中指定的字符串
+</p>
+<ol class="org-ol">
+<li><code>mkdir /tmp/{ef,ff,fg}</code> 创建三个目录 <code>ef,ff,fg</code></li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgeae562c" class="outline-2">
+<h2 id="orgeae562c"><span class="section-number-2">4</span> 扩展通配</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+扩展匹配需要显示打开 <code>shopt -s extglob</code> ，注意：这个必须在单独的行， <code>shopt -s extglob &amp;&amp; ls !("a1"|"a2")</code> 无效。个人觉得除了反向匹配，其它的用处不是特别大。因为不常用，建议用完之后关闭 <code>shopt -u extglob</code>
+</p>
+</div>
+
+<div id="outline-container-org4612292" class="outline-3">
+<h3 id="org4612292"><span class="section-number-3">4.1</span> 模式最多匹配一次</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+<code>?(pattern-list)</code> 模式最多匹配一次， <code>x?(y|z)</code> 匹配到 <code>x xy xz</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgee830fe" class="outline-3">
+<h3 id="orgee830fe"><span class="section-number-3">4.2</span> 模式匹配任意次</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+<code>*(pattern-list)</code> 模式匹配任意次， <code>x*(y|z)</code> 匹配到 <code>x xy xyy xz xzz</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge05b0c6" class="outline-3">
+<h3 id="orge05b0c6"><span class="section-number-3">4.3</span> 模式至少匹配一次</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+<code>+(pattern-list)</code> 模式至少匹配一次， <code>x+(y|z)</code> 匹配到 <code>xy xyy xz xzz</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org94605dc" class="outline-3">
+<h3 id="org94605dc"><span class="section-number-3">4.4</span> 模式仅匹配一次</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+<code>@(pattern-list)</code> 模式仅匹配一次， <code>x@(y|zz)</code> 匹配到 <code>xy xzz</code> 等价于 <code>x{y,zz}</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4beda80" class="outline-3">
+<h3 id="org4beda80"><span class="section-number-3">4.5</span> 反向匹配</h3>
+<div class="outline-text-3" id="text-4-5">
+<p>
+<code>!(pattern-list)</code> 反向匹配， <code>ls x!(y|z)</code> 匹配到 <code>x xyy xzz</code> 。一个实用例子，列出所有非 <code>.conf</code> 结尾的文件， <code>!(*.conf)</code>
 </p>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: root</p>
-<p class="date">Created: 2019-08-30 五 10:55</p>
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2019-09-03 二 15:34</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

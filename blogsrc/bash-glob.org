@@ -1,0 +1,53 @@
+#+TITLE: bash glob 简介
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+glob是一种模式匹配规范，用于匹配文件名，内置在bash中。这里总结了glob的常见用法。
+
+* 准备环境
+=mkdir -p /tmp/test && cd /tmp/test && touch a1 a1b a2 a2b b1 b2 c1 c2 d1 d2 x xy xyy xz xzz= 。
+
+* 匹配替换的时机
+以命令 =ls a*= 为例，我们只写了一个参数 =a*= ，但是 =ls= 接收到4个参数 =a1  a1b  a2  a2b= 。在bash调用 =ls= 命令之前，完成了glob的模式匹配和替换。可以对比 =system("ls a*")= 和 =execv("/bin/ls", "/bin/ls", "a*")= 前者可以正常工作，因为它用=bash -c= 执行，后者不可以，因为没有bash做参数的匹配替换。
+
+* 基础通配
+** 匹配任意字符
+=*= 可以匹配任意多个任意字符
+1. =a*b= 匹配 =a1b a2b=
+2. =a*= 匹配 =a1 a1b a2 a2b=
+3. =d1*= 匹配 =d1=
+4. =/tmp/*/b*= 匹配 =/tmp/test/b1 /tmp/test/b2=
+
+** 匹配一个字符
+=?= 可以匹配任意一个字符
+1. =a?= 匹配 =a1 a2=
+2. =a??= 匹配 =a1b a2b=
+
+** 匹配指定字符
+=[]= 匹配 =[]= 中指定的字符，和正则很像
+1. =[ab]1= 匹配 =a1 b1=
+2. =[a-c]1= 匹配 =a1 b1 c1=
+3. =[^a-d]?= 匹配 =xy xz=
+
+** 匹配指定字符串
+={}= 匹配 ={}= 中指定的字符串
+1. =mkdir /tmp/{ef,ff,fg}= 创建三个目录 =ef,ff,fg=
+
+* 扩展通配
+扩展匹配需要显示打开 =shopt -s extglob= ，注意：这个必须在单独的行， =shopt -s extglob && ls !("a1"|"a2")= 无效。个人觉得除了反向匹配，其它的用处不是特别大。因为不常用，建议用完之后关闭 =shopt -u extglob=
+
+** 模式最多匹配一次
+=?(pattern-list)= 模式最多匹配一次， =x?(y|z)= 匹配到 =x xy xz=
+
+** 模式匹配任意次
+=*(pattern-list)= 模式匹配任意次， =x*(y|z)= 匹配到 =x xy xyy xz xzz=
+
+** 模式至少匹配一次
+=+(pattern-list)= 模式至少匹配一次， =x+(y|z)= 匹配到 =xy xyy xz xzz=
+
+** 模式仅匹配一次
+=@(pattern-list)= 模式仅匹配一次， =x@(y|zz)= 匹配到 =xy xzz= 等价于 =x{y,zz}=
+
+** 反向匹配
+=!(pattern-list)= 反向匹配， =ls x!(y|z)= 匹配到 =x xyy xzz= 。一个实用例子，列出所有非 =.conf= 结尾的文件， =!(*.conf)=

@@ -7,6 +7,7 @@
 --------------
 
 ** 经验
+[[blog:bash-glob][bash glob 简介]] <2019-09-03>
 
 [[blog:analyze-websites-ttfb][分析网站的TTFB]] <2019-08-27>
 
