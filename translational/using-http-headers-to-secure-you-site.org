@@ -1,0 +1,67 @@
+#+TITLE: 使用HTTP头加固你的网站
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+[[https://blog.heroku.com/using-http-headers-to-secure-your-site][原文]] 有意思的是我使用mozilla的工具测试它们的主站 [[https://observatory.mozilla.org/analyze/www.mozilla.org][mozilla得分]]，也没得到满分。
+
+[[https://observatory.mozilla.org/][Observatory by Mozilla]] 可以教育开发者、系统管理员、安全专家如何配置他们的网站，使之更加安全、牢固。本文介绍和安全有关的HTTP头。
+
+* Content Security Policy (CSP)
+CSP控制站点可以从哪里引用脚本和资源，例如：
+- default-src <source>, script-src <source>, object-src <source> 等配置资源的源。
+  - =https= 只能引用https的源
+  - =https://example.com= 只能引用该站点的
+  - ='self'= 只能引用本站的
+  - 在 [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src][CSP:default-src]] 查看更多选项
+- =Content Security Policy= 禁止 =<script>= 内联执行，可以通过标记 ='unsafe-inline'= 取消禁止，但是会使削弱站点的安全。可以通过指定 =nonce= 或 =SHA= 签名脚本内容以允许执行。
+- =frame-ancestors 'none'= 禁止站点在 =iframe= 中被引用，以避免 [[https://www.owasp.org/index.php/Clickjacking][clickjacking 攻击]] ，如果确实需要在iframe中被引用，可以指定url代替 ='none'= 。
+
+我们的网站希望引用自身资源，twitter和aws的图片，google和twitter的脚本，google的css和字体等。我们还需要在一些指令中重新定义 ='self'= ，以覆盖默认值（ =default-src 'self'= 指定了默认值）。最终配置如下：
+#+BEGIN_EXAMPLE
+Content-Security-Policy: default-src 'self';
+                         script-src https://static.ads-twitter.com https://www.google-analytics.com;
+                         img-src 'self' https://s3.amazonaws.com https://twitter.com https://pbs.twimg.com;
+                         font-src 'self' https://fonts.gstatic.com;
+                         style-src 'self' https://fonts.googleapis.com;
+                         frame-ancestors 'none';
+#+END_EXAMPLE
+
+* HTTP Strict Transport Security (HSTS)
+=HSTS= 告诉浏览器，我们的站点仅接受HTTPS访问，HSTS提供下面的标记：
+- ~max-age=<seconds>~ 这个指令告诉浏览器，未来这么久，对本站点的访问，必须通过HTTPS。这个标记使必须的。
+- =includeSubDomains= 包含子域
+- =preload= 如果配置了这个标记，并且在 [[https://hstspreload.org/][Chrome HSTS preload list ]]注册了你的域名，在看到这个header前，就会强制使用https。（这个我没看懂）
+
+最终设置是： =Strict-Transport-Security: max-age=63072000; includeSubDomains; preload=
+
+* X-Content-Type-Options
+这个头告诉浏览器，如果MIME类型和需要的不一致，不要加载script和stylesheets。例如：引用script资源，但是资源的MIME类型是text/plain，和需要的不一致，拒绝加载。
+
+最终设置是： =X-Content-Type-Options: nosniff=
+
+* X-Frame-Options
+提供的功能和CSP的 =frame-ancestors 'none'= 类似，但是浏览器的支持更广泛。
+
+最终设置是： =X-Frame-Options: DENY=
+
+* X-XSS-Protection
+用来避免XSS，和CSP中提供的功能类似，但是浏览器支持更广泛。
+
+最终设置是： ~X-XSS-Protection: 1; mode=block~
+
+* 总结
+添加上面的header后，firefox的console出现警告， ~拒绝执行inline脚本，和如下的CSP策略冲突，"script-src https://static.ads-twitter.com https://www.google-analytics.com"~ ~使用 'unsafe-inline' 或者 hash（'sha256-q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0='） 或者 nonce 可以解决~ 。即使我们把 =https://www.google-analytics.com= 添加到了 =script-src= ，因为使用了inline脚本，还需要显式开启允许inline执行。这里我们选择 ~'sha256-q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0='~ ，只有script的sha256是 ~q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0=~ 才允许执行。最终配置的header是：
+#+BEGIN_EXAMPLE
+Content-Security-Policy: default-src 'self';
+                         script-src https://static.ads-twitter.com https://www.google-analytics.com 'sha256-q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0=';
+                         img-src 'self' https://s3.amazonaws.com https://twitter.com https://pbs.twimg.com;
+                         font-src 'self' https://fonts.gstatic.com;
+                         style-src 'self' https://fonts.googleapis.com;
+                         frame-ancestors 'none';
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+#+END_EXAMPLE

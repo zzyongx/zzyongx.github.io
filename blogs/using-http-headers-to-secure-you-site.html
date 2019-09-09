@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-09-09 一 10:24 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>使用HTTP头加固你的网站</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">使用HTTP头加固你的网站</h1>
+<p>
+<a href="https://blog.heroku.com/using-http-headers-to-secure-your-site">原文</a> 有意思的是我使用mozilla的工具测试它们的主站 <a href="https://observatory.mozilla.org/analyze/www.mozilla.org">mozilla得分</a>，也没得到满分。
+</p>
+
+<p>
+<a href="https://observatory.mozilla.org/">Observatory by Mozilla</a> 可以教育开发者、系统管理员、安全专家如何配置他们的网站，使之更加安全、牢固。本文介绍和安全有关的HTTP头。
+</p>
+
+<div id="outline-container-orgd320e98" class="outline-2">
+<h2 id="orgd320e98"><span class="section-number-2">1</span> Content Security Policy (CSP)</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+CSP控制站点可以从哪里引用脚本和资源，例如：
+</p>
+<ul class="org-ul">
+<li>default-src &lt;source&gt;, script-src &lt;source&gt;, object-src &lt;source&gt; 等配置资源的源。
+<ul class="org-ul">
+<li><code>https</code> 只能引用https的源</li>
+<li><code>https://example.com</code> 只能引用该站点的</li>
+<li><code>'self'</code> 只能引用本站的</li>
+<li>在 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src">CSP:default-src</a> 查看更多选项</li>
+</ul></li>
+<li><code>Content Security Policy</code> 禁止 <code>&lt;script&gt;</code> 内联执行，可以通过标记 <code>'unsafe-inline'</code> 取消禁止，但是会使削弱站点的安全。可以通过指定 <code>nonce</code> 或 <code>SHA</code> 签名脚本内容以允许执行。</li>
+<li><code>frame-ancestors 'none'</code> 禁止站点在 <code>iframe</code> 中被引用，以避免 <a href="https://www.owasp.org/index.php/Clickjacking">clickjacking 攻击</a> ，如果确实需要在iframe中被引用，可以指定url代替 <code>'none'</code> 。</li>
+</ul>
+
+<p>
+我们的网站希望引用自身资源，twitter和aws的图片，google和twitter的脚本，google的css和字体等。我们还需要在一些指令中重新定义 <code>'self'</code> ，以覆盖默认值（ <code>default-src 'self'</code> 指定了默认值）。最终配置如下：
+</p>
+<pre class="example">
+Content-Security-Policy: default-src 'self';
+                         script-src https://static.ads-twitter.com https://www.google-analytics.com;
+                         img-src 'self' https://s3.amazonaws.com https://twitter.com https://pbs.twimg.com;
+                         font-src 'self' https://fonts.gstatic.com;
+                         style-src 'self' https://fonts.googleapis.com;
+                         frame-ancestors 'none';
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org7f02f1b" class="outline-2">
+<h2 id="org7f02f1b"><span class="section-number-2">2</span> HTTP Strict Transport Security (HSTS)</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+<code>HSTS</code> 告诉浏览器，我们的站点仅接受HTTPS访问，HSTS提供下面的标记：
+</p>
+<ul class="org-ul">
+<li><code>max-age=&lt;seconds&gt;</code> 这个指令告诉浏览器，未来这么久，对本站点的访问，必须通过HTTPS。这个标记使必须的。</li>
+<li><code>includeSubDomains</code> 包含子域</li>
+<li><code>preload</code> 如果配置了这个标记，并且在 <a href="https://hstspreload.org/">Chrome HSTS preload list </a>注册了你的域名，在看到这个header前，就会强制使用https。（这个我没看懂）</li>
+</ul>
+
+<p>
+最终设置是： <code>Strict-Transport-Security: max-age=63072000; includeSubDomains; preload</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org65f2843" class="outline-2">
+<h2 id="org65f2843"><span class="section-number-2">3</span> X-Content-Type-Options</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+这个头告诉浏览器，如果MIME类型和需要的不一致，不要加载script和stylesheets。例如：引用script资源，但是资源的MIME类型是text/plain，和需要的不一致，拒绝加载。
+</p>
+
+<p>
+最终设置是： <code>X-Content-Type-Options: nosniff</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org341fb1d" class="outline-2">
+<h2 id="org341fb1d"><span class="section-number-2">4</span> X-Frame-Options</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+提供的功能和CSP的 <code>frame-ancestors 'none'</code> 类似，但是浏览器的支持更广泛。
+</p>
+
+<p>
+最终设置是： <code>X-Frame-Options: DENY</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5c4f861" class="outline-2">
+<h2 id="org5c4f861"><span class="section-number-2">5</span> X-XSS-Protection</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+用来避免XSS，和CSP中提供的功能类似，但是浏览器支持更广泛。
+</p>
+
+<p>
+最终设置是： <code>X-XSS-Protection: 1; mode=block</code>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc211a78" class="outline-2">
+<h2 id="orgc211a78"><span class="section-number-2">6</span> 总结</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+添加上面的header后，firefox的console出现警告， <code>拒绝执行inline脚本，和如下的CSP策略冲突，"script-src https://static.ads-twitter.com https://www.google-analytics.com"</code> <code>使用 'unsafe-inline' 或者 hash（'sha256-q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0='） 或者 nonce 可以解决</code> 。即使我们把 <code>https://www.google-analytics.com</code> 添加到了 <code>script-src</code> ，因为使用了inline脚本，还需要显式开启允许inline执行。这里我们选择 <code>'sha256-q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0='</code> ，只有script的sha256是 <code>q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0=</code> 才允许执行。最终配置的header是：
+</p>
+<pre class="example">
+Content-Security-Policy: default-src 'self';
+                         script-src https://static.ads-twitter.com https://www.google-analytics.com 'sha256-q2sY7jlDS4SrxBg6oq/NBYk9XVSwDsterXWpH99SAn0=';
+                         img-src 'self' https://s3.amazonaws.com https://twitter.com https://pbs.twimg.com;
+                         font-src 'self' https://fonts.gstatic.com;
+                         style-src 'self' https://fonts.googleapis.com;
+                         frame-ancestors 'none';
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+</pre>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2019-09-09 一 10:24</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
