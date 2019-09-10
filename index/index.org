@@ -16,9 +16,13 @@
 [[blog:zombie_process_caused_by_systemd][排查systemd的bug引起的僵尸进程]] <2019-08-22>
 
 ** 笔记
+[[blog:using-http-headers-to-secure-you-site][使用HTTP头加固你的站点]] <2019-09-09>
+
 [[blog:dockfile-best-practices][Dockfile 最佳实践]] <2019-08-28>
 
 ** 翻译
+[[blog:sql-window-functions-tutorial][教程：使用SQL窗口函数做商务分析]] <2019-09-10>
+
 [[blog:typical-problems-of-technical-founders][技术人员做产品的盲区]] <2019-08-27>
 
 * 2018 戊戌年

@@ -1,0 +1,1384 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-09-10 二 15:45 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>教程：使用SQL窗口函数做商务分析</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">教程：使用SQL窗口函数做商务分析</h1>
+<p>
+<a href="https://statsbot.co/blog/sql-window-functions-tutorial/">原文</a> statsbot 是一家商业智能公司，本文翻译自它的博客，原文使用PostgreSQL，本文改用MySQL（语法和原文略有不同，并且要求MySQL8），并补上了创建测试数据的sql，方便学习。
+</p>
+
+<p>
+<b>注</b> 本文的sql都非常复杂，我估计性能也高不到哪去，非常不适合OLTP业务。
+</p>
+
+<p>
+任何一个从事数据分析的人都有过这样的感叹，一个直观上很简单的方法，使用纯SQL解决却非常困难（例如：TOP N）。
+</p>
+
+<p>
+如何计算每月的营收增长和总营收？我们可以相信计算结果吗？有没有重复数据的影响？如何找到每月的TOP N订单？所有这些问题都需要把商业语言转成编程语言。可以使用复杂的JOIN、数据导入excel、SQL存储过程等解决问题。窗口函数，让我们可以使用纯SQL解决问题，它更简单易读，更容易调试。
+</p>
+
+<div id="outline-container-org9a40f1c" class="outline-2">
+<h2 id="org9a40f1c"><span class="section-number-2">1</span> 准备工作</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-orge506a6e" class="outline-3">
+<h3 id="orge506a6e"><span class="section-number-3">1.1</span> 安装启动MySQL</h3>
+<div class="outline-text-3" id="text-1-1">
+<div class="org-src-container">
+<pre class="src src-sh">yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+yum install percona-server-server
+systemctl status mysqld
+<span style="color: #ffff00;"># </span><span style="color: #ffff00;">&#39318;&#27425;&#21551;&#21160; mysql8&#20250;&#25226;root&#23494;&#30721;&#20889;&#20837;&#26085;&#24535;&#65292;&#38656;&#35201;&#25163;&#21160;&#20462;&#25913;&#23494;&#30721;&#65306;alter user 'root'@'localhost' identified by '********'</span>
+grep password /var/log/mysqld.log
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org38ca181" class="outline-3">
+<h3 id="org38ca181"><span class="section-number-3">1.2</span> 准备数据</h3>
+<div class="outline-text-3" id="text-1-2">
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">CREATE</span> <span style="color: #00ffff; font-weight: bold;">TABLE</span> `orders` (
+  `order_id` <span style="color: #00ff00;">int</span>(11) <span style="color: #00ffff; font-weight: bold;">NOT</span> <span style="color: #00ffff; font-weight: bold;">NULL</span>,
+  `customer_id` <span style="color: #00ff00;">char</span>(10) <span style="color: #00ffff; font-weight: bold;">DEFAULT</span> <span style="color: #00ffff; font-weight: bold;">NULL</span>,
+  `<span style="color: #00ffff; font-weight: bold;">state</span>` <span style="color: #00ff00;">char</span>(2) <span style="color: #00ffff; font-weight: bold;">DEFAULT</span> <span style="color: #00ffff; font-weight: bold;">NULL</span>,
+  `datetime` datetime <span style="color: #00ffff; font-weight: bold;">DEFAULT</span> <span style="color: #00ffff; font-weight: bold;">NULL</span>,
+  `amount` <span style="color: #00ff00;">int</span>(11) <span style="color: #00ffff; font-weight: bold;">DEFAULT</span> <span style="color: #00ffff; font-weight: bold;">NULL</span>
+) ENGINE=InnoDB <span style="color: #00ffff; font-weight: bold;">DEFAULT</span> CHARSET=utf8;
+
+<span style="color: #00ffff; font-weight: bold;">INSERT</span> <span style="color: #00ffff; font-weight: bold;">INTO</span> orders(order_id, customer_id, <span style="color: #00ffff; font-weight: bold;">state</span>, datetime, amount) <span style="color: #00ffff; font-weight: bold;">VALUES</span>
+ (1,  <span style="color: #00ff00;">'A'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-01-01'</span>, 200),
+ (2,  <span style="color: #00ff00;">'B'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-01-05'</span>, 250),
+ (3,  <span style="color: #00ff00;">'C'</span>, <span style="color: #00ff00;">'NY'</span>, <span style="color: #00ff00;">'2017-01-12'</span>, 200),
+ (4,  <span style="color: #00ff00;">'A'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-02-04'</span>, 400),
+ (5,  <span style="color: #00ff00;">'D'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-02-05'</span>, 250),
+ (5,  <span style="color: #00ff00;">'D'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-02-05 12:00:00'</span>, 300),
+ (6,  <span style="color: #00ff00;">'C'</span>, <span style="color: #00ff00;">'NY'</span>, <span style="color: #00ff00;">'2017-02-19'</span>, 300),
+ (7,  <span style="color: #00ff00;">'A'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-03-01'</span>, 150),
+ (8,  <span style="color: #00ff00;">'E'</span>, <span style="color: #00ff00;">'NY'</span>, <span style="color: #00ff00;">'2017-03-05'</span>, 500),
+ (9,  <span style="color: #00ff00;">'F'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-03-09'</span>, 250),
+ (10, <span style="color: #00ff00;">'B'</span>, <span style="color: #00ff00;">'CA'</span>, <span style="color: #00ff00;">'2017-03-21'</span>, 600);
+</pre>
+</div>
+
+<p>
+这就是我们的测试数据集了：
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">order_id</th>
+<th scope="col" class="org-left">customer_id</th>
+<th scope="col" class="org-left">state</th>
+<th scope="col" class="org-left">datetime</th>
+<th scope="col" class="org-right">amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-01 00:00:00</td>
+<td class="org-right">200</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-05 00:00:00</td>
+<td class="org-right">250</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">C</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-01-12 00:00:00</td>
+<td class="org-right">200</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-04 00:00:00</td>
+<td class="org-right">400</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-left">D</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-05 00:00:00</td>
+<td class="org-right">250</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-left">D</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-05 12:00:00</td>
+<td class="org-right">300</td>
+</tr>
+
+<tr>
+<td class="org-right">6</td>
+<td class="org-left">C</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-02-19 00:00:00</td>
+<td class="org-right">300</td>
+</tr>
+
+<tr>
+<td class="org-right">7</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-01 00:00:00</td>
+<td class="org-right">150</td>
+</tr>
+
+<tr>
+<td class="org-right">8</td>
+<td class="org-left">E</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-03-05 00:00:00</td>
+<td class="org-right">500</td>
+</tr>
+
+<tr>
+<td class="org-right">9</td>
+<td class="org-left">F</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-09 00:00:00</td>
+<td class="org-right">250</td>
+</tr>
+
+<tr>
+<td class="org-right">10</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-21 00:00:00</td>
+<td class="org-right">600</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgce3d2b2" class="outline-2">
+<h2 id="orgce3d2b2"><span class="section-number-2">2</span> 营收增长</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+在商务中，月营收增长使用公式 <code>100*(m1-m0)/m0</code> 表示，m1是指定月份的营收，m0是它的前一月份的营收。你可以使用下面SQL计算出每个月的营收。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">SELECT</span>
+DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`,
+<span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue
+<span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+<span style="color: #00ffff; font-weight: bold;">GROUP</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">month</th>
+<th scope="col" class="org-right">revenue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">2017-01-01</td>
+<td class="org-right">650</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-02-01</td>
+<td class="org-right">1250</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-03-01</td>
+<td class="org-right">1500</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+你可以把数据导入excel计算，并做出趋势图。这里我们演示如何使用SQL解决。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">WITH</span>
+monthly_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`,
+  <span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+  <span style="color: #00ffff; font-weight: bold;">GROUP</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+),
+prev_month_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span>
+  t1.*,
+  t2.revenue <span style="color: #00ffff; font-weight: bold;">AS</span> prev_month_revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> monthly_revenue t1
+  <span style="color: #00ffff; font-weight: bold;">LEFT</span> <span style="color: #00ffff; font-weight: bold;">JOIN</span> monthly_revenue t2
+  <span style="color: #00ffff; font-weight: bold;">ON</span> TIMESTAMPDIFF(<span style="color: #00ffff; font-weight: bold;">MONTH</span>, t2.`<span style="color: #00ffff; font-weight: bold;">month</span>`, t1.`<span style="color: #00ffff; font-weight: bold;">month</span>`)=1
+)
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+ROUND(100.0*(revenue-prev_month_revenue)/prev_month_revenue,1) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue_growth
+<span style="color: #00ffff; font-weight: bold;">FROM</span> prev_month_revenue
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">month</th>
+<th scope="col" class="org-right">revenue</th>
+<th scope="col" class="org-right">prev_month_revenue</th>
+<th scope="col" class="org-right">revenue_growth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">2017-01-01</td>
+<td class="org-right">650</td>
+<td class="org-right">NULL</td>
+<td class="org-right">NULL</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-02-01</td>
+<td class="org-right">1250</td>
+<td class="org-right">650</td>
+<td class="org-right">92.3</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-03-01</td>
+<td class="org-right">1500</td>
+<td class="org-right">1250</td>
+<td class="org-right">20.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+这里我们先计算月营收，然后自JOIN，这个解法没问题，只是 <code>TIMESTAMPDIFF</code> 的可读性不好。下面介绍如何使用窗口函数解决：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">WITH</span>
+monthly_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`,
+  <span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+  <span style="color: #00ffff; font-weight: bold;">GROUP</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+),
+prev_month_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+  LAG(revenue) OVER (<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> <span style="color: #00ffff; font-weight: bold;">month</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> prev_month_revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> monthly_revenue
+)
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+ROUND(100.0*(revenue-prev_month_revenue)/prev_month_revenue,1) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue_growth
+<span style="color: #00ffff; font-weight: bold;">FROM</span> prev_month_revenue
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+</pre>
+</div>
+
+<p>
+这两个SQL的结果一样，prev_month_revenue 子句用到了窗口函数。这里解释下 <code>LAG</code> ：
+</p>
+<ul class="org-ul">
+<li><code>lag</code> 是窗口函数，获取 <code>前一行</code></li>
+<li><code>revenue</code> 是表达式，表示你想从前一行获取 <code>revenue</code> 字段</li>
+<li><code>over(order by month)</code> 是窗口规格，指定如何定义 <code>前一行</code> ，这里通过month排序定义行的顺序</li>
+</ul>
+
+<p>
+窗口函数的结构基本如此： <code>function (expression, [parameters]) OVER (window specification)</code> 非常简单强大。例如，通过添加 <code>partition by</code> 窗口规格，可以把行分组，本例分别计算每个 <code>state</code> 的营收增长。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">WITH</span>
+monthly_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`,
+  `<span style="color: #00ffff; font-weight: bold;">state</span>`,
+  <span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+  <span style="color: #00ffff; font-weight: bold;">GROUP</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`, `<span style="color: #00ffff; font-weight: bold;">state</span>`
+),
+prev_month_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+  LAG(revenue) OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">BY</span> <span style="color: #00ffff; font-weight: bold;">state</span> <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> <span style="color: #00ffff; font-weight: bold;">month</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> prev_month_revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> monthly_revenue
+)
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+ROUND(100.0*(revenue-prev_month_revenue)/prev_month_revenue,1) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue_growth
+<span style="color: #00ffff; font-weight: bold;">FROM</span> prev_month_revenue
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`, `<span style="color: #00ffff; font-weight: bold;">state</span>`
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">month</th>
+<th scope="col" class="org-left">state</th>
+<th scope="col" class="org-right">revenue</th>
+<th scope="col" class="org-right">prev_month_revenue</th>
+<th scope="col" class="org-right">revenue_growth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">2017-01-01</td>
+<td class="org-left">CA</td>
+<td class="org-right">450</td>
+<td class="org-right">NULL</td>
+<td class="org-right">NULL</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-02-01</td>
+<td class="org-left">CA</td>
+<td class="org-right">950</td>
+<td class="org-right">450</td>
+<td class="org-right">111.1</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-03-01</td>
+<td class="org-left">CA</td>
+<td class="org-right">1000</td>
+<td class="org-right">950</td>
+<td class="org-right">5.3</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-01-01</td>
+<td class="org-left">NY</td>
+<td class="org-right">200</td>
+<td class="org-right">NULL</td>
+<td class="org-right">NULL</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-02-01</td>
+<td class="org-left">NY</td>
+<td class="org-right">300</td>
+<td class="org-right">200</td>
+<td class="org-right">50.0</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-03-01</td>
+<td class="org-left">NY</td>
+<td class="org-right">500</td>
+<td class="org-right">300</td>
+<td class="org-right">66.7</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+通过第一个子句按州计算月营收，第二个子句按州计算上个月营收，第三个子句按州计算月营收增长。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org87ea2a2" class="outline-2">
+<h2 id="org87ea2a2"><span class="section-number-2">3</span> 流水总计</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+另一个常见问题是计算一段时间的流水，例如，计算到本月为止的总营收：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">WITH</span>
+monthly_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`,
+  <span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+  <span style="color: #00ffff; font-weight: bold;">GROUP</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+)
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+<span style="color: #0000ff; font-weight: bold;">SUM</span>(revenue) OVER (<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>` <span style="color: #00ffff; font-weight: bold;">rows</span> <span style="color: #00ffff; font-weight: bold;">BETWEEN</span> unbounded preceding <span style="color: #00ffff; font-weight: bold;">AND</span> <span style="color: #00ffff; font-weight: bold;">current</span> <span style="color: #00ff00;">row</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `running_total`
+<span style="color: #00ffff; font-weight: bold;">FROM</span> monthly_revenue
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`;
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">month</th>
+<th scope="col" class="org-right">revenue</th>
+<th scope="col" class="org-right">running_total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">2017-01-01</td>
+<td class="org-right">650</td>
+<td class="org-right">650</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-02-01</td>
+<td class="org-right">1250</td>
+<td class="org-right">1900</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-03-01</td>
+<td class="org-right">1500</td>
+<td class="org-right">3400</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+这里新出现的 <code>rows BETWEEN unbounded preceding AND current row</code> 称作 <code>frame clause</code> 它定义了感兴趣的行的子集（用于聚合函数），它的结构是 <code>rows between frame_start and frame_end</code> 。
+</p>
+
+<p>
+<code>frame_start</code> 和 <code>frame_end</code> 取如下值，但是 <code>frame_start</code> 指定的行必须在 <code>frame_end</code> 前面：
+</p>
+<ul class="org-ul">
+<li><code>unbounded preceding</code> 窗口第一行</li>
+<li><code>unbounded following</code> 窗口最后一行</li>
+<li><code>N preceding</code> 前N行</li>
+<li><code>N following</code> 后N行</li>
+<li><code>current row</code> 当前行</li>
+</ul>
+
+
+<p>
+例如:
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">SELECT</span>
+*,
+<span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) OVER () <span style="color: #00ffff; font-weight: bold;">AS</span> amount_total,
+<span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) OVER (<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> order_id <span style="color: #00ffff; font-weight: bold;">rows</span> <span style="color: #00ffff; font-weight: bold;">BETWEEN</span> unbounded preceding <span style="color: #00ffff; font-weight: bold;">AND</span> <span style="color: #00ffff; font-weight: bold;">current</span> <span style="color: #00ff00;">row</span>) <span style="color: #00ffff; font-weight: bold;">as</span> running_sum,
+<span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">BY</span> customer_id <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `datetime` <span style="color: #00ffff; font-weight: bold;">rows</span> <span style="color: #00ffff; font-weight: bold;">BETWEEN</span> unbounded preceding <span style="color: #00ffff; font-weight: bold;">AND</span> <span style="color: #00ffff; font-weight: bold;">current</span> <span style="color: #00ff00;">row</span>) <span style="color: #00ffff; font-weight: bold;">as</span> running_sum_by_customer,
+<span style="color: #0000ff; font-weight: bold;">AVG</span>(amount) OVER (<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `datetime` <span style="color: #00ffff; font-weight: bold;">rows</span> <span style="color: #00ffff; font-weight: bold;">BETWEEN</span> 5 preceding <span style="color: #00ffff; font-weight: bold;">AND</span> <span style="color: #00ffff; font-weight: bold;">current</span> <span style="color: #00ff00;">row</span>) <span style="color: #00ffff; font-weight: bold;">as</span> trailing_avg
+<span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> order_id;
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>amount_total 没有指定窗口，默认取所有行</li>
+<li>running_sum 按照订单ID排序，本订单和之前所有订单</li>
+<li>running_sum_by_customer 按每个客户分组，本订单和之前所有订单</li>
+<li>trailing_avg 最近5笔订单的均值</li>
+</ul>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">order_id</th>
+<th scope="col" class="org-left">customer_id</th>
+<th scope="col" class="org-left">state</th>
+<th scope="col" class="org-left">datetime</th>
+<th scope="col" class="org-right">amount</th>
+<th scope="col" class="org-right">amount_total</th>
+<th scope="col" class="org-right">running_sum</th>
+<th scope="col" class="org-right">running_sum_by_customer</th>
+<th scope="col" class="org-right">trailing_avg</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-01 00:00:00</td>
+<td class="org-right">200</td>
+<td class="org-right">3400</td>
+<td class="org-right">200</td>
+<td class="org-right">200</td>
+<td class="org-right">200.0000</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-05 00:00:00</td>
+<td class="org-right">250</td>
+<td class="org-right">3400</td>
+<td class="org-right">450</td>
+<td class="org-right">250</td>
+<td class="org-right">225.0000</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">C</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-01-12 00:00:00</td>
+<td class="org-right">200</td>
+<td class="org-right">3400</td>
+<td class="org-right">650</td>
+<td class="org-right">200</td>
+<td class="org-right">216.6667</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-04 00:00:00</td>
+<td class="org-right">400</td>
+<td class="org-right">3400</td>
+<td class="org-right">1050</td>
+<td class="org-right">600</td>
+<td class="org-right">262.5000</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-left">D</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-05 12:00:00</td>
+<td class="org-right">300</td>
+<td class="org-right">3400</td>
+<td class="org-right">1600</td>
+<td class="org-right">550</td>
+<td class="org-right">266.6667</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-left">D</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-05 00:00:00</td>
+<td class="org-right">250</td>
+<td class="org-right">3400</td>
+<td class="org-right">1300</td>
+<td class="org-right">250</td>
+<td class="org-right">260.0000</td>
+</tr>
+
+<tr>
+<td class="org-right">6</td>
+<td class="org-left">C</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-02-19 00:00:00</td>
+<td class="org-right">300</td>
+<td class="org-right">3400</td>
+<td class="org-right">1900</td>
+<td class="org-right">500</td>
+<td class="org-right">283.3333</td>
+</tr>
+
+<tr>
+<td class="org-right">7</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-01 00:00:00</td>
+<td class="org-right">150</td>
+<td class="org-right">3400</td>
+<td class="org-right">2050</td>
+<td class="org-right">750</td>
+<td class="org-right">266.6667</td>
+</tr>
+
+<tr>
+<td class="org-right">8</td>
+<td class="org-left">E</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-03-05 00:00:00</td>
+<td class="org-right">500</td>
+<td class="org-right">3400</td>
+<td class="org-right">2550</td>
+<td class="org-right">500</td>
+<td class="org-right">316.6667</td>
+</tr>
+
+<tr>
+<td class="org-right">9</td>
+<td class="org-left">F</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-09 00:00:00</td>
+<td class="org-right">250</td>
+<td class="org-right">3400</td>
+<td class="org-right">2800</td>
+<td class="org-right">250</td>
+<td class="org-right">291.6667</td>
+</tr>
+
+<tr>
+<td class="org-right">10</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-21 00:00:00</td>
+<td class="org-right">600</td>
+<td class="org-right">3400</td>
+<td class="org-right">3400</td>
+<td class="org-right">850</td>
+<td class="org-right">350.0000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgd12c791" class="outline-2">
+<h2 id="orgd12c791"><span class="section-number-2">4</span> 处理重复数据</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+仔细观察数据，发现有两个order_id为5的数据，这是同一笔订单，初始值是250，后来追加到300。这导致计算月增长错误。（应该通过主键的方式避免）
+</p>
+
+<p>
+排除重复数据：
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">SELECT</span> *
+<span style="color: #00ffff; font-weight: bold;">FROM</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+  ROW_NUMBER() OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">BY</span> order_id <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `datetime` <span style="color: #00ffff; font-weight: bold;">DESC</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> row_num
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+) row_num_tbl
+<span style="color: #00ffff; font-weight: bold;">WHERE</span> row_num=1
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">order_id</th>
+<th scope="col" class="org-left">customer_id</th>
+<th scope="col" class="org-left">state</th>
+<th scope="col" class="org-left">datetime</th>
+<th scope="col" class="org-right">amount</th>
+<th scope="col" class="org-right">row_num</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-01 00:00:00</td>
+<td class="org-right">200</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-05 00:00:00</td>
+<td class="org-right">250</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">C</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-01-12 00:00:00</td>
+<td class="org-right">200</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-04 00:00:00</td>
+<td class="org-right">400</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-left">D</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-05 12:00:00</td>
+<td class="org-right">300</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">6</td>
+<td class="org-left">C</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-02-19 00:00:00</td>
+<td class="org-right">300</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">7</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-01 00:00:00</td>
+<td class="org-right">150</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">8</td>
+<td class="org-left">E</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-03-05 00:00:00</td>
+<td class="org-right">500</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">9</td>
+<td class="org-left">F</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-09 00:00:00</td>
+<td class="org-right">250</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">10</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-21 00:00:00</td>
+<td class="org-right">600</td>
+<td class="org-right">1</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+下图演示了这个过程：
+</p>
+
+
+<div class="figure">
+<p><img src="../images/sql-window-duplicate-row.jpg" alt="sql-window-duplicate-row.jpg" />
+</p>
+</div>
+
+<p>
+使用排重后的数据计算月营收增长：
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">WITH</span>
+orders_cleaned <span style="color: #00ffff; font-weight: bold;">as</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> (
+    <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+    ROW_NUMBER() OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">BY</span> order_id <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `datetime` <span style="color: #00ffff; font-weight: bold;">DESC</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> row_num
+    <span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+  ) row_num_tbl
+  <span style="color: #00ffff; font-weight: bold;">WHERE</span> row_num=1
+),
+monthly_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`,
+  <span style="color: #0000ff; font-weight: bold;">SUM</span>(amount) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders_cleaned
+  <span style="color: #00ffff; font-weight: bold;">GROUP</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+),
+prev_month_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+  LAG(revenue) OVER (<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> <span style="color: #00ffff; font-weight: bold;">month</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> prev_month_revenue
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> monthly_revenue
+)
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+ROUND(100.0*(revenue-prev_month_revenue)/prev_month_revenue,1) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue_growth
+<span style="color: #00ffff; font-weight: bold;">FROM</span> prev_month_revenue
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`;
+</pre>
+</div>
+
+<p>
+对比错误数据，这个数据看起来更正确，月营收增长没有大幅波动。
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">month</th>
+<th scope="col" class="org-right">revenue</th>
+<th scope="col" class="org-right">prev_month_revenue</th>
+<th scope="col" class="org-right">revenue_growth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">2017-01-01</td>
+<td class="org-right">650</td>
+<td class="org-right">NULL</td>
+<td class="org-right">NULL</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-02-01</td>
+<td class="org-right">1000</td>
+<td class="org-right">650</td>
+<td class="org-right">53.8</td>
+</tr>
+
+<tr>
+<td class="org-right">2017-03-01</td>
+<td class="org-right">1500</td>
+<td class="org-right">1000</td>
+<td class="org-right">50.0</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+给排重后的数据创建视图：
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">CREATE</span> <span style="color: #00ffff; font-weight: bold;">VIEW</span> <span style="color: #0000ff; font-weight: bold;">orders_cleaned</span> <span style="color: #00ffff; font-weight: bold;">AS</span>
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> order_id, customer_id, `<span style="color: #00ffff; font-weight: bold;">state</span>`, `datetime`, amount
+<span style="color: #00ffff; font-weight: bold;">FROM</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+  ROW_NUMBER() OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">BY</span> order_id <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `datetime` <span style="color: #00ffff; font-weight: bold;">DESC</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> row_num
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders
+) t
+<span style="color: #00ffff; font-weight: bold;">WHERE</span> row_num=1
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org54f98ae" class="outline-2">
+<h2 id="org54f98ae"><span class="section-number-2">5</span> 分组计算TOP N</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+计算每月的TOP 2订单
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">WITH</span> orders_ranked <span style="color: #00ffff; font-weight: bold;">as</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+  DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`,
+  ROW_NUMBER() OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">BY</span> DATE_FORMAT(`datetime`, <span style="color: #00ff00;">'%Y-%m-01'</span>) <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> amount <span style="color: #00ffff; font-weight: bold;">DESC</span>, `datetime`) <span style="color: #00ffff; font-weight: bold;">AS</span> amount_rank
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders_cleaned
+)
+<span style="color: #00ffff; font-weight: bold;">SELECT</span> *
+<span style="color: #00ffff; font-weight: bold;">FROM</span> orders_ranked
+<span style="color: #00ffff; font-weight: bold;">WHERE</span> amount_rank&lt;=2
+<span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `<span style="color: #00ffff; font-weight: bold;">month</span>`
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">order_id</th>
+<th scope="col" class="org-left">customer_id</th>
+<th scope="col" class="org-left">state</th>
+<th scope="col" class="org-left">datetime</th>
+<th scope="col" class="org-right">amount</th>
+<th scope="col" class="org-right">month</th>
+<th scope="col" class="org-right">amount_rank</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-05 00:00:00</td>
+<td class="org-right">250</td>
+<td class="org-right">2017-01-01</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-01-01 00:00:00</td>
+<td class="org-right">200</td>
+<td class="org-right">2017-01-01</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-left">A</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-04 00:00:00</td>
+<td class="org-right">400</td>
+<td class="org-right">2017-02-01</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-left">D</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-02-05 12:00:00</td>
+<td class="org-right">300</td>
+<td class="org-right">2017-02-01</td>
+<td class="org-right">2</td>
+</tr>
+
+<tr>
+<td class="org-right">10</td>
+<td class="org-left">B</td>
+<td class="org-left">CA</td>
+<td class="org-left">2017-03-21 00:00:00</td>
+<td class="org-right">600</td>
+<td class="org-right">2017-03-01</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">8</td>
+<td class="org-left">E</td>
+<td class="org-left">NY</td>
+<td class="org-left">2017-03-05 00:00:00</td>
+<td class="org-right">500</td>
+<td class="org-right">2017-03-01</td>
+<td class="org-right">2</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+<code>row_number</code> 计算时间窗口内的行数，这里分月按照amount排序，行数代表了排名，行数越多，说明排名越靠后。下图演示了这个过程：
+</p>
+
+
+<div class="figure">
+<p><img src="../images/sql-window-topn.jpg" alt="sql-window-topn.jpg" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2f5d68d" class="outline-2">
+<h2 id="org2f5d68d"><span class="section-number-2">6</span> 重复下单行为</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+重复下单（留存）行为非常重要，衡量用户忠实度。
+</p>
+
+<p>
+计算重复下单率和平均客单增长率：
+</p>
+<div class="org-src-container">
+<pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">WITH</span>
+customer_orders <span style="color: #00ffff; font-weight: bold;">AS</span> (
+  <span style="color: #00ffff; font-weight: bold;">SELECT</span> *,
+  ROW_NUMBER() OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">BY</span> customer_id <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `datetime`) <span style="color: #00ffff; font-weight: bold;">AS</span> customer_order_n,
+  LAG(amount) OVER (PARTITION <span style="color: #00ffff; font-weight: bold;">by</span> customer_id <span style="color: #00ffff; font-weight: bold;">ORDER</span> <span style="color: #00ffff; font-weight: bold;">BY</span> `datetime`) <span style="color: #00ffff; font-weight: bold;">AS</span> prev_order_amount
+  <span style="color: #00ffff; font-weight: bold;">FROM</span> orders_cleaned
+)
+<span style="color: #00ffff; font-weight: bold;">SELECT</span>
+ROUND(100.0*<span style="color: #0000ff; font-weight: bold;">SUM</span>(<span style="color: #00ffff; font-weight: bold;">CASE</span> <span style="color: #00ffff; font-weight: bold;">WHEN</span> customer_order_n=2 <span style="color: #00ffff; font-weight: bold;">THEN</span> 1 <span style="color: #00ffff; font-weight: bold;">END</span>)/<span style="color: #0000ff; font-weight: bold;">COUNT</span>(<span style="color: #00ffff; font-weight: bold;">DISTINCT</span> customer_id),1) <span style="color: #00ffff; font-weight: bold;">AS</span> repeat_purchases,
+<span style="color: #0000ff; font-weight: bold;">AVG</span>(<span style="color: #00ffff; font-weight: bold;">CASE</span> <span style="color: #00ffff; font-weight: bold;">WHEN</span> customer_order_n=2 <span style="color: #00ffff; font-weight: bold;">THEN</span> 1.0*amount/prev_order_amount <span style="color: #00ffff; font-weight: bold;">END</span>) <span style="color: #00ffff; font-weight: bold;">AS</span> revenue_expansion
+<span style="color: #00ffff; font-weight: bold;">FROM</span> customer_orders
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">repeat_purchases</th>
+<th scope="col" class="org-right">revenue_expansion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">50.0</td>
+<td class="org-right">1.966666667</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+下图演示了这个过程：
+</p>
+
+
+<div class="figure">
+<p><img src="../images/sql-window-repeat-purchase.jpg" alt="sql-window-repeat-purchase.jpg" />
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2019-09-10 二 15:45</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
