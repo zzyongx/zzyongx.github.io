@@ -7,6 +7,9 @@
 --------------
 
 ** 经验
+
+[[blog:curl-transfer-closed-with-outstanding-read-data-remaining][curl: (18) transfer closed with outstanding read data remaining]] <2019-09-23>
+
 [[blog:bash-glob][bash glob 简介]] <2019-09-03>
 
 [[blog:analyze-websites-ttfb][分析网站的TTFB]] <2019-08-27>

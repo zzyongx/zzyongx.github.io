@@ -7,3 +7,4 @@
 #+HTML_HEAD: <script src="/jslib/bootstrap.min.js"></script>
 #+HTML_HEAD: <script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
 #+HTML_HEAD: <script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+#+HTML_HEAD: <style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>

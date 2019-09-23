@@ -1,0 +1,22 @@
+#+TITLE: curl: (18) transfer closed with outstanding read data remaining
+#+AUTHOR: zhengzhiyong
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+请求接口返回 =curl: (18) transfer closed with outstanding read data remaining= ，[[https://stackoverflow.com/questions/1759956/curl-error-18-transfer-closed-with-outstanding-read-data-remaining][stackoverflow]] 给出的解释是：服务端在响应header中指明的响应大小和实际的响应大小不同，可以通过 =--ignore-content-length= 参数忽略服务端指定的大小。在我这个例子中，服务端并没有指定响应大小，所以这个参数无效。
+
+但报错的原理肯定类似，于是抓包，截取关键点如下：
+
+#+BEGIN_EXAMPLE
+10:02:15.655228 IP 10.152.216.40.80 > 10.152.116.142.49987: Flags [P.], seq 26:199, ack 5171732, win 65535, length 173
+HTTP/1.1 200
+Server: nginx/1.8.0
+Date: Fri, 20 Sep 2019 02:02:15 GMT
+Content-Type: application/json;charset=UTF-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+10:02:15.655312 IP 10.152.216.40.80 > 10.152.116.142.49987: Flags [F.], seq 199, ack 5171732, win 65535, length 0
+10:02:15.661320 IP 10.152.216.40.80 > 10.152.116.142.49987: Flags [.], ack 5171733, win 65535, length 0
+#+END_EXAMPLE
+
+响应 =Transfer-Encoding: chunked= 指明响应使用 =chunked= 编码，但是服务端发送完响应header之后，直接发送 =Fin= 断开了连接，并没有发送 =chunked= 编码的响应，所以curl报错说 =尚有未读数据时断开了连接= 。妥妥的服务端问题，客户端无能为力。

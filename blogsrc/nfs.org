@@ -14,3 +14,7 @@ systemctl start nfs && systemctl enable nfs
 
 * 挂载 nfs
 ~mkdir -p /mnt/partimag && mount -F nfs.server:/data/partimag/ /mnt/partimag~
+
+* 常见错误
+** nfs write permission denied
+root用户使用nfs系统时，会使用nfsnobody用户，要确保nfsnobody用户有权限写入。
