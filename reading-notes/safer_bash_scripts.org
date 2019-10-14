@@ -1,0 +1,30 @@
+#+TITLE: 更安全的shell
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+在我启动了一个新的c++项目后，我从别的地方复制了一个Makefile过来，简单的修改后，我执行了 =make clean= ，然后我的系统就没了。罪魁祸首是 =rm -rf $(BUILDDIR)/*= ， =$(BUILDDIR)= 的定义被我误删了。后来当我写到 =find $TMPFSDIR -type f \( \( -size +10M -mtime +2 \) -o -mtime +7 -o -empty \) -delete= 时，我不淡定了，这行脚本将在公司所有服务器上执行，万一 =$TMPFSDIR= 被误改了，我估计得坐牢。
+
+我抓紧找到之前看过的这篇文章 [[https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/][Safer bash scripts with 'set -euxo pipefail']] ，做笔记，反思。bash太强大了，也太宽松了。我必须给自己设置到防火墙。
+
+* 笔记
+** set -e
+=-e= 导致脚本一旦有错，立即退出。例如： ~VER=$(cat /etc/version)~ 如果文件不存在，脚本立即退出。如果允许文件不存在，可以使用  ~VER=$(cat /etc/version || true)~ 。如果失败的语句在条件语句中，不会导致退出。例如： ~if test -f /etc/version; then VER=$(cat /etc/version); fi~ 。
+
+** set -o pipefail
+通常bash只检查管道命令的最后一个，这会导致 =-e= 仅能检测最后一个命令的失败，例如 ~VER=$(cat /etc/varsion | grep "VERSION")~ 即使文件不存在也不会失败。 =-o pipefail= 把最后一个非零退出状态作为管道命令的退出状态（如果没有，则状态时0）。
+
+** set -u
+把未定义的变量，当作错误对待。例如，不小心把 =$BUILDDIR= 写成了 =$BULIDDIR= 则报错退出。 =${a:-b}= 的赋值方式不在此列。例如： ~RESULT=${VAR:-NOTFOUND}~ 这里 =VAR= 未定义，但是不报错。
+
+** set -E
+如果使用了=trap= ，使用 =-E= 配合 =-e= 使用，避免某些场景 =trap= 不执行。
+
+* 反思
+** 避免使用root
+至少不会把重要数据删除。如果需要以root运行，可以赋予非root用户删除目标数据的权限，然后以非root用户删除，这样不会删除预期外的数据。
+
+** 避免使用 rm -r
+避免使用 =rm -r= ，如果不删除目录，破坏力也有限。
+
+** 使用 set -Eeuo pipefail
+在开始编写脚本的时候，就开启这些选项，不要在后面开启，除非测试非常完善。因为后面开启，极可能导致脚本无法正常工作。对已有脚本，可以在某些 =危险代码段= 开始时开启，结束时关闭， =set +Eeuo pipefail= 。

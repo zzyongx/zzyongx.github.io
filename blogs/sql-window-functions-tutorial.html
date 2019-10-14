@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-09-10 二 15:45 -->
+<!-- 2019-10-14 Mon 19:56 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>教程：使用SQL窗口函数做商务分析</title>
@@ -186,6 +186,7 @@
 <script src="/jslib/bootstrap.min.js"></script>
 <script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -252,15 +253,16 @@ for the JavaScript code in this tag.
 如何计算每月的营收增长和总营收？我们可以相信计算结果吗？有没有重复数据的影响？如何找到每月的TOP N订单？所有这些问题都需要把商业语言转成编程语言。可以使用复杂的JOIN、数据导入excel、SQL存储过程等解决问题。窗口函数，让我们可以使用纯SQL解决问题，它更简单易读，更容易调试。
 </p>
 
-<div id="outline-container-org9a40f1c" class="outline-2">
-<h2 id="org9a40f1c"><span class="section-number-2">1</span> 准备工作</h2>
+<div id="outline-container-org116d123" class="outline-2">
+<h2 id="org116d123"><span class="section-number-2">1</span> 准备工作</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-orge506a6e" class="outline-3">
-<h3 id="orge506a6e"><span class="section-number-3">1.1</span> 安装启动MySQL</h3>
+<div id="outline-container-org48b2719" class="outline-3">
+<h3 id="org48b2719"><span class="section-number-3">1.1</span> 安装启动MySQL</h3>
 <div class="outline-text-3" id="text-1-1">
 <div class="org-src-container">
 <pre class="src src-sh">yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+percona-release setup ps80
 yum install percona-server-server
 systemctl status mysqld
 <span style="color: #ffff00;"># </span><span style="color: #ffff00;">&#39318;&#27425;&#21551;&#21160; mysql8&#20250;&#25226;root&#23494;&#30721;&#20889;&#20837;&#26085;&#24535;&#65292;&#38656;&#35201;&#25163;&#21160;&#20462;&#25913;&#23494;&#30721;&#65306;alter user 'root'@'localhost' identified by '********'</span>
@@ -270,8 +272,8 @@ grep password /var/log/mysqld.log
 </div>
 </div>
 
-<div id="outline-container-org38ca181" class="outline-3">
-<h3 id="org38ca181"><span class="section-number-3">1.2</span> 准备数据</h3>
+<div id="outline-container-orgfd4b04f" class="outline-3">
+<h3 id="orgfd4b04f"><span class="section-number-3">1.2</span> 准备数据</h3>
 <div class="outline-text-3" id="text-1-2">
 <div class="org-src-container">
 <pre class="src src-sql"><span style="color: #00ffff; font-weight: bold;">CREATE</span> <span style="color: #00ffff; font-weight: bold;">TABLE</span> `orders` (
@@ -417,8 +419,8 @@ grep password /var/log/mysqld.log
 </div>
 </div>
 
-<div id="outline-container-orgce3d2b2" class="outline-2">
-<h2 id="orgce3d2b2"><span class="section-number-2">2</span> 营收增长</h2>
+<div id="outline-container-org363fd55" class="outline-2">
+<h2 id="org363fd55"><span class="section-number-2">2</span> 营收增长</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 在商务中，月营收增长使用公式 <code>100*(m1-m0)/m0</code> 表示，m1是指定月份的营收，m0是它的前一月份的营收。你可以使用下面SQL计算出每个月的营收。
@@ -675,8 +677,8 @@ ROUND(100.0*(revenue-prev_month_revenue)/prev_month_revenue,1) <span style="colo
 </div>
 </div>
 
-<div id="outline-container-org87ea2a2" class="outline-2">
-<h2 id="org87ea2a2"><span class="section-number-2">3</span> 流水总计</h2>
+<div id="outline-container-org8ce0735" class="outline-2">
+<h2 id="org8ce0735"><span class="section-number-2">3</span> 流水总计</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 另一个常见问题是计算一段时间的流水，例如，计算到本月为止的总营收：
@@ -945,8 +947,8 @@ monthly_revenue <span style="color: #00ffff; font-weight: bold;">AS</span> (
 </div>
 </div>
 
-<div id="outline-container-orgd12c791" class="outline-2">
-<h2 id="orgd12c791"><span class="section-number-2">4</span> 处理重复数据</h2>
+<div id="outline-container-org194d272" class="outline-2">
+<h2 id="org194d272"><span class="section-number-2">4</span> 处理重复数据</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 仔细观察数据，发现有两个order_id为5的数据，这是同一笔订单，初始值是250，后来追加到300。这导致计算月增长错误。（应该通过主键的方式避免）
@@ -1192,8 +1194,8 @@ ROUND(100.0*(revenue-prev_month_revenue)/prev_month_revenue,1) <span style="colo
 </div>
 </div>
 
-<div id="outline-container-org54f98ae" class="outline-2">
-<h2 id="org54f98ae"><span class="section-number-2">5</span> 分组计算TOP N</h2>
+<div id="outline-container-org074e03d" class="outline-2">
+<h2 id="org074e03d"><span class="section-number-2">5</span> 分组计算TOP N</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 计算每月的TOP 2订单
@@ -1316,8 +1318,8 @@ ROUND(100.0*(revenue-prev_month_revenue)/prev_month_revenue,1) <span style="colo
 </div>
 </div>
 
-<div id="outline-container-org2f5d68d" class="outline-2">
-<h2 id="org2f5d68d"><span class="section-number-2">6</span> 重复下单行为</h2>
+<div id="outline-container-orgb94e682" class="outline-2">
+<h2 id="orgb94e682"><span class="section-number-2">6</span> 重复下单行为</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 重复下单（留存）行为非常重要，衡量用户忠实度。
@@ -1377,7 +1379,7 @@ ROUND(100.0*<span style="color: #0000ff; font-weight: bold;">SUM</span>(<span st
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zzyongx</p>
-<p class="date">Created: 2019-09-10 二 15:45</p>
+<p class="date">Created: 2019-10-14 Mon 19:56</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

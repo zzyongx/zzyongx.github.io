@@ -17,6 +17,7 @@
 ** 安装启动MySQL
 #+BEGIN_SRC sh
 yum install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+percona-release setup ps80
 yum install percona-server-server
 systemctl status mysqld
 # 首次启动 mysql8会把root密码写入日志，需要手动修改密码：alter user 'root'@'localhost' identified by '********'
