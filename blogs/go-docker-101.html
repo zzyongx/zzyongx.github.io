@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-11-22 Fri 15:23 -->
+<!-- 2019-11-22 Fri 17:06 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>更安全的shell</title>
+<title>golang docker 101</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="root" />
 <style type="text/css">
@@ -236,100 +236,66 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">更安全的shell</h1>
+<h1 class="title">golang docker 101</h1>
 <p>
-在我启动了一个新的c++项目后，我从别的地方复制了一个Makefile过来，简单的修改后，我执行了 <code>make clean</code> ，然后我的系统就没了。罪魁祸首是 <code>rm -rf $(BUILDDIR)/*</code> ， <code>$(BUILDDIR)</code> 的定义被我误删了。后来当我写到 <code>find $TMPFSDIR -type f \( \( -size +10M -mtime +2 \) -o -mtime +7 -o -empty \) -delete</code> 时，我不淡定了，这行脚本将在公司所有服务器上执行，万一 <code>$TMPFSDIR</code> 被误改了，我估计得坐牢。
+本文介绍如何把一个golang程序打包成docker，并发布到私有镜像。
 </p>
 
-<p>
-我抓紧找到之前看过的这篇文章 <a href="https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/">Safer bash scripts with 'set -euxo pipefail'</a> ，做笔记，反思。bash太强大了，也太宽松了。我必须给自己设置到防火墙。
-</p>
-
-<div id="outline-container-orgd416b9b" class="outline-2">
-<h2 id="orgd416b9b"><span class="section-number-2">1</span> 笔记</h2>
+<div id="outline-container-org166655c" class="outline-2">
+<h2 id="org166655c"><span class="section-number-2">1</span> 安装docker</h2>
 <div class="outline-text-2" id="text-1">
-</div>
-<div id="outline-container-org86869b1" class="outline-3">
-<h3 id="org86869b1"><span class="section-number-3">1.1</span> set -e</h3>
-<div class="outline-text-3" id="text-1-1">
-<p>
-<code>-e</code> 导致脚本一旦有错，立即退出。例如： <code>VER=$(cat /etc/version)</code> 如果文件不存在，脚本立即退出。如果允许文件不存在，可以使用  <code>VER=$(cat /etc/version || true)</code> 。如果失败的语句在条件语句中，不会导致退出。例如： <code>if test -f /etc/version; then VER=$(cat /etc/version); fi</code> 。
-</p>
+<ol class="org-ol">
+<li>安装 <code>yum install docker</code></li>
+<li>启动 <code>service docker start</code></li>
+</ol>
 </div>
 </div>
 
-<div id="outline-container-org8004750" class="outline-3">
-<h3 id="org8004750"><span class="section-number-3">1.2</span> set -o pipefail</h3>
-<div class="outline-text-3" id="text-1-2">
-<p>
-通常bash只检查管道命令的最后一个，这会导致 <code>-e</code> 仅能检测最后一个命令的失败，例如 <code>VER=$(cat /etc/varsion | grep "VERSION")</code> 即使文件不存在也不会失败。 <code>-o pipefail</code> 把最后一个非零退出状态作为管道命令的退出状态（如果没有，则状态时0）。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org7089d5c" class="outline-3">
-<h3 id="org7089d5c"><span class="section-number-3">1.3</span> set -u</h3>
-<div class="outline-text-3" id="text-1-3">
-<p>
-把未定义的变量，当作错误对待。例如，不小心把 <code>$BUILDDIR</code> 写成了 <code>$BULIDDIR</code> 则报错退出。 <code>${a:-b}</code> 的赋值方式不在此列。例如： <code>RESULT=${VAR:-NOTFOUND}</code> 这里 <code>VAR</code> 未定义，但是不报错。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org9652233" class="outline-3">
-<h3 id="org9652233"><span class="section-number-3">1.4</span> set -E</h3>
-<div class="outline-text-3" id="text-1-4">
-<p>
-如果使用了<code>trap</code> ，使用 <code>-E</code> 配合 <code>-e</code> 使用，避免某些场景 <code>trap</code> 不执行。
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-org0d01b33" class="outline-2">
-<h2 id="org0d01b33"><span class="section-number-2">2</span> 经验</h2>
+<div id="outline-container-orga647ca4" class="outline-2">
+<h2 id="orga647ca4"><span class="section-number-2">2</span> 编写Dockfile</h2>
 <div class="outline-text-2" id="text-2">
-<ul class="org-ul">
-<li><code>(())</code> 返回计算结果，$?不总是0，使用 <code>((i++)) || true</code> 代替 <code>((i++))</code></li>
-</ul>
+<pre class="example">
+FROM golang:latest
+COPY server/pclone /usr/local/bin/
+ENV PCLONE_DB=user:pass(example.db:3306)/test?charset=utf8
+RUN mkdir -p /var/log/pclone/logs
+RUN pclone -logd /var/log/pclone/logs -logr true
+</pre>
 </div>
 </div>
 
-<div id="outline-container-org5830559" class="outline-2">
-<h2 id="org5830559"><span class="section-number-2">3</span> 反思</h2>
+<div id="outline-container-org582cc74" class="outline-2">
+<h2 id="org582cc74"><span class="section-number-2">3</span> 启动镜像</h2>
 <div class="outline-text-2" id="text-3">
-</div>
-<div id="outline-container-orgbaaac1b" class="outline-3">
-<h3 id="orgbaaac1b"><span class="section-number-3">3.1</span> 避免使用root</h3>
-<div class="outline-text-3" id="text-3-1">
 <p>
-至少不会把重要数据删除。如果需要以root运行，可以赋予非root用户删除目标数据的权限（不要赋错了），然后以非root用户删除，这样不会删除预期外的数据。
+<code>docker build .</code>
 </p>
+
+<p>
+镜像启动后会有类似输出：
+</p>
+<pre class="example">
+Step 4 : RUN pclone -logd /var/log/pclone/logs -logr true
+ ---&gt; Running in 939b34a5b3b2
+</pre>
 </div>
 </div>
 
-<div id="outline-container-orgc15880f" class="outline-3">
-<h3 id="orgc15880f"><span class="section-number-3">3.2</span> 避免使用 rm -r</h3>
-<div class="outline-text-3" id="text-3-2">
-<p>
-避免使用 <code>rm -r</code> ，如果不删除目录，破坏力也有限。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgc809377" class="outline-3">
-<h3 id="orgc809377"><span class="section-number-3">3.3</span> 使用 set -Eeuo pipefail</h3>
-<div class="outline-text-3" id="text-3-3">
-<p>
-在开始编写脚本的时候，就开启这些选项，不要在后面开启，除非测试非常完善。因为后面开启，极可能导致脚本无法正常工作。对已有脚本，可以在某些 <code>危险代码段</code> 开始时开启，结束时关闭， <code>set +Eeuo pipefail</code> 。
-</p>
-</div>
+<div id="outline-container-orgb987d3b" class="outline-2">
+<h2 id="orgb987d3b"><span class="section-number-2">4</span> 上传到私有镜像</h2>
+<div class="outline-text-2" id="text-4">
+<ol class="org-ol">
+<li>登陆 <code>docker loign -u user docker-reg.example</code></li>
+<li>创建镜像 <code>docker commit 939b34a5b3b2 pclone</code></li>
+<li>创建tag，需要提前创建data-link项目 <code>docker tag pclone docker-reg.example/data-link/pclone:v1.0.1</code></li>
+<li>推送镜像 <code>docker push docker-reg.example/data-link/pclone:v1.0.1</code></li>
+</ol>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-11-22 Fri 15:23</p>
+<p class="date">Created: 2019-11-22 Fri 17:06</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

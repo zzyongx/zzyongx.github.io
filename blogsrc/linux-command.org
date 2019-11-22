@@ -15,6 +15,10 @@ java的properties文件不能有汉字，可以用~native2ascii~转成utf8写在
 ** 替换war包中的文件
 ~jar uf app.war WEB-INF/classes/application-online.properties~ 替换文件，注意必须和war包中的文件保持相同路径
 
+* MySQL
+** 把表从A库导入B库
+~mysqldump -h host_a -u user_a -ppass_a --skip-add-locks --skip-lock-tables --column-statistics=0 db_a table | mysql -h host_b -u user_b -ppass_b db_b~
+
 * 字符串
 
 ** 获取随机字符串

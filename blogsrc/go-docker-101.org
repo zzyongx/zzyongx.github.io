@@ -1,0 +1,33 @@
+#+TITLE: golang docker 101
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+本文介绍如何把一个golang程序打包成docker，并发布到私有镜像。
+
+* 安装docker
+1. 安装 =yum install docker=
+2. 启动 =service docker start=
+
+* 编写Dockfile
+#+BEGIN_EXAMPLE
+FROM golang:latest
+COPY server/pclone /usr/local/bin/
+ENV PCLONE_DB=user:pass(example.db:3306)/test?charset=utf8
+RUN mkdir -p /var/log/pclone/logs
+RUN pclone -logd /var/log/pclone/logs -logr true
+#+END_EXAMPLE
+
+* 启动镜像
+=docker build .=
+
+镜像启动后会有类似输出：
+#+BEGIN_EXAMPLE
+Step 4 : RUN pclone -logd /var/log/pclone/logs -logr true
+ ---> Running in 939b34a5b3b2
+#+END_EXAMPLe
+
+* 上传到私有镜像
+1. 登陆 =docker loign -u user docker-reg.example=
+2. 创建镜像 =docker commit 939b34a5b3b2 pclone=
+3. 创建tag，需要提前创建data-link项目 =docker tag pclone docker-reg.example/data-link/pclone:v1.0.1=
+4. 推送镜像 =docker push docker-reg.example/data-link/pclone:v1.0.1=

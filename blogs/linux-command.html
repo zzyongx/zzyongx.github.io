@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-04-12 五 09:17 -->
+<!-- 2019-11-22 Fri 15:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>linux命令备忘</title>
@@ -186,6 +186,7 @@
 <script src="/jslib/bootstrap.min.js"></script>
 <script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -259,12 +260,12 @@ for the JavaScript code in this tag.
 <div id="content">
 <h1 class="title">linux命令备忘</h1>
 
-<div id="outline-container-org4096e14" class="outline-2">
-<h2 id="org4096e14"><span class="section-number-2">1</span> java 工具</h2>
+<div id="outline-container-orgcb84ceb" class="outline-2">
+<h2 id="orgcb84ceb"><span class="section-number-2">1</span> java 工具</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org29d2d74" class="outline-3">
-<h3 id="org29d2d74"><span class="section-number-3">1.1</span> 将汉字编码为utf8</h3>
+<div id="outline-container-orge6950a7" class="outline-3">
+<h3 id="orge6950a7"><span class="section-number-3">1.1</span> 将汉字编码为utf8</h3>
 <div class="outline-text-3" id="text-1-1">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">echo -n "&#21892;&#33391;" | native2ascii</span>
@@ -278,8 +279,8 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-org40764cd" class="outline-3">
-<h3 id="org40764cd"><span class="section-number-3">1.2</span> 替换war包中的文件</h3>
+<div id="outline-container-org3096584" class="outline-3">
+<h3 id="org3096584"><span class="section-number-3">1.2</span> 替换war包中的文件</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 <code>jar uf app.war WEB-INF/classes/application-online.properties</code> 替换文件，注意必须和war包中的文件保持相同路径
@@ -288,13 +289,27 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-org3ec5a3b" class="outline-2">
-<h2 id="org3ec5a3b"><span class="section-number-2">2</span> 字符串</h2>
+<div id="outline-container-orgc77359f" class="outline-2">
+<h2 id="orgc77359f"><span class="section-number-2">2</span> MySQL</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org14ca5fb" class="outline-3">
-<h3 id="org14ca5fb"><span class="section-number-3">2.1</span> 获取随机字符串</h3>
+<div id="outline-container-org7f10f66" class="outline-3">
+<h3 id="org7f10f66"><span class="section-number-3">2.1</span> 把表从A库导入B库</h3>
 <div class="outline-text-3" id="text-2-1">
+<p>
+<code>mysqldump -h host_a -u user_a -ppass_a --skip-add-locks --skip-lock-tables --column-statistics=0 db_a table | mysql -h host_b -u user_b -ppass_b db_b</code>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf1ad862" class="outline-2">
+<h2 id="orgf1ad862"><span class="section-number-2">3</span> 字符串</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org5b5ad2f" class="outline-3">
+<h3 id="org5b5ad2f"><span class="section-number-3">3.1</span> 获取随机字符串</h3>
+<div class="outline-text-3" id="text-3-1">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">head -n 1024 /dev/urandom | md5sum</span>
 9b480cfa33d33009cbae5c0f10d7b2f7  -
@@ -307,9 +322,9 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-org7c4da27" class="outline-3">
-<h3 id="org7c4da27"><span class="section-number-3">2.2</span> 二进制数据和16进制转换</h3>
-<div class="outline-text-3" id="text-2-2">
+<div id="outline-container-org9823235" class="outline-3">
+<h3 id="org9823235"><span class="section-number-3">3.2</span> 二进制数据和16进制转换</h3>
+<div class="outline-text-3" id="text-3-2">
 <ol class="org-ol">
 <li>16进制转二进制 <code>echo "6F0AD0BFEE7D4B478AFED096E03CD80A" | xxd -r -p | base64</code></li>
 <li>二进制转16进制 <code>echo "bwrQv+59S0eK/tCW4DzYCg==" | base64 -d | xxd -l 16 -c 256 -p</code>  注意 <code>-l</code> 指定的是二进制的长度，必须指定对 <code>-c</code> 指定换行位置，用于数据较长时</li>
@@ -317,9 +332,9 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-org70113ec" class="outline-3">
-<h3 id="org70113ec"><span class="section-number-3">2.3</span> linux命令行如何在单引号字符串中转义单引号</h3>
-<div class="outline-text-3" id="text-2-3">
+<div id="outline-container-org4337d9e" class="outline-3">
+<h3 id="org4337d9e"><span class="section-number-3">3.3</span> linux命令行如何在单引号字符串中转义单引号</h3>
+<div class="outline-text-3" id="text-3-3">
 <p>
 使用 <code>'"'"'</code> 例如： <code>echo "100 XY" | perl -an -e 'print "UPDATE TABLE test SET config='"'"'${F[1]}'"'"' WHERE id=${F[0]};\n"'</code>
 输出 <code>UPDATE TABLE test SET config='XY' WHERE id=100;</code>
@@ -328,13 +343,13 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orge4ed298" class="outline-2">
-<h2 id="orge4ed298"><span class="section-number-2">3</span> OpenSSL</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-org300bb45" class="outline-2">
+<h2 id="org300bb45"><span class="section-number-2">4</span> OpenSSL</h2>
+<div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org390a718" class="outline-3">
-<h3 id="org390a718"><span class="section-number-3">3.1</span> HMAC</h3>
-<div class="outline-text-3" id="text-3-1">
+<div id="outline-container-org03b7196" class="outline-3">
+<h3 id="org03b7196"><span class="section-number-3">4.1</span> HMAC</h3>
+<div class="outline-text-3" id="text-4-1">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">echo -n "initial text" | openssl dgst -sha1 -hmac "9b480cfa33d33009cbae5c0f10d7b2f7"</span>
 (stdin)= 32740bc521b8476818d7b7ba056ff7e758217adc
@@ -347,9 +362,9 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgebe28a7" class="outline-3">
-<h3 id="orgebe28a7"><span class="section-number-3">3.2</span> 对称加密</h3>
-<div class="outline-text-3" id="text-3-2">
+<div id="outline-container-orgb0ace4b" class="outline-3">
+<h3 id="orgb0ace4b"><span class="section-number-3">4.2</span> 对称加密</h3>
+<div class="outline-text-3" id="text-4-2">
 <ol class="org-ol">
 <li><code>openssl rand 32 -out keyfile</code> 产生秘钥，keyfile是二进制的</li>
 <li><code>openssl rand 32 -base64 -out keyfile.b64</code> keyfile.b64是base64的，除了正常的base64，文件末尾多了一个换行</li>
@@ -362,9 +377,9 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orgd250d76" class="outline-3">
-<h3 id="orgd250d76"><span class="section-number-3">3.3</span> 非对称加密</h3>
-<div class="outline-text-3" id="text-3-3">
+<div id="outline-container-org0e04d5a" class="outline-3">
+<h3 id="org0e04d5a"><span class="section-number-3">4.3</span> 非对称加密</h3>
+<div class="outline-text-3" id="text-4-3">
 <ol class="org-ol">
 <li><code>openssl genrsa -out private.pem 1024</code> private.pem 是产生的私钥</li>
 <li><code>openssl rsa -in private.pem -inform PEM -outform PEM -pubout -out public.pem</code> 根据私钥生成公钥</li>
@@ -374,9 +389,9 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-org8e723ab" class="outline-3">
-<h3 id="org8e723ab"><span class="section-number-3">3.4</span> 私钥签名/公钥验证签名</h3>
-<div class="outline-text-3" id="text-3-4">
+<div id="outline-container-orgb06346c" class="outline-3">
+<h3 id="orgb06346c"><span class="section-number-3">4.4</span> 私钥签名/公钥验证签名</h3>
+<div class="outline-text-3" id="text-4-4">
 <ol class="org-ol">
 <li><code>openssl dgst -sha256 -sign private.pem -out /tmp/sign.sha256 datafile</code> 私钥签名</li>
 <li><code>openssl dgst -sha256 -sign private.pem -hex -out /tmp/sign.sha256 datafile</code> 私钥签名，输出hex</li>
@@ -386,22 +401,22 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-org4717250" class="outline-2">
-<h2 id="org4717250"><span class="section-number-2">4</span> Image</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-orgbe81e41" class="outline-2">
+<h2 id="orgbe81e41"><span class="section-number-2">5</span> Image</h2>
+<div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-orgf1ee8d2" class="outline-3">
-<h3 id="orgf1ee8d2"><span class="section-number-3">4.1</span> 查看图片大小</h3>
-<div class="outline-text-3" id="text-4-1">
+<div id="outline-container-org30fc659" class="outline-3">
+<h3 id="org30fc659"><span class="section-number-3">5.1</span> 查看图片大小</h3>
+<div class="outline-text-3" id="text-5-1">
 <p>
 <code>identify big.png</code>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org1308f88" class="outline-3">
-<h3 id="org1308f88"><span class="section-number-3">4.2</span> 改变图片大小</h3>
-<div class="outline-text-3" id="text-4-2">
+<div id="outline-container-org92afce6" class="outline-3">
+<h3 id="org92afce6"><span class="section-number-3">5.2</span> 改变图片大小</h3>
+<div class="outline-text-3" id="text-5-2">
 <p>
 <code>convert big.png -resize 20% small.png</code> <code>convert</code> 可以看做ImageMagick库的命令行版本。
 </p>
@@ -409,13 +424,13 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-org5384640" class="outline-2">
-<h2 id="org5384640"><span class="section-number-2">5</span> Bash</h2>
-<div class="outline-text-2" id="text-5">
+<div id="outline-container-orgede80eb" class="outline-2">
+<h2 id="orgede80eb"><span class="section-number-2">6</span> Bash</h2>
+<div class="outline-text-2" id="text-6">
 </div>
-<div id="outline-container-org2f762a1" class="outline-3">
-<h3 id="org2f762a1"><span class="section-number-3">5.1</span> ssh 自动补全主机名</h3>
-<div class="outline-text-3" id="text-5-1">
+<div id="outline-container-orgf238fc6" class="outline-3">
+<h3 id="orgf238fc6"><span class="section-number-3">6.1</span> ssh 自动补全主机名</h3>
+<div class="outline-text-3" id="text-6-1">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">cat &gt; /etc/bash_completion.d/ssh</span>
 <span style="color: #0000ff; font-weight: bold;">complete</span> -W <span style="color: #00ff00;">"$(</span><span style="color: #fa8072;">echo</span><span style="color: #00ff00;"> `cat ~/.ssh/known_hosts | cut -f 1 -d ' ' | sed -e s/,.*//g | uniq | grep -v "\["`;)"</span> ssh
@@ -429,9 +444,9 @@ java的properties文件不能有汉字，可以用<code>native2ascii</code>转�
 </div>
 </div>
 
-<div id="outline-container-orge049b99" class="outline-3">
-<h3 id="orge049b99"><span class="section-number-3">5.2</span> ssh 保持心跳（客户端配置）</h3>
-<div class="outline-text-3" id="text-5-2">
+<div id="outline-container-orgc871d5a" class="outline-3">
+<h3 id="orgc871d5a"><span class="section-number-3">6.2</span> ssh 保持心跳（客户端配置）</h3>
+<div class="outline-text-3" id="text-6-2">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">cat &gt; /etc/ssh_config</span>
 Host *
@@ -442,18 +457,18 @@ Host *
 </div>
 </div>
 
-<div id="outline-container-orgcf3066a" class="outline-3">
-<h3 id="orgcf3066a"><span class="section-number-3">5.3</span> ssh 启动命令后台执行</h3>
-<div class="outline-text-3" id="text-5-3">
+<div id="outline-container-org6be079d" class="outline-3">
+<h3 id="org6be079d"><span class="section-number-3">6.3</span> ssh 启动命令后台执行</h3>
+<div class="outline-text-3" id="text-6-3">
 <p>
 <code>ssh -f user@host 'whatever_command &amp;&gt;/dev/null &amp;'</code> 重定向输出是关键
 </p>
 </div>
 </div>
 
-<div id="outline-container-org6caa6dd" class="outline-3">
-<h3 id="org6caa6dd"><span class="section-number-3">5.4</span> 如何用命令跳过文件的第一行</h3>
-<div class="outline-text-3" id="text-5-4">
+<div id="outline-container-orgb2e6203" class="outline-3">
+<h3 id="orgb2e6203"><span class="section-number-3">6.4</span> 如何用命令跳过文件的第一行</h3>
+<div class="outline-text-3" id="text-6-4">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">tail -n +2 file</span>
 </pre>
@@ -461,9 +476,9 @@ Host *
 </div>
 </div>
 
-<div id="outline-container-orgfc10ccf" class="outline-3">
-<h3 id="orgfc10ccf"><span class="section-number-3">5.5</span> 如何删除海量文件</h3>
-<div class="outline-text-3" id="text-5-5">
+<div id="outline-container-orgb173a78" class="outline-3">
+<h3 id="orgb173a78"><span class="section-number-3">6.5</span> 如何删除海量文件</h3>
+<div class="outline-text-3" id="text-6-5">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">rm /var/spool/postfix/maildrop/* -f</span>
 -bash: /bin/rm: &#21442;&#25968;&#21015;&#34920;&#36807;&#38271;
@@ -473,9 +488,9 @@ Host *
 </div>
 </div>
 
-<div id="outline-container-org5429faa" class="outline-3">
-<h3 id="org5429faa"><span class="section-number-3">5.6</span> date 命令</h3>
-<div class="outline-text-3" id="text-5-6">
+<div id="outline-container-orgdd1f13a" class="outline-3">
+<h3 id="orgdd1f13a"><span class="section-number-3">6.6</span> date 命令</h3>
+<div class="outline-text-3" id="text-6-6">
 <ul class="org-ul">
 <li><code>date +%s</code> 获取时间戳</li>
 <li><code>date @1480065287</code> 获取时间戳对应的时间</li>
@@ -483,9 +498,9 @@ Host *
 </div>
 </div>
 
-<div id="outline-container-org982c584" class="outline-3">
-<h3 id="org982c584"><span class="section-number-3">5.7</span> 输入换行和回车</h3>
-<div class="outline-text-3" id="text-5-7">
+<div id="outline-container-org8d5d55a" class="outline-3">
+<h3 id="org8d5d55a"><span class="section-number-3">6.7</span> 输入换行和回车</h3>
+<div class="outline-text-3" id="text-6-7">
 <ul class="org-ul">
 <li>echo "A,B" | tr ',' $'\n'   逗号转换行</li>
 <li>echo "A,B" | tr ',' $'\t'   逗号转tab</li>
@@ -493,23 +508,55 @@ Host *
 </div>
 </div>
 
-<div id="outline-container-org9f1a663" class="outline-3">
-<h3 id="org9f1a663"><span class="section-number-3">5.8</span> 干掉有问题的nginx进程</h3>
-<div class="outline-text-3" id="text-5-8">
+<div id="outline-container-orgb283a51" class="outline-3">
+<h3 id="orgb283a51"><span class="section-number-3">6.8</span> 干掉有问题的nginx进程</h3>
+<div class="outline-text-3" id="text-6-8">
 <ul class="org-ul">
 <li><code>ps -eo pcpu,bsdtime,pid,user,args | grep -e '[n]ginx: worker' | sort -k1 -r | perl -ane 'if ($F[0] * 1 &gt; 95 || int($F[1]) &gt; 60) { print "echo $_ kill ${F[2]}; sleep 1; kill -9 ${F[2]} \n" }' | bash -x</code></li>
 </ul>
 </div>
 </div>
+
+<div id="outline-container-orga6ee9b5" class="outline-3">
+<h3 id="orga6ee9b5"><span class="section-number-3">6.9</span> 获取进程启动时间</h3>
+<div class="outline-text-3" id="text-6-9">
+<ul class="org-ul">
+<li><code>ls -ld /proc/&lt;pid&gt;</code>  这种方法比较好记</li>
+<li><code>ps -eo pid,cmd,etime</code></li>
+</ul>
+</div>
+</div>
 </div>
 
-<div id="outline-container-org9c33a0d" class="outline-2">
-<h2 id="org9c33a0d"><span class="section-number-2">6</span> Net</h2>
-<div class="outline-text-2" id="text-6">
+<div id="outline-container-orgf3ffa48" class="outline-2">
+<h2 id="orgf3ffa48"><span class="section-number-2">7</span> sshd</h2>
+<div class="outline-text-2" id="text-7">
 </div>
-<div id="outline-container-org28f69df" class="outline-3">
-<h3 id="org28f69df"><span class="section-number-3">6.1</span> 测试网速</h3>
-<div class="outline-text-3" id="text-6-1">
+<div id="outline-container-org8953fff" class="outline-3">
+<h3 id="org8953fff"><span class="section-number-3">7.1</span> 禁用密码登陆</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+修改 <code>/etc/ssh/sshd_config</code> 配置文件
+</p>
+<pre class="example">
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+UsePAM no
+</pre>
+<p>
+修改之后 <code>/etc/init.d/sshd reload</code> 。切记： <b>测试时新启终端，不要退出当前登陆，以免配置错误，再也无法登陆</b>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb69a1f1" class="outline-2">
+<h2 id="orgb69a1f1"><span class="section-number-2">8</span> Net</h2>
+<div class="outline-text-2" id="text-8">
+</div>
+<div id="outline-container-orgab453f6" class="outline-3">
+<h3 id="orgab453f6"><span class="section-number-3">8.1</span> 测试网速</h3>
+<div class="outline-text-3" id="text-8-1">
 <ul class="org-ul">
 <li><code>curl http://example.com/bigfile.txt &gt;/dev/null -vv</code> 会显示打开速度</li>
 <li><code>rsync -v example.com::path/bigfile.txt /bigfile.txt.`date +%s`</code> 使用rsync，目标文件必须每次都不同</li>
@@ -518,34 +565,34 @@ Host *
 </div>
 </div>
 
-<div id="outline-container-org94ea43d" class="outline-2">
-<h2 id="org94ea43d"><span class="section-number-2">7</span> 比较两个排序的文件 comm</h2>
-<div class="outline-text-2" id="text-7">
+<div id="outline-container-org2ba606e" class="outline-2">
+<h2 id="org2ba606e"><span class="section-number-2">9</span> 比较两个排序的文件 comm</h2>
+<div class="outline-text-2" id="text-9">
 <p>
 假设有两个文件A B，每行一个IP，comm要求文件必须是排序的，如果已排序，可以忽略下面的sort命令
 </p>
 </div>
-<div id="outline-container-org5045ae5" class="outline-3">
-<h3 id="org5045ae5"><span class="section-number-3">7.1</span> 交集</h3>
-<div class="outline-text-3" id="text-7-1">
+<div id="outline-container-org9ad31ac" class="outline-3">
+<h3 id="org9ad31ac"><span class="section-number-3">9.1</span> 交集</h3>
+<div class="outline-text-3" id="text-9-1">
 <p>
 <code>comm -12 &lt;(sort A) &lt;(sort B)</code> 此外，还可以使用grep， <code>grep -f A B</code> 。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgf2af9c9" class="outline-3">
-<h3 id="orgf2af9c9"><span class="section-number-3">7.2</span> 差集 A - B</h3>
-<div class="outline-text-3" id="text-7-2">
+<div id="outline-container-org1ca7875" class="outline-3">
+<h3 id="org1ca7875"><span class="section-number-3">9.2</span> 差集 A - B</h3>
+<div class="outline-text-3" id="text-9-2">
 <p>
 <code>comm -23 &lt;(sort A) &lt;(sort B)</code>
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgba63229" class="outline-3">
-<h3 id="orgba63229"><span class="section-number-3">7.3</span> 差集 B - A</h3>
-<div class="outline-text-3" id="text-7-3">
+<div id="outline-container-orgc4190b8" class="outline-3">
+<h3 id="orgc4190b8"><span class="section-number-3">9.3</span> 差集 B - A</h3>
+<div class="outline-text-3" id="text-9-3">
 <p>
 <code>comm -13 &lt;(sort B) &lt;(sort A)</code>
 </p>
@@ -553,31 +600,31 @@ Host *
 </div>
 </div>
 
-<div id="outline-container-orgda9a431" class="outline-2">
-<h2 id="orgda9a431"><span class="section-number-2">8</span> 比较两个文件</h2>
-<div class="outline-text-2" id="text-8">
+<div id="outline-container-org7bd7d0b" class="outline-2">
+<h2 id="org7bd7d0b"><span class="section-number-2">10</span> 比较两个文件</h2>
+<div class="outline-text-2" id="text-10">
 </div>
-<div id="outline-container-org338965b" class="outline-3">
-<h3 id="org338965b"><span class="section-number-3">8.1</span> 普通比较</h3>
-<div class="outline-text-3" id="text-8-1">
+<div id="outline-container-org9ab7df4" class="outline-3">
+<h3 id="org9ab7df4"><span class="section-number-3">10.1</span> 普通比较</h3>
+<div class="outline-text-3" id="text-10-1">
 <p>
 vimdiff和diff
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgb9e5b09" class="outline-3">
-<h3 id="orgb9e5b09"><span class="section-number-3">8.2</span> 忽略掉狭义的空行</h3>
-<div class="outline-text-3" id="text-8-2">
+<div id="outline-container-orge660d19" class="outline-3">
+<h3 id="orge660d19"><span class="section-number-3">10.2</span> 忽略掉狭义的空行</h3>
+<div class="outline-text-3" id="text-10-2">
 <p>
 <code>diff -b file1 file2</code>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org2fa387d" class="outline-3">
-<h3 id="org2fa387d"><span class="section-number-3">8.3</span> 忽略掉空行</h3>
-<div class="outline-text-3" id="text-8-3">
+<div id="outline-container-org7d8733d" class="outline-3">
+<h3 id="org7d8733d"><span class="section-number-3">10.3</span> 忽略掉空行</h3>
+<div class="outline-text-3" id="text-10-3">
 <p>
 如果一行只包含空格，tab或者换行符，就算空行。 <code>diff &lt;(grep -P '\w' file1) &lt;(grep -P '\w' file2)</code>
 </p>
@@ -587,7 +634,7 @@ vimdiff和diff
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-04-12 五 09:17</p>
+<p class="date">Created: 2019-11-22 Fri 15:22</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
