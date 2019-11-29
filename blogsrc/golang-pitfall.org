@@ -1,0 +1,140 @@
+#+TITLE: golang 陷阱
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+昨天使用golang开发的一个基础组件，干挂了公司上百台机器，决定总结下golang的陷阱，持续更新中。
+
+* time.After 导致 OOM
+#+BEGIN_SRC go
+wait := true
+timeout := 600 * time.Second
+
+for wait {
+  select {
+    case e := <-watcher.ResultChan():
+      timeout = 10 * time.Second
+    case <-time.After(timeout):
+      wait = false
+  }
+}
+#+END_SRC
+
+这里每次select都会创建一个timer，timer在到期前，不会被gc清理掉，如果频繁创建定时器，会导致OOM。修改代码为：
+#+BEGIN_SRC go
+wait := true
+timer := time.NewTimer(600 * time.Second)
+defer timer.Stop()
+
+for wait {
+  select {
+    case e := <-watcher.ResultChan():
+      timer.Reset(10 * time.Second)
+    case <-timer.C:
+      wait = false
+  }
+}
+#+END_SRC
+
+* 不检查 chan 返回状态导致死循环
+上面的代码使用一个timer解决了OOM的问题，但是没检查chan的返回值，可能导致CPU 100%。如果chan关闭，读取chan不会被阻塞。修改代码为：
+#+BEGIN_SRC go
+wait := true
+timer := time.NewTimer(600 * time.Second)
+defer timer.Stop()
+
+for wait {
+  select {
+    case e, ok := <-watcher.ResultChan():
+      if ok {
+        timer.Reset(10 * time.Second)
+      } else {
+        wait = false
+      }
+    case <-timer.C:
+      wait = false
+  }
+}
+#+END_SRC
+
+* break
+go的 =switch= 不同于c的，不会 =fallthrough= （除非使用 =fallthrough= 关键字）, 这导致 =break= 几乎不会用在 =switch= 中。这会给人以幻觉， =break= 总是用来中断 =for= 。事实上 =break= 是用来中断内层的 =for= =switch= =select= 的。
+
+这段代码原是想退出for循环，但是 =break= 做不到，它只是退出 =select=
+#+BEGIN_SRC go
+for {
+  select {
+    case m, ok := <-queue
+      if ok {
+        fmt.Println(m)
+      } else {
+        break
+      }
+    case <-quit:
+      break
+  }
+}
+#+END_SRC
+
+如果想退出 =for= 需要使用标签：
+#+BEGIN_SRC go
+LOOP:
+for {
+  select {
+    case m, ok := <-queue
+      if ok {
+        fmt.Println(m)
+      } else {
+        break LOOP
+      }
+    case <-quit:
+      break LOOP
+  }
+}
+#+END_SRC
+
+* for x := range
+这里x只被定义了一次，如果在for中打印x的地址，总是不变的。x总是range中元素的一个副本。
+#+BEGIN_SRC go
+for x := range []int{1, 2, 3} {
+  fmt.Println(&x)
+}
+#+END_SRC
+
+** 不要保存x的地址
+因为x的值仅有一份，保存x的地址，事实上总是保存的range的最后一个值。
+#+BEGIN_SRC go
+var xptr []*int
+for _, x := range []int{1, 2, 3} {
+  xptr = append(xptr, &x)
+}
+
+for _, x := range xptr {
+  fmt.Println(*x)  // 总是打印3
+}
+#+END_SRC
+
+** 不要在routine中使用x，要传x的副本（指针当然也不行）
+#+BEGIN_SRC go
+var wg sync.WaitGroup
+for _, x := range []int{1, 2, 3} {
+  wg.Add(2)
+  go func() {
+    fmt.Println("E", x) // 能打出什么不确定，并且有线程安全问题
+    wg.Done()
+  }()
+  go func(x int) {
+    fmt.Println("R", x)  // 可以打印1,2,3三个数
+    wg.Done()
+  }(x)
+}
+wg.Wait()
+#+END_SRC
+
+* map使用前必须初始化
+#+BEGIN_SRC go
+var v []int
+var m map[string]int
+
+v = append(v, 1)
+// m["a"] = 1 panic
+#+END_SRC

@@ -23,6 +23,8 @@
 然后启动 ~go tool pprof -http=0.0.0.0:12345 cpu.1000_reqs_sec_no_optimizations.prof~ ，
 通过浏览器 =http://localhost:12345/= 访问 profile 数据。其中 =VIEW->Flame Graph= 火焰图最直观。查看函数的耗时比例，有针对性的优化。
 
+*注意* 需要安装 graphviz =yum install -y graphviz=
+
 * 个人心得
 压力和度量不是必须的，大部分时间，都是针对某个接口的优化。这时候 =time curl http://localhost:8080= 就能满足需求。通过火焰图找到哪慢之后，通常就比较好优化了。优化时有些注意事项：
 

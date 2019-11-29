@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-11-29 Fri 14:16 -->
+<!-- 2019-11-29 Fri 17:32 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>使用pprof调优go http server性能</title>
+<title>使用pprof解决golang OOM问题</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="root" />
 <style type="text/css">
@@ -236,176 +236,38 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">使用pprof调优go http server性能</h1>
+<h1 class="title">使用pprof解决golang OOM问题</h1>
 <p>
-本文是 <a href="https://medium.com/dm03514-tech-blog/sre-performance-analysis-tuning-methodology-using-a-simple-http-webserver-in-go-d475460f27ca">SRE: Performance Analysis: Tuning Methodology Using a Simple HTTP Webserver In Go</a> 的阅读笔记，
-文中用到的代码可以在 <a href="https://github.com/dm03514/sre-tutorials/tree/master/performance/analysis-methodology-simple-http">analysis-methodology-simple-http</a> 找到。
+java和golang这类语言不用手动管理内存，这自然可以避免内存泄漏，可真要是泄漏呢，从代码层面可能真看不出来。还好有pprof。pprof的alloc功能，可以查看各种对象所消耗内存的比例。
 </p>
 
-<div id="outline-container-orgdb8e356" class="outline-2">
-<h2 id="orgdb8e356"><span class="section-number-2">1</span> 目标</h2>
+<div id="outline-container-org0c17057" class="outline-2">
+<h2 id="org0c17057"><span class="section-number-2">1</span> 抓取内存pprof</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-99%的请求延迟低于60ms
+<code>curl http://example/debug/pprof/allocs?debug=1 -o allocs.prof</code>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org46f81a2" class="outline-2">
-<h2 id="org46f81a2"><span class="section-number-2">2</span> 度量</h2>
+<div id="outline-container-orgda0a494" class="outline-2">
+<h2 id="orgda0a494"><span class="section-number-2">2</span> 分析内存占用</h2>
 <div class="outline-text-2" id="text-2">
-<ol class="org-ol">
-<li>使用 <a href="https://prometheus.io">prometheus</a> 收集数据</li>
-<li>使用 <a href="https://grafana.com/">grafana</a> 作图</li>
-</ol>
 </div>
-</div>
-
-<div id="outline-container-org51c7068" class="outline-2">
-<h2 id="org51c7068"><span class="section-number-2">3</span> 来点压力</h2>
-<div class="outline-text-2" id="text-3">
+<div id="outline-container-org86b46d9" class="outline-3">
+<h3 id="org86b46d9"><span class="section-number-3">2.1</span> 启动go tool</h3>
+<div class="outline-text-3" id="text-2-1">
 <p>
-使用 <a href="https://github.com/tsenart/vegeta">vegeta</a> 来打压力。
-简单用法 <code>echo "POST http://localhost:8080" | vegeta attack -body tests/fixtures/age_no_match.json -rate=50 -duration=0 | tee results.bin | vegeta report</code>
-打压力之后，观看 grafana 中延迟和cpu的变化趋势。
+<code>go tool pprof -http=0.0.0.0:12345 ./bin-file allocs.prof</code> bin-file 是二进制程序，allocs.prof 是pporf数据文件。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org61992f5" class="outline-2">
-<h2 id="org61992f5"><span class="section-number-2">4</span> 使用pprof</h2>
-<div class="outline-text-2" id="text-4">
+<div id="outline-container-org2714725" class="outline-3">
+<h3 id="org2714725"><span class="section-number-3">2.2</span> 浏览器打开 <a href="http://127.0.0.1:12345/">http://127.0.0.1:12345/</a></h3>
+<div class="outline-text-3" id="text-2-2">
 <p>
-在打压力前开启pprof数据收集 <code>curl http://localhost:8080/debug/pprof/profile?seconds=29 &gt; cpu.1000_reqs_sec_no_optimizations.prof</code> 这里 <code>seconds=29</code> 是收集29秒的数据，时间跨度要超过打压力时间。
-</p>
-
-<p>
-然后启动 <code>go tool pprof -http=0.0.0.0:12345 cpu.1000_reqs_sec_no_optimizations.prof</code> ，
-通过浏览器 <code>http://localhost:12345/</code> 访问 profile 数据。其中 <code>VIEW-&gt;Flame Graph</code> 火焰图最直观。查看函数的耗时比例，有针对性的优化。
-</p>
-
-<p>
-<b>注意</b> 需要安装 graphviz <code>yum install -y graphviz</code>
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgd58acbd" class="outline-2">
-<h2 id="orgd58acbd"><span class="section-number-2">5</span> 个人心得</h2>
-<div class="outline-text-2" id="text-5">
-<p>
-压力和度量不是必须的，大部分时间，都是针对某个接口的优化。这时候 <code>time curl http://localhost:8080</code> 就能满足需求。通过火焰图找到哪慢之后，通常就比较好优化了。优化时有些注意事项：
-</p>
-</div>
-
-<div id="outline-container-orga00e765" class="outline-3">
-<h3 id="orga00e765"><span class="section-number-3">5.1</span> 标准库和第三方库可能很慢</h3>
-<div class="outline-text-3" id="text-5-1">
-<p>
-此时通常不是他们实现的问题，而是用法不合适，例如反复调用 <code>strings.Split</code> 来解析字符串（内容来自 <code>/proc/net/tcp</code> ），先按行拆，再按空格拆（还要考虑多空格的问题），这带来两个问题，一个是多趟遍历，一个是多趟复制。如果是自己写逻辑解析字符串，可能只要一趟循环，一次复制，性能至少提高50%。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgc61002a" class="outline-3">
-<h3 id="orgc61002a"><span class="section-number-3">5.2</span> 语言内置的操作可能很慢</h3>
-<div class="outline-text-3" id="text-5-2">
-<p>
-<code>int</code> 和 <code>int64</code> 的转化，可能是零代价的，但是 <code>byte[]</code> 和 <code>string</code> 之间互转肯定不是，尽量避免这些开销（go的类型转换和C有很大不同）。如果可以，定义数组时一个合理的容量预估值可以显著提升性能，特别是数组大小从零增长到上万时。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orga39ac71" class="outline-3">
-<h3 id="orga39ac71"><span class="section-number-3">5.3</span> 注意嵌套循环</h3>
-<div class="outline-text-3" id="text-5-3">
-<p>
-遍历1万个元素非常快，但是嵌套一次就1亿了。因为循环不作为一个单独的调用栈存在，所以火焰图上很容易忽略它，而诱导我们去优化循环内的调用，本质可能只是循环次数太多了。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgdf2af9b" class="outline-3">
-<h3 id="orgdf2af9b"><span class="section-number-3">5.4</span> 多考虑问题的特殊性</h3>
-<div class="outline-text-3" id="text-5-4">
-<p>
-考虑自己问题的特殊性（这相当于把解空间缩小了，自然解的更快），用特殊的方法。例如把字符串 <code>0500000A:8D72</code> 解析成IPv4的地址和端口 <code>10.0.0.5:36210</code> 。可能会先 <code>split</code> 再 <code>hexdecode</code> 再 <code>reverse</code> 之类，这就是泛化思路。实际上判断下长度是不是13，第8个字符是不是":"，就可以直接操作指定位置的数据了。性能至少提高50%。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org8d948c2" class="outline-3">
-<h3 id="org8d948c2"><span class="section-number-3">5.5</span> 野路子也是好路子</h3>
-<div class="outline-text-3" id="text-5-5">
-<p>
-例如判断IP是不是私网地址，常规操作肯定是解析IP地址，然后判断在不在私网的CIDR段内。野路子是啥？如果IP是 <code>10.</code> 开头的直接判真，如果不是 <code>10.</code> <code>172.</code> <code>192.</code> 开头的直接判假，剩下的情况再走常规操作，这么下来，性能至少提高50%。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org6b9c003" class="outline-3">
-<h3 id="org6b9c003"><span class="section-number-3">5.6</span> 不确定就试试</h3>
-<div class="outline-text-3" id="text-5-6">
-<p>
-把5个 <code>string</code> 和1个 <code>int</code> 格式化成一个字符串，用 <code>fmt.Sprintf</code> 是很自然的选择，当火焰图提示这块有问题时，可以试试把int转成string，然后手动拼接，说不定能提升50%，虽然代码丑了很多。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgc2892c9" class="outline-3">
-<h3 id="orgc2892c9"><span class="section-number-3">5.7</span> 保留profile的历史数据</h3>
-<div class="outline-text-3" id="text-5-7">
-<p>
-每次的profile数据放到不同的文件，对比每次修改的影响。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orgced4543" class="outline-3">
-<h3 id="orgced4543"><span class="section-number-3">5.8</span> 火焰图和常识</h3>
-<div class="outline-text-3" id="text-5-8">
-<p>
-当火焰图提示某个函数耗时时，有两种可能。一种是真慢，一种是调用太多。例如在循环中，根据条件调用的函数，如果条件逻辑出了问题，导致调用次数多了数十倍，可能误导优化的方向。
-</p>
-</div>
-</div>
-
-<div id="outline-container-orge4291d6" class="outline-3">
-<h3 id="orge4291d6"><span class="section-number-3">5.9</span> 在大格局下考虑优化</h3>
-<div class="outline-text-3" id="text-5-9">
-<p>
-我曾花很多时间去优化一个接口，把性能提升了3倍，然而还是有很多超时。单看这个接口，已经没有优化空间了。从 <code>QPS</code> 上来看， <code>QPS</code> 并不大，但是 <code>QPS</code> 误导了我，因为它不是真的，我们没有秒级的数据。实际情况是，一个广泛部署的定时任务本来该在1分钟内随机执行，结果全在第0秒执行。修改这个问题后，超时消失了。从这个角度看，我之前所做的优化，意义就很小了。
-</p>
-
-<p>
-当HTTP接口的性能已经在一个合理范围内（什么算合理，看业务），从架构，业务等更大角度考虑优化。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org377bbac" class="outline-3">
-<h3 id="org377bbac"><span class="section-number-3">5.10</span> 什么时候值得优化</h3>
-<div class="outline-text-3" id="text-5-10">
-<p>
-50%是很高的比例，但是效果却不一定显著，一天赚1块钱和1.5块钱其实没多大区别，因为本身就很小。但是一分钟赚1块钱和1.5块钱，区别可就大了，这就是累积效应。需要优化的场景：
-</p>
-
-<ul class="org-ul">
-<li>请求量很大的接口</li>
-<li>海量数据</li>
-</ul>
-
-<p>
-除了提升用户体验，优化的另一个好处是节约资源，这是老板实实在在能感受到的。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org6344fd2" class="outline-3">
-<h3 id="org6344fd2"><span class="section-number-3">5.11</span> 什么时候停止优化</h3>
-<div class="outline-text-3" id="text-5-11">
-<p>
-优化是一个无止境的事情，但随着优化的深入，优化的难度在提升，收益却可能在递减（基础库除外，因为有放大效应）。当火焰图显示耗时集中在IO操作，而IO操作的耗时，符合预期时，停止优化。
+一览无遗
 </p>
 </div>
 </div>
@@ -413,7 +275,7 @@ for the JavaScript code in this tag.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-11-29 Fri 14:16</p>
+<p class="date">Created: 2019-11-29 Fri 17:32</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

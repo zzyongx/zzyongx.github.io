@@ -1,0 +1,15 @@
+#+TITLE: 使用pprof解决golang OOM问题
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+java和golang这类语言不用手动管理内存，这自然可以避免内存泄漏，可真要是泄漏呢，从代码层面可能真看不出来。还好有pprof。pprof的alloc功能，可以查看各种对象所消耗内存的比例。
+
+* 抓取内存pprof
+=curl http://example/debug/pprof/allocs?debug=1 -o allocs.prof=
+
+* 分析内存占用
+** 启动go tool
+=go tool pprof -http=0.0.0.0:12345 ./bin-file allocs.prof= bin-file 是二进制程序，allocs.prof 是pporf数据文件。
+
+** 浏览器打开 http://127.0.0.1:12345/
+一览无遗
