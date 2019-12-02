@@ -138,3 +138,18 @@ var m map[string]int
 v = append(v, 1)
 // m["a"] = 1 panic
 #+END_SRC
+
+* http.Transport 是有连接池的
+#+BEGIN_SRC go
+client := http.Client{
+  Transport: &http.Transport{
+    TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+  },
+}
+resp, err := client.Get(endpoint)
+#+END_SRC
+
+这段代码的问题是，每次创建 =http.Client= 都会创建 =http.Transport= ，而 =http.Transport= 是有线程池的，每次 =http.Client= 被gc时， =http.Transport= 中的连接不会被回收。必须把 =http.Transport= 做成单例（包变量也行）或者将其 =DisableKeepAlives= 属性设为 true。
+
+** 小心对待有连接池的对象
+不止 =http.Transport= ，很多对象都内置连接池，例如： =sql.DB= 。小心关闭它们，或者使用单例。

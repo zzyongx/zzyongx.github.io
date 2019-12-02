@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-11-29 Fri 16:55 -->
+<!-- 2019-12-02 Mon 15:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>golang 陷阱</title>
@@ -426,10 +426,38 @@ v = <span style="color: #0000ff; font-weight: bold;">append</span>(v, 1)
 </div>
 </div>
 </div>
+
+<div id="outline-container-org36ca276" class="outline-2">
+<h2 id="org36ca276"><span class="section-number-2">6</span> http.Transport 是有连接池的</h2>
+<div class="outline-text-2" id="text-6">
+<div class="org-src-container">
+<pre class="src src-go">client := http.<span style="color: #00ff00;">Client</span>{
+  <span style="color: #ff00ff;">Transport</span>: &amp;http.<span style="color: #00ff00;">Transport</span>{
+    <span style="color: #ff00ff;">TLSClientConfig</span>: &amp;tls.<span style="color: #00ff00;">Config</span>{InsecureSkipVerify: <span style="color: #ff00ff;">true</span>},
+  },
+}
+resp, err := client.<span style="color: #0000ff; font-weight: bold;">Get</span>(endpoint)
+</pre>
+</div>
+
+<p>
+这段代码的问题是，每次创建 <code>http.Client</code> 都会创建 <code>http.Transport</code> ，而 <code>http.Transport</code> 是有线程池的，每次 <code>http.Client</code> 被gc时， <code>http.Transport</code> 中的连接不会被回收。必须把 <code>http.Transport</code> 做成单例（包变量也行）或者将其 <code>DisableKeepAlives</code> 属性设为 true。
+</p>
+</div>
+
+<div id="outline-container-org2df9593" class="outline-3">
+<h3 id="org2df9593"><span class="section-number-3">6.1</span> 小心对待有连接池的对象</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+不止 <code>http.Transport</code> ，很多对象都内置连接池，例如： <code>sql.DB</code> 。小心关闭它们，或者使用单例。
+</p>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-11-29 Fri 16:55</p>
+<p class="date">Created: 2019-12-02 Mon 15:57</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
