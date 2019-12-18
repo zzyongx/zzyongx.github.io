@@ -1,0 +1,36 @@
+#+TITLE: nginx 配置陷阱
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+
+* 配置允许跨行，以分号判断结尾
+这通常不是问题，对于 ~log_format~ 指令来说，这是非常有用的特性，它的参数太长，往往需要分行。对于大部分指令，如果忘记加分号，会报错，因为它们的参数有个数约束。例如：
+#+BEGIN_EXAMPLE
+proxy_http_version 1.0
+proxy_read_timeout 300s;
+#+END_EXAMPLE
+这时会报错，因为 ~proxy_http_version~ 需要1个参数，而此时提供了3个，因为这个配置等价于 ~proxy_http_version 1.0 proxy_read_timeout 300s;~ 。某些指令就没那么幸运了，
+#+BEGIN_EXAMPLE
+server_name example.com
+proxy_read_timeout 300s;
+#+END_EXAMPLE
+这时不会报错，并且令人惊讶的是 host 为 =300s= 竟然也可以访问。令人沮丧的是， ~proxy_read_timeout 300s;~ 这个配置被吞掉了，没有生效。对于这种不生效表现也不明显的配置，排查起来可困难了。
+
+* 第一个server作为作为 =default_server=
+nginx的 =server= 指令指定访问该 *server* 段需要的host，除非 *server* 是 ~default_server~ ，否则如果host不匹配，跳过该 *server* 段。
+一个 *server* 要想成为 ~default_server~ ，必须是配置里的一个 *server* 段，或者在 =listen= 的参数中指定 ~default_server~ 。
+
+~default_server~ 的这个规则，是利于访问者的，对于想通过host限制访问者的人来说是不利的。
+
+我们站点配置的一个 *server* 段使用内网域名，提供更多的接口，并且很多免认证。另一个 *server* 段使用公网域名，提供较少的接口，并且全部需要认证。此时我们就不希望任何 *server* 段成为 ~default_server~ ，至少不希望内网域名成为。避免业务变更，导致未配置的域名访问 ~default_server~ 。（我们的站点，依赖更外围的负载均衡，分别转发内外网的流量，不用担心外网流量冒充内网域名访问）。
+
+为了避免 ~default_server~ 利于访问者的规则，最好总是配置一个拒绝访问的 ~default_server~ ，这样任何访问总是完全匹配 *server* 段的host。
+
+#+BEGIN_EXAMPLE
+server
+{
+  listen *:80 default_server;
+  location / {
+    return 403;
+  }
+}
+#+END_EXAMPLE
