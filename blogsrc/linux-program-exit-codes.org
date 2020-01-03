@@ -1,0 +1,56 @@
+#+TITLE: Linux 程序退出码
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+这通常不是问题。写程序时，正常退出 ~exit(EXIT_SUCCESS)~ ，其它情况 ~exit(EXIT_FAILURE)~ 。而检查程序退出码时，判断 =$?= 是否等于0即可。但当我们想通过不同的退出码，表示不同的错误原因时，就有必要了解退出码的一些约定，例如 =curl= 命令，退出码含义非常丰富。
+
+在 =man 3 exit= 中，exit的参数是个 =int= ，这很容易给人错觉，退出码可以是任意整数，然而并非如此，退出码的范围是 =0-255= ，exit函数会把 =退出码 & 0xff= 。
+
+这里会再次给人以错觉，只要0-255的数字都可以，事实的确如此，然而却不是明智的选择，因为退出码多数都是要给bash使用的，而bash对错误码有自己的一套约定。
+
+* Bash对错误码的约定
+| 错误码 | 含义               | 例子                  | 说明                                 |
+|--------+--------------------+-----------------------+--------------------------------------|
+|    1	 | 通用错误           | 	let "var1 = 1/0"	  | 通用错误，例如除零和其它不允许的操作 |
+|      2 | shell内置命令误用  | =empty_function() {}= | 缺少关键字或者命令或者权限问题       |
+|    126 | 调用不可执行的命令 | =/dev/null=           | 权限问题或者命令不可执行             |
+|    127 | 命令没找到         | =illegal_command=     | 命令不存在，或者 =$PATH= 配置问题    |
+|    128 | 无效的exit参数     | exit 3.14159          | exit 只接受 0-255 范围的整数         |
+|  128+n | 收到信号n退出      | kill -9 $PPID         | $? 返回 137                          |
+以上参考 [[http://tldp.org/LDP/abs/html/exitcodes.html][原文]] ，综上， =1-2，126-164= 是有特殊含义的退出码，用户在调用exit时，应该避免使用这些数字。
+
+这些没有强制保证，仅从 ~$? = 137~ 无法确切判断是被kill了，还是 =exit 137= 退出了。
+
+* wait对错误码的处理
+下面是一个例子，正常退出status是正数，值是退出码，收到信号退出是负数，值是信号值，128表示超时。
+
+#+BEGIN_SRC c
+int status = 0;
+while (true) {
+  if (waitpid(pid, &status, 0) == -1) {
+    kill(-pid, SIGKILL);
+    waitpid(pid, &status, 0);
+    status = -128;
+  } else {
+    if (WIFEXITED(status)) {
+      status = WEXITSTATUS(status);
+    } else if (WIFSIGNALED(status)) {
+      status = -WTERMSIG(status);
+    } else if (WIFSTOPPED(status) || WIFCONTINUED(status)) {
+      continue;
+    } else {
+      status = -128;
+    }
+  }
+  break;
+}
+#+END_SRC
+
+wait得到的status值比 =$?= 丰富，借助宏能够获得详情，一些宏的定义如下：
+#+BEGIN_SRC c
+#define __WTERMSIG(status)      ((status) & 0x7f)
+#define __WIFEXITED(status)     (__WTERMSIG(status) == 0)
+#define __WEXITSTATUS(status)   (((status) & 0xff00) >> 8)
+#define __W_EXITCODE(ret, sig)  ((ret) << 8 | (sig))
+#+END_SRC
+如上可以看出真正的退出码在第二个8位，和信号有关的在低8位。

@@ -3,6 +3,11 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
+* 2020 庚子年
+
+** 经验
+[[blog:linux-program-exit-codes][Linux 程序退出码]] <2020-01-03>
+
 * 2019 己亥年
 --------------
 

@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2018-08-14 二 10:18 -->
-<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<!-- 2020-01-03 Fri 12:42 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MySQL InnoDB Locking and Transaction</title>
-<meta  name="generator" content="Org-mode" />
-<meta  name="author" content="root" />
+<meta name="generator" content="Org mode" />
+<meta name="author" content="root" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center;
@@ -53,13 +53,98 @@
     border: 1px solid black;
   }
   pre.src:hover:before { display: inline;}
-  pre.src-sh:before    { content: 'sh'; }
-  pre.src-bash:before  { content: 'sh'; }
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
   pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-R:before     { content: 'R'; }
-  pre.src-perl:before  { content: 'Perl'; }
-  pre.src-java:before  { content: 'Java'; }
-  pre.src-sql:before   { content: 'SQL'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
 
   table { border-collapse:collapse; }
   caption.t-above { caption-side: top; }
@@ -92,6 +177,7 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
@@ -100,12 +186,13 @@
 <script src="/jslib/bootstrap.min.js"></script>
 <script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -154,16 +241,16 @@ for the JavaScript code in this tag.
 事情起源于同事的一个问题，读表-修改-写表，在事务内完成，是否有并发问题？我想当然的以为没问题，不然要事务干什么？缺乏对事务的深入思考。事实是，这样有并发问题，如果不使用锁，是没法保证并发安全的。那么锁和事务是什么关系呢？
 </p>
 
-<div id="outline-container-orgheadline5" class="outline-2">
-<h2 id="orgheadline5"><span class="section-number-2">1</span> 事务</h2>
+<div id="outline-container-org66511c6" class="outline-2">
+<h2 id="org66511c6"><span class="section-number-2">1</span> 事务</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 一般而言，如果数据库支持ACID属性，那么它就支持事务。事务只是数据库的一个特性而已，不是说有了事务，一些问题被神奇的解决了。还需要思考问题的内在逻辑。
 </p>
 </div>
 
-<div id="outline-container-orgheadline1" class="outline-3">
-<h3 id="orgheadline1"><span class="section-number-3">1.1</span> A（atomicity）</h3>
+<div id="outline-container-orgdede2a8" class="outline-3">
+<h3 id="orgdede2a8"><span class="section-number-3">1.1</span> A（atomicity）</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 原子性，事务内的所有操作，要么都做（ <code>COMMIT</code> ），要么都不做（ <code>ROLLBACK</code> ）。但做的对不对，不管。
@@ -172,8 +259,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-3">
-<h3 id="orgheadline2"><span class="section-number-3">1.2</span> C（consistency）</h3>
+<div id="outline-container-orgffca6f0" class="outline-3">
+<h3 id="orgffca6f0"><span class="section-number-3">1.2</span> C（consistency）</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 一致性，事务结束时，数据库的主键约束，外键约束等其它特性，必须满足。（理解不深，觉得理所当然就该这样）
@@ -181,8 +268,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3"><span class="section-number-3">1.3</span> I（isolation）</h3>
+<div id="outline-container-org2815f7b" class="outline-3">
+<h3 id="org2815f7b"><span class="section-number-3">1.3</span> I（isolation）</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 隔离性，同时运行的事务，应该相互隔离。并发控制和隔离性有关。
@@ -190,8 +277,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4"><span class="section-number-3">1.4</span> D（durability）</h3>
+<div id="outline-container-orgd8c559a" class="outline-3">
+<h3 id="orgd8c559a"><span class="section-number-3">1.4</span> D（durability）</h3>
 <div class="outline-text-3" id="text-1-4">
 <p>
 持久性，完成的事务数据必须持久存储。
@@ -204,16 +291,16 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgheadline10" class="outline-2">
-<h2 id="orgheadline10"><span class="section-number-2">2</span> 锁</h2>
+<div id="outline-container-org5465e27" class="outline-2">
+<h2 id="org5465e27"><span class="section-number-2">2</span> 锁</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 MySQL的读分 <code>锁读</code> 和 <code>一般读</code> ，不特殊强调的话，都是指一般读，一般读不加锁。锁分读锁 <code>S</code> 和写锁 <code>X</code> 。另外，同样的SQL，在不同的隔离级别下，加的锁也不同。下面的论述相当不专业，只是为了辅助理解事务隔离级别。可以通过 <code>SHOW ENGINE INNODB STATUS</code> 看到锁的详细信息，但也依赖mysql的版本，我在<code>percona 5.6.22-72.0</code>中能看到每个锁的信息，但是<code>percona 5.6.24-72.2</code>中却看不到。
 </p>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="section-number-3">2.1</span> Intention Locks (意向锁)</h3>
+<div id="outline-container-org8454492" class="outline-3">
+<h3 id="org8454492"><span class="section-number-3">2.1</span> Intention Locks (意向锁)</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 Intention Locks，仅仅表明了加锁的意向，它是表级锁，并且无法单独存在。 <code>SELECT ... LOCK IN SHARE MODE</code> 加 <code>IS</code> 锁， <code>SELECT ... FOR UPDATE</code> 和写操作加 <code>IX</code> 锁。 <code>IS</code> <code>IX</code> <code>S</code> 和 <code>X</code> 的兼容情况是：
@@ -314,8 +401,8 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-3">
-<h3 id="orgheadline7"><span class="section-number-3">2.2</span> Record Locks</h3>
+<div id="outline-container-org093f79f" class="outline-3">
+<h3 id="org093f79f"><span class="section-number-3">2.2</span> Record Locks</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 记录锁，可以理解为每个锁对应一个记录。例如 <code>UPDATE students SET age = 15 WHERE id = 75;</code> 这里id是primary key，如果id是unique，也是记录锁。
@@ -323,8 +410,8 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-3">
-<h3 id="orgheadline8"><span class="section-number-3">2.3</span> Gap Locks</h3>
+<div id="outline-container-orge6bace6" class="outline-3">
+<h3 id="orge6bace6"><span class="section-number-3">2.3</span> Gap Locks</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 应该是锁住一个范围的意思。不是特别理解。
@@ -332,8 +419,8 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-3">
-<h3 id="orgheadline9"><span class="section-number-3">2.4</span> Next-Key Locks</h3>
+<div id="outline-container-org37659b9" class="outline-3">
+<h3 id="org37659b9"><span class="section-number-3">2.4</span> Next-Key Locks</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 用于防止幻读的，等于 record lock + gap lock，下界开区间，上界闭区间。但是我没想明白这个是如何解决幻读的。例如事务A： <code>SELECT * FROM students WHERE id &gt; 75</code> ，然后事务B：新增了id=79并提交，此时事务A再次执行刚才的查询，结果是一样的，而事务A执行期间没加任何锁。
@@ -342,23 +429,22 @@ RECORD LOCKS space id 842 page no 3 n bits 72 index `PRIMARY` of table `test`.`s
 </div>
 </div>
 
-<div id="outline-container-orgheadline15" class="outline-2">
-<h2 id="orgheadline15"><span class="section-number-2">3</span> 事务的隔离级别</h2>
+<div id="outline-container-orgd735cd6" class="outline-2">
+<h2 id="orgd735cd6"><span class="section-number-2">3</span> 事务的隔离级别</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 下面的陈述按照常用级别排序，从实例中可以看出，各个隔离级别锁数据的量是不一样的，这导致了性能的差异。同时，在并发时，理解SQL背后的锁，有助于理解业务逻辑是不是并发安全的。
 </p>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-3">
-<h3 id="orgheadline11"><span class="section-number-3">3.1</span> 可重复读（REPEATABLE READ）</h3>
+<div id="outline-container-org3babca9" class="outline-3">
+<h3 id="org3babca9"><span class="section-number-3">3.1</span> 可重复读（REPEATABLE READ）</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 所谓可重复读，就是在事务内部，所有查询都和第一次查询的结果相同（能看到首次查询前其它事务的提交，看不到之后其它事务的提交），但是可以看到本事务内的修改（虽然看不到其它事务的提交，但是如果修改，则可以看到）。写操作加写锁， <code>锁读</code> 加锁。这是MySQL的默认级别。
 例如：
 </p>
 <div class="org-src-container">
-
 <pre class="src src-ditta">  Session A                                   |     Session B
 SELECT * FROM testt;                          |
 +----+------+                                 |
@@ -419,20 +505,20 @@ ERROR 1205 (HY000): Lock wait timeout...      |
                                               |    UPDATE testt SET n = 0 WHERE n &gt;= 800;
 UPDATE testt SET n = 77 WHERE id = 7;         |
 ERROR 1205 (HY000): Lock wait timeout...      |
+
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-3">
-<h3 id="orgheadline12"><span class="section-number-3">3.2</span> 读已提交（READ COMMITTED）</h3>
+<div id="outline-container-orgf881217" class="outline-3">
+<h3 id="orgf881217"><span class="section-number-3">3.2</span> 读已提交（READ COMMITTED）</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 事务内部可以读到其它事务提交的结果。这个导致 <b>幻读</b> （我理解幻读就是读到的数据不确定的意思），取决于业务逻辑，幻读不一定是个问题。它的另一个问题是 <code>锁读</code> 没有 Next-Key Locks。测试前需要设置隔离级别， <code>SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code> 。
 例如：
 </p>
 <div class="org-src-container">
-
 <pre class="src src-ditta">  Session A                                   |      Session B
                                               |    START TRANSACTION;
                                               |    SELECT * FROM testt;
@@ -471,8 +557,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-orgheadline13" class="outline-3">
-<h3 id="orgheadline13"><span class="section-number-3">3.3</span> 读未提交（READ UNCOMMITTED）</h3>
+<div id="outline-container-org48ec45c" class="outline-3">
+<h3 id="org48ec45c"><span class="section-number-3">3.3</span> 读未提交（READ UNCOMMITTED）</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 可以读到未提交的数据。导致 <b>脏读</b> ，因为数据最终可能未提交。
@@ -480,8 +566,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-orgheadline14" class="outline-3">
-<h3 id="orgheadline14"><span class="section-number-3">3.4</span> 串行化（SERIALIZABLE）</h3>
+<div id="outline-container-org62cb104" class="outline-3">
+<h3 id="org62cb104"><span class="section-number-3">3.4</span> 串行化（SERIALIZABLE）</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 和重复读类似，除了所有的读都是 <code>LOCK IN SHARE MODE</code> ，写性能大大降低。
@@ -490,8 +576,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-orgheadline16" class="outline-2">
-<h2 id="orgheadline16"><span class="section-number-2">4</span> 读-修改-写</h2>
+<div id="outline-container-org4a7e9a6" class="outline-2">
+<h2 id="org4a7e9a6"><span class="section-number-2">4</span> 读-修改-写</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 回到最初的问题，默认隔离级别。读-修改-写，不是并发安全的，多个线程可以并发的读到相同的数据，然后各自修改，这不是业务需要的。可以使用 <code>SELECT ... FOR UPDATE</code> 防止并发读写。虽然可以使用 <code>锁读</code> 来控制锁，但是死锁的概率也大大提升。注意： <b>通过FOR UPDATE加锁不能脱离事务独立存在</b>
@@ -499,8 +585,8 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-orgheadline17" class="outline-2">
-<h2 id="orgheadline17"><span class="section-number-2">5</span> 锁冲突</h2>
+<div id="outline-container-org0cb14d6" class="outline-2">
+<h2 id="org0cb14d6"><span class="section-number-2">5</span> 锁冲突</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 锁冲突会降低并发，例如使用mysql做计数器。
@@ -508,21 +594,21 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </div>
 </div>
 
-<div id="outline-container-orgheadline19" class="outline-2">
-<h2 id="orgheadline19"><span class="section-number-2">6</span> 死锁</h2>
+<div id="outline-container-orga48a2f9" class="outline-2">
+<h2 id="orga48a2f9"><span class="section-number-2">6</span> 死锁</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 偶尔死锁不是大问题，只要重试即可。减低死锁的方法：
 </p>
 <ol class="org-ol">
 <li>不同事务，操作表的顺序尽量相同</li>
-<li>事务尽可能小，执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。</li>
+<li>事务尽可能小（把大事务分拆成小事务），执行时间尽可能短，事务中不要有耗时操作，例如http请求，读写文件等。</li>
 <li>如果确信不影响业务，可以降低事务的隔离级别。例如 spring 中 <code>@Transactional(isolation = Isolation.READ_COMMITTED)</code></li>
 </ol>
 </div>
 
-<div id="outline-container-orgheadline18" class="outline-3">
-<h3 id="orgheadline18"><span class="section-number-3">6.1</span> 单纯INSERT引起的死锁</h3>
+<div id="outline-container-org5435912" class="outline-3">
+<h3 id="org5435912"><span class="section-number-3">6.1</span> 单纯INSERT引起的死锁</h3>
 <div class="outline-text-3" id="text-6-1">
 <p>
 这个死锁是工作中碰到的，参考：<a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html">Locks Set by Different SQL Statements in InnoDB</a>
@@ -533,7 +619,6 @@ UPDATE testt SET n = 77 WHERE id = 7;         |
 </p>
 
 <div class="org-src-container">
-
 <pre class="src src-ditta">session A                                                 | session B                                               | session C
 START TRANSACTION;                                        |                                                         |
 -- INSERT 加了 X 锁                                       | START TRANSACTION;                                      |
@@ -579,7 +664,7 @@ WE ROLL BACK TRANSACTION (2)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2018-08-14 二 10:18</p>
+<p class="date">Created: 2020-01-03 Fri 12:42</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
