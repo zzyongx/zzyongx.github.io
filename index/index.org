@@ -8,6 +8,8 @@
 ** 经验
 [[blog:linux-program-exit-codes][Linux 程序退出码]] <2020-01-03>
 
+[[blog:NMI_watchdog_BUG_soft_lockup][NMI watchdog: BUG: soft lockup]] <2020-01-09>
+
 * 2019 己亥年
 --------------
 

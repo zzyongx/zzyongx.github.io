@@ -1,0 +1,142 @@
+#+TITLE: NMI watchdog: BUG: soft lockup
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+IDC的一个交换机出了点问题,引发网络不通,同事反馈console上出现了 ~NMI watchdog: BUG: soft lockup - CPU#1 stuck for 31s~ 这样的输出,我查了点资料,这里做点笔记.
+
+[[http://linuxperf.com/?p=83][读核笔记]] 有对NMI watchdog和lockup的更多介绍.
+
+* 什么是lockup
+~lockup~ 就是某段内核代码占着CPU不放, ~lockup~ 严重时导致整个系统失去相应, ~lockup~ 有两个特点:
+1. 只有内核代码才能引起lockup,因为用户代码是可被抢占的,不可能形成lockup(只有一个例外: ~SCHED_FIFO~ 优先级为99的实时进程也是不可抢占的)
+2. 内核代码必须处于禁止抢占状态,因为linux是抢占式内核,只有某些特定代码区才禁止抢占,只有这些区域才能形成lockup
+
+lockup分为soft lockup和hard lockup,如果lockup时没屏蔽中断soft,否则hard.
+
+* 使用NMI Watchdog检测lockup
+当发生hard lockup时,唯一能把cpu抢下来的唯一办法就是NMI,因为NMI是不可屏蔽中断. NMI Watchdog包含两部分:
+1. 高精度计时器,递增 ~hrtimer_interrupts~ ,唤醒[watchodg/x]内核线程,更新一个时间戳.
+2. NMI中断时,检查 ~hrtimer_interrupts~ 是否递增,如果没有说明hard lockup,检查时间戳是否更新,如果没有说明soft lockup
+
+** 和lockup和watchdog有关的sysctl参数
+1. ~kernel.nmi_watchdog = 1~ 开启或关闭nmi watchdog
+2. ~kernel.softlockup_panic = 0~ softlockup 不触发panic
+3. ~kernel.watchdog = 1~ 同时开启或关闭soft lockup detector和nmi watchdog
+4. ~kernel.watchdog_thresh = 10~ hard lockup的阈值,soft lockup的阈值是 ~2*watchdog_thresh~
+
+* lockup 的解决
+发生lockup通常是特定条件下触发了内核bug,表现为负载高(因为cpu hang住了).如果是偶然发生一次,可以忽略,如果频繁发生,则考虑两种方法:
+1. 看看是什么条件触发了内核bug,解决这个条件
+2. 向厂商/社区报告这个bug
+
+在我碰到例子中,就是网络原因触发的,网络恢复后,问题自动消失了.
+
+* 和lockup有关的信息
+lockup时 ~dmsg~ 中相关的信息,留心几个关键点.
+1. ~Modules linked in~ 看看是不是新增内核模块引起的
+2. ~CPU: 1 PID: 5071 Comm: sshd Kdump: loaded Tainted~ 类似这种,记录了内核态对应的进程,这里是pid为5071的sshd进程,但lockup和进程无关
+3. ~RIP: 0010:[<ffffffff91f904dc>]  [<ffffffff91f904dc>] iowrite16+0x1c/0x40~ RIP记录lockup时执行的函数,这里是 ~iowrite16~
+4. ~Call Trace~ 记录lockup的堆栈
+
+寻找多个lockup之间的共同点,判断是什么引发了内核bug. 在我碰到例子中,RIP都是 ~iowrite16~ ,堆栈都和网络有关.
+
+* lockup发生时的一段dmsg输出
+
+#+BEGIN_EXAMPLE
+[Mon Dec 30 18:39:04 2019] NMI watchdog: BUG: soft lockup - CPU#1 stuck for 31s! [sshd:5071]
+[Mon Dec 30 18:39:04 2019] Modules linked in: ipmi_devintf ipmi_msghandler sunrpc dm_mirror dm_region_hash dm_log dm_mod ppdev iosf_mbi xfs crc32_
+pclmul ghash_clmulni_intel libcrc32c aesni_intel lrw gf128mul joydev glue_helper ablk_helper cryptd pcspkr sg virtio_balloon parport_pc parport i2
+c_piix4 ip_tables ext4 mbcache jbd2 sr_mod cdrom virtio_blk virtio_net ata_generic pata_acpi crct10dif_pclmul crct10dif_common crc32c_intel serio_
+raw cirrus drm_kms_helper syscopyarea sysfillrect floppy sysimgblt fb_sys_fops ttm drm ata_piix libata virtio_pci virtio_ring virtio drm_panel_ori
+entation_quirks
+[Mon Dec 30 18:39:04 2019] CPU: 1 PID: 5071 Comm: sshd Kdump: loaded Tainted: G             L ------------   3.10.0-957.el7.x86_64 #1
+[Mon Dec 30 18:39:04 2019] Hardware name: Red Hat KVM, BIOS 0.5.1 01/01/2011
+[Mon Dec 30 18:39:04 2019] task: ffff8be9ffa94100 ti: ffff8be9ad548000 task.ti: ffff8be9ad548000
+[Mon Dec 30 18:39:04 2019] RIP: 0010:[<ffffffff91f904dc>]  [<ffffffff91f904dc>] iowrite16+0x1c/0x40
+[Mon Dec 30 18:39:04 2019] RSP: 0018:ffff8be9ad54b950  EFLAGS: 00000202
+[Mon Dec 30 18:39:04 2019] RAX: 0000000000000001 RBX: ffff8be9f6ab6000 RCX: ffff8be9f36026c0
+[Mon Dec 30 18:39:04 2019] RDX: 000000000000c0b0 RSI: 000000000001c0b0 RDI: 0000000000000001
+[Mon Dec 30 18:39:04 2019] RBP: ffff8be9ad54b958 R08: 0000000000000020 R09: 00000000000000c2
+[Mon Dec 30 18:39:04 2019] R10: 0000000000000001 R11: 000000000000000c R12: ffff8be9f6ab6000
+[Mon Dec 30 18:39:04 2019] R13: ffff8be9bfc01700 R14: ffff8be996a4d500 R15: 00000000f3ef44c9
+[Mon Dec 30 18:39:04 2019] FS:  0000000000000000(0000) GS:ffff8be9ffd00000(0000) knlGS:0000000000000000
+[Mon Dec 30 18:39:04 2019] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[Mon Dec 30 18:39:04 2019] CR2: 000055586c776c60 CR3: 0000000145e10000 CR4: 00000000003606e0
+[Mon Dec 30 18:39:04 2019] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[Mon Dec 30 18:39:04 2019] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[Mon Dec 30 18:39:04 2019] Call Trace:
+[Mon Dec 30 18:39:04 2019]  [<ffffffffc02a8b76>] ? vp_notify+0x16/0x20 [virtio_pci]
+[Mon Dec 30 18:39:04 2019]  [<ffffffffc029c720>] virtqueue_kick+0x30/0x50 [virtio_ring]
+[Mon Dec 30 18:39:04 2019]  [<ffffffffc03f1584>] start_xmit+0x264/0x500 [virtio_net]
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92238c66>] dev_hard_start_xmit+0x246/0x3b0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92265cea>] sch_direct_xmit+0x11a/0x250
+[Mon Dec 30 18:39:04 2019]  [<ffffffff9223bbe1>] __dev_queue_xmit+0x491/0x650
+[Mon Dec 30 18:39:04 2019]  [<ffffffff9223bdb0>] dev_queue_xmit+0x10/0x20
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92288736>] ip_finish_output+0x556/0x7b0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92288c93>] ip_output+0x73/0xe0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92286817>] ip_local_out_sk+0x37/0x40
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92286bb4>] ip_queue_xmit+0x144/0x3c0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff922a0f64>] tcp_transmit_skb+0x4e4/0x9e0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff922a15d2>] tcp_write_xmit+0x172/0xd00
+[Mon Dec 30 18:39:04 2019]  [<ffffffff922a23de>] __tcp_push_pending_frames+0x2e/0xc0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff922a3ed2>] tcp_send_fin+0x62/0x190
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92295110>] tcp_close+0x3a0/0x400
+[Mon Dec 30 18:39:04 2019]  [<ffffffff922be86d>] inet_release+0x7d/0x90
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92218765>] sock_release+0x25/0x90
+[Mon Dec 30 18:39:04 2019]  [<ffffffff922187e2>] sock_close+0x12/0x20
+[Mon Dec 30 18:39:04 2019]  [<ffffffff91e433dc>] __fput+0xec/0x260
+[Mon Dec 30 18:39:04 2019]  [<ffffffff91e4363e>] ____fput+0xe/0x10
+[Mon Dec 30 18:39:04 2019]  [<ffffffff91cbe79b>] task_work_run+0xbb/0xe0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff91c9dc61>] do_exit+0x2d1/0xa40
+[Mon Dec 30 18:39:04 2019]  [<ffffffff91c9e44f>] do_group_exit+0x3f/0xa0
+[Mon Dec 30 18:39:04 2019]  [<ffffffff91c9e4c4>] SyS_exit_group+0x14/0x20
+[Mon Dec 30 18:39:04 2019]  [<ffffffff92374ddb>] system_call_fastpath+0x22/0x27
+[Mon Dec 30 18:39:04 2019] Code: ff ff 5d c3 0f 1f 00 40 88 3e c3 0f 1f 40 00 48 81 fe ff ff 03 00 48 89 f2 77 2c 48 81 fe 00 00 01 00 76 0b 0f b7 d6 89 f8 66 ef <c3> 0f 1f 00 55 48 c7 c6 51 40 6a 92 48 89 d7 48 89 e5 e8 5d fe
+[Mon Dec 30 18:39:41 2019] INFO: rcu_sched detected stalls on CPUs/tasks: {} (detected by 1, t=70290 jiffies, g=151052658, c=151052657, q=3140)
+[Mon Dec 30 18:39:41 2019] All QSes seen, last rcu_sched kthread activity 70290 (14862025930-14861955640), jiffies_till_next_fqs=3
+[Mon Dec 30 18:39:41 2019] sshd            R  running task        0  5071   3124 0x0000000a
+[Mon Dec 30 18:39:41 2019] Call Trace:
+[Mon Dec 30 18:39:41 2019]  <IRQ>  [<ffffffff91cd5d88>] sched_show_task+0xa8/0x110
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91d55fde>] rcu_check_callbacks+0x72e/0x730
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91d0ad60>] ? tick_sched_do_timer+0x50/0x50
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91cab136>] update_process_times+0x46/0x80
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91d0aad0>] tick_sched_handle+0x30/0x70
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91d0ad99>] tick_sched_timer+0x39/0x80
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91cc5f93>] __hrtimer_run_queues+0xf3/0x270
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91cc651f>] hrtimer_interrupt+0xaf/0x1d0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91c5a2cb>] local_apic_timer_interrupt+0x3b/0x60
+[Mon Dec 30 18:39:41 2019]  [<ffffffff923796c3>] smp_apic_timer_interrupt+0x43/0x60
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92375df2>] apic_timer_interrupt+0x162/0x170
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91f904dc>] ? iowrite16+0x1c/0x40
+[Mon Dec 30 18:39:41 2019]  [<ffffffffc02a8b76>] ? vp_notify+0x16/0x20 [virtio_pci]
+[Mon Dec 30 18:39:41 2019]  [<ffffffffc029c720>] virtqueue_kick+0x30/0x50 [virtio_ring]
+[Mon Dec 30 18:39:41 2019]  [<ffffffffc03f1584>] start_xmit+0x264/0x500 [virtio_net]
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92238c66>] dev_hard_start_xmit+0x246/0x3b0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92265cea>] sch_direct_xmit+0x11a/0x250
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92265eae>] __qdisc_run+0x8e/0x360
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92237386>] net_tx_action+0x1d6/0x240
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91ca0f05>] __do_softirq+0xf5/0x280
+[Mon Dec 30 18:39:41 2019]  [<ffffffff9237832c>] call_softirq+0x1c/0x30
+[Mon Dec 30 18:39:41 2019]  <EOI>  [<ffffffff91c2e675>] do_softirq+0x65/0xa0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91ca035b>] __local_bh_enable_ip+0x9b/0xb0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91ca0387>] local_bh_enable+0x17/0x20
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92288464>] ip_finish_output+0x284/0x7b0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92288c93>] ip_output+0x73/0xe0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92286817>] ip_local_out_sk+0x37/0x40
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92286bb4>] ip_queue_xmit+0x144/0x3c0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff922a0f64>] tcp_transmit_skb+0x4e4/0x9e0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff922a15d2>] tcp_write_xmit+0x172/0xd00
+[Mon Dec 30 18:39:41 2019]  [<ffffffff922a23de>] __tcp_push_pending_frames+0x2e/0xc0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff922a3ed2>] tcp_send_fin+0x62/0x190
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92295110>] tcp_close+0x3a0/0x400
+[Mon Dec 30 18:39:41 2019]  [<ffffffff922be86d>] inet_release+0x7d/0x90
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92218765>] sock_release+0x25/0x90
+[Mon Dec 30 18:39:41 2019]  [<ffffffff922187e2>] sock_close+0x12/0x20
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91e433dc>] __fput+0xec/0x260
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91e4363e>] ____fput+0xe/0x10
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91cbe79b>] task_work_run+0xbb/0xe0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91c9dc61>] do_exit+0x2d1/0xa40
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91c9e44f>] do_group_exit+0x3f/0xa0
+[Mon Dec 30 18:39:41 2019]  [<ffffffff91c9e4c4>] SyS_exit_group+0x14/0x20
+[Mon Dec 30 18:39:41 2019]  [<ffffffff92374ddb>] system_call_fastpath+0x22/0x27
+#+END_EXAMPLE

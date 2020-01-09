@@ -28,8 +28,11 @@ Unable to start 'C:\Users\zhengzhiyong\AppData\Roaming\Swan\.cache\spm\setup-x86
 2. spm -u
 
 * linux
+** 安装开发工具
+~apt-get install pstack~
+
 ** 安装emacs的图形依赖
-~sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev~
+~sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev chromium-browser~
 
 ** 终端在tab中打开标签
 在终端菜单 编辑->首选项 中配置
@@ -50,9 +53,22 @@ echo 'export PATH=/usr/local/go/bin:$PATH' >> ~/.bash_profile
 echo 'export GOPATH=/data/zzyong/gitlab' >> ~/.bash_profile
 #+END_SRC
 
+* vscode
+1. =sudo add-apt-repository ppa:ubuntu-desktop/ubuntu-make=
+2. =sudo apt-get update=
+3. =sudo apt-get install ubuntu-make=
+4. =umake ide visual-studio-code=
+
+* apt
+1. =apt list --installed= 列出所有已安装的软件
+
+
 * json
 ** gofx
 [[https://github.com/antonmedv/gofx][gofx]] 是一款命令行json处理工具，可以 =格式化= json，和用 =jsonpath= 类似的方法获取json片段。
 
 ** 浏览器DevTools
 =DevTools= 是浏览器提供的开发者调试工具，可以在它的控制台执行交互式js。首先把json加载到json变量里， =fetch("...").then(r => r.json()).then(j => json = j)= 现在可以使用js随意操作json了。
+
+* android without ide
+1. =sudo apt-get install openjdk-8-jdk-headless=

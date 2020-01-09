@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-01-09 四 23:57 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NMI watchdog: BUG: soft lockup</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">NMI watchdog: BUG: soft lockup</h1>
+<p>
+IDC的一个交换机出了点问题,引发网络不通,同事反馈console上出现了 <code>NMI watchdog: BUG: soft lockup - CPU#1 stuck for 31s</code> 这样的输出,我查了点资料,这里做点笔记.
+</p>
+
+<p>
+<a href="http://linuxperf.com/?p=83">读核笔记</a> 有对NMI watchdog和lockup的更多介绍.
+</p>
+
+<div id="outline-container-org2d8db6c" class="outline-2">
+<h2 id="org2d8db6c"><span class="section-number-2">1</span> 什么是lockup</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<code>lockup</code> 就是某段内核代码占着CPU不放, <code>lockup</code> 严重时导致整个系统失去相应, <code>lockup</code> 有两个特点:
+</p>
+<ol class="org-ol">
+<li>只有内核代码才能引起lockup,因为用户代码是可被抢占的,不可能形成lockup(只有一个例外: <code>SCHED_FIFO</code> 优先级为99的实时进程也是不可抢占的)</li>
+<li>内核代码必须处于禁止抢占状态,因为linux是抢占式内核,只有某些特定代码区才禁止抢占,只有这些区域才能形成lockup</li>
+</ol>
+
+<p>
+lockup分为soft lockup和hard lockup,如果lockup时没屏蔽中断soft,否则hard.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org41191ec" class="outline-2">
+<h2 id="org41191ec"><span class="section-number-2">2</span> 使用NMI Watchdog检测lockup</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+当发生hard lockup时,唯一能把cpu抢下来的唯一办法就是NMI,因为NMI是不可屏蔽中断. NMI Watchdog包含两部分:
+</p>
+<ol class="org-ol">
+<li>高精度计时器,递增 <code>hrtimer_interrupts</code> ,唤醒[watchodg/x]内核线程,更新一个时间戳.</li>
+<li>NMI中断时,检查 <code>hrtimer_interrupts</code> 是否递增,如果没有说明hard lockup,检查时间戳是否更新,如果没有说明soft lockup</li>
+</ol>
+</div>
+
+<div id="outline-container-org7512cc9" class="outline-3">
+<h3 id="org7512cc9"><span class="section-number-3">2.1</span> 和lockup和watchdog有关的sysctl参数</h3>
+<div class="outline-text-3" id="text-2-1">
+<ol class="org-ol">
+<li><code>kernel.nmi_watchdog = 1</code> 开启或关闭nmi watchdog</li>
+<li><code>kernel.softlockup_panic = 0</code> softlockup 不触发panic</li>
+<li><code>kernel.watchdog = 1</code> 同时开启或关闭soft lockup detector和nmi watchdog</li>
+<li><code>kernel.watchdog_thresh = 10</code> hard lockup的阈值,soft lockup的阈值是 <code>2*watchdog_thresh</code></li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb677672" class="outline-2">
+<h2 id="orgb677672"><span class="section-number-2">3</span> lockup 的解决</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+发生lockup通常是特定条件下触发了内核bug,表现为负载高(因为cpu hang住了).如果是偶然发生一次,可以忽略,如果频繁发生,则考虑两种方法:
+</p>
+<ol class="org-ol">
+<li>看看是什么条件触发了内核bug,解决这个条件</li>
+<li>向厂商/社区报告这个bug</li>
+</ol>
+
+<p>
+在我碰到例子中,就是网络原因触发的,网络恢复后,问题自动消失了.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2984857" class="outline-2">
+<h2 id="org2984857"><span class="section-number-2">4</span> 和lockup有关的信息</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+lockup时 <code>dmsg</code> 中相关的信息,留心几个关键点.
+</p>
+<ol class="org-ol">
+<li><code>Modules linked in</code> 看看是不是新增内核模块引起的</li>
+<li><code>CPU: 1 PID: 5071 Comm: sshd Kdump: loaded Tainted</code> 类似这种,记录了内核态对应的进程,这里是pid为5071的sshd进程,但lockup和进程无关</li>
+<li><code>RIP: 0010:[&lt;ffffffff91f904dc&gt;]  [&lt;ffffffff91f904dc&gt;] iowrite16+0x1c/0x40</code> RIP记录lockup时执行的函数,这里是 <code>iowrite16</code></li>
+<li><code>Call Trace</code> 记录lockup的堆栈</li>
+</ol>
+
+<p>
+寻找多个lockup之间的共同点,判断是什么引发了内核bug. 在我碰到例子中,RIP都是 <code>iowrite16</code> ,堆栈都和网络有关.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org32fb227" class="outline-2">
+<h2 id="org32fb227"><span class="section-number-2">5</span> lockup发生时的一段dmsg输出</h2>
+<div class="outline-text-2" id="text-5">
+<pre class="example">
+[Mon Dec 30 18:39:04 2019] NMI watchdog: BUG: soft lockup - CPU#1 stuck for 31s! [sshd:5071]
+[Mon Dec 30 18:39:04 2019] Modules linked in: ipmi_devintf ipmi_msghandler sunrpc dm_mirror dm_region_hash dm_log dm_mod ppdev iosf_mbi xfs crc32_
+pclmul ghash_clmulni_intel libcrc32c aesni_intel lrw gf128mul joydev glue_helper ablk_helper cryptd pcspkr sg virtio_balloon parport_pc parport i2
+c_piix4 ip_tables ext4 mbcache jbd2 sr_mod cdrom virtio_blk virtio_net ata_generic pata_acpi crct10dif_pclmul crct10dif_common crc32c_intel serio_
+raw cirrus drm_kms_helper syscopyarea sysfillrect floppy sysimgblt fb_sys_fops ttm drm ata_piix libata virtio_pci virtio_ring virtio drm_panel_ori
+entation_quirks
+[Mon Dec 30 18:39:04 2019] CPU: 1 PID: 5071 Comm: sshd Kdump: loaded Tainted: G             L ------------   3.10.0-957.el7.x86_64 #1
+[Mon Dec 30 18:39:04 2019] Hardware name: Red Hat KVM, BIOS 0.5.1 01/01/2011
+[Mon Dec 30 18:39:04 2019] task: ffff8be9ffa94100 ti: ffff8be9ad548000 task.ti: ffff8be9ad548000
+[Mon Dec 30 18:39:04 2019] RIP: 0010:[&lt;ffffffff91f904dc&gt;]  [&lt;ffffffff91f904dc&gt;] iowrite16+0x1c/0x40
+[Mon Dec 30 18:39:04 2019] RSP: 0018:ffff8be9ad54b950  EFLAGS: 00000202
+[Mon Dec 30 18:39:04 2019] RAX: 0000000000000001 RBX: ffff8be9f6ab6000 RCX: ffff8be9f36026c0
+[Mon Dec 30 18:39:04 2019] RDX: 000000000000c0b0 RSI: 000000000001c0b0 RDI: 0000000000000001
+[Mon Dec 30 18:39:04 2019] RBP: ffff8be9ad54b958 R08: 0000000000000020 R09: 00000000000000c2
+[Mon Dec 30 18:39:04 2019] R10: 0000000000000001 R11: 000000000000000c R12: ffff8be9f6ab6000
+[Mon Dec 30 18:39:04 2019] R13: ffff8be9bfc01700 R14: ffff8be996a4d500 R15: 00000000f3ef44c9
+[Mon Dec 30 18:39:04 2019] FS:  0000000000000000(0000) GS:ffff8be9ffd00000(0000) knlGS:0000000000000000
+[Mon Dec 30 18:39:04 2019] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[Mon Dec 30 18:39:04 2019] CR2: 000055586c776c60 CR3: 0000000145e10000 CR4: 00000000003606e0
+[Mon Dec 30 18:39:04 2019] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[Mon Dec 30 18:39:04 2019] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[Mon Dec 30 18:39:04 2019] Call Trace:
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffffc02a8b76&gt;] ? vp_notify+0x16/0x20 [virtio_pci]
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffffc029c720&gt;] virtqueue_kick+0x30/0x50 [virtio_ring]
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffffc03f1584&gt;] start_xmit+0x264/0x500 [virtio_net]
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92238c66&gt;] dev_hard_start_xmit+0x246/0x3b0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92265cea&gt;] sch_direct_xmit+0x11a/0x250
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff9223bbe1&gt;] __dev_queue_xmit+0x491/0x650
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff9223bdb0&gt;] dev_queue_xmit+0x10/0x20
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92288736&gt;] ip_finish_output+0x556/0x7b0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92288c93&gt;] ip_output+0x73/0xe0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92286817&gt;] ip_local_out_sk+0x37/0x40
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92286bb4&gt;] ip_queue_xmit+0x144/0x3c0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff922a0f64&gt;] tcp_transmit_skb+0x4e4/0x9e0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff922a15d2&gt;] tcp_write_xmit+0x172/0xd00
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff922a23de&gt;] __tcp_push_pending_frames+0x2e/0xc0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff922a3ed2&gt;] tcp_send_fin+0x62/0x190
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92295110&gt;] tcp_close+0x3a0/0x400
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff922be86d&gt;] inet_release+0x7d/0x90
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92218765&gt;] sock_release+0x25/0x90
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff922187e2&gt;] sock_close+0x12/0x20
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff91e433dc&gt;] __fput+0xec/0x260
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff91e4363e&gt;] ____fput+0xe/0x10
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff91cbe79b&gt;] task_work_run+0xbb/0xe0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff91c9dc61&gt;] do_exit+0x2d1/0xa40
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff91c9e44f&gt;] do_group_exit+0x3f/0xa0
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff91c9e4c4&gt;] SyS_exit_group+0x14/0x20
+[Mon Dec 30 18:39:04 2019]  [&lt;ffffffff92374ddb&gt;] system_call_fastpath+0x22/0x27
+[Mon Dec 30 18:39:04 2019] Code: ff ff 5d c3 0f 1f 00 40 88 3e c3 0f 1f 40 00 48 81 fe ff ff 03 00 48 89 f2 77 2c 48 81 fe 00 00 01 00 76 0b 0f b7 d6 89 f8 66 ef &lt;c3&gt; 0f 1f 00 55 48 c7 c6 51 40 6a 92 48 89 d7 48 89 e5 e8 5d fe
+[Mon Dec 30 18:39:41 2019] INFO: rcu_sched detected stalls on CPUs/tasks: {} (detected by 1, t=70290 jiffies, g=151052658, c=151052657, q=3140)
+[Mon Dec 30 18:39:41 2019] All QSes seen, last rcu_sched kthread activity 70290 (14862025930-14861955640), jiffies_till_next_fqs=3
+[Mon Dec 30 18:39:41 2019] sshd            R  running task        0  5071   3124 0x0000000a
+[Mon Dec 30 18:39:41 2019] Call Trace:
+[Mon Dec 30 18:39:41 2019]  &lt;IRQ&gt;  [&lt;ffffffff91cd5d88&gt;] sched_show_task+0xa8/0x110
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91d55fde&gt;] rcu_check_callbacks+0x72e/0x730
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91d0ad60&gt;] ? tick_sched_do_timer+0x50/0x50
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91cab136&gt;] update_process_times+0x46/0x80
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91d0aad0&gt;] tick_sched_handle+0x30/0x70
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91d0ad99&gt;] tick_sched_timer+0x39/0x80
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91cc5f93&gt;] __hrtimer_run_queues+0xf3/0x270
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91cc651f&gt;] hrtimer_interrupt+0xaf/0x1d0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91c5a2cb&gt;] local_apic_timer_interrupt+0x3b/0x60
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff923796c3&gt;] smp_apic_timer_interrupt+0x43/0x60
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92375df2&gt;] apic_timer_interrupt+0x162/0x170
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91f904dc&gt;] ? iowrite16+0x1c/0x40
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffffc02a8b76&gt;] ? vp_notify+0x16/0x20 [virtio_pci]
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffffc029c720&gt;] virtqueue_kick+0x30/0x50 [virtio_ring]
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffffc03f1584&gt;] start_xmit+0x264/0x500 [virtio_net]
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92238c66&gt;] dev_hard_start_xmit+0x246/0x3b0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92265cea&gt;] sch_direct_xmit+0x11a/0x250
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92265eae&gt;] __qdisc_run+0x8e/0x360
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92237386&gt;] net_tx_action+0x1d6/0x240
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91ca0f05&gt;] __do_softirq+0xf5/0x280
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff9237832c&gt;] call_softirq+0x1c/0x30
+[Mon Dec 30 18:39:41 2019]  &lt;EOI&gt;  [&lt;ffffffff91c2e675&gt;] do_softirq+0x65/0xa0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91ca035b&gt;] __local_bh_enable_ip+0x9b/0xb0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91ca0387&gt;] local_bh_enable+0x17/0x20
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92288464&gt;] ip_finish_output+0x284/0x7b0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92288c93&gt;] ip_output+0x73/0xe0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92286817&gt;] ip_local_out_sk+0x37/0x40
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92286bb4&gt;] ip_queue_xmit+0x144/0x3c0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff922a0f64&gt;] tcp_transmit_skb+0x4e4/0x9e0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff922a15d2&gt;] tcp_write_xmit+0x172/0xd00
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff922a23de&gt;] __tcp_push_pending_frames+0x2e/0xc0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff922a3ed2&gt;] tcp_send_fin+0x62/0x190
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92295110&gt;] tcp_close+0x3a0/0x400
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff922be86d&gt;] inet_release+0x7d/0x90
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92218765&gt;] sock_release+0x25/0x90
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff922187e2&gt;] sock_close+0x12/0x20
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91e433dc&gt;] __fput+0xec/0x260
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91e4363e&gt;] ____fput+0xe/0x10
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91cbe79b&gt;] task_work_run+0xbb/0xe0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91c9dc61&gt;] do_exit+0x2d1/0xa40
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91c9e44f&gt;] do_group_exit+0x3f/0xa0
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff91c9e4c4&gt;] SyS_exit_group+0x14/0x20
+[Mon Dec 30 18:39:41 2019]  [&lt;ffffffff92374ddb&gt;] system_call_fastpath+0x22/0x27
+</pre>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2020-01-09 四 23:57</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
