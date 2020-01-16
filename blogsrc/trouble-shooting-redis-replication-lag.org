@@ -1,0 +1,69 @@
+#+TITLE: 排查redis主从复制lag不断增大问题
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+redis以主从模式部署时，监控主从是否同步非常重要。我们在master执行 =info replication= 命令并监控 =slave#= 的值。 =slave#=的值类似这种 ~ip=10.14.11.12,port=6379,state=online,offset=4878516094,lag=0~ 通过检查lag的值是否超过阈值来判断主从是否同步。
+
+老实说，监控lag纯属望文生义，对它的含义并不是十分理解。直到有一天某个实例的lag不断增长，大于60后主从连接自动断开。从lag上看，主从不同步了，但从实际效果看（主写入后，马上可以在从上读出来）主从并没有不同步。
+
+排查过程比较曲折，记录下排查过程：
+
+* 肤浅阶段
+之所以说肤浅，是因为没下功夫。查看机器的负载，网络连接正常。查看redis的slowlog正常。然后开始在网络上搜索，也没有结果。网络搜索通常是很好的主意，但是如果搜索了20分钟，还没有结果，也许该暂停下，想想是不是搜索方向出了问题，抑或是看看源码。
+
+* lag 到底是何方神圣
+grep -w lag . 发现 server.c 文件
+#+BEGIN_SRC c
+if (slave->replstate == SLAVE_STATE_ONLINE)
+  lag = time(NULL) - slave->repl_ack_time;
+
+info = sdscatprintf(info,
+    "slave%d:ip=%s,port=%d,state=%s,offset=%lld,lag=%ld\r\n",
+    slaveid,slaveip,slave->slave_listening_port,state,
+    slave->repl_ack_off, lag);
+#+END_SRC
+
+由此看出lag和 =repl_ack_time= 有关，继续grep发现 replication.c
+#+BEGIN_SRC c
+if (!strcasecmp(c->argv[j]->ptr,"ack")) {
+  long long offset;
+  if ((getLongLongFromObject(c->argv[j+1], &offset) != C_OK))
+    return;
+  if (offset > c->repl_ack_off)
+    c->repl_ack_off = offset;
+  c->repl_ack_time = server.unixtime;
+}
+#+END_SRC
+slave会发送 =ACK= 给master，汇报自己的offset，每收到 =ACK= master都会更新 =repl_ack_time= 和 =repl_ack_off= 。
+
+#+BEGIN_SRC c
+if ((server.unixtime - slave->repl_ack_time) > server.repl_timeout)
+{
+  serverLog(LL_WARNING, "Disconnecting timedout replica: %s",
+    replicationGetSlaveName(slave));
+  freeClient(slave);
+}
+#+END_SRC
+如果超过 =repl_timeout= 没收到 =ACK= ，master会主动断开和slave的连接。这和观察到的现象一致。
+
+综上大致可以推测出，因为master没有收到 =ACK= 的缘故，导致主从表现为不同步。
+
+* slave 为啥不发ACK
+首先要确定slave是否发了ACK，在replication.c中
+#+BEGIN_SRC c
+void replicationCron(void) {
+  if (server.masterhost && server.master &&
+      !(server.master->flags & CLIENT_PRE_PSYNC))
+    replicationSendAck();
+}
+#+END_SRC
+因为slave上没有业务，直接用gdb设置了两个断点 =replicationCron= 和 =replicationSendAck= ，前者执行了，但是后者没有执行，的确没有发送 =ACK= 。
+
+为了确定slave不发=ACK= ，是master还是slave导致的。我新启了另外的slave，lag没有问题，可以确定是slave的原因导致的。考虑没有配置控制这个行为，我估计是代码bug，slave内部状态错了。这个代码太复杂了，一时半会儿理不出头绪，遂放弃。
+
+* 如何修复
+内部状态坏了，可以通过重启解决。还有一个不重启的方法： =slaveof NO ONE; flushall; slaveof master port= ，中间 =flushall= 命令是必须的。
+
+* 总结
+1. 监控主从同步可以从lag和offset两个维度，lag值小于某个数， =slave_repl_offset - offset= 的值也小于某个数
+2. 看源码很多时候往往是捷径。

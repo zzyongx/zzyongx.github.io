@@ -10,6 +10,8 @@
 
 [[blog:NMI_watchdog_BUG_soft_lockup][NMI watchdog: BUG: soft lockup]] <2020-01-09>
 
+[[blog:trouble-shooting-redis-replication-lag][排查redis主从复制lag不断增大问题]] <2020-01-16>
+
 * 2019 己亥年
 --------------
 

@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-01-16 Thu 13:08 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>排查redis主从复制lag不断增大问题</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="root" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">排查redis主从复制lag不断增大问题</h1>
+<p>
+redis以主从模式部署时，监控主从是否同步非常重要。我们在master执行 <code>info replication</code> 命令并监控 <code>slave#</code> 的值。 <code>slave#</code>的值类似这种 <code>ip=10.14.11.12,port=6379,state=online,offset=4878516094,lag=0</code> 通过检查lag的值是否超过阈值来判断主从是否同步。
+</p>
+
+<p>
+老实说，监控lag纯属望文生义，对它的含义并不是十分理解。直到有一天某个实例的lag不断增长，大于60后主从连接自动断开。从lag上看，主从不同步了，但从实际效果看（主写入后，马上可以在从上读出来）主从并没有不同步。
+</p>
+
+<p>
+排查过程比较曲折，记录下排查过程：
+</p>
+
+<div id="outline-container-org489b418" class="outline-2">
+<h2 id="org489b418"><span class="section-number-2">1</span> 肤浅阶段</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+之所以说肤浅，是因为没下功夫。查看机器的负载，网络连接正常。查看redis的slowlog正常。然后开始在网络上搜索，也没有结果。网络搜索通常是很好的主意，但是如果搜索了20分钟，还没有结果，也许该暂停下，想想是不是搜索方向出了问题，抑或是看看源码。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5bdd301" class="outline-2">
+<h2 id="org5bdd301"><span class="section-number-2">2</span> lag 到底是何方神圣</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+grep -w lag . 发现 server.c 文件
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #00ffff; font-weight: bold;">if</span> (slave-&gt;replstate == SLAVE_STATE_ONLINE)
+  lag = time(<span style="color: #ff00ff;">NULL</span>) - slave-&gt;repl_ack_time;
+
+info = sdscatprintf(info,
+    <span style="color: #00ff00;">"slave%d:ip=%s,port=%d,state=%s,offset=%lld,lag=%ld\r\n"</span>,
+    slaveid,slaveip,slave-&gt;slave_listening_port,state,
+    slave-&gt;repl_ack_off, lag);
+</pre>
+</div>
+
+<p>
+由此看出lag和 <code>repl_ack_time</code> 有关，继续grep发现 replication.c
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #00ffff; font-weight: bold;">if</span> (!strcasecmp(c-&gt;argv[j]-&gt;ptr,<span style="color: #00ff00;">"ack"</span>)) {
+  <span style="color: #00ff00;">long</span> <span style="color: #00ff00;">long</span> <span style="color: #ffff00;">offset</span>;
+  <span style="color: #00ffff; font-weight: bold;">if</span> ((getLongLongFromObject(c-&gt;argv[j+1], &amp;offset) != C_OK))
+    <span style="color: #00ffff; font-weight: bold;">return</span>;
+  <span style="color: #00ffff; font-weight: bold;">if</span> (offset &gt; c-&gt;repl_ack_off)
+    c-&gt;repl_ack_off = offset;
+  c-&gt;repl_ack_time = server.unixtime;
+}
+</pre>
+</div>
+<p>
+slave会发送 <code>ACK</code> 给master，汇报自己的offset，每收到 <code>ACK</code> master都会更新 <code>repl_ack_time</code> 和 <code>repl_ack_off</code> 。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #00ffff; font-weight: bold;">if</span> ((server.unixtime - slave-&gt;repl_ack_time) &gt; server.repl_timeout)
+{
+  serverLog(LL_WARNING, <span style="color: #00ff00;">"Disconnecting timedout replica: %s"</span>,
+    replicationGetSlaveName(slave));
+  freeClient(slave);
+}
+</pre>
+</div>
+<p>
+如果超过 <code>repl_timeout</code> 没收到 <code>ACK</code> ，master会主动断开和slave的连接。这和观察到的现象一致。
+</p>
+
+<p>
+综上大致可以推测出，因为master没有收到 <code>ACK</code> 的缘故，导致主从表现为不同步。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga241ee1" class="outline-2">
+<h2 id="orga241ee1"><span class="section-number-2">3</span> slave 为啥不发ACK</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+首先要确定slave是否发了ACK，在replication.c中
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #00ff00;">void</span> <span style="color: #0000ff; font-weight: bold;">replicationCron</span>(<span style="color: #00ff00;">void</span>) {
+  <span style="color: #00ffff; font-weight: bold;">if</span> (server.masterhost &amp;&amp; server.master &amp;&amp;
+      !(server.master-&gt;flags &amp; CLIENT_PRE_PSYNC))
+    replicationSendAck();
+}
+</pre>
+</div>
+<p>
+因为slave上没有业务，直接用gdb设置了两个断点 <code>replicationCron</code> 和 <code>replicationSendAck</code> ，前者执行了，但是后者没有执行，的确没有发送 <code>ACK</code> 。
+</p>
+
+<p>
+为了确定slave不发<code>ACK</code> ，是master还是slave导致的。我新启了另外的slave，lag没有问题，可以确定是slave的原因导致的。考虑没有配置控制这个行为，我估计是代码bug，slave内部状态错了。这个代码太复杂了，一时半会儿理不出头绪，遂放弃。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgaf8ea0c" class="outline-2">
+<h2 id="orgaf8ea0c"><span class="section-number-2">4</span> 如何修复</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+内部状态坏了，可以通过重启解决。还有一个不重启的方法： <code>slaveof NO ONE; flushall; slaveof master port</code> ，中间 <code>flushall</code> 命令是必须的。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf39a80c" class="outline-2">
+<h2 id="orgf39a80c"><span class="section-number-2">5</span> 总结</h2>
+<div class="outline-text-2" id="text-5">
+<ol class="org-ol">
+<li>监控主从同步可以从lag和offset两个维度，lag值小于某个数， <code>slave_repl_offset - offset</code> 的值也小于某个数</li>
+<li>看源码很多时候往往是捷径。</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: root</p>
+<p class="date">Created: 2020-01-16 Thu 13:08</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
