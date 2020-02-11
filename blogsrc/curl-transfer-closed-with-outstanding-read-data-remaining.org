@@ -20,3 +20,6 @@ Connection: keep-alive
 #+END_EXAMPLE
 
 响应 =Transfer-Encoding: chunked= 指明响应使用 =chunked= 编码，但是服务端发送完响应header之后，直接发送 =Fin= 断开了连接，并没有发送 =chunked= 编码的响应，所以curl报错说 =尚有未读数据时断开了连接= 。妥妥的服务端问题，客户端无能为力。
+
+* 可能的服务端原因
+1. 由于数据太大，nginx需要写入临时文件，但是临时文件的目录不存在，或者nginx没有权限。

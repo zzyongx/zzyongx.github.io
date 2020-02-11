@@ -5,7 +5,7 @@
 ~timeout~ 是linux下的一个命令，用来限制命令的执行时间。例如： ~timeout 3 sleep 30~ 。sleep 30执行完成需要消耗30s，但是现在3秒后，timeout会kill掉它。timeout有一些需要注意的事项：
 
 * 如果超时，所有子进程都会被kill掉
-如果命令执行超时，命令的所有子进程（包括后台进程）都会被kill掉，timeout 启动时，调用 ~setpgid(0, 0)~ 设置进程组，当超时时，调用 ~kill(0, SIGTERM)~ ，杀死进程组内的所有进程。
+如果命令执行超时，命令的所有子进程（包括后台进程）都会被kill掉，timeout 启动时，调用 ~setpgid(0, 0)~ 设置进程组，当超时时，调用 ~kill(0, SIGTERM)~ ，杀死进程组内的所有进程（包括父进程为1的进程，因为还在这个进程组内），通过 =ps -eo 'pid ppid pgid cmd'= 查看进程组 。
 
 * 如果没有超时，后台子进程不会被kill掉
 ~timeout 3 bash -c 'sleep 37 & echo "OK"'~ 命令没有超时， ~sleep 37~ 则在后台继续执行。
