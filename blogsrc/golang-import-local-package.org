@@ -1,0 +1,30 @@
+#+TITLE: golang 如何import本地package
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+项目使用golang开发，同一个项目下有两个独立模块，虽然独立，可以共享一些库，抽象出来，目录结构如下，在 ~b/main.go~ 中 ~import "pktest/a"~
+#+BEGIN_EXAMPLE
+pktest
+├── a
+│   └── test.go
+└── b
+    └── main.go
+#+END_EXAMPLE
+
+
+如果不使用=go mod= ，pktest在 =GOPATH= 下，import 很自然，使用=go mod= 后，问题就来了。使用 =go mod= 后的目录结构如下，这里两个模块必须都使用=go mod=
+#+BEGIN_EXAMPLE
+pktest.in
+├── a
+│   ├── go.mod
+│   └── test.go
+└── b
+    ├── go.mod
+    └── main.go
+#+END_EXAMPLE
+
+* missing dot in first path element
+=go mod= 要求模块路径的第一部分必须带 =.= ，这个估计是为了方便下载做的规定。为此把 =pktest= 改为 =pktest.in= 这个涉及的改动较多，使用脚本： ~find . -name '*.go' | xargs sed -i -E 's/"pktest\/a/"pktest.in\/a/g'~ 这里最好多限定一些关键字，以免误替换。
+
+* cannot find module providing package pktest.in/a
+修改为 =pktest.in= 之后报这个错误，毕竟 =pktest.in= 是不存在的，没法从网络上找到，必须显示的告诉 =go mod= 从哪里寻找： ~go mod edit -replace pktest.in/a=../a~ 注意如果a下面还有package，假设为aa，如果b引用得是 ~pktest.in/a/aa~ 那么编译报错，就是 ~pktest.in/a/aa~ 找不到，不管报哪个package找不到， ~go mod edit~ 替换的路径始终是 ~go.mod~ 所在的路径。

@@ -23,6 +23,11 @@ SSL connect error
 
 =git merge --no-ff branch-to-be-merged=
 
+列出所有tag
+=git tag=
+
+从tag创建branch
+=git branch new-branch-name tag-name=
 
 =git clone --bare http://zzyong@git.example/zzyong/small.git=
 =git push --mirror http://zzyong@git.example/zzyong/big.git=
@@ -35,28 +40,9 @@ SSL connect error
 删除远程分支 issue25
 =git push origin :issue25=
 
+* 常见错误
+** git push error: failed to push some refs to
+通常是因为remote端发生了更新，需要先更新本地repo，执行 =git pull=
 
-#+BEGIN_SRC bash
-# git push
-Password:
-To http://zzyong@git.example/zzyong/big.git
- ! [rejected]        master -> master (non-fast-forward)
-error: failed to push some refs to 'http://zzyong@git.example/zzyong/big.git'
-To prevent you from losing history, non-fast-forward updates were rejected
-Merge the remote changes before pushing again.  See the 'Note about
-fast-forwards' section of 'git push --help' for details.
-# git pull origin master
-Password:
-From http://git.example/zzyong/big
- * branch            master     -> FETCH_HEAD
-Already up-to-date.
-# git push
-Password:
-Counting objects: 26, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (9/9), done.
-Writing objects: 100% (9/9), 1.88 KiB, done.
-Total 9 (delta 4), reused 0 (delta 0)
-To http://zzyong@git.example/zzyong/big.git
-   1a6cbcc..f0dd65f  master -> master
-#+END_SRC
+** git status fatal: index file smaller than expected
+重建索引可以解决 =mv .git/index .git/index.backup && git reset HEAD=
