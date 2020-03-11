@@ -25,9 +25,6 @@ nginx的 =server= 指令指定访问该 *server* 段需要的host，除非 *serv
 
 为了避免 ~default_server~ 利于访问者的规则，最好总是配置一个拒绝访问的 ~default_server~ ，这样任何访问总是完全匹配 *server* 段的host。
 
-** 补充1
-假设有个服务A被渗透攻击了，可以通过服务A抓取内网的所有服务，如果内网其它服务配置了 ~default_server~ ，则攻击者通过服务A扫描内网时，必须IP和域名同时匹配，才能抓取。
-
 #+BEGIN_EXAMPLE
 server
 {
@@ -37,6 +34,9 @@ server
   }
 }
 #+END_EXAMPLE
+
+** 补充1
+假设有个服务A被渗透攻击了，可以通过服务A抓取内网的所有服务，如果内网其它服务配置了 ~default_server~ ，则攻击者通过服务A扫描内网时，必须IP和域名同时匹配，才能抓取。
 
 * 启动时只检查语法合法性,不检查配置有效性
 ** 路径有关的配置

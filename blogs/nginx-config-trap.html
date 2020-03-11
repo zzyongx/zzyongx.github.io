@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-11 Wed 12:28 -->
+<!-- 2020-03-11 Wed 12:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>nginx 配置陷阱</title>
@@ -280,14 +280,6 @@ nginx的 <code>server</code> 指令指定访问该 <b>server</b> 段需要的hos
 <p>
 为了避免 <code>default_server</code> 利于访问者的规则，最好总是配置一个拒绝访问的 <code>default_server</code> ，这样任何访问总是完全匹配 <b>server</b> 段的host。
 </p>
-</div>
-
-<div id="outline-container-org0bc02d4" class="outline-3">
-<h3 id="org0bc02d4"><span class="section-number-3">2.1</span> 补充1</h3>
-<div class="outline-text-3" id="text-2-1">
-<p>
-假设有个服务A被渗透攻击了，可以通过服务A抓取内网的所有服务，如果内网其它服务配置了 <code>default_server</code> ，则攻击者通过服务A扫描内网时，必须IP和域名同时匹配，才能抓取。
-</p>
 
 <pre class="example">
 server
@@ -298,6 +290,14 @@ server
   }
 }
 </pre>
+</div>
+
+<div id="outline-container-org0bc02d4" class="outline-3">
+<h3 id="org0bc02d4"><span class="section-number-3">2.1</span> 补充1</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+假设有个服务A被渗透攻击了，可以通过服务A抓取内网的所有服务，如果内网其它服务配置了 <code>default_server</code> ，则攻击者通过服务A扫描内网时，必须IP和域名同时匹配，才能抓取。
+</p>
 </div>
 </div>
 </div>
@@ -318,7 +318,7 @@ server
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2020-03-11 Wed 12:28</p>
+<p class="date">Created: 2020-03-11 Wed 12:30</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
