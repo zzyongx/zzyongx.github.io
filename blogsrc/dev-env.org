@@ -46,6 +46,10 @@ F=/usr/local/bin/vpnc.start; echo -e '#!/bin/bash\nvpnc /etc/vpnc/default.conf' 
 ** 配置=bash_profile=
 export PS1="[@zzyong \W]\$ "
 
+** 重置显示器配置
+家里的小家伙不知道按了什么键，桌面无法填满整个显示器，恢复方法：
+~rm ~/.config/monitors.xml~ ，然后登出，重新登入
+
 * golang
 #+BEGIN_SRC bash
 tar -C /usr/local -xzf go1.12.6.linux-386.tar.gz
@@ -69,6 +73,3 @@ echo 'export GOPATH=/data/zzyong/gitlab' >> ~/.bash_profile
 
 ** 浏览器DevTools
 =DevTools= 是浏览器提供的开发者调试工具，可以在它的控制台执行交互式js。首先把json加载到json变量里， =fetch("...").then(r => r.json()).then(j => json = j)= 现在可以使用js随意操作json了。
-
-* android without ide
-1. =sudo apt-get install openjdk-8-jdk-headless=

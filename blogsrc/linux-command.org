@@ -109,6 +109,10 @@ Host *
 # find /var/spool/postfix/maildrop/ -type f -delete
 #+END_SRC
 
+** pstree 命令
+- ~pstree -a <pid>~ 显示进程<pid>的进程树，可用看到进程中线程的数量
+- ~pstree -ap <pid> | grep -v '},'~ 显示<pid>的进程数，可用看到pid，使用grep过滤线程信息，有时候实在太多了
+
 ** date 命令
 - ~date +%s~ 获取时间戳
 - ~date @1480065287~ 获取时间戳对应的时间

@@ -14,6 +14,8 @@
 
 [[blog:golang-import-local-package][golang 如何import本地package]] <2020-03-09>
 
+[[blog:rpath_in_chroot][chroot 环境中使用带 RPATH 的程序]] <2020-04-18>
+
 * 2019 己亥年
 --------------
 

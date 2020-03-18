@@ -1,0 +1,50 @@
+#+TITLE: chroot 环境中使用带 RPATH 的程序
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* java 如何支持安装多个版本
+
+众所周知，同一台机器可以安装多个java版本，但java依赖的库并不是版本化的放在ldconfig可以识别的目录中的，而是借助RPATH，在编译时指定加载目录实现的。验证如下：
+#+BEGIN_SRC bash
+## java 需要 libjli.so
+# ldd /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.222.b10-0.el7_6.x86_64/jre/bin/java
+	libjli.so => /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.222.b10-0.el7_6.x86_64/jre/bin/../lib/amd64/jli/libjli.so (0x00007f80f83a1000)
+
+## libjli.so 不在链接路径里
+# ldconfig -p | grep libjli.so
+
+## libjli.so 出现在了RPATH里，这里 $ORIGIN 指代java的路径，可以把so放到java的相对路径里
+# objdump -a -x /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.222.b10-0.el7_6.x86_64/jre/bin/java  | grep RPATH
+  RPATH                $ORIGIN/../lib/amd64/jli:$ORIGIN/../lib/amd64
+#+END_SRC
+
+* chroot 环境如何构建
+chroot本质是把程序运行的根目录切到chroot的目录，只要程序在chroot目录启动时能找到相应的程序以及程序依赖的东西，那么chroot环境就可以了。找到程序很简单，它依赖的东西嘛，就比较费劲了。常见的依赖包括so，以及so所需要的配置文件，至于其它东西，就比较晦涩了。
+** 构建一个通用的的chroot环境
+~mkdir -p jail/usr && cp -a /usr/{lib64,bin,libexec} jail/usr && cp -a /etc jail && ln -sf /usr/lib64 jail/lib64 && ln -sf /usr/bin jail/bin~
+这样构造出的chroot环境，比较大，至少有500M。
+
+缩小chroot环境的方法是只复制需要的文件，通常的步骤是找到二进制文件p，然后 ~ldd p~ 查看依赖哪些so，复制这些so。
+~mkdir -p sjail/usr/{lib64,bin} && cp /bin/{bash,ls} sjail/usr/bin && ldd /bin/bash /bin/ls | grep -Po '/lib64/[^\s]+' | xargs -I'{}' cp '{}'  sjail/usr/lib64 && ln -sf /usr/lib64 sjail/lib64~
+这个chroot环境只有 ~ls~ 和 ~bash~ 两个命令，所以非常小，只有4M。
+
+** 验证chroot环境是否正常
+~chroot jail bash -c "echo X"~ 如果执行成功，则说明chroot环境的bash已经可以正常运行了。
+
+* 如何把java放到chroot环境中
+如法炮制，我构建了java的chroot环境，遗憾的是报错， ~/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.222.b10-0.el7_6.x86_64/jre/bin/java: error while loading shared libraries: libjli.so: cannot open shared object file: No such file or directory~ 。找不到 =libjli.so= ，说明RPATH没生效，RPATH好像被忽略掉了。
+
+[[https://github.com/daveagp/java_jail][~java_jail~]] 中提到了 ~/proc~ ，难免让人眼前一亮，RPATH中的$ORIGIN要想正常工作离不开/proc文件系统，利用strace验证一下：
+#+BEGIN_SRC bash
+# strace java -version 2>&1 | grep /proc
+readlink("/proc/self/exe", 0x7ffd965d3910, 4096) = -1 ENOENT (No such file or directory)
+#+END_SRC
+为什么要读取 ~/proc/self/exe~ 呢，因为要获取java的位置，这样才能确定 $ORIGIN的值，RPATH 才能生效。
+
+~/proc~ 目录当然不能复制了，需要 ~mount --bind -o ro,bind /proc $PWD/proc~ 这样chroot和机器共享 ~/proc~ ，问题解决。
+
+** 其它解决方法
+既然RPATH不起作用，可以把 =libjli.so= 放到lib64 目录下，也可以使用 ~LD_LIBRARY_PATH~ 指定 =libjli.so= 的路径，这两种方法更简答，只是没有mount优雅。
+
+* 更复杂的chroot环境
+[[https://github.com/daveagp/java_jail][~java_jail~ ]] 中除了提到proc，还提到了特殊的 ~/dev~ 文件，构建一个chroot环境，可能很简单，也可能很复杂，取决于在chroot环境中执行什么。
