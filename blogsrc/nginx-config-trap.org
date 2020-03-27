@@ -41,3 +41,12 @@ server
 * 启动时只检查语法合法性,不检查配置有效性
 ** 路径有关的配置
 例如: ~proxy_cache_path~ ~proxy_temp_path~ 如果路径不存在，或者没有权限启动也没有问题，但是运行时如果碰到需要写入这些路径，则会报错。这个报错可能只是nginx的一条日志，并不体现在http code上。
+
+* =proxy_pass= 的路径替换
+~proxy_pass URL;~ 如果URL的URI部分不为空，则把请求URI中匹配location的部分换成 ~proxy_pass~中的URI部分，例如：
+#+BEGIN_EXAMPLE
+location /forward/ {
+  proxy_pass http://backend/;  # 注意和 proxy_pass http://backend; 的区别，差一个 /
+}
+#+END_EXAMPLE
+如果请求 ~/forward/third-party/~ ， ~/forward/~ 部分匹配，nginx 转发时，URI被替换为 ~/third-party/~ 。

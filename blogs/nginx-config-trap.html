@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-03-11 Wed 12:30 -->
+<!-- 2020-03-27 Fri 16:03 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>nginx 配置陷阱</title>
@@ -315,10 +315,27 @@ server
 </div>
 </div>
 </div>
+
+<div id="outline-container-org4136e33" class="outline-2">
+<h2 id="org4136e33"><span class="section-number-2">4</span> <code>proxy_pass</code> 的路径替换</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<code>proxy_pass URL;</code> 如果URL的URI部分不为空，则把请求URI中匹配location的部分换成 <code>proxy_pass</code>中的URI部分，例如：
+</p>
+<pre class="example">
+location /forward/ {
+  proxy_pass http://backend/;  # 注意和 proxy_pass http://backend; 的区别，差一个 /
+}
+</pre>
+<p>
+如果请求 <code>/forward/third-party/</code> ， <code>/forward/</code> 部分匹配，nginx 转发时，URI被替换为 <code>/third-party/</code> 。
+</p>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2020-03-11 Wed 12:30</p>
+<p class="date">Created: 2020-03-27 Fri 16:03</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
