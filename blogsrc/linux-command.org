@@ -163,3 +163,6 @@ vimdiff和diff
 
 ** 忽略掉空行
 如果一行只包含空格，tab或者换行符，就算空行。 =diff <(grep -P '\w' file1) <(grep -P '\w' file2)=
+i
+** join
+join -v 2 -1 1 -2 1 /tmp/rusage.txt.sort /tmp/node_exporter.txt.sort
