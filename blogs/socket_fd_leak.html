@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-07-07 Tue 16:10 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>记一次排查socket fd泄漏</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">记一次排查socket fd泄漏</h1>
+
+<div id="outline-container-org9e279ac" class="outline-2">
+<h2 id="org9e279ac"><span class="section-number-2">1</span> 故障表现</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+先说下系统架构，非常简单。本机nginx做接入，beego做后端，MySQL做存储，除了MySQL，外端还有少量的http接口对外调用。故障表现是，系统在测试环境运行一段时间后，beego接受新请求报错， <code>http: Accept error: accept tcp [::]:8080: accept4: too many open files; retrying in 1s</code> 。查看文件描述符限制 <code>ulimit -n</code> 得65535，查看 <code>ls -l /proc/&lt;pid&gt;/fd | wc -l</code> 得到65536且都是socket标记的，说明文件描述符的确耗尽了。查看 <code>netstat -anp | wc -l</code> ，并没有这么多连接。只能有一种解释，beego没有响应socket被动关闭，关闭文件描述符（fd）。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org96443ab" class="outline-2">
+<h2 id="org96443ab"><span class="section-number-2">2</span> 排查过程</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org079fd8b" class="outline-3">
+<h3 id="org079fd8b"><span class="section-number-3">2.1</span> 查找哪些连接beego没有关闭</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+因为tcp被动关闭连接是不需要应用干涉的，虽然应用没有关闭fd，但是连接确实关闭了。因为故障时netstat已经看不到连接情况，所以需要记录故障前的连接快照。如果知道是连接哪个地址出的问题，就能找到相关代码，所以这步很关键。为此 1. 配置了cron，每分钟调用netstat，记录连接情况。 2. 配置监控，打开的网络描述符大于1000时报警。
+</p>
+
+<p>
+从趋势图看，描述符的个数很稳定，并没有出现逐渐增大的情况。只能等报警时再排查。由于是测试环境，所以处理报警不及时，每次报警后查看现场，描述符都耗尽了。排查连接情况。
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ffff00;"># </span><span style="color: #ffff00;">&#33719;&#21462;fd&#23545;&#24212;&#36830;&#25509;&#30340;inode</span>
+ls -l /proc/&lt;pid&gt;/fd | grep -Po <span style="color: #00ff00;">'socket:\[\d+'</span> | cut -d<span style="color: #00ff00;">'['</span> -f2 &gt; /tmp/inodes.txt
+<span style="color: #ffff00;"># </span><span style="color: #ffff00;">&#33719;&#21462;cron&#35760;&#24405;&#30340;&#36830;&#25509;&#65292;&#24182;&#26681;&#25454;inode&#23383;&#27573;&#25490;&#24207;&#65292;&#25490;&#37325;&#65292;&#36825;&#37324;tcpstat.*&#26159;&#20351;&#29992;&#25105;&#20204;&#30340;&#20869;&#37096;&#24037;&#20855;&#35760;&#24405;&#30340;&#36830;&#25509;&#24773;&#20917;&#65292;&#21487;&#20197;&#29992;netstat&#20195;&#26367;</span>
+grep &lt;pid&gt; tcpstat.* | sort -k3,3 -u &gt; /tmp/tcp.txt
+<span style="color: #ffff00;"># </span><span style="color: #ffff00;">&#26597;&#30475;inode&#23545;&#24212;&#30340;&#36830;&#25509;</span>
+<span style="color: #00ffff; font-weight: bold;">for</span> inode<span style="color: #00ffff; font-weight: bold;"> in</span> $(<span style="color: #fa8072;">cat</span> /tmp/inodes.txt); <span style="color: #00ffff; font-weight: bold;">do</span> grep $<span style="color: #ffff00;">inode</span> /tmp/tcp.txt; <span style="color: #00ffff; font-weight: bold;">done</span>
+</pre>
+</div>
+
+<p>
+结果大大出乎意料，全是nginx连beego的请求，beego没有断开连接。查看beego的相关代码，我确定beego也没问题。查看beego的goroutine，发现都停在了sql获取连接上，（beego的sql自带连接池），由此判断因为没有文件描述符可用，所以无法获取连接。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org52d9edb" class="outline-3">
+<h3 id="org52d9edb"><span class="section-number-3">2.2</span> 现场很重要</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+beego没问题，泄漏的连接又没有提供有用线索，根据目前的掌握的信息无法判断问题的原因。前面说了，由于是测试环境（同样的代码线上环境没事儿），所以处理报警不及时，每次查看现场时文件描述符都已经耗尽了。结合趋势图，描述符个数一直很稳定，直到某个时点，开始不断往上增，直到耗尽。基于某个时点之后，fd就开始快速增加，我判断是某个内部状态出了问题所致，所以看到耗尽前的现场至关重要。
+</p>
+
+<p>
+机会很快来了，在描述符升到1000的时候，我切断了所有测试请求，手动模拟用户请求，结果发现请求超时，beego阻塞在了sql获取连接上，进一步查看所有goroutine（pperf提供了查看函数，beego基于此提供了http接口，使用起来非常方便），发现都停在了sql获取连接上。
+</p>
+
+<p>
+事情清楚了，不是因为没有描述符可用导致sql无法获取连接，而是因为sql无法获取连接，导致所有的请求都卡住了，nginx主动关闭了连接，导致beego积攒了大量未关闭描述符的连接。
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2020-07-07 Tue 16:10</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

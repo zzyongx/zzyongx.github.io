@@ -1,0 +1,36 @@
+#+TITLE: 又一次排查socket fd泄漏
+#+AUTHOR: zzyongx
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+距离上一次 [[blog:socket_fd_leak][socket fd泄漏]] 已经过去很久了，我再次碰到了 socket fd 泄漏的情况。相比上次的徒增，这次是缓慢增长，解决起来容易很多。这次决定换用更简单的方法，找找fd在哪泄漏的。
+
+* 查找方法
+思路是利用strace，跟踪 =socket,connect,accept4,close= 4个系统调用一段时间，然后用netstat查看当前连接用的inode，和 proc 下的fd inode对比，不在netstat中的inode就是泄漏的inode，最后对比strace里面记录的fd，查看这些fd是怎么创建的。写成脚本如下：
+
+#+BEGIN_SRC bash
+#!/bin/bash
+
+PID=911
+DURATION=3600
+
+strace -tt -f -p $PID -e trace=socket,connect,accept4,close 2>&1 | grep -v SIGURG > tcp.log &
+sleep $DURATION
+
+netstat -tenp | grep api | sort -k 8 > netstat.txt
+ls /proc/$PID/fd -l | grep socket | perl -ane '$F[10] =~ /socket:\[(\d+)\]/; print $F[8], " ", $1, "\n"' | sort -k 2 > fd.txt
+
+for fd in $(join -v 1 -1 2 -2 8 fd.txt netstat.txt | cut -d' ' -f2); do
+  F=/proc/$PID/fd/$fd
+  test -e $F && {
+    ls -l $F
+    grep -w $fd tcp.log | tail
+  }
+done
+#+END_SRC
+
+* 查找问题根源
+这次仍然是accept出的fd没释放，说明某些请求hang住了没有结束，亏得是go routine，系统没崩。查看go routine很容易找出问题所在。
+
+* 思考
+类似web这种服务模式，很容易出现某些接口太耗时或有BUG，导致资源逐渐耗尽的情况。监控socket fd的使用是个不错的办法。

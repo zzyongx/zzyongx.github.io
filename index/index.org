@@ -16,6 +16,8 @@
 
 [[blog:rpath_in_chroot][chroot 环境中使用带 RPATH 的程序]] <2020-04-18>
 
+[[blog:socket_fd_leak_2][排查socket fd泄漏]] <2020-07-07>
+
 * 2019 己亥年
 --------------
 
