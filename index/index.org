@@ -18,6 +18,8 @@
 
 [[blog:socket_fd_leak_2][排查socket fd泄漏]] <2020-07-07>
 
+[[blog:use_rest_access_k8s][使用rest访问k8s自定义资源]] <2020-09-06>
+
 * 2019 己亥年
 --------------
 

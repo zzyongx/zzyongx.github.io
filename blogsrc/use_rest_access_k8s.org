@@ -1,0 +1,93 @@
+#+TITLE: 使用client-go/rest访问k8s
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+公司的k8s平台使用CR（custom resource）实现个性化需求，监控系统需要获取CR提升可观测性。k8s客户端对标准资源，例如deployment，pod支持比较好，但是对自定义资源的支持弄得我一头雾水。本质上说都是通过http访问资源，我想不如直接使用http库，避免理解过多不必要的概念。
+
+# API object
+通过哪些url访问呢，这可把我难住了，又要陷入理解k8s的概念中去？k8s提供了类似[[https://medium.com/programming-kubernetes/building-stuff-with-the-kubernetes-api-1-cc50a3642][资源浏览器的接口]]，通过这个接口，可以层层下探，找到自己需要的接口。
+
+可用通过 ~kubectl get --raw /~ 获取根下的接口，然后层层下探，直到找到需要的资源。
+
+## kubectl proxy
+k8s的接口需要证书访问，curl起来太不方便了，为此可以使用 ~kubectl proxy --port=8001~ 启动代理， curl访问代理即可 ~curl http://127.0.0.1:8080/~ 。
+
+## 使用token
+除了证书，使用token也是可以的，先要生成token，然后curl直接访问。
+#+BEGIN_SRC bash
+APISERVER=$(kubectl config view -o jsonpath='{.clusters[*].cluster.server}')
+TOKEN=$(kubectl get secrets -o jsonpath='{.items[?(@.type=="kubernetes.io/service-account-token")].data.token}' | base64 --decode)
+curl $APISERVER/ --header "Authorization: Bearer $TOKEN" --insecure
+#+END_SRC
+
+# 使用client-go/rest
+除了使用代理或token访问k8s资源，还可以借助client-go/rest，这种方式直接使用go client，更自然。
+
+## 访问标准资源
+我们先看看如何访问标准资源，首先获取config，然后构造客户端，最后借助客户端提供的接口就可以访问了。
+#+BEGIN_SRC go
+// 获取config
+config, err := clientcmd.BuildConfigFromFlags("", config)
+if err != nil {
+  return err
+}
+config.UserAgent = "data-link/agent"
+
+// 构造客户端，这个来自 k8s.io/client-go/kubernetes
+clientset, err := kubernetes.NewForConfig(config)
+if err != nil {
+  return err
+}
+
+// 使用客户端获取所有的pod
+pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
+#+END_SRC
+
+## 访问自定义资源
+标准资源和自定义资源，区别无非在于数据格式是否标准。因为标准，前者可用返回预定义的对象，后者只能返回json格式的[]byte。这里面底层通信是没有区别的。
+client-go/rest 正是使用的底层通讯库。
+
+#+BEGIN_SRC go
+// 获取config，这里需要配置下ContentConfig
+config, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath(file))
+if err != nil {
+  return err
+}
+
+config.UserAgent = "data-link/agent"
+
+// 配置ContentConfig
+// 标准资源可以传入不同的ContentConfig，解析出不同的预定义对象。
+// 我只想哄骗它，返回json
+jsonSerializerInfo := runtime.SerializerInfo {
+  MediaType:        "application",
+  MediaTypeType:    "json",
+  MediaTypeSubType: "UTF-8",
+  EncodesAsText:    true,
+}
+
+config.ContentConfig = rest.ContentConfig{
+  GroupVersion: &schema.GroupVersion{},
+  NegotiatedSerializer: runtime.NewSimpleNegotiatedSerializer(jsonSerializerInfo),
+}
+
+// 构造客户端，这个来自 k8s.io/client-go/rest
+client, err := rest.RESTClientFor(config)
+if err != nil {
+  return err
+}
+
+// 获取资源，uri是对应的资源
+request := client.Get().RequestURI(uri)
+result := request.Do(context.Background())
+if err := result.Error(); err != nil {
+  return err
+}
+
+// 这里raw就是http的响应body，json格式，到此，一切就好办了。
+if raw, err := result.Raw(); err != nil {
+  return err
+} else {
+  fmt.Println(string(raw))
+}
+#+END_SRC
