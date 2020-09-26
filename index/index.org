@@ -20,6 +20,8 @@
 
 [[blog:use_rest_access_k8s][使用rest访问k8s自定义资源]] <2020-09-06>
 
+[[blog:mysql-auto_increment-out-of-range][MySQL AUTO_INCREMEN 溢出及危险]] <2020-09-13>
+
 * 2019 己亥年
 --------------
 

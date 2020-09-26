@@ -1,0 +1,43 @@
+#+TITLE: MySQL =AUTO_INCREMENT= runs out of value
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+某天我们系统的一张表无法INSERT了，但是某些存在的数据一直在更新。我用tcpdump的确看到INSERT请求不断的发往MySQL，程序日志也没有记录INSERT错误。我当时就懵了，MySQL怕不是糊涂了吧！
+
+* SQL的失败情况
+~(webhook_alert_id, instance)~ 组成UNIQUE KEY。
+
+1. ~INSERT...ON DUPLICATE KEY UPDATE~ 成功了，但是SELECT刚才写入的值，不存在
+2. ~INSERT~ 失败，程序没用这个语句，所以没发现错误
+
+#+BEGIN_EXAMPLE
+mysql> INSERT INTO alertItemList(webhook_alert_id, instance, status) VALUES (10098161, "10.135.48.67:789", "resolved") ON DUPLICATE KEY UPDATE status = values(status);
+Query OK, 2 rows affected (0.00 sec)
+
+mysql> SELECT * FROM alertItemList WHERE webhook_alert_id = 10098161;
+Empty set (0.00 sec)
+
+mysql> INSERT INTO alertItemList(webhook_alert_id, instance, status) VALUES (10098161, "10.135.48.67:789", "resolved");
+ERROR 1062 (23000): Duplicate entry '4294967295' for key 'PRIMARY'
+#+END_EXAMPLE
+
+* 失败原因
+~4294967295~ 看到这个数字，失败原因就知道七七八八了， 肯定是整数溢出了。查看表结构， ~`id` int(10) unsigned NOT NULL AUTO_INCREMENT~ 果然如此。
+
+** 为什么INSERT报错是 ~Duplicate entry~
+翻看[[https://dev.mysql.com/doc/refman/8.0/en/innodb-auto-increment-handling.html][ MySQL文档]] 有这么一句：
+
+#+BEGIN_QUOTE
+When an =AUTO_INCREMENT= integer column runs out of values, a subsequent INSERT operation returns a duplicate-key error. This is general MySQL behavior.
+#+END_QUOTE
+
+把错误类型归结为1062，让 ~INSERT...ON DUPLICATE KEY UPDATE~ 变得危险起来
+
+** =AUTO_INCREMENT= 变的危险起来
+如上， ~INSERT...ON DUPLICATE KEY UPDATE~ 成功了，因为 ~PRIMARY KEY~ duplicate了，所以不是INSERT了，而是总是在UPDATE最后一行，这解释了为啥SELECT不出来。 使用 ~INSERT...ON DUPLICATE KEY UPDATE~ 的本意是unique key duplicate时更新，绝对不是 =AUTO_INCREMENT= out of values导致duplicate时更新。
+
+就这样，真正的INSERT丢失了，而最后一行的数据一直被意外的更新。
+
+* 如何避免
+1. 如果不确定， =AUTO_INCREMENT= 使用 BIGINT
+2. 监控 =AUTO_INCREMENT= 的位置，  ~SELECT id FROM t ORDER BY id DESC LIMIT 1~
