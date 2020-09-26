@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-12-02 Mon 15:57 -->
+<!-- 2020-09-26 Sat 08:19 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>golang 陷阱</title>
@@ -192,7 +192,7 @@
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2018 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -241,19 +241,19 @@ for the JavaScript code in this tag.
 昨天使用golang开发的一个基础组件，干挂了公司上百台机器，决定总结下golang的陷阱，持续更新中。
 </p>
 
-<div id="outline-container-org03d40a8" class="outline-2">
-<h2 id="org03d40a8"><span class="section-number-2">1</span> time.After 导致 OOM</h2>
+<div id="outline-container-org30a038b" class="outline-2">
+<h2 id="org30a038b"><span class="section-number-2">1</span> time.After 导致 OOM</h2>
 <div class="outline-text-2" id="text-1">
 <div class="org-src-container">
-<pre class="src src-go">wait := <span style="color: #ff00ff;">true</span>
-timeout := 600 * time.Second
+<pre class="src src-go"><span style="color: #eedd82;">wait</span> := <span style="color: #7fffd4;">true</span>
+<span style="color: #eedd82;">timeout</span> := 600 * time.Second
 
-<span style="color: #00ffff; font-weight: bold;">for</span> wait {
-  <span style="color: #00ffff; font-weight: bold;">select</span> {
-    <span style="color: #00ffff; font-weight: bold;">case</span> e := &lt;-watcher.<span style="color: #0000ff; font-weight: bold;">ResultChan</span>():
+<span style="color: #00ffff;">for</span> wait {
+  <span style="color: #00ffff;">select</span> {
+    <span style="color: #00ffff;">case</span> <span style="color: #eedd82;">e</span> := &lt;-watcher.<span style="color: #87cefa;">ResultChan</span>():
       timeout = 10 * time.Second
-    <span style="color: #00ffff; font-weight: bold;">case</span> &lt;-time.<span style="color: #0000ff; font-weight: bold;">After</span>(timeout):
-      wait = <span style="color: #ff00ff;">false</span>
+    <span style="color: #00ffff;">case</span> &lt;-time.<span style="color: #87cefa;">After</span>(timeout):
+      wait = <span style="color: #7fffd4;">false</span>
   }
 }
 </pre>
@@ -263,16 +263,16 @@ timeout := 600 * time.Second
 这里每次select都会创建一个timer，timer在到期前，不会被gc清理掉，如果频繁创建定时器，会导致OOM。修改代码为：
 </p>
 <div class="org-src-container">
-<pre class="src src-go">wait := <span style="color: #ff00ff;">true</span>
-timer := time.<span style="color: #0000ff; font-weight: bold;">NewTimer</span>(600 * time.Second)
-<span style="color: #00ffff; font-weight: bold;">defer</span> timer.<span style="color: #0000ff; font-weight: bold;">Stop</span>()
+<pre class="src src-go"><span style="color: #eedd82;">wait</span> := <span style="color: #7fffd4;">true</span>
+<span style="color: #eedd82;">timer</span> := time.<span style="color: #87cefa;">NewTimer</span>(600 * time.Second)
+<span style="color: #00ffff;">defer</span> timer.<span style="color: #87cefa;">Stop</span>()
 
-<span style="color: #00ffff; font-weight: bold;">for</span> wait {
-  <span style="color: #00ffff; font-weight: bold;">select</span> {
-    <span style="color: #00ffff; font-weight: bold;">case</span> e := &lt;-watcher.<span style="color: #0000ff; font-weight: bold;">ResultChan</span>():
-      timer.<span style="color: #0000ff; font-weight: bold;">Reset</span>(10 * time.Second)
-    <span style="color: #00ffff; font-weight: bold;">case</span> &lt;-timer.C:
-      wait = <span style="color: #ff00ff;">false</span>
+<span style="color: #00ffff;">for</span> wait {
+  <span style="color: #00ffff;">select</span> {
+    <span style="color: #00ffff;">case</span> <span style="color: #eedd82;">e</span> := &lt;-watcher.<span style="color: #87cefa;">ResultChan</span>():
+      timer.<span style="color: #87cefa;">Reset</span>(10 * time.Second)
+    <span style="color: #00ffff;">case</span> &lt;-timer.C:
+      wait = <span style="color: #7fffd4;">false</span>
   }
 }
 </pre>
@@ -280,27 +280,27 @@ timer := time.<span style="color: #0000ff; font-weight: bold;">NewTimer</span>(6
 </div>
 </div>
 
-<div id="outline-container-org30a7f11" class="outline-2">
-<h2 id="org30a7f11"><span class="section-number-2">2</span> 不检查 chan 返回状态导致死循环</h2>
+<div id="outline-container-org4642924" class="outline-2">
+<h2 id="org4642924"><span class="section-number-2">2</span> 不检查 chan 返回状态导致死循环</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 上面的代码使用一个timer解决了OOM的问题，但是没检查chan的返回值，可能导致CPU 100%。如果chan关闭，读取chan不会被阻塞。修改代码为：
 </p>
 <div class="org-src-container">
-<pre class="src src-go">wait := <span style="color: #ff00ff;">true</span>
-timer := time.<span style="color: #0000ff; font-weight: bold;">NewTimer</span>(600 * time.Second)
-<span style="color: #00ffff; font-weight: bold;">defer</span> timer.<span style="color: #0000ff; font-weight: bold;">Stop</span>()
+<pre class="src src-go"><span style="color: #eedd82;">wait</span> := <span style="color: #7fffd4;">true</span>
+<span style="color: #eedd82;">timer</span> := time.<span style="color: #87cefa;">NewTimer</span>(600 * time.Second)
+<span style="color: #00ffff;">defer</span> timer.<span style="color: #87cefa;">Stop</span>()
 
-<span style="color: #00ffff; font-weight: bold;">for</span> wait {
-  <span style="color: #00ffff; font-weight: bold;">select</span> {
-    <span style="color: #00ffff; font-weight: bold;">case</span> e, ok := &lt;-watcher.<span style="color: #0000ff; font-weight: bold;">ResultChan</span>():
-      <span style="color: #00ffff; font-weight: bold;">if</span> ok {
-        timer.<span style="color: #0000ff; font-weight: bold;">Reset</span>(10 * time.Second)
-      } <span style="color: #00ffff; font-weight: bold;">else</span> {
-        wait = <span style="color: #ff00ff;">false</span>
+<span style="color: #00ffff;">for</span> wait {
+  <span style="color: #00ffff;">select</span> {
+    <span style="color: #00ffff;">case</span> <span style="color: #eedd82;">e</span>, <span style="color: #eedd82;">ok</span> := &lt;-watcher.<span style="color: #87cefa;">ResultChan</span>():
+      <span style="color: #00ffff;">if</span> ok {
+        timer.<span style="color: #87cefa;">Reset</span>(10 * time.Second)
+      } <span style="color: #00ffff;">else</span> {
+        wait = <span style="color: #7fffd4;">false</span>
       }
-    <span style="color: #00ffff; font-weight: bold;">case</span> &lt;-timer.C:
-      wait = <span style="color: #ff00ff;">false</span>
+    <span style="color: #00ffff;">case</span> &lt;-timer.C:
+      wait = <span style="color: #7fffd4;">false</span>
   }
 }
 </pre>
@@ -308,8 +308,8 @@ timer := time.<span style="color: #0000ff; font-weight: bold;">NewTimer</span>(6
 </div>
 </div>
 
-<div id="outline-container-org26e3128" class="outline-2">
-<h2 id="org26e3128"><span class="section-number-2">3</span> break</h2>
+<div id="outline-container-orga0d0fe3" class="outline-2">
+<h2 id="orga0d0fe3"><span class="section-number-2">3</span> break</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 go的 <code>switch</code> 不同于c的，不会 <code>fallthrough</code> （除非使用 <code>fallthrough</code> 关键字）, 这导致 <code>break</code> 几乎不会用在 <code>switch</code> 中。这会给人以幻觉， <code>break</code> 总是用来中断 <code>for</code> 。事实上 <code>break</code> 是用来中断内层的 <code>for</code> <code>switch</code> <code>select</code> 的。
@@ -319,16 +319,16 @@ go的 <code>switch</code> 不同于c的，不会 <code>fallthrough</code> （除
 这段代码原是想退出for循环，但是 <code>break</code> 做不到，它只是退出 <code>select</code>
 </p>
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #00ffff; font-weight: bold;">for</span> {
-  <span style="color: #00ffff; font-weight: bold;">select</span> {
-    <span style="color: #00ffff; font-weight: bold;">case</span> m, ok := &lt;-queue
-      <span style="color: #00ffff; font-weight: bold;">if</span> ok {
-        fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(m)
-      } <span style="color: #00ffff; font-weight: bold;">else</span> {
-        <span style="color: #00ffff; font-weight: bold;">break</span>
+<pre class="src src-go"><span style="color: #00ffff;">for</span> {
+  <span style="color: #00ffff;">select</span> {
+    <span style="color: #00ffff;">case</span> <span style="color: #eedd82;">m</span>, <span style="color: #eedd82;">ok</span> := &lt;-queue
+      <span style="color: #00ffff;">if</span> ok {
+        fmt.<span style="color: #87cefa;">Println</span>(m)
+      } <span style="color: #00ffff;">else</span> {
+        <span style="color: #00ffff;">break</span>
       }
-    <span style="color: #00ffff; font-weight: bold;">case</span> &lt;-quit:
-      <span style="color: #00ffff; font-weight: bold;">break</span>
+    <span style="color: #00ffff;">case</span> &lt;-quit:
+      <span style="color: #00ffff;">break</span>
   }
 }
 </pre>
@@ -338,17 +338,17 @@ go的 <code>switch</code> 不同于c的，不会 <code>fallthrough</code> （除
 如果想退出 <code>for</code> 需要使用标签：
 </p>
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #ff00ff;">LOOP</span>:
-<span style="color: #00ffff; font-weight: bold;">for</span> {
-  <span style="color: #00ffff; font-weight: bold;">select</span> {
-    <span style="color: #00ffff; font-weight: bold;">case</span> m, ok := &lt;-queue
-      <span style="color: #00ffff; font-weight: bold;">if</span> ok {
-        fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(m)
-      } <span style="color: #00ffff; font-weight: bold;">else</span> {
-        <span style="color: #00ffff; font-weight: bold;">break</span> <span style="color: #ff00ff;">LOOP</span>
+<pre class="src src-go"><span style="color: #7fffd4;">LOOP</span>:
+<span style="color: #00ffff;">for</span> {
+  <span style="color: #00ffff;">select</span> {
+    <span style="color: #00ffff;">case</span> <span style="color: #eedd82;">m</span>, <span style="color: #eedd82;">ok</span> := &lt;-queue
+      <span style="color: #00ffff;">if</span> ok {
+        fmt.<span style="color: #87cefa;">Println</span>(m)
+      } <span style="color: #00ffff;">else</span> {
+        <span style="color: #00ffff;">break</span> <span style="color: #7fffd4;">LOOP</span>
       }
-    <span style="color: #00ffff; font-weight: bold;">case</span> &lt;-quit:
-      <span style="color: #00ffff; font-weight: bold;">break</span> <span style="color: #ff00ff;">LOOP</span>
+    <span style="color: #00ffff;">case</span> &lt;-quit:
+      <span style="color: #00ffff;">break</span> <span style="color: #7fffd4;">LOOP</span>
   }
 }
 </pre>
@@ -356,57 +356,57 @@ go的 <code>switch</code> 不同于c的，不会 <code>fallthrough</code> （除
 </div>
 </div>
 
-<div id="outline-container-orge5b78c6" class="outline-2">
-<h2 id="orge5b78c6"><span class="section-number-2">4</span> for x := range</h2>
+<div id="outline-container-orge3133d8" class="outline-2">
+<h2 id="orge3133d8"><span class="section-number-2">4</span> for x := range</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 这里x只被定义了一次，如果在for中打印x的地址，总是不变的。x总是range中元素的一个副本。
 </p>
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #00ffff; font-weight: bold;">for</span> x := <span style="color: #00ffff; font-weight: bold;">range</span> []<span style="color: #00ff00;">int</span>{1, 2, 3} {
-  fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(&amp;x)
+<pre class="src src-go"><span style="color: #00ffff;">for</span> <span style="color: #eedd82;">x</span> := <span style="color: #00ffff;">range</span> []<span style="color: #98fb98;">int</span>{1, 2, 3} {
+  fmt.<span style="color: #87cefa;">Println</span>(&amp;x)
 }
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org540a6f1" class="outline-3">
-<h3 id="org540a6f1"><span class="section-number-3">4.1</span> 不要保存x的地址</h3>
+<div id="outline-container-org7db66eb" class="outline-3">
+<h3 id="org7db66eb"><span class="section-number-3">4.1</span> 不要保存x的地址</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 因为x的值仅有一份，保存x的地址，事实上总是保存的range的最后一个值。
 </p>
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #00ffff; font-weight: bold;">var</span> xptr []*<span style="color: #00ff00;">int</span>
-<span style="color: #00ffff; font-weight: bold;">for</span> _, x := <span style="color: #00ffff; font-weight: bold;">range</span> []<span style="color: #00ff00;">int</span>{1, 2, 3} {
-  xptr = <span style="color: #0000ff; font-weight: bold;">append</span>(xptr, &amp;x)
+<pre class="src src-go"><span style="color: #00ffff;">var</span> <span style="color: #eedd82;">xptr</span> []*<span style="color: #98fb98;">int</span>
+<span style="color: #00ffff;">for</span> <span style="color: #eedd82;">_</span>, <span style="color: #eedd82;">x</span> := <span style="color: #00ffff;">range</span> []<span style="color: #98fb98;">int</span>{1, 2, 3} {
+  xptr = <span style="color: #b0c4de;">append</span>(xptr, &amp;x)
 }
 
-<span style="color: #00ffff; font-weight: bold;">for</span> _, x := <span style="color: #00ffff; font-weight: bold;">range</span> xptr {
-  fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(*x)  <span style="color: #ffff00;">// </span><span style="color: #ffff00;">&#24635;&#26159;&#25171;&#21360;3</span>
+<span style="color: #00ffff;">for</span> <span style="color: #eedd82;">_</span>, <span style="color: #eedd82;">x</span> := <span style="color: #00ffff;">range</span> xptr {
+  fmt.<span style="color: #87cefa;">Println</span>(*x)  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#24635;&#26159;&#25171;&#21360;3</span>
 }
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org2361f71" class="outline-3">
-<h3 id="org2361f71"><span class="section-number-3">4.2</span> 不要在routine中使用x，要传x的副本（指针当然也不行）</h3>
+<div id="outline-container-orgfa0087d" class="outline-3">
+<h3 id="orgfa0087d"><span class="section-number-3">4.2</span> 不要在routine中使用x，要传x的副本（指针当然也不行）</h3>
 <div class="outline-text-3" id="text-4-2">
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #00ffff; font-weight: bold;">var</span> wg sync.WaitGroup
-<span style="color: #00ffff; font-weight: bold;">for</span> _, x := <span style="color: #00ffff; font-weight: bold;">range</span> []<span style="color: #00ff00;">int</span>{1, 2, 3} {
-  wg.<span style="color: #0000ff; font-weight: bold;">Add</span>(2)
-  <span style="color: #00ffff; font-weight: bold;">go</span> <span style="color: #00ffff; font-weight: bold;">func</span>() {
-    fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(<span style="color: #00ff00;">"E"</span>, x) <span style="color: #ffff00;">// </span><span style="color: #ffff00;">&#33021;&#25171;&#20986;&#20160;&#20040;&#19981;&#30830;&#23450;&#65292;&#24182;&#19988;&#26377;&#32447;&#31243;&#23433;&#20840;&#38382;&#39064;</span>
-    wg.<span style="color: #0000ff; font-weight: bold;">Done</span>()
+<pre class="src src-go"><span style="color: #00ffff;">var</span> <span style="color: #eedd82;">wg</span> <span style="color: #98fb98;">sync.WaitGroup</span>
+<span style="color: #00ffff;">for</span> <span style="color: #eedd82;">_</span>, <span style="color: #eedd82;">x</span> := <span style="color: #00ffff;">range</span> []<span style="color: #98fb98;">int</span>{1, 2, 3} {
+  wg.<span style="color: #87cefa;">Add</span>(2)
+  <span style="color: #00ffff;">go</span> <span style="color: #00ffff;">func</span>() {
+    fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"E"</span>, x) <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#33021;&#25171;&#20986;&#20160;&#20040;&#19981;&#30830;&#23450;&#65292;&#24182;&#19988;&#26377;&#32447;&#31243;&#23433;&#20840;&#38382;&#39064;</span>
+    wg.<span style="color: #87cefa;">Done</span>()
   }()
-  <span style="color: #00ffff; font-weight: bold;">go</span> <span style="color: #00ffff; font-weight: bold;">func</span>(x <span style="color: #00ff00;">int</span>) {
-    fmt.<span style="color: #0000ff; font-weight: bold;">Println</span>(<span style="color: #00ff00;">"R"</span>, x)  <span style="color: #ffff00;">// </span><span style="color: #ffff00;">&#21487;&#20197;&#25171;&#21360;1,2,3&#19977;&#20010;&#25968;</span>
-    wg.<span style="color: #0000ff; font-weight: bold;">Done</span>()
+  <span style="color: #00ffff;">go</span> <span style="color: #00ffff;">func</span>(<span style="color: #eedd82;">x</span> <span style="color: #98fb98;">int</span>) {
+    fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"R"</span>, x)  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#21487;&#20197;&#25171;&#21360;1,2,3&#19977;&#20010;&#25968;</span>
+    wg.<span style="color: #87cefa;">Done</span>()
   }(x)
 }
-wg.<span style="color: #0000ff; font-weight: bold;">Wait</span>()
+wg.<span style="color: #87cefa;">Wait</span>()
 </pre>
 </div>
 </div>
@@ -417,11 +417,11 @@ wg.<span style="color: #0000ff; font-weight: bold;">Wait</span>()
 <h2 id="orgc58ffbb"><span class="section-number-2">5</span> map使用前必须初始化</h2>
 <div class="outline-text-2" id="text-5">
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #00ffff; font-weight: bold;">var</span> v []<span style="color: #00ff00;">int</span>
-<span style="color: #00ffff; font-weight: bold;">var</span> m <span style="color: #00ffff; font-weight: bold;">map</span>[<span style="color: #00ff00;">string</span>]<span style="color: #00ff00;">int</span>
+<pre class="src src-go"><span style="color: #00ffff;">var</span> <span style="color: #eedd82;">v</span> []<span style="color: #98fb98;">int</span>
+<span style="color: #00ffff;">var</span> <span style="color: #eedd82;">m</span> <span style="color: #00ffff;">map</span>[<span style="color: #98fb98;">string</span>]<span style="color: #98fb98;">int</span>
 
-v = <span style="color: #0000ff; font-weight: bold;">append</span>(v, 1)
-<span style="color: #ffff00;">// </span><span style="color: #ffff00;">m["a"] = 1 panic</span>
+v = <span style="color: #b0c4de;">append</span>(v, 1)
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">m["a"] = 1 panic</span>
 </pre>
 </div>
 </div>
@@ -431,12 +431,12 @@ v = <span style="color: #0000ff; font-weight: bold;">append</span>(v, 1)
 <h2 id="org36ca276"><span class="section-number-2">6</span> http.Transport 是有连接池的</h2>
 <div class="outline-text-2" id="text-6">
 <div class="org-src-container">
-<pre class="src src-go">client := http.<span style="color: #00ff00;">Client</span>{
-  <span style="color: #ff00ff;">Transport</span>: &amp;http.<span style="color: #00ff00;">Transport</span>{
-    <span style="color: #ff00ff;">TLSClientConfig</span>: &amp;tls.<span style="color: #00ff00;">Config</span>{InsecureSkipVerify: <span style="color: #ff00ff;">true</span>},
+<pre class="src src-go"><span style="color: #eedd82;">client</span> := <span style="color: #98fb98;">http.Client</span>{
+  <span style="color: #7fffd4;">Transport</span>: &amp;<span style="color: #98fb98;">http.Transport</span>{
+    <span style="color: #7fffd4;">TLSClientConfig</span>: &amp;<span style="color: #98fb98;">tls.Config</span>{InsecureSkipVerify: <span style="color: #7fffd4;">true</span>},
   },
 }
-resp, err := client.<span style="color: #0000ff; font-weight: bold;">Get</span>(endpoint)
+<span style="color: #eedd82;">resp</span>, <span style="color: #eedd82;">err</span> := client.<span style="color: #87cefa;">Get</span>(endpoint)
 </pre>
 </div>
 
@@ -454,10 +454,185 @@ resp, err := client.<span style="color: #0000ff; font-weight: bold;">Get</span>(
 </div>
 </div>
 </div>
+
+<div id="outline-container-org3a90ff8" class="outline-2">
+<h2 id="org3a90ff8"><span class="section-number-2">7</span> interface{} 是否为 nil</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+<code>interface{}</code> 一经和类型绑定，就不再为nil，哪怕类型的值为nil。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #00ffff;">func</span> <span style="color: #87cefa;">main</span>() {
+  <span style="color: #00ffff;">var</span> <span style="color: #eedd82;">inter</span> <span style="color: #00ffff;">interface</span>{}
+  fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"inter == nil"</span>, inter == <span style="color: #7fffd4;">nil</span>)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">inter == nil true</span>
+
+  inter = <span style="color: #7fffd4;">nil</span>  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">nil &#27809;&#26377;&#31867;&#22411;&#65292;&#25152;&#20197;inter&#36824;&#27809;&#26377;&#21644;&#31867;&#22411;&#32465;&#23450;</span>
+  fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"inter == nil"</span>, inter == <span style="color: #7fffd4;">nil</span>)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">inter == nil true</span>
+
+  <span style="color: #00ffff;">var</span> <span style="color: #eedd82;">intp</span> *<span style="color: #98fb98;">int</span>
+  fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"intp == nil"</span>, intp == <span style="color: #7fffd4;">nil</span>)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">intp == nil true</span>
+
+  inter = intp <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#21644;&#31867;&#22411;&#32465;&#23450;&#65292;&#19981;&#20877;&#20026;nil</span>
+  fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"inter == nil"</span>, inter == <span style="color: #7fffd4;">nil</span>)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">inter == nil false</span>
+}
+</pre>
+</div>
+
+<p>
+如果通过函数返回实现了 <code>interface{}</code> 的对象，并且可能为nil，最好返回 <code>interface{}</code> 类型，否则永不为nil
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #00ffff;">type</span> <span style="color: #98fb98;">Foo</span> <span style="color: #00ffff;">interface</span> {
+  <span style="color: #87cefa;">Hello</span>()
+}
+
+<span style="color: #00ffff;">type</span> <span style="color: #98fb98;">FooEn</span> <span style="color: #00ffff;">struct</span> {}
+<span style="color: #00ffff;">func</span> (<span style="color: #eedd82;">this</span> *<span style="color: #98fb98;">FooEn</span>) <span style="color: #87cefa;">Hello</span>() {
+  fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"hello"</span>)
+}
+
+<span style="color: #00ffff;">func</span> <span style="color: #87cefa;">newFooEn</span>(<span style="color: #eedd82;">duty</span> <span style="color: #98fb98;">bool</span>) *<span style="color: #98fb98;">FooEn</span> {
+  <span style="color: #00ffff;">if</span> duty {
+    <span style="color: #00ffff;">return</span> &amp;<span style="color: #98fb98;">FooEn</span>{}
+  } <span style="color: #00ffff;">else</span> {
+    <span style="color: #00ffff;">return</span> <span style="color: #7fffd4;">nil</span>
+  }
+}
+
+<span style="color: #00ffff;">func</span> <span style="color: #87cefa;">NewFooEn</span>(<span style="color: #eedd82;">duty</span> <span style="color: #98fb98;">bool</span>) <span style="color: #98fb98;">Foo</span> {
+  <span style="color: #00ffff;">if</span> <span style="color: #eedd82;">f</span> := <span style="color: #87cefa;">newFooEn</span>(duty); f != <span style="color: #7fffd4;">nil</span> {
+    <span style="color: #00ffff;">return</span> f
+  } <span style="color: #00ffff;">else</span> {
+    <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#27492;&#22788;&#34429;&#28982;f&#20063;&#26159;nil&#65292;&#20294;&#36820;&#22238;f&#21644;&#36820;&#22238;nil&#26377;&#21306;&#21035;</span>
+    <span style="color: #00ffff;">return</span> <span style="color: #7fffd4;">nil</span>
+  }
+}
+
+<span style="color: #00ffff;">func</span> <span style="color: #87cefa;">main</span>() {
+  <span style="color: #00ffff;">var</span> <span style="color: #eedd82;">foo</span> <span style="color: #98fb98;">Foo</span>
+
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">newFooEn&#36820;&#22238;FooEn&#65292;&#24635;&#26159;&#21457;&#29983;&#31867;&#22411;&#32465;&#23450;&#65292;&#27704;&#19981;&#20026;nil</span>
+  foo = <span style="color: #87cefa;">newFooEn</span>(<span style="color: #7fffd4;">false</span>)
+  fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"foo == nil"</span>, foo == <span style="color: #7fffd4;">nil</span>)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">foo == nil false</span>
+
+
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">NewFooEn&#36820;&#22238;Foo&#65292;&#32465;&#23450;&#19982;&#21542;&#30001;NewFooEn&#20989;&#25968;&#20915;&#23450;</span>
+  foo = <span style="color: #87cefa;">NewFooEn</span>(<span style="color: #7fffd4;">false</span>)
+  fmt.<span style="color: #87cefa;">Println</span>(<span style="color: #ffa07a;">"foo == nil"</span>, foo == <span style="color: #7fffd4;">nil</span>)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">foo == nil true</span>
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgae291e2" class="outline-2">
+<h2 id="orgae291e2"><span class="section-number-2">8</span> 函数参数用于传值，除非值自身是引用</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+因为map，slice，pointer，chan自身是引用，所以也可以认为这几种类型传引用，和C一样，传引用可用改变引用的内容，但不能改变引用自身。
+注意，数组不是引用，数组是传值的
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #00ffff;">func</span> <span style="color: #87cefa;">ref</span>(<span style="color: #eedd82;">m</span> <span style="color: #00ffff;">map</span>[<span style="color: #98fb98;">string</span>]<span style="color: #98fb98;">bool</span>, <span style="color: #eedd82;">sl</span> []<span style="color: #98fb98;">string</span>, <span style="color: #eedd82;">array</span> [1]<span style="color: #98fb98;">string</span>) {
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#25913;&#21464;&#24341;&#29992;&#30340;&#20869;&#23481;</span>
+  m[<span style="color: #ffa07a;">"hello"</span>] = <span style="color: #7fffd4;">true</span>
+  sl[0] = <span style="color: #ffa07a;">"hello"</span>
+
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#25968;&#32452;&#20256;&#20540;&#65292;&#22823;&#25968;&#32452;&#24615;&#33021;&#20302;</span>
+  array[0] = <span style="color: #ffa07a;">"hello"</span>
+
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#25913;&#21464;&#24341;&#29992;&#33258;&#36523;</span>
+  m = <span style="color: #00ffff;">map</span>[<span style="color: #98fb98;">string</span>]<span style="color: #98fb98;">bool</span>{<span style="color: #ffa07a;">"world"</span>:<span style="color: #7fffd4;">true</span>}
+  sl = <span style="color: #b0c4de;">append</span>(sl, <span style="color: #ffa07a;">"world"</span>)
+}
+
+<span style="color: #00ffff;">func</span> <span style="color: #87cefa;">main</span>() {
+  <span style="color: #eedd82;">m</span> := <span style="color: #00ffff;">map</span>[<span style="color: #98fb98;">string</span>]<span style="color: #98fb98;">bool</span>{}
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">sl&#26159;&#38745;&#24577;&#30340;&#65292;&#24517;&#39035;&#26377;&#20869;&#23481;</span>
+  <span style="color: #eedd82;">sl</span> := <span style="color: #b0c4de;">make</span>([]<span style="color: #98fb98;">string</span>, 1)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#25968;&#32452;&#24517;&#39035;&#26174;&#31034;&#25351;&#23450;&#22823;&#23567;</span>
+  <span style="color: #eedd82;">array</span> := [1]<span style="color: #98fb98;">string</span>{<span style="color: #ffa07a;">"world"</span>}
+
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#25968;&#32452;&#30340;&#20540;&#27809;&#26377;&#25913;&#21464;</span>
+  <span style="color: #87cefa;">ref</span>(m, sl, array)
+  fmt.<span style="color: #87cefa;">Println</span>(m, sl, array)
+  <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">map[hello:true] [hello] [world]</span>
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga34c567" class="outline-2">
+<h2 id="orga34c567"><span class="section-number-2">9</span> 数组和slice</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+只有类型无法创建数组，必须有大小才行，并且数组大小无法改变。有类型就可以创建slice，并且大小可变。
+slice 可以通过make，引用数组等方式创建，但数组只有一种创建方式。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #eedd82;">slice</span> := []<span style="color: #98fb98;">string</span>{<span style="color: #ffa07a;">"hello"</span>}
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#21019;&#24314;&#26102;&#26174;&#31034;&#25351;&#23450;&#22823;&#23567;&#65292;&#21542;&#21017;&#20026;slice</span>
+<span style="color: #eedd82;">array</span> := [1]<span style="color: #98fb98;">string</span>{<span style="color: #ffa07a;">"world"</span>}
+
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#36825;&#26159;&#20004;&#31181;&#23436;&#20840;&#19981;&#21516;&#30340;&#31867;&#22411;&#65292;&#26080;&#27861;&#20114;&#30456;&#36171;&#20540;</span>
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">array = slice</span>
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">slice = array[]</span>
+
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#36171;&#20540;&#21482;&#33021;&#36890;&#36807;&#20989;&#25968;&#65292;slice&#21487;&#20197;&#24341;&#29992;&#25968;&#32452;</span>
+<span style="color: #b0c4de;">copy</span>(array[:], slice)
+slice = array[0:]
+</pre>
+</div>
+
+<p>
+必须牢记slice是引用，append操作可能会重新分配内存，和复制数据。 <code>a=append(b, 1)</code> 这种操作可能导致令人迷惑的行为。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #eedd82;">path</span> := []<span style="color: #98fb98;">string</span>{<span style="color: #ffa07a;">"1"</span>, <span style="color: #ffa07a;">"2"</span>, <span style="color: #ffa07a;">"3"</span>, <span style="color: #ffa07a;">"4"</span>, <span style="color: #ffa07a;">"5"</span>, <span style="color: #ffa07a;">"6"</span>, <span style="color: #ffa07a;">"7"</span>}
+<span style="color: #eedd82;">x1</span> := <span style="color: #b0c4de;">append</span>(path, <span style="color: #ffa07a;">"1"</span>)
+<span style="color: #eedd82;">x2</span> := <span style="color: #b0c4de;">append</span>(path, <span style="color: #ffa07a;">"2"</span>)
+<span style="color: #eedd82;">x3</span> := <span style="color: #b0c4de;">append</span>(path, <span style="color: #ffa07a;">"3"</span>)
+fmt.<span style="color: #87cefa;">Println</span>(x1, x2, x3)
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">[1 2 3 4 5 6 7 1] [1 2 3 4 5 6 7 2] [1 2 3 4 5 6 7 3]</span>
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">append &#25805;&#20316;&#35302;&#21457;&#20102;&#20869;&#23384;&#20998;&#37197;&#65292;x1, x2, x3 &#25351;&#21521;&#19981;&#21516;&#30340;&#20869;&#23384;&#21306;&#22495;&#65292;&#20540;&#19981;&#21516;</span>
+
+path = <span style="color: #b0c4de;">append</span>(path, <span style="color: #ffa07a;">"X"</span>)
+x1 = <span style="color: #b0c4de;">append</span>(path, <span style="color: #ffa07a;">"1"</span>)
+x2 = <span style="color: #b0c4de;">append</span>(path, <span style="color: #ffa07a;">"2"</span>)
+x3 = <span style="color: #b0c4de;">append</span>(path, <span style="color: #ffa07a;">"3"</span>)
+fmt.<span style="color: #87cefa;">Println</span>(x1, x2, x3)
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">[1 2 3 4 5 6 7 X 3] [1 2 3 4 5 6 7 X 3] [1 2 3 4 5 6 7 X 3]</span>
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">append &#25805;&#20316;&#27809;&#26377;&#35302;&#21457;&#20869;&#23384;&#20998;&#37197;&#65292;x1, x2, x3 &#25351;&#21521;&#30456;&#21516;&#20869;&#23384;&#21306;&#22495;&#65292;&#20540;&#30456;&#21516;</span>
+
+x1 = <span style="color: #b0c4de;">append</span>([]<span style="color: #98fb98;">string</span>{}, path...)
+x1 = <span style="color: #b0c4de;">append</span>(x1, <span style="color: #ffa07a;">"1"</span>)
+x2 = <span style="color: #b0c4de;">append</span>([]<span style="color: #98fb98;">string</span>{}, path...)
+x2 = <span style="color: #b0c4de;">append</span>(x2, <span style="color: #ffa07a;">"2"</span>)
+x3 = <span style="color: #b0c4de;">append</span>([]<span style="color: #98fb98;">string</span>{}, path...)
+x3 = <span style="color: #b0c4de;">append</span>(x3, <span style="color: #ffa07a;">"3"</span>)
+fmt.<span style="color: #87cefa;">Println</span>(x1, x2, x3)
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">&#20808;&#22797;&#21046;&#65292;&#28982;&#21518;append&#65292;x1,x2,x3&#23436;&#20840;&#26080;&#20851;&#65292;&#20351;&#29992;make,copy,&#28982;&#21518;append&#65292;&#25928;&#29575;&#21487;&#33021;&#26356;&#39640;</span>
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">[1 2 3 4 5 6 7 X 1] [1 2 3 4 5 6 7 X 2] [1 2 3 4 5 6 7 X 3]</span>
+</pre>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: root</p>
-<p class="date">Created: 2019-12-02 Mon 15:57</p>
+<p class="date">Created: 2020-09-26 Sat 08:19</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

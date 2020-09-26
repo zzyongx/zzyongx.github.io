@@ -153,3 +153,151 @@ resp, err := client.Get(endpoint)
 
 ** 小心对待有连接池的对象
 不止 =http.Transport= ，很多对象都内置连接池，例如： =sql.DB= 。小心关闭它们，或者使用单例。
+
+* interface{} 是否为 nil
+=interface{}= 一经和类型绑定，就不再为nil，哪怕类型的值为nil。
+
+#+BEGIN_SRC go
+func main() {
+	var inter interface{}
+	fmt.Println("inter == nil", inter == nil)
+  // inter == nil true
+
+	inter = nil  // nil 没有类型，所以inter还没有和类型绑定
+	fmt.Println("inter == nil", inter == nil)
+  // inter == nil true
+
+	var intp *int
+	fmt.Println("intp == nil", intp == nil)
+  // intp == nil true
+
+	inter = intp // 和类型绑定，不再为nil
+	fmt.Println("inter == nil", inter == nil)
+  // inter == nil false
+}
+#+END_SRC
+
+如果通过函数返回实现了 =interface{}= 的对象，并且可能为nil，最好返回 =interface{}= 类型，否则永不为nil
+
+#+BEGIN_SRC go
+type Foo interface {
+	Hello()
+}
+
+type FooEn struct {}
+func (this *FooEn) Hello() {
+	fmt.Println("hello")
+}
+
+func newFooEn(duty bool) *FooEn {
+  if duty {
+    return &FooEn{}
+  } else {
+    return nil
+  }
+}
+
+func NewFooEn(duty bool) Foo {
+  if f := newFooEn(duty); f != nil {
+    return f
+  } else {
+    // 此处虽然f也是nil，但返回f和返回nil有区别
+    return nil
+  }
+}
+
+func main() {
+  var foo Foo
+
+  // newFooEn返回FooEn，总是发生类型绑定，永不为nil
+	foo = newFooEn(false)
+	fmt.Println("foo == nil", foo == nil)
+  // foo == nil false
+
+
+  // NewFooEn返回Foo，绑定与否由NewFooEn函数决定
+  foo = NewFooEn(false)
+	fmt.Println("foo == nil", foo == nil)
+  // foo == nil true
+}
+#+END_SRC
+
+* 函数参数用于传值，除非值自身是引用
+因为map，slice，pointer，chan自身是引用，所以也可以认为这几种类型传引用，和C一样，传引用可用改变引用的内容，但不能改变引用自身。
+注意，数组不是引用，数组是传值的
+
+#+BEGIN_SRC go
+func ref(m map[string]bool, sl []string, array [1]string) {
+  // 改变引用的内容
+  m["hello"] = true
+  sl[0] = "hello"
+
+  // 数组传值，大数组性能低
+  array[0] = "hello"
+
+  // 改变引用自身
+  m = map[string]bool{"world":true}
+  sl = append(sl, "world")
+}
+
+func main() {
+  m := map[string]bool{}
+  // sl是静态的，必须有内容
+  sl := make([]string, 1)
+  // 数组必须显示指定大小
+  array := [1]string{"world"}
+
+  // 数组的值没有改变
+  ref(m, sl, array)
+  fmt.Println(m, sl, array)
+  // map[hello:true] [hello] [world]
+}
+#+END_SRC
+
+* 数组和slice
+只有类型无法创建数组，必须有大小才行，并且数组大小无法改变。有类型就可以创建slice，并且大小可变。
+slice 可以通过make，引用数组等方式创建，但数组只有一种创建方式。
+
+#+BEGIN_SRC go
+slice := []string{"hello"}
+// 创建时显示指定大小，否则为slice
+array := [1]string{"world"}
+
+// 这是两种完全不同的类型，无法互相赋值
+// array = slice
+// slice = array[]
+
+// 赋值只能通过函数，slice可以引用数组
+copy(array[:], slice)
+slice = array[0:]
+#+END_SRC
+
+必须牢记slice是引用，append操作可能会重新分配内存，和复制数据。 ~a=append(b, 1)~ 这种操作可能导致令人迷惑的行为。
+
+#+BEGIN_SRC go
+path := []string{"1", "2", "3", "4", "5", "6", "7"}
+x1 := append(path, "1")
+x2 := append(path, "2")
+x3 := append(path, "3")
+fmt.Println(x1, x2, x3)
+// [1 2 3 4 5 6 7 1] [1 2 3 4 5 6 7 2] [1 2 3 4 5 6 7 3]
+// append 操作触发了内存分配，x1, x2, x3 指向不同的内存区域，值不同
+
+path = append(path, "X")
+x1 = append(path, "1")
+x2 = append(path, "2")
+x3 = append(path, "3")
+fmt.Println(x1, x2, x3)
+// [1 2 3 4 5 6 7 X 3] [1 2 3 4 5 6 7 X 3] [1 2 3 4 5 6 7 X 3]
+// append 操作没有触发内存分配，x1, x2, x3 指向相同内存区域，值相同
+
+x1 = append([]string{}, path...)
+x1 = append(x1, "1")
+x2 = append([]string{}, path...)
+x2 = append(x2, "2")
+x3 = append([]string{}, path...)
+x3 = append(x3, "3")
+fmt.Println(x1, x2, x3)
+// 先复制，然后append，x1,x2,x3完全无关，使用make,copy,然后append，效率可能更高
+// [1 2 3 4 5 6 7 X 1] [1 2 3 4 5 6 7 X 2] [1 2 3 4 5 6 7 X 3]
+#+END_SRC
