@@ -1,0 +1,25 @@
+#+TITLE: 有趣的bash之字符串操作
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+HTML_LINK_HOME: index.html
+#+HTML_LINK_UP:  powerful-bash.html
+#+KEYWORDS: bash cut
+
+* cut
+cut 用于切割字符串，并提取其中的某个或某些字段
+- ~echo "x y" | cut -d' ' -f1~ 提取第一个字段 =x=
+- ~echo "https://zzyongx.github.io/blogs.html" | cut -d'/' -f3-~ 提取第3个字段直到结尾 =zzyongx.github.io/blogs.html=
+
+** cut 的陷阱
+cut是有陷阱的， ~echo "x:y" | cut -d':' -f2~ 得到 =y= ，但是 ~echo "x" | cut -d':' -f2~ 却会得到 =x= ，本来期望是空，因为没有第二个字段。
+此时需要 =-s= 参数忽略不存在分割符的行，而不是原样打印整行  =echo "x" | cut -s -d':' -f2= 。
+
+奇妙的是 ~echo "x:y" | cut -d':' -f3~ 却会如期得到空。
+
+* tr
+tr 用于字符转换，通常是一对一的
+- =echo "x y" | tr ' ' ':'= 得到 =x:y=
+- =echo "x  y" | tr -s ' ' ':'= 得到 =x::y=
+- 添加=-s= =echo "x  y" | tr -s ' ' ':'= 得到 =x:y=
+- =echo x$'\n'y | tr -d -c [:print:]= 删除不可打印字符，得到 =xy=
+- =echo "x  y" | tr -s ' ' | cut -d' ' -f2= 借助tr删除重复的分割符后再切割，得到 =y=

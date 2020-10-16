@@ -1,0 +1,11 @@
+#+TITLE: 强大的bash
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+KEYWORDS: bash
+#+HTML_LINK_HOME: index.html
+
+复用是程序设计之精髓，编程引用现成的库是复用，组合现成的命令无疑是更高级的复用，因为需要的代码更少。而bash正是复用现成命令的语言。
+但是我不建议把bash当成常规编程语言，毕竟bash在细节上表达能力有限，程序写太复杂，晦涩难懂。作为胶水语言复用现成的命令是比较合适。
+
+- [[blog:bash-file][文件操作]] 描述了常用的文件/文本操作
+- [[blog:bash-string][字符串操作]] 描述了常用的字符串操作

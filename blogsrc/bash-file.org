@@ -1,0 +1,16 @@
+#+TITLE: 有趣的bash之文件操作
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+HTML_LINK_HOME: index.html
+#+HTML_LINK_UP:  powerful-bash.html
+#+KEYWORDS: bash 文件
+
+* 在文件起始和结尾处添加字符串
+方法很多，无疑子shell是最直接的。例如：把单个的json对象文件，拼接成大的json数组文件。
+ ~(echo -n '['; find ./data -name "*.json" | xargs cat | sed -E 's|\}\{|\},\{|'; echo ']') > one.json~
+
+* 逐行拼接文件
+假设 url.txt 是个一行一个url的文件，我们需要把它转成一行一个url外加一个目标下载地址的文件，例如： ~https://zzyongx.github.io/blogs/index.html~ 转成
+ ~https://zzyongx.github.io/blogs/index.html zzyongx.github.io/blogs_index.html~
+无疑使用bash逐行处理是可行的，但是性能太低，并且很冗余。利用paste逐行拼接的能力，只需一行且性能优良。
+~paste -d' '/ url.txt <(cat url.txt | cut -d'/' -f3) <(cat url.txt | cut -d'/' -f4- | tr '/' '_')~  =-d= 参数指定了拼接分隔符。
