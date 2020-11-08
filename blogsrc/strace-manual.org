@@ -1,0 +1,45 @@
+#+TITLE: strace 手册
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: ^:nil
+#+OPTIONS: toc:nil
+
+如果能了解程序的每行代码是如何执行的，程序在运行时便了无秘密可言，是谓程序的可观察性。在我09年最早接触strace的时候，可观察性的概念还没有流行起来。使用至今，虽然systemtap，bpf等先进工具不断涌现，但它仍是首选，因为太简单易用。
+
+strace是个诊断，教学，调试工具，最简单的用法是通过strace启动程序 ~strace command args~ ，如果程序已启动，可以 ~strace -p <pid>~ 。strace 拦截并记录程序发出的 *系统调用* 以及程序收到的 *信号* ，打印每个系统调用的名称，参数，返回值到标准错误。
+
+* strace 的用途
+1. 无源码即可了解程序的机制。例如，通过观察 ~strace ip addr~ 使用了哪些系统调用，可以了解如何编程获取机器IP。
+2. 正常和异常对比。例如，通过对比 ~strace cp data data.1~ 和 ~strace cp -a data data.2~ 可以看看为啥有时 ~cp -a~ 才能正常工作。
+3. 性能问题。例如，通过观察关键系统调用的时间间隔，是否符合预期，可以判断性能问题，锁是不是太大了，网络是不是太慢等。
+4. 了解程序正在干啥。有时候程序既不退出，也不打印输出，完全不知道它在忙啥，可以用strace看看。
+
+** strace 的机制
+程序的运行离不开操作系统，而系统调用正是操作系统和应用的边界，通过观察边界的行为，进而了解程序的行为。
+
+* strace 的输出
+** 输出格式
+每行包含了系统调用名称，被括号包围的参数，以及返回值，例如strace ~cat /dev/null~ 的输出包括 ~open("/dev/null", O_RDONLY) = 3~ 。当错误发生时（通常返回-1），会包含额外的错误码和错误字符串，例如 ~open("/notexist", O_RDONLY) = -1 ENOENT (No such file or directory)~
+
+收到信号会打印信号名称，以及解码后的siginfo结构，例如 ~sleep 666~ 被 SIGINT 中断后，打印：
+#+BEGIN_EXAMPLE
+sigsuspend([] <unfinished ...>
+--- SIGINT {si_signo=SIGINT, si_code=SI_USER, si_pid=...} ---
++++ killed by SIGINT +++
+#+END_EXAMPLE
+
+
+** 未完成的系统调用
+如果系统调用正在执行，同时另一个系统调用被其它线程调用（strace 可以同时跟踪多个线程），strace会保留调用的顺序，同时标记该系统调用为 *unfinished* ，当该系统调用返回时，会被标记为 *resumed* 。
+#+BEGIN_EXAMPLE
+[pid 28772] select(4, [3], NULL, NULL, NULL <unfinished ...>
+[pid 28779] clock_gettime(CLOCK_REALTIME, {1130322148, 939977000}) = 0
+[pid 28772] <... select resumed>   = 1 (in [3])
+#+END_EXAMPLE
+
+可重启系统调用被信号中断后，打印略有不同，因为操作系统会立即重启该系统调用。
+#+BEGIN_EXAMPLE
+read(0, 0x7ffff72cf5cf, 1)       = ? ERESTARTSYS (To be restarted)
+--- SIGALARM ... ---
+rt_sigreturn(0xe)                = 0
+read(0, "", 1)                   = 0
+#+END_EXAMPLE
