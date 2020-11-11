@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-11-12 四 07:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>strace 手册</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">strace 手册</h1>
+<p>
+如果能了解程序的每行代码是如何执行的，程序在运行时便了无秘密可言，是谓程序的可观察性。在我09年最早接触strace的时候，可观察性的概念还没有流行起来。使用至今，虽然systemtap，bpf等先进工具不断涌现，但它仍是首选，因为太简单易用。
+</p>
+
+<p>
+strace是个诊断，教学，调试工具，最简单的用法是通过strace启动程序 <code>strace command args</code> ，如果程序已启动，可以 <code>strace -p &lt;pid&gt;</code> 。strace 拦截并记录程序发出的 <b>系统调用</b> 以及程序收到的 <b>信号</b> ，打印每个系统调用的名称，参数，返回值到标准错误。
+</p>
+
+<div id="outline-container-org5f875b9" class="outline-2">
+<h2 id="org5f875b9"><span class="section-number-2">1</span> strace 的用途</h2>
+<div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>无源码即可了解程序的机制。例如，通过观察 <code>strace ip addr</code> 使用了哪些系统调用，可以了解如何编程获取机器IP。</li>
+<li>正常和异常对比。例如，通过对比 <code>strace cp data data.1</code> 和 <code>strace cp -a data data.2</code> 可以看看为啥有时 <code>cp -a</code> 才能正常工作。</li>
+<li>性能问题。例如，通过观察关键系统调用的时间间隔，是否符合预期，可以判断性能问题，锁是不是太大了，网络是不是太慢等。</li>
+<li>了解程序正在干啥。有时候程序既不退出，也不打印输出，完全不知道它在忙啥，可以用strace看看。</li>
+</ol>
+</div>
+
+<div id="outline-container-orgda779a6" class="outline-3">
+<h3 id="orgda779a6"><span class="section-number-3">1.1</span> strace 的机制</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+程序的运行离不开操作系统，而系统调用正是操作系统和应用的边界，通过观察边界的行为，进而了解程序的行为。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4e3cdb5" class="outline-2">
+<h2 id="org4e3cdb5"><span class="section-number-2">2</span> strace 的输出</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgaf9fa28" class="outline-3">
+<h3 id="orgaf9fa28"><span class="section-number-3">2.1</span> 输出格式</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+每行包含了系统调用名称，被括号包围的参数，以及返回值，例如strace <code>cat /dev/null</code> 的输出包括 <code>open("/dev/null", O_RDONLY) = 3</code> 。当错误发生时（通常返回-1），会包含额外的错误码和错误字符串，例如 <code>open("/notexist", O_RDONLY) = -1 ENOENT (No such file or directory)</code>
+</p>
+
+<p>
+收到信号会打印信号名称，以及解码后的siginfo结构，例如 <code>sleep 666</code> 被 SIGINT 中断后，打印：
+</p>
+<pre class="example">
+sigsuspend([] &lt;unfinished ...&gt;
+--- SIGINT {si_signo=SIGINT, si_code=SI_USER, si_pid=...} ---
++++ killed by SIGINT +++
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-orgaf8a27d" class="outline-3">
+<h3 id="orgaf8a27d"><span class="section-number-3">2.2</span> 未完成的系统调用</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+如果系统调用正在执行，同时另一个系统调用被其它线程调用（strace 可以同时跟踪多个线程），strace会保留调用的顺序，同时标记该系统调用为 <b>unfinished</b> ，当该系统调用返回时，会被标记为 <b>resumed</b> 。
+</p>
+<pre class="example">
+[pid 28772] select(4, [3], NULL, NULL, NULL &lt;unfinished ...&gt;
+[pid 28779] clock_gettime(CLOCK_REALTIME, {1130322148, 939977000}) = 0
+[pid 28772] &lt;... select resumed&gt;   = 1 (in [3])
+</pre>
+
+<p>
+可重启系统调用被信号中断后，打印略有不同，因为操作系统会立即重启该系统调用。
+</p>
+<pre class="example">
+read(0, 0x7ffff72cf5cf, 1)       = ? ERESTARTSYS (To be restarted)
+--- SIGALARM ... ---
+rt_sigreturn(0xe)                = 0
+read(0, "", 1)                   = 0
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgac87b1a" class="outline-3">
+<h3 id="orgac87b1a"><span class="section-number-3">2.3</span> 参数的输出</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+很多时候函数参数都是数字、指针，在输出时，strace尽量讲这些不可读的内容转成有意义的字符串。
+</p>
+
+<p>
+输出时参数会被尽量转成符号。例如，执行strace重定向 <code>&gt;&gt;xyzzy</code> 时输出 <code>open("xyzzy", O_WRONLY|O_APPEND|O_CREAT, 0666) = 3</code> 这里 open 的第二个参数被逆向转成宏，第三个参数被转成8进制。（熟悉C的同学了解，二进制程序里，这些参数都是数字，宏是源码里的东西，可见strace做了很多可读性的转换）。
+</p>
+
+<p>
+结构体指针会被解引用，打印成接近源码的形式，例如，strace <code>ls -l /dev/null</code> 时输出 <code>lstat("/dev/null", {st_mode=S_IFCHR|0666, st_rdev=makedev(0x1,0x3), ...}) = 0</code> ，这里第二个参数 <b>struct stat</b> 的指针，存放返回值，输出时尽量可读。如果系统调用失败了，指针不会被解引用。
+</p>
+
+<p>
+字符指针打印成C字符串，默认打印32个，超过部分用省略号代替。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbe29d58" class="outline-2">
+<h2 id="orgbe29d58"><span class="section-number-2">3</span> strace的参数</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org6cd893d" class="outline-3">
+<h3 id="org6cd893d"><span class="section-number-3">3.1</span> 常用的参数</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+<code>-p pid</code> 用于trace运行中的程序， <code>CTRL-C</code> 退出trace。
+</p>
+
+<p>
+<code>-f</code> 连同trace的子进程一起trace。
+</p>
+
+<p>
+<code>-s strsize</code> 指定输出字符串时的最大长度，默认32。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org66b847d" class="outline-3">
+<h3 id="org66b847d"><span class="section-number-3">3.2</span> 性能用途方面的参数</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<code>-r</code> 打印两次系统调用之间的相对时间
+</p>
+
+<p>
+<code>-t</code> 打印系统调用的时间
+</p>
+
+<p>
+<code>-tt</code> 打印系统调用的时间，包含毫秒数据
+</p>
+
+<p>
+<code>-ttt</code> 打印系统调用的时间，以 <code>秒.毫秒</code> 的形式
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2020-11-12 四 07:06</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

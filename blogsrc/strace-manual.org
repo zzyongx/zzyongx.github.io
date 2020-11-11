@@ -43,3 +43,29 @@ read(0, 0x7ffff72cf5cf, 1)       = ? ERESTARTSYS (To be restarted)
 rt_sigreturn(0xe)                = 0
 read(0, "", 1)                   = 0
 #+END_EXAMPLE
+
+** 参数的输出
+很多时候函数参数都是数字、指针，在输出时，strace尽量将这些不可读的内容转成有意义的字符串。
+
+输出时参数会被尽量转成符号。例如，执行strace重定向 ~>>xyzzy~ 时输出 ~open("xyzzy", O_WRONLY|O_APPEND|O_CREAT, 0666) = 3~ 这里 open 的第二个参数被逆向转成宏，第三个参数被转成8进制。（熟悉C的同学了解，二进制程序里，这些参数都是数字，宏是源码里的东西，可见strace做了很多可读性的转换）。
+
+结构体指针会被解引用，打印成接近源码的形式，例如，strace ~ls -l /dev/null~ 时输出 ~lstat("/dev/null", {st_mode=S_IFCHR|0666, st_rdev=makedev(0x1,0x3), ...}) = 0~ ，这里第二个参数 *struct stat* 的指针，存放返回值，输出时尽量可读。如果系统调用失败了，指针不会被解引用。
+
+字符指针打印成C字符串，默认打印32个，超过部分用省略号代替。
+
+* strace的参数
+** 常用的参数
+~-p pid~ 用于trace运行中的程序， ~CTRL-C~ 退出trace。
+
+~-f~ 连同trace的子进程一起trace。
+
+~-s strsize~ 指定输出字符串时的最大长度，默认32。
+
+** 性能用途方面的参数
+~-r~ 打印两次系统调用之间的相对时间
+
+~-t~ 打印系统调用的时间
+
+~-tt~ 打印系统调用的时间，包含毫秒数据
+
+~-ttt~ 打印系统调用的时间，以 ~秒.毫秒~ 的形式
