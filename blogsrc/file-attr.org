@@ -25,3 +25,7 @@ linux文件还有属性、扩展属性、acl，如果碰到文件内容和状态
 1. =chmod 0600 root-file= 此时只有root可读，zzyong没权限。
 2. =setfacl -m u:zzyong:r root-file= 给zzyong添加读权限
 3. =getfacl root-file= 查看，现在zzyong已经可读
+
+* 如何备份文件
+=cp= 能备份文件吗？是的，但必须是 ~cp -a --preserve=all~ ，其中 ~--preserve=all~ 用来复制acl。
+此外可以用 =rsync -a -A= ，其中 =-A= 用来复制acl。

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-11-14 六 06:47 -->
+<!-- 2020-11-14 六 07:02 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>linux文件的属性</title>
@@ -288,10 +288,20 @@ linux文件还有属性、扩展属性、acl，如果碰到文件内容和状态
 </ol>
 </div>
 </div>
+
+<div id="outline-container-orgd2fd1e2" class="outline-2">
+<h2 id="orgd2fd1e2"><span class="section-number-2">4</span> 如何备份文件</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<code>cp</code> 能备份文件吗？是的，但必须是 <code>cp -a --preserve=all</code> ，其中 <code>--preserve=all</code> 用来复制acl。
+此外可以用 <code>rsync -a -A</code> ，其中 <code>-A</code> 用来复制acl。
+</p>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2020-11-14 六 06:47</p>
+<p class="date">Created: 2020-11-14 六 07:02</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
