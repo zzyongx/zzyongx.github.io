@@ -9,3 +9,37 @@
 
 - [[blog:bash-file][文件操作]] 描述了常用的文件/文本操作
 - [[blog:bash-string][字符串操作]] 描述了常用的字符串操作
+
+
+getfattr -d dbnetget
+# file: dbnetget
+user.rsync.%stat="100755 0,0 1000:1000"
+
+
+[@hbhly_59_132 nobody]# sudo -u nobody rsync --fake-super -a 10.160.77.60::dc/ecadd2ae-2d2c-48ef-9c1c-d89274eac3d2/bin/20201030_x00Ieu/dbnetget   .
+[@hbhly_59_132 nobody]# ls -l
+total 636
+-rwxr-xr-x 1 nobody nobody 649842 Nov 27  2017 dbnetget
+[@hbhly_59_132 nobody]# getfattr dbnetget
+# file: dbnetget
+user.rsync.%stat
+
+[@hbhly_59_132 nobody]# sudo -u nobody rsync -a 10.160.77.60::dc/ecadd2ae-2d2c-48ef-9c1c-d89274eac3d2/bin/20201030_x00Ieu/dbnetget   .[@hbhly_59_132 nobody]# ls -l
+total 636
+-rwxr-xr-x 1 nobody nobody 649842 Nov 27  2017 dbnetget
+[@hbhly_59_132 nobody]# getfattr dbnetget
+
+
+[@hbhly_59_132 nobody]# rsync -a 10.160.77.60::dc/ecadd2ae-2d2c-48ef-9c1c-d89274eac3d2/bin/20201030_x00Ieu/dbnetget   .
+[@hbhly_59_132 nobody]# ls -l dbnetget
+-rwxr-xr-x 1 odin odin 649842 Nov 27  2017 dbnetget
+[@hbhly_59_132 nobody]# getfattr dbnetget
+[@hbhly_59_132 nobody]#
+
+
+[@hbhly_59_132 nobody]# rsync --fake-super -a 10.160.77.60::dc/ecadd2ae-2d2c-48ef-9c1c-d89274eac3d2/bin/20201030_x00Ieu/dbnetget   .
+[@hbhly_59_132 nobody]# ls -l dbnetget
+-rwxr-xr-x 1 root root 649842 Nov 27  2017 dbnetget
+[@hbhly_59_132 nobody]# getfattr dbnetget
+# file: dbnetget
+user.rsync.%stat

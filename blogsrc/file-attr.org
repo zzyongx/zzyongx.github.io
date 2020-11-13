@@ -1,0 +1,27 @@
+#+TITLE: linux文件的属性
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+KEYWORDS: linux file lsattr chattr getfattr setfattr getfacl setfacl
+
+说起文件，首先想到文件的内容，通常可以用 ~md5sum~ 计算签名。其次想到文件的状态，包括owner，mode，time等，通常用~stat~ 或~ls -l~查看。那么两个文件的内容和状态完全一样，两个文件就完全一样了吗？
+
+linux文件还有属性、扩展属性、acl，如果碰到文件内容和状态都一样，但文件行为不一样，不妨检查下这些属性。
+
+* 文件属性
+文件属性是文件系统内置的属性，操作文件时会检查这些属性。它们以状态位的形式存在，几乎不占用额外的磁盘空间。
+文件属性用 *lsattr* 查看，用 *chattr +-=[aAcCdDeijsStTu]* 操作 + 表示开启， - 表示关闭，= 表示设置。
+常用的文件属性包括：
+1. =i= 只读属性，开启后文件不能被修改，移动，改名等。只有root和配置了=CAP_LINUX_IMMUTABLE=的进程才能操作该属性。
+2. =a= append属性，类似 =i= ，但文件可以追加
+
+* 文件扩展属性
+文件扩展属性是应用定义的属性，以 ~namespace.field=value~ 的形式存在，属性的含义由应用解释（rsync 通过 user.rsync.%stat 实现 fake-super功能）。namespace目前支持 user，system等，不能任意指定，key可以任意指定，但最好加上应用自己的标记，以免不同应用冲突。
+
+1. 设定属性 =setfattr -n user.foo.favor -v apple test-xattr=
+2. 获取属性 =getfattr -d test-xattr=
+
+* 文件acl
+除了chmod设定文件的读写权限，还可以通过acl控制，acl可以细粒度划分权限。 例如 root-test 文件仅让root和指定其它用户可读
+1. =chmod 0600 root-file= 此时只有root可读，zzyong没权限。
+2. =setfacl -m u:zzyong:r root-file= 给zzyong添加读权限
+3. =getfacl root-file= 查看，现在zzyong已经可读
