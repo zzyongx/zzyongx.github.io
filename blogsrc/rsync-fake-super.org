@@ -1,0 +1,54 @@
+#+TITLE: 编程思维-如何破解rsync -a不a的问题
+#+OPTIONS: toc:nil
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+KEYWORDS: rsync strace file attr
+
+rsync 有个 =-a= 参数，归档模式用于保证文件和文件stat都被复制。但是神奇的事情发生了。在rsync服务器上明明是root用户，rsync到本地之后变成了nobody，说好的 =-a= ，文件owner给我 =a= 哪去了。如何排查？
+
+* 对比正常rsync服务器的配置
+找了正常服务器的rsyncd.conf，对比无异常。配置无异常，说明不是服务端的问题，那也不能是客户端的问题，客户端没配置，只有参数。
+
+* 对比rsync服务器的文件
+在rsync服务器touch一个文件，rsync正常，owner被保留了，说明是文件的问题。哪文件到底出了什么问题，都是root，到底有啥不同呢？
+
+* 复制异常文件
+用 =cp= 复制异常文件，rsync正常，owner被保留了。用 =cp -a= 复制文件，rsync异常，owner变成了nobody。为什么？借助 [[blog:strace-manual][strace]] 发现有 ~fsetxattr(4,"user.rsync.%stat","100755 0,0 1000:1000",20,0)=0~ 这样的调用，问题肯定出在这儿。
+
+* fake-super
+rsync有fake-super参数，客户端和服务端都有，为啥要引入这个参数呢？因为rsync不是想a就能a的，它自己先得有权限。例如以非root从服务端rsync root文件，虽然rsync很想保留文件owner是root，但是它没权限呀，这样file的owner属性不就丢了吗？
+
+所以rsync引入了fake-super参数，虽然没权限把文件改成owner，但是可以找个地方记下来文件的owner是root，记哪呢？答案是文件扩展属性。
+
+下面的例子：因为zzyong没有nobody权限，所以nobody被记在了扩展属性中。注意，如果没有 =--fake-super= ，则不会记录扩展属性，owner没被保留，丢了。
+#+BEGIN_EXAMPLE
+# sudo -u zzyong rsync --fake-super -a rsync_server::backup/dbnet .
+# ls -l
+-rwxr-xr-x 1 zzyong zzyong 649842 Nov 27  2017 dbnet
+# getfattr -d dbnet
+# file: dbnet
+user.rsync.%stat="100755 0,0 1000:1000"
+#+END_EXAMPLE
+
+下面的例子：因为root有nobody权限，所以变成了nobody，注意这里没有 =--fake-super= ，并且扩展属性被清空了。
+#+BEGIN_EXAMPLE
+# rsync -a rsync_server::backup/dbnet .
+# ls -l dbnet
+-rwxr-xr-x 1 nobody nobody 649842 Nov 27  2017 dbnet
+# getfattr dbnetget
+#+END_EXAMPLE
+
+下面的例子：虽然root有nobody权限，但是使用了 =--fake-super= ，仍然是root，保留了扩展属性
+#+BEGIN_EXAMPLE
+# rsync --fake-super -a rsync_server::backup/dbnet .
+# ls -l dbnet
+-rwxr-xr-x 1 root root 649842 Nov 27  2017 dbnet
+# getfattr dbnet
+# file: dbnet
+user.rsync.%stat="100755 0,0 1000:1000"
+#+END_EXAMPLE
+
+* 问题原因
+到这里原因基本找到了，因为文件rsync涉及多个业务，不知道哪个环节加了文件扩展属性，这个属性在合适的时候显露出来了。
+
+* 总结
+要看文件，仅仅看内容和stat的是不够的，必须考虑到其它[[blog:file-attr][属性]]。同样，要备份，仅仅cp是不够的，必须 ~cp -a --preserve=all~ 。
