@@ -26,6 +26,8 @@
 
 [[blog:rsync-fake-super][破解rsync -a不a的问题]] <2020-11-14>
 
+[[blog:linux-load-high][破解linux负载高]] <2020-11-15>
+
 * 2019 己亥年
 --------------
 
