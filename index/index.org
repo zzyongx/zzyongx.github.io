@@ -28,6 +28,8 @@
 
 [[blog:linux-load-high][破解linux负载高]] <2020-11-15>
 
+[[blog:linux-lower-nice-make-program-slower][低nice让程序变慢了]] <2020-11-22>
+
 * 2019 己亥年
 --------------
 
