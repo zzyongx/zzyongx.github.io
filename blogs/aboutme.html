@@ -3,23 +3,30 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
+<!-- 2020-12-16 Wed 03:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>关于我</title>
-<!-- 2019-04-21 日 14:46 -->
-<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta  name="generator" content="Org-mode" />
-<meta  name="author" content="zhengzhiyong" />
+<meta name="generator" content="Org mode" />
+<meta name="author" content="root" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
-  .title  { text-align: center; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
   .todo   { font-family: monospace; color: red; }
-  .done   { color: green; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
   .tag    { background-color: #eee; font-family: monospace;
             padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
-  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
   .underline { text-decoration: underline; }
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
@@ -46,27 +53,111 @@
     border: 1px solid black;
   }
   pre.src:hover:before { display: inline;}
-  pre.src-sh:before    { content: 'sh'; }
-  pre.src-bash:before  { content: 'sh'; }
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
   pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-R:before     { content: 'R'; }
-  pre.src-perl:before  { content: 'Perl'; }
-  pre.src-java:before  { content: 'Java'; }
-  pre.src-sql:before   { content: 'SQL'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
 
   table { border-collapse:collapse; }
   caption.t-above { caption-side: top; }
   caption.t-bottom { caption-side: bottom; }
   td, th { vertical-align:top;  }
-  th.right  { text-align: center;  }
-  th.left   { text-align: center;   }
-  th.center { text-align: center; }
-  td.right  { text-align: right;  }
-  td.left   { text-align: left;   }
-  td.center { text-align: center; }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
   dt { font-weight: bold; }
-  .footpara:nth-child(2) { display: inline; }
-  .footpara { display: block; }
+  .footpara { display: inline; }
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
@@ -86,6 +177,7 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
@@ -94,12 +186,13 @@
 <script src="/jslib/bootstrap.min.js"></script>
 <script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -145,8 +238,8 @@ for the JavaScript code in this tag.
 <div id="content">
 <h1 class="title">关于我</h1>
 
-<div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> 基本信息</h2>
+<div id="outline-container-orge324244" class="outline-2">
+<h2 id="orge324244"><span class="section-number-2">1</span> 基本信息</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 男，84年生，07年毕业于中国矿业大学数学系，后在互联网行业从事开发，架构工作至今。
@@ -154,107 +247,110 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 基本技能和所擅长</h2>
+<div id="outline-container-org1f11d36" class="outline-2">
+<h2 id="org1f11d36"><span class="section-number-2">2</span> 基本技能和所擅长</h2>
 <div class="outline-text-2" id="text-2">
 <ul class="org-ul">
-<li>丰富的linux c、c++系统开发、调试、调优经验，良好的开发习惯。此外对java，go，perl，erlang等主流的非主流的语言都有编程经验
-</li>
-<li>丰富的系统架构，设计经验。系统内模块儿化，系统间解耦，分层设计，可运维、可监控、易调试系统的构建，经验丰富。对老系统的重构，新系统的旁路测试，新旧系统的平滑升级也有丰富经验
-</li>
-<li>对非阻塞，多进程，多线程，多协程对高并发的影响有丰富经验
-</li>
-<li>深入理解数据结构、算法、分布式系统、大数据、数据库、网络等，对机器学习有一定了解。
-</li>
-<li>对高效团队建设，需求分析，产品落地，有一定经验
-</li>
+<li>丰富的linux c、c++、golang系统开发、调试、调优经验，良好的开发习惯。此外有bash、lua、perl、java、erlang等有编程经验</li>
+<li>丰富的系统架构，设计经验。系统内模块儿化，系统间解耦，分层设计，可运维、可监控、易调试系统的构建，经验丰富。对老系统的重构，新系统的旁路测试，新旧系统的平滑升级也有丰富经验</li>
+<li>对非阻塞，多进程，多线程，多协程对高并发的影响有丰富经验</li>
+<li>深入理解数据结构、算法、分布式系统、大数据、数据库、网络等，对机器学习有一定了解。</li>
+<li>对高效团队建设，需求分析，产品落地，有一定经验</li>
+<li>基于vue、bootstrap做前端开发</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-sec-3" class="outline-2">
-<h2 id="sec-3"><span class="section-number-2">3</span> 工作经历</h2>
+<div id="outline-container-orge00619e" class="outline-2">
+<h2 id="orge00619e"><span class="section-number-2">3</span> 工作经历</h2>
 <div class="outline-text-2" id="text-3">
-</div><div id="outline-container-sec-3-1" class="outline-3">
-<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 搜狗，2014年10月 - 至今</h3>
+</div>
+<div id="outline-container-org5bd5647" class="outline-3">
+<h3 id="org5bd5647"><span class="section-number-3">3.1</span> 搜狗，2014年10月 - 至今</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
-在搜狗，技术的深度和广度有所深入，并形成了结果导向的思维方式。
+在搜狗，技术的深度和广度有所深入，以用户导向，结果导向的方式思考问题。
+</p>
+
+<p>
+16年以前我专注开发。16年到18年我像架构师，专注团队效率和业务。18年以后专注做成事，架构、开发、产品、客服啥都干。
 </p>
 </div>
 
-<div id="outline-container-sec-3-1-1" class="outline-4">
-<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> 监控系统， 2018年4月 - 至今</h4>
+<div id="outline-container-org62bfd01" class="outline-4">
+<h4 id="org62bfd01"><span class="section-number-4">3.1.1</span> datalink系统， 2018年4月 - 至今</h4>
 <div class="outline-text-4" id="text-3-1-1">
 <p>
-领导离职，原团队七零八落，个人转做监控系统。最初确定了以数据为核心的理念，在保留原有监控用法的基础上，历时近一年重新实现了一套新的系统。在新系统逐步替换旧系统的过程中，形成了datalink的产品思路，即连接业务运行时以及关联系统的数据和用户（开发和运维），协助他们定位、并解决问题（包括稳定性，报警，排查case等）。
+前身是搜狗监控系统，但过于陈旧。历时一年重新实现了新监控，在新旧系统升级过程中，形成了“立足监控，促进业务稳定，立足度量，做开放数据”的产品思路。产品覆盖公司80%以上的业务。
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-3-1-2" class="outline-4">
-<h4 id="sec-3-1-2"><span class="section-number-4">3.1.2</span> 彷徨中前进， 2016年3月 - 2018年4月</h4>
+<div id="outline-container-org7e25856" class="outline-4">
+<h4 id="org7e25856"><span class="section-number-4">3.1.2</span> 搜狗应用平台，2020年1月 - 2020年7月</h4>
 <div class="outline-text-4" id="text-3-1-2">
 <p>
-团队接手了公司的统一登录系统，支付系统，团队领导想转行做用户产品，后来又做了商城，AI客服，plus系统等，都不是很成功。16年升职到架构师，专注提高团队效率和执行力。
+类似SaaS，对于activemq，elasticsearch，kafka等标准应用，用户只需配置，即可使用，无需运维。
+此为个人发起的项目，初衷是让业务开发专注业务，标准应用有开箱即用的方案，同时集中运维也利用提升稳定性和资源利用率。
 </p>
-<ul class="org-ul">
-<li>模板化了spring框架，以及使用规范。标准化了文档，测试，监控，排错，部署。
-</li>
-<li>基于gitlab加jenkins的代码协作，测试，上线，回滚流程。
-</li>
-<li>结果为导向的团队文化
-</li>
-</ul>
-
-<p>
-期间的工作还有：
-</p>
-<ul class="org-ul">
-<li>基于sql的大数据产品，选型，第一版
-</li>
-<li>类似友盟的统计产品，数据接入，数据分析等
-</li>
-</ul>
 </div>
 </div>
 
-<div id="outline-container-sec-3-1-3" class="outline-4">
-<h4 id="sec-3-1-3"><span class="section-number-4">3.1.3</span> 任务明确，2014年10月 - 2016年3月</h4>
+<div id="outline-container-org9297a55" class="outline-4">
+<h4 id="org9297a55"><span class="section-number-4">3.1.3</span> dfly系统，2019年7月 - 至今</h4>
 <div class="outline-text-4" id="text-3-1-3">
 <p>
-这个阶段的特点是以个人为团队，目标明确，结果清晰。除技术外，要关心的问题不多。
+dfly系统是搜狗的自动化运维系统，我负责agent及其插件部分。
+agent部署在业务机器上，负责接收系统指令，并调用插件执行指令。其中gravity插件最核心，负责配置管理。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd8f5d99" class="outline-4">
+<h4 id="orgd8f5d99"><span class="section-number-4">3.1.4</span> plus项目， 2017年3月 - 2018年4月</h4>
+<div class="outline-text-4" id="text-3-1-4">
+<p>
+这是一次构建数据中台的尝试。主要产品包括业务指标统计、数据市场、数据分析。作为架构师和产品参与其中，并作出MVP。
+业务指标统计涵盖了sdk采集，服务端计算，采用传统的hadoop。数据市场是整理搜狗的数据资产，实现跨部门的数据合作。数据分析提供即席查询，基于hive+presto，数据来源于用户上传。
+没做成挺可惜的，中台不是技术问题，是公司组织问题。
 </p>
 
+<p>
+团队效率方面，模板化了spring框架，以及使用规范，标准化了文档，测试，监控，排错，部署等。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga5731f9" class="outline-4">
+<h4 id="orga5731f9"><span class="section-number-4">3.1.5</span> 云图重构和redis平台，2014年10月 - 2016年3月</h4>
+<div class="outline-text-4" id="text-3-1-5">
 <ul class="org-ul">
-<li>云图系统重构，重构后的API更功能强大，系统组件由nginx-lua加php改为纯nginx-lua，为API添加了全套的自动化测试。
-</li>
-<li>redis平台，为中等规模用户提供一键开启，免运维的redis服务。基于原生redis、zookeeper、lvs开发的一套资源分配，故障切换系统。
-</li>
+<li>云图系统重构，重构后的API更功能强大，系统组件由nginx-lua加php改为纯nginx-lua，为API添加了全套的自动化测试。</li>
+<li>redis平台，为中等规模用户提供一键开启，免运维的redis服务。基于原生redis、zookeeper、lvs开发。</li>
 </ul>
 </div>
 </div>
 </div>
 
-<div id="outline-container-sec-3-2" class="outline-3">
-<h3 id="sec-3-2"><span class="section-number-3">3.2</span> 云栈科技， 2013年10月 - 2014年10月</h3>
+<div id="outline-container-org9348119" class="outline-3">
+<h3 id="org9348119"><span class="section-number-3">3.2</span> 云栈科技， 2013年10月 - 2014年10月</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
-作为初级合伙人，参与公司产品开发，基于公有云的运维管理平台。因公司转型做新产品，无意于此，故离职。
+作为初级合伙人，参与公司产品开发，基于公有云的运维管理平台。因公司转型做新产品，无意于此，故退出。
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-3-3" class="outline-3">
-<h3 id="sec-3-3"><span class="section-number-3">3.3</span> 新浪，2007年7月 - 2013年10月</h3>
+<div id="outline-container-org490082c" class="outline-3">
+<h3 id="org490082c"><span class="section-number-3">3.3</span> 新浪，2007年7月 - 2013年10月</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
-在新浪，个人成长偏技术方面，还是技术主导的思维方式。
+在新浪，个人成长偏技术方面，以技术导向的方式思考问题。
 </p>
 </div>
 
-<div id="outline-container-sec-3-3-1" class="outline-4">
-<h4 id="sec-3-3-1"><span class="section-number-4">3.3.1</span> SAE运维主管， 2012年12月 – 2013年11月</h4>
+<div id="outline-container-org3f9b95f" class="outline-4">
+<h4 id="org3f9b95f"><span class="section-number-4">3.3.1</span> SAE运维主管， 2012年12月 – 2013年11月</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <p>
 Sae运维团队缺人，就去带了一年运维团队，一年内实现了全部的管理puppet化。
@@ -262,8 +358,8 @@ Sae运维团队缺人，就去带了一年运维团队，一年内实现了全�
 </div>
 </div>
 
-<div id="outline-container-sec-3-3-2" class="outline-4">
-<h4 id="sec-3-3-2"><span class="section-number-4">3.3.2</span> SAE系统开发工程师， 2009年3月 – 2012年12月</h4>
+<div id="outline-container-org6a3ba62" class="outline-4">
+<h4 id="org6a3ba62"><span class="section-number-4">3.3.2</span> SAE系统开发工程师， 2009年3月 – 2012年12月</h4>
 <div class="outline-text-4" id="text-3-3-2">
 <p>
 09年开始从事sae的开发，sae是国内领先的PaaS云平台，作为sae最早的员工和核心开发者，主导了sae很多核心组件的开发，并为sae的持续改进和稳定运行做出了努力。
@@ -273,47 +369,36 @@ Sae运维团队缺人，就去带了一年运维团队，一年内实现了全�
 主要工作有：
 </p>
 <ul class="org-ul">
-<li>开发sae的L7，对负载均衡非常了解
-</li>
-<li>开发trigger，是sae各主要系统的控制数据源
-</li>
-<li>开发sae的缓存系统memcachedx
-</li>
-<li>开发sae的用户代码分发系统codefs
-</li>
-<li>开发sae的对外http，tcp代理
-</li>
-<li>开发sae的apache环境
-</li>
+<li>开发sae的L7，对负载均衡非常了解</li>
+<li>开发trigger，是sae各主要系统的控制数据源</li>
+<li>开发sae的缓存系统memcachedx</li>
+<li>开发sae的用户代码分发系统codefs</li>
+<li>开发sae的对外http，tcp代理</li>
+<li>开发sae的apache环境</li>
 </ul>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-sec-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> 个人项目</h2>
+<div id="outline-container-orgadbca9d" class="outline-2">
+<h2 id="orgadbca9d"><span class="section-number-2">4</span> 个人项目</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 <a href="https://github.com/zzyongx">https://github.com/zzyongx</a> 是个人的github，比较有意思的几个项目是：
 </p>
 <ul class="org-ul">
-<li>shmc 是一个基于共享内存的key-value库，其中包换了一个网络操作接口，使得数据可以通过net和语言级的api同时访问，某些场景下，极大提高性能
-</li>
-<li>Wayd是一个apache模块，在prefork模式下可以显示当前进程正在服务那个请求，利于调试和排障
-</li>
-<li>tail2kafka，可以实时把文件内容发往kafka和es，发送前，支持通过lua修改文件内容
-</li>
-<li>dcron，实现简单的分布式任务调度
-</li>
+<li>shmc 是一个基于共享内存的key-value库，其中包换了一个网络操作接口，使得数据可以通过net和语言级的api同时访问，某些场景下，极大提高性能</li>
+<li>Wayd是一个apache模块，在prefork模式下可以显示当前进程正在服务那个请求，利于调试和排障</li>
+<li>tail2kafka，可以实时把文件内容发往kafka和es，发送前，支持通过lua修改文件内容</li>
+<li>dcron，实现简单的分布式任务调度</li>
 </ul>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2019-04-21 日 14:46</p>
-<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="author">Author: root</p>
+<p class="date">Created: 2020-12-16 Wed 03:30</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
