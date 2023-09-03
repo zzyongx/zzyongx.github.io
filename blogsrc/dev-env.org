@@ -34,6 +34,9 @@ Unable to start 'C:\Users\zhengzhiyong\AppData\Roaming\Swan\.cache\spm\setup-x86
 ** 安装emacs的图形依赖
 ~sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libncurses-dev chromium-browser~
 
+apt-cache search 'libgnutls.*-dev'
+libgnutls-dev
+
 ** 终端在tab中打开标签
 在终端菜单 编辑->首选项 中配置
 

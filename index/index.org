@@ -3,6 +3,11 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
+* 2023 癸卯年
+
+** 经验
+[[blog:how-pagecache-make-cpu-intensive-program-slow][pagecache如何让cpu密集程序变慢]] <2023-09-03>
+
 * 2020 庚子年
 
 ** 经验

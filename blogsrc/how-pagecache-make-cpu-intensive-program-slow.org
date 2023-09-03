@@ -1,0 +1,139 @@
+#+TITLE: pagecache如何让cpu密集程序变慢
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+问题的现象：业务的某些实例运行（在k8s中）缓慢（把实例中的程序记作ffm），即使运行 ffm -v（查看版本） 都很慢。
+
+* 耗时分析
+
+既然运行缓慢，先和正常实例，大概对比下运行耗时，这里使用time ffm -v 运行。
+
+| 实例     | 耗时           | 说明                          |
+|----------+----------------+-------------------------------|
+| 正常实例 | real 0m0.997s  | (user+sys)/real = 1           |
+|          | user 0m0.599s  | 说明cpu使用率100%             |
+|          | sys  0m0.383s  | 符合cpu密集的特征             |
+| 异常实例 | real 0m53.659s | (user+sys)/real < 1           |
+|          | user 0m0.480s  | CPU使用率不足100%             |
+|          | sys  0m0.380s  | 说明进程有相当的时间处于S状态 |
+
+* 进程S状态
+进程如果在S状态，通常是在等待，此时可以查看内核态的栈（小知识：进程在S状态，必然处在内核态），查看方法 =cat /proc/<pid>/stack=
+
+#+BEGIN_EXAMPLE
+$ cat /proc/$(pgrep -nf ffm)/stack
+[<0>] io_schedule+0x12/0x40
+[<0>] __lock_page_or_retry+0x1c9/0x4e0
+[<0>] filemap_fault+0x199/0x860
+[<0>] __xfs_filemap_fault+0x6d/0x200
+[<0>] __do_fault_0x20/0x80
+[<0>] __handle_mm_fault+0x539/0x6b0
+[<0>] handle_mm_fault+0xda/0x200
+[<0>] __do_page_fault_0x22b/0x4e0
+#+END_EXAMPLE
+
+@@html: <small>备注：此命令需要在k8s的宿主上执行，后面需要宿主执行的会简单标注宿主</small>@@
+
+调用栈透露出关键信息：
+1. =io_schedule= 说明程序因为io进入S状态;
+2. =filemap_fault= 说明io和mmap有关。
+
+背景知识：
+1. 可以通过IO相关的系统调用（read、write），主动发起IO操作;
+2. 可以通过mmap做文件映射，通过操作内存的方式，隐式发起IO操作，触发的入口是page fault。
+
+下面需要跟踪mmap系统调用，看看mmap和哪些文件有关，跟踪方法 =strace -tt -T ffm -v=
+#+BEGIN_EXAMPLE
+12:20:59.202402 open("/usr/local/libtorch/libtorch_cpu.so", O_RDONLY|O_CLOEXEC) = 3 <0.000014>
+12:20:59.202653 mmap(NULL, 306632192, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7f1294b28000 <0.000017>
+#+END_EXAMPLE
+
+mmap 都是so文件，也就是程序执行所需的代码段，数量不少。
+
+背景知识：
+1. 程序执行需要把代码段加载到内存，是通过mmap实现的，mmap内存的存在形式是page cache;
+2. mmap 对应的 page cache，如果可以、并且需要，内核可以回收。
+
+这里有个疑问：因为有page cache，只有第一次执行 ffm -v 会慢才对？
+
+* 和page cache有关吗？
+
+因为k8s实例运行在cgroup中，可能和cgroup有关，为此做了一组实验：
+| 运行ffm -v的时间线     | 执行耗时 | 说明                                                                                |
+|------------------------+----------+-------------------------------------------------------------------------------------|
+| （cgroup内）第一次执行 | 2m47s    | 符合预期，因为需要warmup page cache，通过biosnoop观察到IO                           |
+| （cgroup内）第二次执行 | 2m15s    | 不符合预期，page cache似乎不存在，仍观察到IO                                        |
+| （cgroup外）第一次执行 | 1m55s    | 符合预期，因为需要warmup page cache，通过biosnoop观察到IO                           |
+| （cgroup外）第一次执行 | 1.71s    | 符合预期，page cache存在，没观察到IO                                                |
+| （cgroup外）第三此执行 | 1.89s    | 符合预期，因为page cache基于inode，只要文件相同，无论cgroup内外，可以共享page cache |
+| 执行drop caches        |          | 无论cgroup内外，执行耗时都和第一次一样，说明的确是page cache影响了性能              |
+
+@@html: <small> 相关命令 </small> @@
+#+BEGIN_SRC bash
+# biosnoop 命令，来自bcc，宿主执行
+biosnoop | grep ffm
+
+# 找到ffm用到的so，strace.txt 是上文 strace 的输出，cgroup内执行
+grep -w open strace.txt | grep -v ENOENT | awk -F '"' '{print $2}' > f.txt
+
+# 手动预热，宿主执行，$pid是cgroup 1号进程在宿主上对应的pid
+# 手动预热后，cgroup内执行ffm -v可用使用预热的page cache，效果和在cgroup外执行 ffm -v 相同
+for f in $(cat /proc/$pid/root/f.txt); do cat /proc/$pid/root/$f; done
+
+# drop cache
+echo 3 | tee /proc/sys/vm/drop_caches
+
+#+END_SRC
+
+* cgroup内为什么没有page cache?
+首先可以肯定page cache生成过。这里跟踪了内核函数 =add_page_cache_lru= ，调用成功了。
+#+BEGIN_EXAMPLE
+# argdist 命令，来自bcc
+$ argdist -p $(pgrep -nf ffm) -C 'r::add_to_page_cache_lru():int:$retval' -i 5
+r::add_to_page_cache_lru():int:$retval
+  COUNT  EVENT
+  2904   $retval = 0
+#+END_EXAMPLE
+
+只能是，page cache生成后，被很快删除了，为此我们找到上文 =libtorch_cpu.so= 对应的 inode 1128195。跟踪它被删除的情况。
+
+#+BEGIN_EXAMPLE
+$ timeout 120 bpftrace -e '
+t:filemap:mm_filemap_delete_from_page_cache /args->i_ino == 1128195/ { printf("%d %s\n", pid, comm); print(kstack); }
+'
+
+24315 kworker/u12:4
+
+  __delete_from_page_cache
+  __remove_mapping
+  shrink_page_list
+  shrink_inactive_list
+  shrink_node_memcg
+  shirink_node
+  ...
+  try_to_free_mem_cgroup_pages
+  wmark_work_func
+  process_one_work
+  worker_thread
+#+END_EXAMPLE
+
+首先page cache是被内核线程 kworker 删除的，和 =wmark_work_func= 有关，这个是公司内核团队加的一个特性，显然被误用了。
+之前观察到 cgroup的 cache使用， =/sys/fs/cgroup/memory/memory.stat= 一直为0，这就对上了，刚生成的page cache就被删除了。
+
+公司k8s团队调整相关参数后，问题得到解决。
+
+@@html: <small> 一些其它用到的命令 </small> @@
+
+#+BEGIN_SRC bash
+# 这里可用提前固定ffm -v的进程ID，$$
+bash -c 'echo $$; sleep 30; exec ffm -v'
+
+# trace，来自bcc，跟踪哪些inode被加入page cache
+trace -e <pid> -T 't:filemap:mm_filemap_add_to_page_cache "%ld %ld", args->s_dev, args->i_ino'
+
+# 根据inode查找文件
+find /usr/ -inum 128301
+#+END_SRC
+
+* 总结
+ffm运行的慢的根因在于，由于page cache总是被删除，ffm运行时需要从磁盘加载代码段（并且是反复加载），ffm大部分时间在加载程序，而不是执行程序。
