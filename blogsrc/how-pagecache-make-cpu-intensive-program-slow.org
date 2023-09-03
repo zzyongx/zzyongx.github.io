@@ -64,8 +64,8 @@ mmap 都是so文件，也就是程序执行所需的代码段，数量不少。
 | （cgroup内）第一次执行 | 2m47s    | 符合预期，因为需要warmup page cache，通过biosnoop观察到IO                           |
 | （cgroup内）第二次执行 | 2m15s    | 不符合预期，page cache似乎不存在，仍观察到IO                                        |
 | （cgroup外）第一次执行 | 1m55s    | 符合预期，因为需要warmup page cache，通过biosnoop观察到IO                           |
-| （cgroup外）第一次执行 | 1.71s    | 符合预期，page cache存在，没观察到IO                                                |
-| （cgroup外）第三此执行 | 1.89s    | 符合预期，因为page cache基于inode，只要文件相同，无论cgroup内外，可以共享page cache |
+| （cgroup外）第二次执行  | 1.71s    | 符合预期，page cache存在，没观察到IO                                                |
+| （cgroup内）第三此执行 | 1.89s    | 符合预期，因为page cache基于inode，只要文件相同，无论cgroup内外，可以共享page cache |
 | 执行drop caches        |          | 无论cgroup内外，执行耗时都和第一次一样，说明的确是page cache影响了性能              |
 
 @@html: <small> 相关命令 </small> @@

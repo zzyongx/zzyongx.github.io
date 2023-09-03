@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-09-03 日 12:28 -->
+<!-- 2023-09-03 日 22:32 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>pagecache如何让cpu密集程序变慢</title>
@@ -254,8 +254,8 @@ for the JavaScript code in this tag.
 问题的现象：业务的某些实例运行（在k8s中）缓慢（把实例中的程序记作ffm），即使运行 ffm -v（查看版本） 都很慢。
 </p>
 
-<div id="outline-container-orgfc5e80d" class="outline-2">
-<h2 id="orgfc5e80d"><span class="section-number-2">1</span> 耗时分析</h2>
+<div id="outline-container-orga295bea" class="outline-2">
+<h2 id="orga295bea"><span class="section-number-2">1</span> 耗时分析</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 既然运行缓慢，先和正常实例，大概对比下运行耗时，这里使用time ffm -v 运行。
@@ -319,8 +319,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org50d82f8" class="outline-2">
-<h2 id="org50d82f8"><span class="section-number-2">2</span> 进程S状态</h2>
+<div id="outline-container-orgc0d2545" class="outline-2">
+<h2 id="orgc0d2545"><span class="section-number-2">2</span> 进程S状态</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 进程如果在S状态，通常是在等待，此时可以查看内核态的栈（小知识：进程在S状态，必然处在内核态），查看方法 <code>cat /proc/&lt;pid&gt;/stack</code>
@@ -384,8 +384,8 @@ mmap 都是so文件，也就是程序执行所需的代码段，数量不少。
 </div>
 </div>
 
-<div id="outline-container-org6a4c7d2" class="outline-2">
-<h2 id="org6a4c7d2"><span class="section-number-2">3</span> 和page cache有关吗？</h2>
+<div id="outline-container-org8c899a5" class="outline-2">
+<h2 id="org8c899a5"><span class="section-number-2">3</span> 和page cache有关吗？</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 因为k8s实例运行在cgroup中，可能和cgroup有关，为此做了一组实验：
@@ -427,13 +427,13 @@ mmap 都是so文件，也就是程序执行所需的代码段，数量不少。
 </tr>
 
 <tr>
-<td class="org-left">（cgroup外）第一次执行</td>
+<td class="org-left">（cgroup外）第二次执行</td>
 <td class="org-left">1.71s</td>
 <td class="org-left">符合预期，page cache存在，没观察到IO</td>
 </tr>
 
 <tr>
-<td class="org-left">（cgroup外）第三此执行</td>
+<td class="org-left">（cgroup内）第三此执行</td>
 <td class="org-left">1.89s</td>
 <td class="org-left">符合预期，因为page cache基于inode，只要文件相同，无论cgroup内外，可以共享page cache</td>
 </tr>
@@ -468,8 +468,8 @@ grep -w open strace.txt | grep -v ENOENT | awk -F <span style="color: #ffa07a;">
 </div>
 </div>
 
-<div id="outline-container-org3061328" class="outline-2">
-<h2 id="org3061328"><span class="section-number-2">4</span> cgroup内为什么没有page cache?</h2>
+<div id="outline-container-org1c9c8f8" class="outline-2">
+<h2 id="org1c9c8f8"><span class="section-number-2">4</span> cgroup内为什么没有page cache?</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 首先可以肯定page cache生成过。这里跟踪了内核函数 <code>add_page_cache_lru</code> ，调用成功了。
@@ -533,8 +533,8 @@ find /usr/ -inum 128301
 </div>
 </div>
 
-<div id="outline-container-org4d0804d" class="outline-2">
-<h2 id="org4d0804d"><span class="section-number-2">5</span> 总结</h2>
+<div id="outline-container-org9148476" class="outline-2">
+<h2 id="org9148476"><span class="section-number-2">5</span> 总结</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 ffm运行的慢的根因在于，由于page cache总是被删除，ffm运行时需要从磁盘加载代码段（并且是反复加载），ffm大部分时间在加载程序，而不是执行程序。
@@ -544,7 +544,7 @@ ffm运行的慢的根因在于，由于page cache总是被删除，ffm运行时�
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2023-09-03 日 12:28</p>
+<p class="date">Created: 2023-09-03 日 22:32</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

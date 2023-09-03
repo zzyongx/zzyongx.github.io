@@ -6,7 +6,10 @@
 * 2023 癸卯年
 
 ** 经验
-[[blog:how-pagecache-make-cpu-intensive-program-slow][pagecache如何让cpu密集程序变慢]] <2023-09-03>
+[[blog:how-pagecache-make-cpu-intensive-program-slow][page cache如何让cpu密集程序变慢]] <2023-09-03>
+
+** 笔记
+[[blog:the-sad-state-of-linux-socket-balancing][为什么不同的nginx进程CPU使用率差别很大]] <2023-09-03>
 
 * 2020 庚子年
 
