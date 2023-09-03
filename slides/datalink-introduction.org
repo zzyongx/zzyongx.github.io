@@ -1,0 +1,353 @@
+#+TITLE: datalink
+#+SUBTITLE: 业务稳定保障系统
+#+AUTHOR: 郑志勇
+
+#+OPTIONS: num:nil toc:nil
+#+OPTIONS: reveal_single_file:nil
+#+REVEAL_HLEVEL:3
+#+REVEAL_THEME: white
+#+REVEAL_TRANS: none
+#+REVEAL_EXTRA_CSS: ../reveal.js/local.css
+#+REVEAL_PLUGINS: (zoom)
+
+* datalink 的定位
+1. 立足于监控，促进业务稳定
+2. 立足于度量，提供数据服务
+
+#+BEGIN_NOTES
+测试能覆盖静态稳定性，监控覆盖动态稳定性。
+业务线有自己对监控的个性化需求，但度量、趋势图等需求相同。
+#+END_NOTES
+
+* datalink 的服务范围
+1. 基础监控覆盖公司服务器（4.5万+）
+2. 公司容器平台（包含GPU平台）（5600+应用）
+3. 业务监控(8500+模块，43000+规则)
+4. 每天2T的metrics数据
+5. PAAS平台（接入平台，RDS，redis，dfly等）
+
+* datalink 的核心功能
+1. 监控，核心是可观察性。（发现问题）
+2. 辅助根因分析。（分析原因）
+3. 辅助问题修复。（解决问题）
+4. 稳定性相关功能。
+5. 开放数据平台。
+
+*** datalink 的架构
+[[./dl-image/arch.jpeg]]
+
+* 监控 - 核心的核心
+1. 监控agent，数据之源
+2. UI，难用等于没用
+3. 白盒监控，过犹不及
+4. 黑盒监控，最后的防线
+5. 业务稳定性，一目了然
+
+** 监控agent，数据之源
+监控agent的定位是，凡人工所能及的可观察性指标，均可metrics化（目前有4000万+）。此外在采集metrics的同时，尽可能生成根因数据，用于故障排查。
+
+#+BEGIN_NOTES
+datalink 的用户只和agent打交道，数据在agent中了，就在datalink中了。只要访问agent的metrics接口，就可以查看metrics是否符合预期。
+#+END_NOTES
+
+*** 系统指标
+1. 标准的linux系统指标，
+2. 自定义的硬件指标，内核异常指标，GPU指标
+3. 标准的cadvisor容器指标和k8s指标
+4. 自定义PVC性能指标
+
+*** 监控dmesg，试图发现异常
+#+BEGIN_SRC go
+func (this *KernelCollector) dmesgCollect(line string) error {
+  var logContextFlag int
+  if strings.Index(line, "Out of memory") >= 0 {
+    logContextFlag = keeper.LogContextNew
+    kernelOomCounter.Inc()
+  } else if strings.Index(*line, "segfault at") >= 0 {
+    // segfault at 24 ip 0000000000426abb sp 00007f5e0df86630 error 4 in
+    logContextFlag = keeper.LogContextOnce
+    kernelCoreDumpCounter.Inc()
+  } else if strings.Index(*line, "general protection") >= 0 {
+    // general protection ip:426abb sp:7f5e0d785630 error:0 in
+    logContextFlag = keeper.LogContextOnce
+    kernelCoreDumpCounter.Inc()
+  } else if strings.Index(*line, "Call Trace:") >= 0 {
+    logContextFlag = keeper.LogContextNew
+    kernelCallTraceCounter.WithLabelValues("").Inc()
+  } else if strings.Index(*line, "BUG: soft lockup") >= 0 {
+    logContextFlag = keeper.LogContextNew
+    kernelSoftLockupCounter.Inc()
+  }
+}
+#+END_SRC
+
+#+BEGIN_NOTES
+遇到问题查看 dmesg /var/log/message，把这些关注点主动汇集成metrics，并收集这些日志，试图发现软硬件的问题。
+#+END_NOTES
+
+*** 对k8s指标的修改
+#+BEGIN_SRC go
+func (this *K8sLabel) AddOn() string {
+  var addOn string
+  if len(this.podNameValue) > 0 {
+    if pod := keeper.K8sGetPod(this.podNameValue); pod != nil {
+      addOn = fmt.Sprintf(`,k8s_name="%s"`, pod.App)
+    }
+
+  } else if len(this.pvcValue) > 0 {
+    if app, ip := keeper.K8sGetAppByPvc(this.namespaceValue, this.pvcValue); len(app) > 0 {
+      addOn = fmt.Sprintf(`,k8s_name="%s",pod_ip="%s"`, app, ip)
+    }
+  } else if len(this.pvValue) > 0 {
+    if app := keeper.K8sGetAppByPv(this.pvValue); len(app) > 0 {
+      addOn = fmt.Sprintf(`,k8s_name="%s"`, app)
+    }
+  }
+}
+#+END_SRC
+
+#+BEGIN_NOTES
+添加额外标签，体现容器平台和应用的约定。
+#+END_NOTES
+
+*** 进程
+1. 采集cpu，内存，线程数，fd数，磁盘IO等
+2. 通过http/tcp请求主动探测存活
+3. 进程存活管理
+4. 系统进程快照，系统进程总量
+
+#+BEGIN_NOTES
+进程快照用于问题排查，落在本地盘，兼顾成本和效率。
+#+END_NOTES
+
+*** 进程配置
+#+BEGIN_EXAMPLE
+PROC_CMD="./api"                                  # 收集进程名为./api的信息
+PROC_HTTP_CHECK="http://127.0.0.1:8080/v1/status" # agent请求这个url，如果返回200，才认为进程活着
+PROC_EXEC_RESTART="/opt/feedback/start_api.sh"    # 如果进程挂了，使用这个脚本重启
+PROC_RESTART_INTERVAL="30"  # 30秒内，不重复重启
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+$proc:alive != 1       # 监控进程存活
+$proc:uptime < 60      # 监控进程重启
+$proc:fd_number < 2000 # 监控文件描述符
+#+END_EXAMPLE
+
+*** 日志
+1. (多种格式)日志转成metrics
+2. 异常日志上报
+3. 实时转换，平摊消耗
+
+#+BEGIN_NOTES
+结构化日志主要包括类key-value格式，类nginx格式
+无格式的日志，支持抽取关键字监控
+日志转metrics的优势在于能够关联metrics和日志，方便问题排查
+#+END_NOTES
+
+*** 以nginx日志为例
+#+BEGIN_EXAMPLE
+NGX_FILENAME="/var/log/nginx/status_log"   # 日志文件的位置
+NGX_PROTOCODE_LOC=3                        # http code字段的位置
+NGX_PROTOCODE_LOGFILTER="!~200|301|302"    # 非200请求发送日志到日志中心
+NGX_DURATION_LOC=5                         # http 耗时字段的位置
+NGX_DURATION_LOGFILTER="50"                # 请求耗时大于50ms时发送日志到日志中心
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+# 耗时 p95 大于 3 秒，p50 大于 100 毫秒时报警
+$ngx:duration{quantile="0.95"} > 3000 || $ngx:duration{quantile="0.5"} > 100
+$ngx:request > 500   # qps 大于 500 时报警
+#+END_EXAMPLE
+
+*** 自定义脚本
+1. 定时执行用户脚本
+2. 标准输出转成metrics
+3. 上报标准错误
+4. 脚本执行失败也报警
+
+#+BEGIN_NOTES
+由agent执行脚本，可以观察到脚本自身失败，避免数据缺失。
+#+END_NOTES
+
+*** 用户自定义metrics
+1. 用户提供metrics接口
+2. 用户提供metrics文件
+3. 割裂了metrics和根因(缺点)
+4. 用户主动调agent上报metrics和根因
+
+#+BEGIN_NOTES
+agent代替prometheus收集metrics，可以过滤metrics，修改metrics，限制条数，避免滥用。
+TODO：支持 # ROOTLOG 注释，用于关联根因
+#+END_NOTES
+
+*** 采集应用的数据
+#+BEGIN_EXAMPLE
+EXPORTER_ENDPOINT="http://127.0.0.1:9108/metrics"
+$(elasticsearch_cluster_health_up != 1)
+#+END_EXAMPLE
+
+#+BEGIN_NOTES
+充分利用已有的exporter，但写prometheus表达式是个挑战
+#+END_NOTES
+
+** UI
+1. 个人面板，待处理告警一目了然
+2. 模板，尽量标准化，有限差异化
+3. 团队，值班、报警升级等
+4. 趋势图，向grafana学习
+5. 业务稳定性面板
+
+#+BEGIN_NOTES
+模块功能类似class的继承、覆盖
+#+END_NOTES
+
+*** 个人面板
+[[./dl-image/ui-me-1.png]]
+
+#+BEGIN_NOTES
+稳定性驱动，定时关注报警页面，围绕稳定性开展工作。
+#+END_NOTES
+
+*** 配置列表界面
+[[./dl-image/ui-config-view-1.png]]
+
+#+BEGIN_NOTES
+#+END_NOTES
+
+*** 白盒配置
+[[./dl-image/ui-wb-config.png]]
+
+*** 白盒趋势图
+[[./dl-image/ui-apm-trend.png]]
+
+*** 黑盒配置
+[[./dl-image/ui-bb-config.png]]
+
+*** 黑盒趋势图
+[[./dl-image/ui-bb-trend.png]]
+
+** 白盒监控
+1. 探测应用内部的情况
+2. 指标来自业务机器
+3. 以表达式的形式设置报警和展示趋势
+4. 指标粒度细，阈值设定依赖经验
+
+#+BEGIN_NOTES
+不报警不行，报警太多也不行，如何智能的辅助用户配置阈值，是主要困难。
+报警太多，通常是接收人设定不合理。通过屏蔽报警解决。
+阈值不合理，调整阈值。
+#+END_NOTES
+
+** 黑盒监控
+1. 模拟用户视角请求服务，最低限度的可用性
+2. 指标来自多个机房的专门探针机
+2. 优点是用户视角，缺点是片面，只能检测关键接口
+
+** 业务稳定性
+1. 基于白盒/黑盒，抽取业务稳定性指标
+2. 基于各稳定性指标权重，构建业务稳定性
+
+#+BEGIN_NOTES
+建立业务稳定性指标是运维的关键。稳定性指标和业务有密切关系，可能需要业务开发专门的接口，以反映业务内部的运行情况。
+#+END_NOTES
+
+* 辅助根因分析
+1. 快速恢复，缩短故障时长
+2. 日常问题排查占据工程师不少时间
+
+#+BEGIN_NOTES
+故障时长是故障级别的关键。
+工欲善其事必先利其器
+#+END_NOTES
+
+** 根因日志
+监控agent能够抽取异常日志，当报警时，能够查看关联的日志，快速定位问题。
+[[./dl-image/rc-log.png]]
+
+#+BEGIN_NOTES
+故障多源于变更，基于基础平台（dfly上线平台，容器平台）的事件，以及业务自身的事件，定位问题。
+#+END_NOTES
+
+** 上下游报警
+报警时能够查看业务上下游（基于网络流向自动发现）的报警，找出可能原因。
+[[./dl-image/rc-network.png]]
+
+** 日志检索
+集中检索业务机器上的日志，相比ELK，简单且成本极低。
+[[./dl-image/ui-file-grep.png]]
+
+** 进程快照
+多用于问题排查。
+[[./dl-image/ui-proc-snapshot.png]]
+
+* 辅助问题修复
+1. 自动报障系统。某些告警自动触发报障。
+2. 一键调用故障修复脚本。（回滚，重启等操作）。
+
+* 稳定性相关功能
+监控代替人，值守例行操作
+
+1. 日志rotate
+2. 增强的crontab
+
+** 日志rotate
+日志滚动出错，会报警。
+
+#+BEGIN_EXAMPLE
+LOGROTATE_MODE="h"                                           # 默认按天滚动
+LOGROTATE_POST_SCRIPT="kill -USR1 $(cat /var/run/nginx.pid)" # 日志滚动后执行的脚本
+LOGROTATE_1_MODE="d"                                         # 覆盖默认配置
+LOGROTATE_1_SRC="/var/log/nginx/error.log"                   # 源文件指定完整文件名
+LOGROTATE_1_DST="/var/log/nginx/history/error.log.%Y-%m-%d"  # 目标文件名，使用了time-format，自动替换
+LOGROTATE_1_COUNT_LIMIT=3                                    # 保留3个
+LOGROTATE_2_REGEX_SRC="/var/log/nginx/(.+log)$"              # 源文件使用正则，注意括号
+LOGROTATE_2_DST="/var/log/nginx/history/${1}.%Y-%m-%d_%H-%M" # 目标文件${1}表示正则匹配到的第一项
+LOGROTATE_2_COUNT_LIMIT=20
+#+END_EXAMPLE
+
+** 增强的crontab
+采集crontab命令的退出码和输出。用于报警和排障。
+
+#+BEGIN_EXAMPLE
+# 标准cron
+*/5 * * * * root /opt/datalink/dataclean.sh
+# 增强标准cron
+*/5 * * * * root node_exporter --op.cron=cron:dataclean:stalealert /opt/datalink/dataclean.sh
+#+END_EXAMPLE
+
+* 开放数据平台
+开放主要包括，数据自身和数据接口标准化。
+
+应用案例：
+1. 公司的服务器成本分析
+2. 营销某部直接从监控agent采集数据
+3. 搜索某部基于agent接口返回的系统指标做调度
+
+#+BEGIN_NOTES
+TODO：主要服务于业务监控的指标，转化为业务运营的指标
+#+END_NOTES
+
+* 总结
+
+** 产品优势
+1. 闭环，从发现问题到解决问题
+2. 架构简单，成本低
+3. agent强大的采集能力
+
+#+BEGIN_NOTES
+大概不到50台机器。
+#+END_NOTES
+
+** 产品不足
+1. 没有基于技术栈把应用标准化
+2. 缺乏报警数据分析
+3. 辅助故障排查工具不够丰富
+
+#+BEGIN_NOTES
+应用标准化后，监控，故障定位就可以标准化。
+
+1. 度量是基础能力
+2. 无人值守是通用需求
+
+#+END_NOTES

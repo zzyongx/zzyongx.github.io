@@ -1,0 +1,16 @@
+#+TITLE: hive howto
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: ^:nil
+#+OPTIONS: toc:nil
+
+* DEBUG
+1. 启动命令 --log.level=debug
+
+2. cat /tmp/x.prom | promtool check metrics
+
+
+level=debug ts=2020-08-13T10:26:47.669024832Z caller=scrape.go:857 component="scrape manager" scrape_pool=test target=http://10.162.45.189:9100/metrics/exporter msg="Scrape failed" err="context deadline exceeded"
+level=debug ts=2020-08-13T10:26:52.595639568Z caller=scrape.go:857 component="scrape manager" scrape_pool=node:exporter target=http://10.162.45.189:9100/metrics/exporter msg="Scrape failed" err="context deadline exceeded"
+
+
+超时
