@@ -1,0 +1,53 @@
+#+TITLE: 多少if语句算多
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+本文是 [[https://blog.cloudflare.com/branch-predictor/][Branch predictor: How many "if"s are too many? Including x86 and M1 benchmarks!]] 的思考、阅读笔记。
+
+本文提出了一个问题：不执行的if语句，影响性能吗？
+
+#+BEGIN_SRC c
+if (debug) {
+  log(...);
+}
+#+END_SRC
+
+* 了解分支的耗时
+对于现代CPU，一条分支指令大概需要1-20个cycle。分支可以分为：1. 无条件分支（x86的jmp）; 2. call/return; 3. 执行的条件分支; 4. 没执行的条件分支。
+其中1、2、3都是执行的分支（taken branch）。
+
+CPU的分支预测单元（BPU），可以在分支执行前，确定分支的目标（branch target）。BPU使用BTB（Branch Target Buffer）存放分支目标（和其它信息），显然它的大小很关键。
+
+* 为什么需要分支预测
+简单说，这是CPU性能要求的必然。没有分支预测，CPU的流水线、多发射、乱序执行就没法高效运转。
+
+#+BEGIN_EXAMPLE
+BR label_a;
+    X1
+    ...
+label_a:
+ 	Y1
+#+END_EXAMPLE
+
+CPU执行上面代码的逻辑，大概是这样的：
+cycle 1：CPU前端，读取BR指令，此时BR还没有解码;
+cycle 2：CPU前端有两个选择，等待BR的结果（branch target），或者取下一条指令（希望它是branch target）; 此时BR完成解码;
+cycle 3：CPU前端，取下一条指令（X1）; 后端执行BR指令;
+cycle 4：CPU后端完成BR指令的执行，前端知道自己取错指令了。
+
+在这个过程中，前端浪费了2个cycles（3和4）。分支越复杂，前端浪费的cycles越多。所以需要分支预测。
+
+* BTB
+可以写代码探测BTB的大小。在AMD EPYC 7642上得到一些结论（适用于无条件分支）。
+1. 成功的分支预测节约了7个cycles（预测成功，执行分支花费~3.4个cycles）;
+2. 在代码小于2k时，可能有uop缓存（uop是指令解码后的形式），预测成功的分支只要 ~1.5 cycles;
+3. hot loop中的分支小于4096时，无论代码大小，成功预测的分支要 ~3.4个cycles;
+4. hot loop中的分支大于4096时，分支要 ~10.5个cycles;
+5. 根据1、3、4推测BTB的大小是4096，大于4096时，分支预测总是失败;
+6. 热点代码函数调用不要多于2000（循环中的函数算一个，这里2000应该是指令地址），函数调用对应call/return两次分支，2000约是4096的一半;
+7. 没执行的条件分支几乎没有花销。
+
+* 总结
+1. x86上BTB只有4096个entries（应该和CPU的型号有关）;
+2. 热点代码小于16K（应该小于L1i就行，避免L1缓存miss）;
+3. 没执行的条件分支没有花销（但是条件的执行需要花销，例如：debug的值可能需要从内存load进缓存，这个花销可能不小）。

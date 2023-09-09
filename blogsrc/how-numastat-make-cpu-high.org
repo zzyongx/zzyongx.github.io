@@ -1,0 +1,111 @@
+#+TITLE: numastat 如何导致目标进程CPU飙升
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+问题现象：在宿主机运行numastat采集进程numa信息，K8s实例出现CPU飙升，但很快恢复，影响业务可用性。这里numastat运行在cgroup中，配额为0.2 cpu。
+
+* 背景知识
+=numastat -p pid= 统计目标进程pid的内存在各个numa的分布情况，这个过程要读取 =/proc/pid/numa_maps= =numa_maps= 是虚拟文件，内核通过遍历目标进程的vma，统计内存相关的信息，这个过程比较消耗CPU。
+
+cgroup的配额为0.2CPU，意味着CPU使用率最多20%，也就是说100ms的时间内最多运行20ms，超过20ms，进程就要被挂起，等下一个100ms周期。
+
+* 理论分析
+初步判断影响路径是这样的：
+1. numastat 运行超过0.2CPU的限制，被挂起，被挂起时，持有目标进程的 =mm->mmap_sem= 锁;
+2. 而目标进程page fault时，也需要这个锁，导致进程被卡住;
+3. 如果numastat被挂起的时间很长，进程被卡住的线程会积累很多;
+3. 随着numastat运行结束、释放 =mm->mmap_sem= 锁，大量被卡住的线程开始运行，导致CPU飙升。
+
+也就是说，目标进程的CPU有个先下降（陆续等锁）、后上升（快速获得锁）的过程，上升表现的较为明显。
+
+* 验证分析
+通过复制线上流量测试，复现了该问题。实例CPU从144%，在2秒内下降到3%，然后在下1秒上升到289%。符合理论分析。
+使用 =offcputime= 分析CPU下降的原因（下降必然是让出了CPU）。发现是 =rwsem_down_read_failed= 让出CPU，和加锁失败有关。
+
+#+BEGIN_EXAMPLE
+$ offcputime -K -p 3629 10
+  finish_task_switch
+  __sched_text_start
+  schedule
+  rwsem_down_read_failed
+  __do_page_fault
+  do_page_fault
+  page_fault
+#+END_EXAMPLE
+
+对比=rwsem_down_read_failed= 的延迟和次数，在numastat CPU节流时上升明显。
+#+BEGIN_EXAMPLE
+$ funclatency -mT -d 10 -p 3629 rwsem_down_read_failed
+
+# 正常情况
+  0 -> 1      : 105
+  2 -> 3      : 34
+128 -> 255    : 12
+256 -> 511    : 6
+512 -> 1023   : 12
+
+# numastat CPU节流时
+   0 -> 1     : 6466
+   2 -> 3     : 625
+   4 -> 7     : 359
+   8 -> 15    : 71
+  16 -> 31    : 55
+  32 -> 63    : 503
+  64 -> 127   : 277
+1024 -> 2047  : 43
+2048 -> 4095  : 190
+#+END_EXAMPLE
+
+* CPU节流
+cgroup实现cpu配额的机制是这样的：cgroup中的程序在 =cfs.cpu_period_us= 周期内，不能使用超过 =cfs.cpu_quota__us= 的CPU，如果超过，进程会被挂起。那问题来了，谁来执行这个检查呢？可用分两部分来看：
+1. 程序运行在用户态是，内核通过定时中断来检查CPU是否超配;
+2. 如果进入内核态，内核不会自己中断自己，必须运行到某些检查点函数，才检查CPU是否超配。
+
+从2可知，在内核态可能出现CPU配额限制不住的情况，只要没有到检查点，可以不受CPU配额的影响。
+
+* numastat 如何被节流
+numastat 节流可能发生在用户态、内核态。
+
+首先可以排除用户态，进程在用户态不会持有内核锁 =mm->mmap_sem= 。从设计上来讲，比较显而易见。查看内核代码，也可以印证这点：
+1. =numa_maps= 文件的 open 函数 =pid_maps_open= ，不会持有 =mm->mmap_sem= ，只是准备相关数据结构;
+2. =numa_maps= 文件的 read 函数 =seq_read= 通过 =m_start= 持有锁，通过 =show_numa_map= 读取 vma 相关信息，通过 =m_stop= 释放锁。在一次read中，完成加锁、读、解锁的过程。
+
+那只能是内核态了，可以对比 =show_numa_map= 的延迟，的确有长尾，应该和CPU节流有关。
+
+#+BEGIN_EXAMPLE
+# 因为编译优化 show_numa_map 真正的函数加上了 isra.34 后缀
+$ funclatency -mT -d 10 -p 3629 show_numa_map.isra.34
+
+# 正常情况
+  0 -> 1     : 53960
+  8 -> 15    : 90
+
+# numastat CPU节流时
+  0 -> 1     : 55615
+  8 -> 15    : 46
+ 64 -> 127   : 101
+#+END_EXAMPLE
+
+可用查看numastat CPU节流时的栈。
+#+BEGIN_EXAMPLE
+$ stackcount throttle_cfs_rq
+
+  throttle_cfs_rq
+  check_cfs_rq_runtime
+  pick_next_task_fair
+  __sched_text_start
+  preempt_schedule_common
+  _cond_resched
+  gather_pte_stats
+  walk_pgd_range
+  show_numa_map.isra.34
+  seq_read
+  vfs_read
+  ksys_read
+#+END_EXAMPLE
+
+这下问题就清楚了，在持有 =mm->mmap_sem= 锁的情况下， =gather_pte_stats= 调用 =_cond_resched= 进入CPU配额检查点。就算没有CPU节流，在持有锁的情况下调用 =_cond_resched= 本身也是一种风险。
+
+* 总结
+1. numastat 被CPU节流时，会影响目标进程的 pagefault;
+2. 进程CPU飙升前可能经历了CPU下降。

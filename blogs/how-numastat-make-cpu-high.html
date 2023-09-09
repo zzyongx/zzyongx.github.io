@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-09-09 六 22:11 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>numastat 如何导致目标进程CPU飙升</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">numastat 如何导致目标进程CPU飙升</h1>
+<p>
+问题现象：在宿主机运行numastat采集进程numa信息，K8s实例出现CPU飙升，但很快恢复，影响业务可用性。这里numastat运行在cgroup中，配额为0.2 cpu。
+</p>
+
+<div id="outline-container-org7a64341" class="outline-2">
+<h2 id="org7a64341"><span class="section-number-2">1</span> 背景知识</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<code>numastat -p pid</code> 统计目标进程pid的内存在各个numa的分布情况，这个过程要读取 <code>/proc/pid/numa_maps</code> <code>numa_maps</code> 是虚拟文件，内核通过遍历目标进程的vma，统计内存相关的信息，这个过程比较消耗CPU。
+</p>
+
+<p>
+cgroup的配额为0.2CPU，意味着CPU使用率最多20%，也就是说100ms的时间内最多运行20ms，超过20ms，进程就要被挂起，等下一个100ms周期。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org62952b7" class="outline-2">
+<h2 id="org62952b7"><span class="section-number-2">2</span> 理论分析</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+初步判断影响路径是这样的：
+</p>
+<ol class="org-ol">
+<li>numastat 运行超过0.2CPU的限制，被挂起，被挂起时，持有目标进程的 <code>mm-&gt;mmap_sem</code> 锁;</li>
+<li>而目标进程page fault时，也需要这个锁，导致进程被卡住;</li>
+<li>如果numastat被挂起的时间很长，进程被卡住的线程会积累很多;</li>
+<li>随着numastat运行结束、释放 <code>mm-&gt;mmap_sem</code> 锁，大量被卡住的线程开始运行，导致CPU飙升。</li>
+</ol>
+
+<p>
+也就是说，目标进程的CPU有个先下降（陆续等锁）、后上升（快速获得锁）的过程，上升表现的较为明显。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga8b5734" class="outline-2">
+<h2 id="orga8b5734"><span class="section-number-2">3</span> 验证分析</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+通过复制线上流量测试，复现了该问题。实例CPU从144%，在2秒内下降到3%，然后在下1秒上升到289%。符合理论分析。
+使用 <code>offcputime</code> 分析CPU下降的原因（下降必然是让出了CPU）。发现是 <code>rwsem_down_read_failed</code> 让出CPU，和加锁失败有关。
+</p>
+
+<pre class="example">
+$ offcputime -K -p 3629 10
+  finish_task_switch
+  __sched_text_start
+  schedule
+  rwsem_down_read_failed
+  __do_page_fault
+  do_page_fault
+  page_fault
+</pre>
+
+<p>
+对比<code>rwsem_down_read_failed</code> 的延迟和次数，在numastat CPU节流时上升明显。
+</p>
+<pre class="example">
+$ funclatency -mT -d 10 -p 3629 rwsem_down_read_failed
+
+# 正常情况
+  0 -&gt; 1      : 105
+  2 -&gt; 3      : 34
+128 -&gt; 255    : 12
+256 -&gt; 511    : 6
+512 -&gt; 1023   : 12
+
+# numastat CPU节流时
+   0 -&gt; 1     : 6466
+   2 -&gt; 3     : 625
+   4 -&gt; 7     : 359
+   8 -&gt; 15    : 71
+  16 -&gt; 31    : 55
+  32 -&gt; 63    : 503
+  64 -&gt; 127   : 277
+1024 -&gt; 2047  : 43
+2048 -&gt; 4095  : 190
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org9691611" class="outline-2">
+<h2 id="org9691611"><span class="section-number-2">4</span> CPU节流</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+cgroup实现cpu配额的机制是这样的：cgroup中的程序在 <code>cfs.cpu_period_us</code> 周期内，不能使用超过 <code>cfs.cpu_quota__us</code> 的CPU，如果超过，进程会被挂起。那问题来了，谁来执行这个检查呢？可用分两部分来看：
+</p>
+<ol class="org-ol">
+<li>程序运行在用户态是，内核通过定时中断来检查CPU是否超配;</li>
+<li>如果进入内核态，内核不会自己中断自己，必须运行到某些检查点函数，才检查CPU是否超配。</li>
+</ol>
+
+<p>
+从2可知，在内核态可能出现CPU配额限制不住的情况，只要没有到检查点，可以不受CPU配额的影响。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org371bc4c" class="outline-2">
+<h2 id="org371bc4c"><span class="section-number-2">5</span> numastat 如何被节流</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+numastat 节流可能发生在用户态、内核态。
+</p>
+
+<p>
+首先可以排除用户态，进程在用户态不会持有内核锁 <code>mm-&gt;mmap_sem</code> 。从设计上来讲，比较显而易见。查看内核代码，也可以印证这点：
+</p>
+<ol class="org-ol">
+<li><code>numa_maps</code> 文件的 open 函数 <code>pid_maps_open</code> ，不会持有 <code>mm-&gt;mmap_sem</code> ，只是准备相关数据结构;</li>
+<li><code>numa_maps</code> 文件的 read 函数 <code>seq_read</code> 通过 <code>m_start</code> 持有锁，通过 <code>show_numa_map</code> 读取 vma 相关信息，通过 <code>m_stop</code> 释放锁。在一次read中，完成加锁、读、解锁的过程。</li>
+</ol>
+
+<p>
+那只能是内核态了，可以对比 <code>show_numa_map</code> 的延迟，的确有长尾，应该和CPU节流有关。
+</p>
+
+<pre class="example">
+# 因为编译优化 show_numa_map 真正的函数加上了 isra.34 后缀
+$ funclatency -mT -d 10 -p 3629 show_numa_map.isra.34
+
+# 正常情况
+  0 -&gt; 1     : 53960
+  8 -&gt; 15    : 90
+
+# numastat CPU节流时
+  0 -&gt; 1     : 55615
+  8 -&gt; 15    : 46
+ 64 -&gt; 127   : 101
+</pre>
+
+<p>
+可用查看numastat CPU节流时的栈。
+</p>
+<pre class="example">
+$ stackcount throttle_cfs_rq
+
+  throttle_cfs_rq
+  check_cfs_rq_runtime
+  pick_next_task_fair
+  __sched_text_start
+  preempt_schedule_common
+  _cond_resched
+  gather_pte_stats
+  walk_pgd_range
+  show_numa_map.isra.34
+  seq_read
+  vfs_read
+  ksys_read
+</pre>
+
+<p>
+这下问题就清楚了，在持有 <code>mm-&gt;mmap_sem</code> 锁的情况下， <code>gather_pte_stats</code> 调用 <code>_cond_resched</code> 进入CPU配额检查点。就算没有CPU节流，在持有锁的情况下调用 <code>_cond_resched</code> 本身也是一种风险。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org28ef94e" class="outline-2">
+<h2 id="org28ef94e"><span class="section-number-2">6</span> 总结</h2>
+<div class="outline-text-2" id="text-6">
+<ol class="org-ol">
+<li>numastat 被CPU节流时，会影响目标进程的 pagefault;</li>
+<li>进程CPU飙升前可能经历了CPU下降。</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2023-09-09 六 22:11</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -6,10 +6,15 @@
 * 2023 癸卯年
 
 ** 经验
+[[blog: how-numastat-make-cpu-high][numastat 如何导致目标进程CPU飙升]] <2023-09-09>
+
 [[blog:how-pagecache-make-cpu-intensive-program-slow][page cache如何让cpu密集程序变慢]] <2023-09-03>
 
 ** 笔记
+
 [[blog:the-sad-state-of-linux-socket-balancing][为什么不同的nginx进程CPU使用率差别很大]] <2023-09-03>
+
+[[blog:how-many-ifs-are-too-many][多少if语句算多]] <2023-09-03>
 
 * 2020 庚子年
 
