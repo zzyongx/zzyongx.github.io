@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-09-09 六 22:11 -->
+<!-- 2023-09-09 六 22:27 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>多少if语句算多</title>
@@ -265,8 +265,8 @@ for the JavaScript code in this tag.
 </pre>
 </div>
 
-<div id="outline-container-orgda83d19" class="outline-2">
-<h2 id="orgda83d19"><span class="section-number-2">1</span> 了解分支的耗时</h2>
+<div id="outline-container-org651a878" class="outline-2">
+<h2 id="org651a878"><span class="section-number-2">1</span> 了解分支的耗时</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 对于现代CPU，一条分支指令大概需要1-20个cycle。分支可以分为：1. 无条件分支（x86的jmp）; 2. call/return; 3. 执行的条件分支; 4. 没执行的条件分支。
@@ -279,8 +279,8 @@ CPU的分支预测单元（BPU），可以在分支执行前，确定分支的�
 </div>
 </div>
 
-<div id="outline-container-orgb69d7ee" class="outline-2">
-<h2 id="orgb69d7ee"><span class="section-number-2">2</span> 为什么需要分支预测</h2>
+<div id="outline-container-orga2b67aa" class="outline-2">
+<h2 id="orga2b67aa"><span class="section-number-2">2</span> 为什么需要分支预测</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 简单说，这是CPU性能要求的必然。没有分支预测，CPU的流水线、多发射、乱序执行就没法高效运转。
@@ -289,27 +289,74 @@ CPU的分支预测单元（BPU），可以在分支执行前，确定分支的�
 <pre class="example">
 BR label_a;
     X1
-    ...
+    X2
 label_a:
  	Y1
 </pre>
 
 <p>
 CPU执行上面代码的逻辑，大概是这样的：
-cycle 1：CPU前端，读取BR指令，此时BR还没有解码;
-cycle 2：CPU前端有两个选择，等待BR的结果（branch target），或者取下一条指令（希望它是branch target）; 此时BR完成解码;
-cycle 3：CPU前端，取下一条指令（X1）; 后端执行BR指令;
-cycle 4：CPU后端完成BR指令的执行，前端知道自己取错指令了。
 </p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">CPU cycle</th>
+<th scope="col" class="org-left">前端</th>
+<th scope="col" class="org-left">后端</th>
+<th scope="col" class="org-left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">读取BR指令</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">此时BR还没有解码</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">对BR解码，读取X1指令</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">此时前端可以等待BR的执行结果（branch target）或者取下一条指令</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">对X1解码，读取X2指令</td>
+<td class="org-left">执行BR指令</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-left">读取Y1指令</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">CPU发现前端错了，根据BR的结果，重新取指令</td>
+</tr>
+</tbody>
+</table>
+
 
 <p>
-在这个过程中，前端浪费了2个cycles（3和4）。分支越复杂，前端浪费的cycles越多。所以需要分支预测。
+在这个过程中，前端浪费了2个cycles（2和3）。分支越复杂，前端浪费的cycles越多。所以需要分支预测。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org6b8164e" class="outline-2">
-<h2 id="org6b8164e"><span class="section-number-2">3</span> BTB</h2>
+<div id="outline-container-orgd6cd4cb" class="outline-2">
+<h2 id="orgd6cd4cb"><span class="section-number-2">3</span> BTB</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 可以写代码探测BTB的大小。在AMD EPYC 7642上得到一些结论（适用于无条件分支）。
@@ -326,8 +373,8 @@ cycle 4：CPU后端完成BR指令的执行，前端知道自己取错指令了�
 </div>
 </div>
 
-<div id="outline-container-orga3c3c9d" class="outline-2">
-<h2 id="orga3c3c9d"><span class="section-number-2">4</span> 总结</h2>
+<div id="outline-container-org52f28c1" class="outline-2">
+<h2 id="org52f28c1"><span class="section-number-2">4</span> 总结</h2>
 <div class="outline-text-2" id="text-4">
 <ol class="org-ol">
 <li>x86上BTB只有4096个entries（应该和CPU的型号有关）;</li>
@@ -339,7 +386,7 @@ cycle 4：CPU后端完成BR指令的执行，前端知道自己取错指令了�
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2023-09-09 六 22:11</p>
+<p class="date">Created: 2023-09-09 六 22:27</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
