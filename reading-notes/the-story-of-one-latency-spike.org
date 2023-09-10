@@ -1,0 +1,43 @@
+#+TITLE: 一次延迟尖峰的故事
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+本文是[[https://blog.cloudflare.com/the-story-of-one-latency-spike/][The story of one latency spike]]的阅读笔记。
+
+CloudFlare的CDN客户反馈有些HTTP请求非常慢，在30s+。
+
+* 复现问题
+CloudFlare复现了这个问题，在数千请求中有的请求耗时1s。在网络中1s、30s有特殊含义，它们是SYN包重传的间隔。
+
+* 网络问题吗
+用于测试的网络拓扑： =Test machine -> Internet -> Router -> Server= 。这里使用ping测试。
+| 目标   | avg RTT | max RTT |
+|--------+---------+---------|
+| Router | 11ms    | 122ms   |
+| Server | 11ms    | 1868ms  |
+
+可能是Server的问题，也可能是Router->Server网络的问题。
+
+* TCPDUMP
+在Server上使用 =tcpdump -ttt -n -i eth2 icmp= 可以清楚看到，ping请求的request和reply的间隔大于1s。这说明是Server的问题，内核遇到了麻烦。
+
+* 寻找根因
+Linux 的 =net_rx_action= 函数负责处理网络收包软中断，跟踪它的延迟，发现几乎所有包都在1ms内处理完毕，但是也有23ms的长尾，23ms对于底层包处理是灾难性的，可能导致buffer耗尽、开始丢包。需要下钻 =net_rx_action= ，寻找根因。下钻的方法是：
+
+1. 火焰图，如果能找到包含 =net_rx_action= 的栈上有明显热点，问题解决（适合OnCPU原因引发的慢）;
+2. 如果不明显，对火焰图中 =net_rx_action= 栈上的函数，分别度量其延迟（比较通用，但是OffCPU引发的慢，可能火焰图上看不到）。
+
+最终定位到 =tcp_collapse= ，平均耗时3ms，最大21ms。
+
+* TCP collapse
+Linux的receive buffer size用于限制TCP socket可用的接收缓冲大小。这个buffer不仅包含TCP数据，也包含管理TCP数据的元数据（ =sk_buffer= 240byte）。对于小包，元数据的内存消耗非常可观。当receive内存不足时，就会发生TCP collapse。
+
+TCP collapse合并=sk_buffer= ，让一个 =sk_buffer= 包含更多的TCP数据，减少元数据的开销。这个过程和 =sk_buffer= 的数量有关，也即和receive buffer大小有关。
+
+调整 =net.ipv4.tcp_rmem= 参数，从 =4096 5242880 33554432= 到 =4096 1048576 2097152= ，receive buffer的最大大小从32M降低到2M， =tcp_collapse= 的最大耗时降低到3ms。
+
+* 总结
+降低 receive buffer的大小，影响高吞吐、高延迟的连接。CloudFlare做了折中，设置为4M。
+
+* 我的思考
+调整receive buffer似乎没有解决根因，为什么receive buffer会满？是不是业务进程消费不足，导致请求积压？
