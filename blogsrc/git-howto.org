@@ -2,37 +2,26 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
-升级git到最新版
+* branch 相关
 
-SSL connect error
-升级libcurl到最新版
-
+列出所有分支：
 =git branch=
+
+删除分支：
 =git branch -d branch-to-rm=
 =git branch -D branch-to-rm-anyway=
 
+切换到存在的分支：
 =git checkout exists-branch=
+
+创建分支，并切换分支：
 =git checkout -b local-branch=
+
+重命名当前分支：
+=git branch -m new-branch-name=
+
+切换远程分支：
 =git checkout -b remote-branch origin/remote-branch=
-
-=git remote rm origin=
-=git remote add origin git-path=
-=git push -u origin master --all=
-
-=git commit --amend -m "new commit message"=
-
-=git merge --no-ff branch-to-be-merged=
-
-列出所有tag
-=git tag=
-
-从tag创建branch
-=git branch new-branch-name tag-name=
-
-=git clone --bare http://zzyong@git.example/zzyong/small.git=
-=git push --mirror http://zzyong@git.example/zzyong/big.git=
-
-=git diff --cached=
 
 推送本地分支 issue25
 =git push origin issue25=
@@ -40,7 +29,54 @@ SSL connect error
 删除远程分支 issue25
 =git push origin :issue25=
 
+合并分支：
+=git merge --no-ff branch-to-be-merged=
+
+* tag 相关
+列出所有tag：
+=git tag -l=
+
+获取所有tag：
+=git fetch --tags=
+
+从tag创建branch：
+=git branch new-branch-name tag-name=
+=git checkout tag-name -b new-branch-name=
+
+* git 源相关
+添加源：
+=git remote add remote-name remote-address=
+
+删除源：
+=git remote rm origin=
+
+指定源名称：
+=git fetch -tags remote-name=
+
+列出所有源：
+=git remote -v=
+
+
+* log 相关
+查看修改记录：
+=git log=
+=git log -- filename=
+
+* 其它
+=git clone --bare http://zzyong@git.example/zzyong/small.git=
+=git push --mirror http://zzyong@git.example/zzyong/big.git=
+
+=git diff --cached=
+
+
+=git push -u origin master --all=
+
+=git commit --amend -m "new commit message"=
+
+
 * 常见错误
+首次使用git碰到错误，先检查git是否最新版本。
+
 ** git push error: failed to push some refs to
 通常是因为remote端发生了更新，需要先更新本地repo，执行 =git pull=
 

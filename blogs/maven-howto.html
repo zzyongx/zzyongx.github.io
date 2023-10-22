@@ -3,23 +3,30 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
+<!-- 2023-10-22 日 12:01 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Maven HowTo</title>
-<!-- 2017-03-12 日 11:19 -->
-<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta  name="generator" content="Org-mode" />
-<meta  name="author" content="zhengzhiyong" />
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zhengzhiyong" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
-  .title  { text-align: center; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
   .todo   { font-family: monospace; color: red; }
-  .done   { color: green; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
   .tag    { background-color: #eee; font-family: monospace;
             padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
-  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
-  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
-  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
   .underline { text-decoration: underline; }
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
@@ -46,30 +53,127 @@
     border: 1px solid black;
   }
   pre.src:hover:before { display: inline;}
-  pre.src-sh:before    { content: 'sh'; }
-  pre.src-bash:before  { content: 'sh'; }
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
   pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-R:before     { content: 'R'; }
-  pre.src-perl:before  { content: 'Perl'; }
-  pre.src-java:before  { content: 'Java'; }
-  pre.src-sql:before   { content: 'SQL'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
 
   table { border-collapse:collapse; }
   caption.t-above { caption-side: top; }
   caption.t-bottom { caption-side: bottom; }
   td, th { vertical-align:top;  }
-  th.right  { text-align: center;  }
-  th.left   { text-align: center;   }
-  th.center { text-align: center; }
-  td.right  { text-align: right;  }
-  td.left   { text-align: left;   }
-  td.center { text-align: center; }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
   dt { font-weight: bold; }
-  .footpara:nth-child(2) { display: inline; }
-  .footpara { display: block; }
+  .footpara { display: inline; }
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -86,6 +190,7 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
@@ -94,12 +199,13 @@
 <script src="/jslib/bootstrap.min.js"></script>
 <script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -148,48 +254,45 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1. maven 简介</a></li>
-<li><a href="#sec-2">2. 安装 maven</a></li>
-<li><a href="#sec-3">3. 修改maven源</a></li>
-<li><a href="#sec-4">4. 创建项目</a></li>
-<li><a href="#sec-5">5. 样板 pom.xml</a></li>
-<li><a href="#sec-6">6. 常用的maven命令和选项</a></li>
-<li><a href="#sec-7">7. mvn test 常用选项</a></li>
-<li><a href="#sec-8">8. 管理依赖</a>
+<li><a href="#org8715923">1. maven 简介</a></li>
+<li><a href="#org0ccae8a">2. 安装 maven</a></li>
+<li><a href="#org9ce873d">3. 修改maven源</a></li>
+<li><a href="#org767a15b">4. 创建项目</a></li>
+<li><a href="#org05e7d72">5. 样板 pom.xml</a></li>
+<li><a href="#org807934e">6. 常用的maven命令和选项</a></li>
+<li><a href="#org19623eb">7. mvn test 常用选项</a></li>
+<li><a href="#orgb9057a6">8. 管理依赖</a>
 <ul>
-<li><a href="#sec-8-1">8.1. 处理maven仓库中不存在的库</a></li>
+<li><a href="#org0e4541e">8.1. 处理maven仓库中不存在的库</a></li>
 </ul>
 </li>
-<li><a href="#sec-9">9. 打出多种格式的包</a></li>
-<li><a href="#sec-10">10. 常用的maven插件</a>
+<li><a href="#org8c2ec03">9. 打出多种格式的包</a></li>
+<li><a href="#org37fbcc4">10. 常用的maven插件</a>
 <ul>
-<li><a href="#sec-10-1">10.1. maven-compiler-plugin 插件</a></li>
-<li><a href="#sec-10-2">10.2. maven-war-plugin</a></li>
-<li><a href="#sec-10-3">10.3. maven-jar-plugin</a></li>
-<li><a href="#sec-10-4">10.4. maven-dependency-plugin</a></li>
-<li><a href="#sec-10-5">10.5. maven-assembly-plugin</a></li>
-<li><a href="#sec-10-6">10.6. jetty-maven-plugin</a></li>
-<li><a href="#sec-10-7">10.7. maven-pmd-plugin</a></li>
-<li><a href="#sec-10-8">10.8. findbugs-maven-plugin</a></li>
+<li><a href="#org7997cad">10.1. maven-compiler-plugin 插件</a></li>
+<li><a href="#orgb6e37dd">10.2. maven-war-plugin</a></li>
+<li><a href="#org97d7d05">10.3. maven-jar-plugin</a></li>
+<li><a href="#orgf7c9e21">10.4. maven-dependency-plugin</a></li>
+<li><a href="#org2f0150a">10.5. maven-assembly-plugin</a></li>
+<li><a href="#org6afd04e">10.6. jetty-maven-plugin</a></li>
+<li><a href="#org4800f7c">10.7. maven-pmd-plugin</a></li>
+<li><a href="#org0957e53">10.8. findbugs-maven-plugin</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> maven 简介</h2>
+<div id="outline-container-org8715923" class="outline-2">
+<h2 id="org8715923"><span class="section-number-2">1</span> maven 简介</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 我们先不谈maven是什么，我们先说，我们开发一个应用需要什么
 </p>
 <ul class="org-ul">
-<li>编译，测试，运行，打包
-</li>
-<li>管理依赖
-</li>
-<li>项目报告
-</li>
+<li>编译，测试，运行，打包</li>
+<li>管理依赖</li>
+<li>项目报告</li>
 </ul>
 <p>
 好的，maven以统一的形式提供了这些功能，虽然几乎所有功能都是以插件的形式提供的。
@@ -197,15 +300,14 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-sec-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> 安装 maven</h2>
+<div id="outline-container-org0ccae8a" class="outline-2">
+<h2 id="org0ccae8a"><span class="section-number-2">2</span> 安装 maven</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 安装很简单，下载源码，解压，把bin目录添加到 PATH 路径即可。
 </p>
 <div class="org-src-container">
-
-<pre class="src src-bash"># mvn -version
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">mvn -version</span>
 Apache Maven 3.3.3 (7994120775791599e205a5524ec3e0dfe41d4a06; 2015-04-22T19:57:37+08:00)
 </pre>
 </div>
@@ -216,8 +318,8 @@ Apache Maven 3.3.3 (7994120775791599e205a5524ec3e0dfe41d4a06; 2015-04-22T19:57:3
 </div>
 </div>
 
-<div id="outline-container-sec-3" class="outline-2">
-<h2 id="sec-3"><span class="section-number-2">3</span> 修改maven源</h2>
+<div id="outline-container-org9ce873d" class="outline-2">
+<h2 id="org9ce873d"><span class="section-number-2">3</span> 修改maven源</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 maven的默认源在国内很慢，在 <code>$MAVEN_HOME/conf/settings.xml</code> 的 <b>mirrors</b> 下增加国内的maven镜像源，下载依赖时提速明显。
@@ -233,27 +335,26 @@ maven的默认源在国内很慢，在 <code>$MAVEN_HOME/conf/settings.xml</code
 </div>
 </div>
 
-<div id="outline-container-sec-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> 创建项目</h2>
+<div id="outline-container-org767a15b" class="outline-2">
+<h2 id="org767a15b"><span class="section-number-2">4</span> 创建项目</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 要使用maven，项目必须符合一定的目录规范，最简单的方法就是用maven来创建项目。
 </p>
 <div class="org-src-container">
-
-<pre class="src src-bash"># mvn archetype:generate -DgroupId=example -DartifactId=howto -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
-# tree howto
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">mvn archetype:generate -DgroupId=example -DartifactId=howto -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">tree howto</span>
 howto/
-├── pom.xml
-└── src
-    ├── main
-    │  └── java
-    │       └── example
-    │           └── App.java
-    └── test
-        └── java
-            └── example
-                └── AppTest.java
+&#9500;&#9472;&#9472; pom.xml
+&#9492;&#9472;&#9472; src
+    &#9500;&#9472;&#9472; main
+    &#9474;&#160; &#9492;&#9472;&#9472; java
+    &#9474;&#160;&#160;     &#9492;&#9472;&#9472; example
+    &#9474;&#160;&#160;         &#9492;&#9472;&#9472; App.java
+    &#9492;&#9472;&#9472; test
+        &#9492;&#9472;&#9472; java
+            &#9492;&#9472;&#9472; example
+                &#9492;&#9472;&#9472; AppTest.java
 </pre>
 </div>
 </div>
@@ -261,186 +362,188 @@ howto/
 
 
 
-<div id="outline-container-sec-5" class="outline-2">
-<h2 id="sec-5"><span class="section-number-2">5</span> 样板 pom.xml</h2>
+<div id="outline-container-org05e7d72" class="outline-2">
+<h2 id="org05e7d72"><span class="section-number-2">5</span> 样板 pom.xml</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 除了目录结构外，pom.xml 是 maven 的核心， <code>package</code> 是包的类型 <code>jar</code> 或者 <code>war</code> ， <code>properties</code> 中定义的值可以在其它地方引用， <code>dependencies</code> 定义依赖， <code>build</code> 定义构建过程需要的插件， <code>reporting</code> 定义构建完后的一些报告插件。maven的大部分功能都是通过插件提供的，后面会说一些比较有用的插件。
 </p>
 
 <div class="org-src-container">
+<pre class="src src-xml">&lt;<span style="color: #87cefa;">project</span> <span style="color: #b0c4de;">xmlns</span>=<span style="color: #ffa07a;">"http://maven.apache.org/POM/4.0.0"</span>
+         <span style="color: #b0c4de;">xmlns</span>:<span style="color: #eedd82;">xsi</span>=<span style="color: #ffa07a;">"http://www.w3.org/2001/XMLSchema-instance"</span>
+         <span style="color: #b0c4de;">xsi</span>:<span style="color: #eedd82;">schemaLocation</span>=<span style="color: #ffa07a;">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span>&gt;
 
-<pre class="src src-xml">&lt;<span style="color: #0000ff; font-weight: bold;">project</span> <span style="color: #483d8b;">xmlns</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">http://maven.apache.org/POM/4.0.0</span><span style="color: #8b2252;">"</span>
-         <span style="color: #483d8b;">xmlns</span>:<span style="color: #a0522d;">xsi</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">http://www.w3.org/2001/XMLSchema-instance</span><span style="color: #8b2252;">"</span>
-         <span style="color: #483d8b;">xsi</span>:<span style="color: #a0522d;">schemaLocation</span>=<span style="color: #8b2252;">"</span><span style="color: #8b2252;">http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd</span><span style="color: #8b2252;">"</span>&gt;
+  &lt;<span style="color: #87cefa;">modelVersion</span>&gt;4.0.0&lt;/<span style="color: #87cefa;">modelVersion</span>&gt;
+  &lt;<span style="color: #87cefa;">groupId</span>&gt;example&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+  &lt;<span style="color: #87cefa;">artifactId</span>&gt;howto&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+  &lt;<span style="color: #87cefa;">packaging</span>&gt;war&lt;/<span style="color: #87cefa;">packaging</span>&gt;
+  &lt;<span style="color: #87cefa;">version</span>&gt;1.0-SNAPSHOT&lt;/<span style="color: #87cefa;">version</span>&gt;
+  &lt;<span style="color: #87cefa;">name</span>&gt;howto&lt;/<span style="color: #87cefa;">name</span>&gt;
+  &lt;<span style="color: #87cefa;">url</span>&gt;http://maven.apache.org&lt;/<span style="color: #87cefa;">url</span>&gt;
 
-  &lt;<span style="color: #0000ff; font-weight: bold;">modelVersion</span>&gt;4.0.0&lt;/<span style="color: #0000ff; font-weight: bold;">modelVersion</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;example&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;howto&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">packaging</span>&gt;war&lt;/<span style="color: #0000ff; font-weight: bold;">packaging</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;1.0-SNAPSHOT&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">name</span>&gt;howto&lt;/<span style="color: #0000ff; font-weight: bold;">name</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">url</span>&gt;http://maven.apache.org&lt;/<span style="color: #0000ff; font-weight: bold;">url</span>&gt;
+  &lt;<span style="color: #87cefa;">properties</span>&gt;
+    &lt;<span style="color: #87cefa;">java.version</span>&gt;1.8&lt;/<span style="color: #87cefa;">java.version</span>&gt;
+    &lt;<span style="color: #87cefa;">spring.version</span>&gt;4.2.5.RELEASE&lt;/<span style="color: #87cefa;">spring.version</span>&gt;
+    &lt;<span style="color: #87cefa;">jetty.http.port</span>&gt;8888&lt;/<span style="color: #87cefa;">jetty.http.port</span>&gt;
+    &lt;<span style="color: #87cefa;">project.build.sourceEncoding</span>&gt;UTF-8&lt;/<span style="color: #87cefa;">project.build.sourceEncoding</span>&gt;
+  &lt;/<span style="color: #87cefa;">properties</span>&gt;
 
-  &lt;<span style="color: #0000ff; font-weight: bold;">properties</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">java.version</span>&gt;1.8&lt;/<span style="color: #0000ff; font-weight: bold;">java.version</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">spring.version</span>&gt;4.2.5.RELEASE&lt;/<span style="color: #0000ff; font-weight: bold;">spring.version</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">jetty.http.port</span>&gt;8888&lt;/<span style="color: #0000ff; font-weight: bold;">jetty.http.port</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">project.build.sourceEncoding</span>&gt;UTF-8&lt;/<span style="color: #0000ff; font-weight: bold;">project.build.sourceEncoding</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">properties</span>&gt;
+  &lt;<span style="color: #87cefa;">dependencies</span>&gt;
+    &lt;<span style="color: #87cefa;">dependency</span>&gt;
+      &lt;<span style="color: #87cefa;">groupId</span>&gt;javax.servlet&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+      &lt;<span style="color: #87cefa;">artifactId</span>&gt;javax.servlet-api&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+      &lt;<span style="color: #87cefa;">version</span>&gt;3.1.0&lt;/<span style="color: #87cefa;">version</span>&gt;
+    &lt;/<span style="color: #87cefa;">dependency</span>&gt;
 
-  &lt;<span style="color: #0000ff; font-weight: bold;">dependencies</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;javax.servlet&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;javax.servlet-api&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;3.1.0&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
+    &lt;<span style="color: #87cefa;">dependency</span>&gt;
+      &lt;<span style="color: #87cefa;">groupId</span>&gt;org.springframework&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+      &lt;<span style="color: #87cefa;">artifactId</span>&gt;spring-web&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+      &lt;<span style="color: #87cefa;">version</span>&gt;${spring.version}&lt;/<span style="color: #87cefa;">version</span>&gt;
+    &lt;/<span style="color: #87cefa;">dependency</span>&gt;
+    &lt;<span style="color: #87cefa;">dependency</span>&gt;
+      &lt;<span style="color: #87cefa;">groupId</span>&gt;org.springframework&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+      &lt;<span style="color: #87cefa;">artifactId</span>&gt;spring-webmvc&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+      &lt;<span style="color: #87cefa;">version</span>&gt;${spring.version}&lt;/<span style="color: #87cefa;">version</span>&gt;
+    &lt;/<span style="color: #87cefa;">dependency</span>&gt;
+    &lt;<span style="color: #87cefa;">dependency</span>&gt;
+      &lt;<span style="color: #87cefa;">groupId</span>&gt;org.springframework&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+      &lt;<span style="color: #87cefa;">artifactId</span>&gt;spring-aop&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+      &lt;<span style="color: #87cefa;">version</span>&gt;${spring.version}&lt;/<span style="color: #87cefa;">version</span>&gt;
+    &lt;/<span style="color: #87cefa;">dependency</span>&gt;
+    &lt;<span style="color: #87cefa;">dependency</span>&gt;
+      &lt;<span style="color: #87cefa;">groupId</span>&gt;org.hibernate&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+      &lt;<span style="color: #87cefa;">artifactId</span>&gt;hibernate-validator&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+      &lt;<span style="color: #87cefa;">version</span>&gt;5.2.4.Final&lt;/<span style="color: #87cefa;">version</span>&gt;
+    &lt;/<span style="color: #87cefa;">dependency</span>&gt;
+    &lt;<span style="color: #87cefa;">dependency</span>&gt;
+      &lt;<span style="color: #87cefa;">groupId</span>&gt;org.aspectj&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+      &lt;<span style="color: #87cefa;">artifactId</span>&gt;aspectjweaver&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+      &lt;<span style="color: #87cefa;">version</span>&gt;1.8.9&lt;/<span style="color: #87cefa;">version</span>&gt;
+    &lt;/<span style="color: #87cefa;">dependency</span>&gt;
 
-    &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.springframework&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;spring-web&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;${spring.version}&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.springframework&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;spring-webmvc&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;${spring.version}&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.springframework&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;spring-aop&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;${spring.version}&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.hibernate&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;hibernate-validator&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;5.2.4.Final&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.aspectj&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;aspectjweaver&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;1.8.9&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
+    &lt;<span style="color: #87cefa;">dependency</span>&gt;
+      &lt;<span style="color: #87cefa;">groupId</span>&gt;junit&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+      &lt;<span style="color: #87cefa;">artifactId</span>&gt;junit&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+      &lt;<span style="color: #87cefa;">version</span>&gt;4.12&lt;/<span style="color: #87cefa;">version</span>&gt;
+      &lt;<span style="color: #87cefa;">scope</span>&gt;test&lt;/<span style="color: #87cefa;">scope</span>&gt;
+    &lt;/<span style="color: #87cefa;">dependency</span>&gt;
+  &lt;/<span style="color: #87cefa;">dependencies</span>&gt;
 
-    &lt;<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;junit&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;junit&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;4.12&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">scope</span>&gt;test&lt;/<span style="color: #0000ff; font-weight: bold;">scope</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">dependency</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">dependencies</span>&gt;
-
-  &lt;<span style="color: #0000ff; font-weight: bold;">build</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">plugins</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;maven-compiler-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;3.3&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-          &lt;<span style="color: #0000ff; font-weight: bold;">compilerArgs</span>&gt;
-            &lt;<span style="color: #0000ff; font-weight: bold;">arg</span>&gt;-Xlint:unchecked&lt;/<span style="color: #0000ff; font-weight: bold;">arg</span>&gt;
-            &lt;<span style="color: #0000ff; font-weight: bold;">arg</span>&gt;-Xlint:deprecation&lt;/<span style="color: #0000ff; font-weight: bold;">arg</span>&gt;
-          &lt;/<span style="color: #0000ff; font-weight: bold;">compilerArgs</span>&gt;
-          &lt;<span style="color: #0000ff; font-weight: bold;">source</span>&gt;${java.version}&lt;/<span style="color: #0000ff; font-weight: bold;">source</span>&gt;
-          &lt;<span style="color: #0000ff; font-weight: bold;">target</span>&gt;${java.version}&lt;/<span style="color: #0000ff; font-weight: bold;">target</span>&gt;
-        &lt;/<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;maven-war-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;2.6&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-          &lt;<span style="color: #0000ff; font-weight: bold;">packagingExcludes</span>&gt;
+  &lt;<span style="color: #87cefa;">build</span>&gt;
+    &lt;<span style="color: #87cefa;">plugins</span>&gt;
+      &lt;<span style="color: #87cefa;">plugin</span>&gt;
+        &lt;<span style="color: #87cefa;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+        &lt;<span style="color: #87cefa;">artifactId</span>&gt;maven-compiler-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+        &lt;<span style="color: #87cefa;">version</span>&gt;3.3&lt;/<span style="color: #87cefa;">version</span>&gt;
+        &lt;<span style="color: #87cefa;">configuration</span>&gt;
+          &lt;<span style="color: #87cefa;">compilerArgs</span>&gt;
+            &lt;<span style="color: #87cefa;">arg</span>&gt;-Xlint:unchecked&lt;/<span style="color: #87cefa;">arg</span>&gt;
+            &lt;<span style="color: #87cefa;">arg</span>&gt;-Xlint:deprecation&lt;/<span style="color: #87cefa;">arg</span>&gt;
+          &lt;/<span style="color: #87cefa;">compilerArgs</span>&gt;
+          &lt;<span style="color: #87cefa;">source</span>&gt;${java.version}&lt;/<span style="color: #87cefa;">source</span>&gt;
+          &lt;<span style="color: #87cefa;">target</span>&gt;${java.version}&lt;/<span style="color: #87cefa;">target</span>&gt;
+        &lt;/<span style="color: #87cefa;">configuration</span>&gt;
+      &lt;/<span style="color: #87cefa;">plugin</span>&gt;
+      &lt;<span style="color: #87cefa;">plugin</span>&gt;
+        &lt;<span style="color: #87cefa;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+        &lt;<span style="color: #87cefa;">artifactId</span>&gt;maven-war-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+        &lt;<span style="color: #87cefa;">version</span>&gt;2.6&lt;/<span style="color: #87cefa;">version</span>&gt;
+        &lt;<span style="color: #87cefa;">configuration</span>&gt;
+          &lt;<span style="color: #87cefa;">packagingExcludes</span>&gt;
             WEB-INF/lib/slf4j-api-*.jar
-          &lt;/<span style="color: #0000ff; font-weight: bold;">packagingExcludes</span>&gt;
-          &lt;<span style="color: #0000ff; font-weight: bold;">failOnMissingWebXml</span>&gt;false&lt;/<span style="color: #0000ff; font-weight: bold;">failOnMissingWebXml</span>&gt;
-        &lt;/<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.eclipse.jetty&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;jetty-maven-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;9.3.4.RC1&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-          &lt;<span style="color: #0000ff; font-weight: bold;">httpConnector</span>&gt;
-            &lt;<span style="color: #0000ff; font-weight: bold;">port</span>&gt;${jetty.http.port}&lt;/<span style="color: #0000ff; font-weight: bold;">port</span>&gt;
-          &lt;/<span style="color: #0000ff; font-weight: bold;">httpConnector</span>&gt;
-        &lt;/<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">plugins</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">build</span>&gt;
+          &lt;/<span style="color: #87cefa;">packagingExcludes</span>&gt;
+          &lt;<span style="color: #87cefa;">failOnMissingWebXml</span>&gt;false&lt;/<span style="color: #87cefa;">failOnMissingWebXml</span>&gt;
+        &lt;/<span style="color: #87cefa;">configuration</span>&gt;
+      &lt;/<span style="color: #87cefa;">plugin</span>&gt;
+      &lt;<span style="color: #87cefa;">plugin</span>&gt;
+        &lt;<span style="color: #87cefa;">groupId</span>&gt;org.eclipse.jetty&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+        &lt;<span style="color: #87cefa;">artifactId</span>&gt;jetty-maven-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+        &lt;<span style="color: #87cefa;">version</span>&gt;9.3.4.RC1&lt;/<span style="color: #87cefa;">version</span>&gt;
+        &lt;<span style="color: #87cefa;">configuration</span>&gt;
+          &lt;<span style="color: #87cefa;">httpConnector</span>&gt;
+            &lt;<span style="color: #87cefa;">port</span>&gt;${jetty.http.port}&lt;/<span style="color: #87cefa;">port</span>&gt;
+          &lt;/<span style="color: #87cefa;">httpConnector</span>&gt;
+        &lt;/<span style="color: #87cefa;">configuration</span>&gt;
+      &lt;/<span style="color: #87cefa;">plugin</span>&gt;
+    &lt;/<span style="color: #87cefa;">plugins</span>&gt;
+  &lt;/<span style="color: #87cefa;">build</span>&gt;
 
-  &lt;<span style="color: #0000ff; font-weight: bold;">reporting</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">plugins</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;maven-pmd-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;3.6&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.codehaus.mojo&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;findbugs-maven-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;3.0.3&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-          &lt;<span style="color: #0000ff; font-weight: bold;">excludeFilterFile</span>&gt;findbugs-exclude.xml&lt;/<span style="color: #0000ff; font-weight: bold;">excludeFilterFile</span>&gt;
-        &lt;/<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">plugins</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">reporting</span>&gt;
-&lt;/<span style="color: #0000ff; font-weight: bold;">project</span>&gt;
+  &lt;<span style="color: #87cefa;">reporting</span>&gt;
+    &lt;<span style="color: #87cefa;">plugins</span>&gt;
+      &lt;<span style="color: #87cefa;">plugin</span>&gt;
+        &lt;<span style="color: #87cefa;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+        &lt;<span style="color: #87cefa;">artifactId</span>&gt;maven-pmd-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+        &lt;<span style="color: #87cefa;">version</span>&gt;3.6&lt;/<span style="color: #87cefa;">version</span>&gt;
+      &lt;/<span style="color: #87cefa;">plugin</span>&gt;
+      &lt;<span style="color: #87cefa;">plugin</span>&gt;
+        &lt;<span style="color: #87cefa;">groupId</span>&gt;org.codehaus.mojo&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+        &lt;<span style="color: #87cefa;">artifactId</span>&gt;findbugs-maven-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+        &lt;<span style="color: #87cefa;">version</span>&gt;3.0.3&lt;/<span style="color: #87cefa;">version</span>&gt;
+        &lt;<span style="color: #87cefa;">configuration</span>&gt;
+          &lt;<span style="color: #87cefa;">excludeFilterFile</span>&gt;findbugs-exclude.xml&lt;/<span style="color: #87cefa;">excludeFilterFile</span>&gt;
+        &lt;/<span style="color: #87cefa;">configuration</span>&gt;
+      &lt;/<span style="color: #87cefa;">plugin</span>&gt;
+    &lt;/<span style="color: #87cefa;">plugins</span>&gt;
+  &lt;/<span style="color: #87cefa;">reporting</span>&gt;
+&lt;/<span style="color: #87cefa;">project</span>&gt;
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-sec-6" class="outline-2">
-<h2 id="sec-6"><span class="section-number-2">6</span> 常用的maven命令和选项</h2>
+<div id="outline-container-org807934e" class="outline-2">
+<h2 id="org807934e"><span class="section-number-2">6</span> 常用的maven命令和选项</h2>
 <div class="outline-text-2" id="text-6">
 <ul class="org-ul">
-<li>mvn compile 编译
-</li>
-<li>mvn package 打 <code>war</code> 或者 <code>jar</code> 包
-</li>
-<li>mvn clean 清除 package 或其它过程中产生的中间文件
-</li>
-<li>mvn dependency:help 查看 dependency 插件的帮助
-</li>
-<li>mvn site 查看项目报告，把 target/site 配置到 http doc 目录，可以以web方式查看
-</li>
+<li>mvn compile 编译</li>
+<li>mvn test-compile 仅编译测试</li>
+<li>mvn package 打 <code>war</code> 或者 <code>jar</code> 包</li>
+<li>mvn clean 清除 package 或其它过程中产生的中间文件</li>
+<li>mvn dependency:help 查看 dependency 插件的帮助</li>
+<li>mvn site 查看项目报告，把 target/site 配置到 http doc 目录，可以以web方式查看</li>
+<li>-T xC 使用x个cpu，例如：mvn test -T 1C，使用1个CPU运行mvn test</li>
 </ul>
 
+
 <p>
-通过 -D 参数指定环境变量，例如 <code>-Dmaven.test.skip=true</code> 用来跳过测试。
 通过 <code>MAVEN_OPTS</code> 环境变量，可以设置java的启动参数，例如 <code>export MAVEN_OPTS="-Xmx512M -Xms512M"</code>
 </p>
 
 <p>
 目标是可以组合的，例如 mvn clean package jetty:run
 </p>
-</div>
-</div>
 
-<div id="outline-container-sec-7" class="outline-2">
-<h2 id="sec-7"><span class="section-number-2">7</span> mvn test 常用选项</h2>
-<div class="outline-text-2" id="text-7">
+<p>
+跳过某些插件的方法似乎是通用的：
+</p>
 <ul class="org-ul">
-<li>-Dtest=TestCircle 只测试 TestCircle
-</li>
-<li>-Dtest=TestCi*le  模糊匹配
-</li>
-<li>-Dtest=TestSquare,TestCi*le 指定多个
-</li>
-<li>-Dtest=TestCircle#mytest 指定方法
-</li>
-<li>-Dtest=TestCircle#test* 模糊匹配
-</li>
-<li>-Dtest=TestCircle#testOne+testTwo 指定多个方法
-</li>
+<li>跳过测试插件 maven-test-plugin，-Dmaven.test.skip=true</li>
+<li>跳过 maven-antrun-plugin，-Dmaven.antrun.skip=true</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-sec-8" class="outline-2">
-<h2 id="sec-8"><span class="section-number-2">8</span> 管理依赖</h2>
+<div id="outline-container-org19623eb" class="outline-2">
+<h2 id="org19623eb"><span class="section-number-2">7</span> mvn test 常用选项</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li>-Dtest=my.package.TestCircle 只测试 TestCircle</li>
+<li>-Dtest=my.package.TestCi*le  模糊匹配</li>
+<li>-Dtest=my.package.TestSquare,my.package.TestCi*le 指定多个</li>
+<li>-Dtest=my.package.TestCircle#mytest 指定方法</li>
+<li>-Dtest=my.package.TestCircle#test* 模糊匹配</li>
+<li>-Dtest=my.package.TestCircle#testOne+testTwo 指定多个方法</li>
+</ul>
+
+<p>
+<b>注意</b> 这里TestCircle在my.package下，一定要带上包名。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb9057a6" class="outline-2">
+<h2 id="orgb9057a6"><span class="section-number-2">8</span> 管理依赖</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 通过 <code>dependency</code> 填写依赖，maven会在本地缓存一份数据 <code>$HOME/.m2/repository</code>
@@ -448,18 +551,17 @@ howto/
 </p>
 </div>
 
-<div id="outline-container-sec-8-1" class="outline-3">
-<h3 id="sec-8-1"><span class="section-number-3">8.1</span> 处理maven仓库中不存在的库</h3>
+<div id="outline-container-org0e4541e" class="outline-3">
+<h3 id="org0e4541e"><span class="section-number-3">8.1</span> 处理maven仓库中不存在的库</h3>
 <div class="outline-text-3" id="text-8-1">
 <p>
 有时候会碰到jar包不在标准maven仓库的情况，这时有两种选择，一种是自己搭建maven仓库，另一种是把jar把安装到maven缓存中，这里介绍第二种方法。
 </p>
 
 <div class="org-src-container">
-
-<pre class="src src-bash"># download jar
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">download jar</span>
 curl http://path-to-jar/org.patchca.patchca-0.6.0.jar -o org.patchca.patchca-0.6.0.jar
-# install jar to local mvn cache
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">install jar to local mvn cache</span>
 mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patchca -DartifactId=patchca -Dversion=0.6.0 -Dpackaging=jar
 </pre>
 </div>
@@ -467,8 +569,8 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-sec-9" class="outline-2">
-<h2 id="sec-9"><span class="section-number-2">9</span> 打出多种格式的包</h2>
+<div id="outline-container-org8c2ec03" class="outline-2">
+<h2 id="org8c2ec03"><span class="section-number-2">9</span> 打出多种格式的包</h2>
 <div class="outline-text-2" id="text-9">
 <p>
 假设应用除了提供web接口（这需要应用打包成war），还提供了一些小命令（这些小命令对war里面的class有依赖），此时除了war外，再打包出一个jar包供小命令用是个不错的选择。
@@ -480,11 +582,12 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-sec-10" class="outline-2">
-<h2 id="sec-10"><span class="section-number-2">10</span> 常用的maven插件</h2>
+<div id="outline-container-org37fbcc4" class="outline-2">
+<h2 id="org37fbcc4"><span class="section-number-2">10</span> 常用的maven插件</h2>
 <div class="outline-text-2" id="text-10">
-</div><div id="outline-container-sec-10-1" class="outline-3">
-<h3 id="sec-10-1"><span class="section-number-3">10.1</span> maven-compiler-plugin 插件</h3>
+</div>
+<div id="outline-container-org7997cad" class="outline-3">
+<h3 id="org7997cad"><span class="section-number-3">10.1</span> maven-compiler-plugin 插件</h3>
 <div class="outline-text-3" id="text-10-1">
 <p>
 编译插件，配置编译选项
@@ -492,8 +595,8 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-sec-10-2" class="outline-3">
-<h3 id="sec-10-2"><span class="section-number-3">10.2</span> maven-war-plugin</h3>
+<div id="outline-container-orgb6e37dd" class="outline-3">
+<h3 id="orgb6e37dd"><span class="section-number-3">10.2</span> maven-war-plugin</h3>
 <div class="outline-text-3" id="text-10-2">
 <p>
 打war包插件，配置打包选项
@@ -501,100 +604,97 @@ mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patc
 </div>
 </div>
 
-<div id="outline-container-sec-10-3" class="outline-3">
-<h3 id="sec-10-3"><span class="section-number-3">10.3</span> maven-jar-plugin</h3>
+<div id="outline-container-org97d7d05" class="outline-3">
+<h3 id="org97d7d05"><span class="section-number-3">10.3</span> maven-jar-plugin</h3>
 <div class="outline-text-3" id="text-10-3">
 <p>
 打jar包插件，不包含依赖
 </p>
 <div class="org-src-container">
-
-<pre class="src src-xml">&lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;maven-jar-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;2.6&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">executions</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">execution</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">id</span>&gt;make-a-jar&lt;/<span style="color: #0000ff; font-weight: bold;">id</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">phase</span>&gt;package&lt;/<span style="color: #0000ff; font-weight: bold;">phase</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">goals</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">goal</span>&gt;jar&lt;/<span style="color: #0000ff; font-weight: bold;">goal</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">goals</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">execution</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">executions</span>&gt;
-&lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
+<pre class="src src-xml">&lt;<span style="color: #87cefa;">plugin</span>&gt;
+  &lt;<span style="color: #87cefa;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+  &lt;<span style="color: #87cefa;">artifactId</span>&gt;maven-jar-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+  &lt;<span style="color: #87cefa;">version</span>&gt;2.6&lt;/<span style="color: #87cefa;">version</span>&gt;
+  &lt;<span style="color: #87cefa;">executions</span>&gt;
+    &lt;<span style="color: #87cefa;">execution</span>&gt;
+      &lt;<span style="color: #87cefa;">id</span>&gt;make-a-jar&lt;/<span style="color: #87cefa;">id</span>&gt;
+      &lt;<span style="color: #87cefa;">phase</span>&gt;package&lt;/<span style="color: #87cefa;">phase</span>&gt;
+      &lt;<span style="color: #87cefa;">goals</span>&gt;
+        &lt;<span style="color: #87cefa;">goal</span>&gt;jar&lt;/<span style="color: #87cefa;">goal</span>&gt;
+      &lt;/<span style="color: #87cefa;">goals</span>&gt;
+    &lt;/<span style="color: #87cefa;">execution</span>&gt;
+  &lt;/<span style="color: #87cefa;">executions</span>&gt;
+&lt;/<span style="color: #87cefa;">plugin</span>&gt;
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-sec-10-4" class="outline-3">
-<h3 id="sec-10-4"><span class="section-number-3">10.4</span> maven-dependency-plugin</h3>
+<div id="outline-container-orgf7c9e21" class="outline-3">
+<h3 id="orgf7c9e21"><span class="section-number-3">10.4</span> maven-dependency-plugin</h3>
 <div class="outline-text-3" id="text-10-4">
 <p>
 提取所有的依赖
 </p>
 <div class="org-src-container">
-
-<pre class="src src-xml">&lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;maven-dependency-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;2.6&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">executions</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">execution</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">id</span>&gt;copy&lt;/<span style="color: #0000ff; font-weight: bold;">id</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">phase</span>&gt;package&lt;/<span style="color: #0000ff; font-weight: bold;">phase</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">goals</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">goal</span>&gt;copy-dependencies&lt;/<span style="color: #0000ff; font-weight: bold;">goal</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">goals</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">outputDirectory</span>&gt;${project.build.directory}/lib&lt;/<span style="color: #0000ff; font-weight: bold;">outputDirectory</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">execution</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">executions</span>&gt;
-&lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
+<pre class="src src-xml">&lt;<span style="color: #87cefa;">plugin</span>&gt;
+  &lt;<span style="color: #87cefa;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+  &lt;<span style="color: #87cefa;">artifactId</span>&gt;maven-dependency-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+  &lt;<span style="color: #87cefa;">version</span>&gt;2.6&lt;/<span style="color: #87cefa;">version</span>&gt;
+  &lt;<span style="color: #87cefa;">executions</span>&gt;
+    &lt;<span style="color: #87cefa;">execution</span>&gt;
+      &lt;<span style="color: #87cefa;">id</span>&gt;copy&lt;/<span style="color: #87cefa;">id</span>&gt;
+      &lt;<span style="color: #87cefa;">phase</span>&gt;package&lt;/<span style="color: #87cefa;">phase</span>&gt;
+      &lt;<span style="color: #87cefa;">goals</span>&gt;
+        &lt;<span style="color: #87cefa;">goal</span>&gt;copy-dependencies&lt;/<span style="color: #87cefa;">goal</span>&gt;
+      &lt;/<span style="color: #87cefa;">goals</span>&gt;
+      &lt;<span style="color: #87cefa;">configuration</span>&gt;
+        &lt;<span style="color: #87cefa;">outputDirectory</span>&gt;${project.build.directory}/lib&lt;/<span style="color: #87cefa;">outputDirectory</span>&gt;
+      &lt;/<span style="color: #87cefa;">configuration</span>&gt;
+    &lt;/<span style="color: #87cefa;">execution</span>&gt;
+  &lt;/<span style="color: #87cefa;">executions</span>&gt;
+&lt;/<span style="color: #87cefa;">plugin</span>&gt;
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-sec-10-5" class="outline-3">
-<h3 id="sec-10-5"><span class="section-number-3">10.5</span> maven-assembly-plugin</h3>
+<div id="outline-container-org2f0150a" class="outline-3">
+<h3 id="org2f0150a"><span class="section-number-3">10.5</span> maven-assembly-plugin</h3>
 <div class="outline-text-3" id="text-10-5">
 <p>
 打独立运行的jar包，build-plugins段
 </p>
 <div class="org-src-container">
-
-<pre class="src src-xml">&lt;<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #0000ff; font-weight: bold;">groupId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;maven-assembly-plugin&lt;/<span style="color: #0000ff; font-weight: bold;">artifactId</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">version</span>&gt;2.6&lt;/<span style="color: #0000ff; font-weight: bold;">version</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">descriptorRefs</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">descriptorRef</span>&gt;jar-with-dependencies&lt;/<span style="color: #0000ff; font-weight: bold;">descriptorRef</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">descriptorRefs</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">configuration</span>&gt;
-  &lt;<span style="color: #0000ff; font-weight: bold;">executions</span>&gt;
-    &lt;<span style="color: #0000ff; font-weight: bold;">execution</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">id</span>&gt;make-a-assembly&lt;/<span style="color: #0000ff; font-weight: bold;">id</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">phase</span>&gt;package&lt;/<span style="color: #0000ff; font-weight: bold;">phase</span>&gt;
-      &lt;<span style="color: #0000ff; font-weight: bold;">goals</span>&gt;
-        &lt;<span style="color: #0000ff; font-weight: bold;">goal</span>&gt;single&lt;/<span style="color: #0000ff; font-weight: bold;">goal</span>&gt;
-      &lt;/<span style="color: #0000ff; font-weight: bold;">goals</span>&gt;
-    &lt;/<span style="color: #0000ff; font-weight: bold;">execution</span>&gt;
-  &lt;/<span style="color: #0000ff; font-weight: bold;">executions</span>&gt;
-&lt;/<span style="color: #0000ff; font-weight: bold;">plugin</span>&gt;
+<pre class="src src-xml">&lt;<span style="color: #87cefa;">plugin</span>&gt;
+  &lt;<span style="color: #87cefa;">groupId</span>&gt;org.apache.maven.plugins&lt;/<span style="color: #87cefa;">groupId</span>&gt;
+  &lt;<span style="color: #87cefa;">artifactId</span>&gt;maven-assembly-plugin&lt;/<span style="color: #87cefa;">artifactId</span>&gt;
+  &lt;<span style="color: #87cefa;">version</span>&gt;2.6&lt;/<span style="color: #87cefa;">version</span>&gt;
+  &lt;<span style="color: #87cefa;">configuration</span>&gt;
+    &lt;<span style="color: #87cefa;">descriptorRefs</span>&gt;
+      &lt;<span style="color: #87cefa;">descriptorRef</span>&gt;jar-with-dependencies&lt;/<span style="color: #87cefa;">descriptorRef</span>&gt;
+    &lt;/<span style="color: #87cefa;">descriptorRefs</span>&gt;
+  &lt;/<span style="color: #87cefa;">configuration</span>&gt;
+  &lt;<span style="color: #87cefa;">executions</span>&gt;
+    &lt;<span style="color: #87cefa;">execution</span>&gt;
+      &lt;<span style="color: #87cefa;">id</span>&gt;make-a-assembly&lt;/<span style="color: #87cefa;">id</span>&gt;
+      &lt;<span style="color: #87cefa;">phase</span>&gt;package&lt;/<span style="color: #87cefa;">phase</span>&gt;
+      &lt;<span style="color: #87cefa;">goals</span>&gt;
+        &lt;<span style="color: #87cefa;">goal</span>&gt;single&lt;/<span style="color: #87cefa;">goal</span>&gt;
+      &lt;/<span style="color: #87cefa;">goals</span>&gt;
+    &lt;/<span style="color: #87cefa;">execution</span>&gt;
+  &lt;/<span style="color: #87cefa;">executions</span>&gt;
+&lt;/<span style="color: #87cefa;">plugin</span>&gt;
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-sec-10-6" class="outline-3">
-<h3 id="sec-10-6"><span class="section-number-3">10.6</span> jetty-maven-plugin</h3>
+<div id="outline-container-org6afd04e" class="outline-3">
+<h3 id="org6afd04e"><span class="section-number-3">10.6</span> jetty-maven-plugin</h3>
 <div class="outline-text-3" id="text-10-6">
 <p>
-jetty插件，通过 mvn jetty:run-war 运行war包，查看 <a href="#sec-5">5</a>
+jetty插件，通过 mvn jetty:run-war 运行war包，查看 <a href="#org05e7d72">5</a>
 虽然通过 <b>jetty:run</b> 也可以运行，但有时候会引起问题，尤其是关于 <b>slf4j</b> 的。例如：把依赖 <b>slf4j-api</b> 设置为 <b>compile</b> ，但是使用 <b>jetty:run</b> 却会加载 <b>slf4j-api</b> 。推荐使用 <b>jetty:run-war</b> 此时执行的是war包中的内容， <b>slf4j-api</b> 肯定不在里面，并且因为更接近真实环境，更能减少上线的bug。
 </p>
 
@@ -604,20 +704,20 @@ jetty插件，通过 mvn jetty:run-war 运行war包，查看 <a href="#sec-5">5<
 </div>
 </div>
 
-<div id="outline-container-sec-10-7" class="outline-3">
-<h3 id="sec-10-7"><span class="section-number-3">10.7</span> maven-pmd-plugin</h3>
+<div id="outline-container-org4800f7c" class="outline-3">
+<h3 id="org4800f7c"><span class="section-number-3">10.7</span> maven-pmd-plugin</h3>
 <div class="outline-text-3" id="text-10-7">
 <p>
-源码分析插件，发现隐藏的bug，参考 <a href="#sec-5">5</a>
+源码分析插件，发现隐藏的bug，参考 <a href="#org05e7d72">5</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-sec-10-8" class="outline-3">
-<h3 id="sec-10-8"><span class="section-number-3">10.8</span> findbugs-maven-plugin</h3>
+<div id="outline-container-org0957e53" class="outline-3">
+<h3 id="org0957e53"><span class="section-number-3">10.8</span> findbugs-maven-plugin</h3>
 <div class="outline-text-3" id="text-10-8">
 <p>
-代码静态分析，发现隐藏的bug，参考 <a href="#sec-5">5</a>
+代码静态分析，发现隐藏的bug，参考 <a href="#org05e7d72">5</a>
 </p>
 </div>
 </div>
@@ -625,8 +725,7 @@ jetty插件，通过 mvn jetty:run-war 运行war包，查看 <a href="#sec-5">5<
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2017-03-12 日 11:19</p>
-<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="date">Created: 2023-10-22 日 12:01</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

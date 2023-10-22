@@ -174,23 +174,31 @@ howto/
 
 * 常用的maven命令和选项
 - mvn compile 编译
+- mvn test-compile 仅编译测试
 - mvn package 打 ~war~ 或者 ~jar~ 包
 - mvn clean 清除 package 或其它过程中产生的中间文件
 - mvn dependency:help 查看 dependency 插件的帮助
 - mvn site 查看项目报告，把 target/site 配置到 http doc 目录，可以以web方式查看
+- -T xC 使用x个cpu，例如：mvn test -T 1C，使用1个CPU运行mvn test
 
-通过 -D 参数指定环境变量，例如 ~-Dmaven.test.skip=true~ 用来跳过测试。
+
 通过 ~MAVEN_OPTS~ 环境变量，可以设置java的启动参数，例如 ~export MAVEN_OPTS="-Xmx512M -Xms512M"~
 
 目标是可以组合的，例如 mvn clean package jetty:run
 
+跳过某些插件的方法似乎是通用的：
+- 跳过测试插件 maven-test-plugin，-Dmaven.test.skip=true
+- 跳过 maven-antrun-plugin，-Dmaven.antrun.skip=true
+
 * mvn test 常用选项
-- -Dtest=TestCircle 只测试 TestCircle
-- -Dtest=TestCi*le  模糊匹配
-- -Dtest=TestSquare,TestCi*le 指定多个
-- -Dtest=TestCircle#mytest 指定方法
-- -Dtest=TestCircle#test* 模糊匹配
-- -Dtest=TestCircle#testOne+testTwo 指定多个方法
+- -Dtest=my.package.TestCircle 只测试 TestCircle
+- -Dtest=my.package.TestCi*le  模糊匹配
+- -Dtest=my.package.TestSquare,my.package.TestCi*le 指定多个
+- -Dtest=my.package.TestCircle#mytest 指定方法
+- -Dtest=my.package.TestCircle#test* 模糊匹配
+- -Dtest=my.package.TestCircle#testOne+testTwo 指定多个方法
+
+*注意* 这里TestCircle在my.package下，一定要带上包名。
 
 * 管理依赖
 通过 ~dependency~ 填写依赖，maven会在本地缓存一份数据 ~$HOME/.m2/repository~
@@ -205,6 +213,8 @@ curl http://path-to-jar/org.patchca.patchca-0.6.0.jar -o org.patchca.patchca-0.6
 # install jar to local mvn cache
 mvn install:install-file -Dfile=org.patchca.patchca-0.6.0.jar -DgroupId=org.patchca -DartifactId=patchca -Dversion=0.6.0 -Dpackaging=jar
 #+END_SRC
+
+如果是用源码编译出的jar包，直接 =mvn install= 即可。
 
 * 打出多种格式的包
 假设应用除了提供web接口（这需要应用打包成war），还提供了一些小命令（这些小命令对war里面的class有依赖），此时除了war外，再打包出一个jar包供小命令用是个不错的选择。
