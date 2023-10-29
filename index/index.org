@@ -6,6 +6,10 @@
 * 2023 癸卯年
 
 ** 经验
+[[blog: xcapture-introduce][xcapture 介绍]] <2023-10-29>
+
+[[blog:one-instance-cpu-is-higher-than-other][同业务内，某实例CPU异常高]] <2023-10-29>
+
 [[blog: how-numastat-make-cpu-high][numastat 如何导致目标进程CPU飙升]] <2023-09-09>
 
 [[blog:how-pagecache-make-cpu-intensive-program-slow][page cache如何让cpu密集程序变慢]] <2023-09-03>

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-10-29 日 13:04 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>xcapture 介绍</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">xcapture 介绍</h1>
+<p>
+<a href="https://0x.tools/">xcapture</a> 是 0x.tools 中的一个工具，用于记录Linux进程快照，包括进程状态、命令、内核栈等。非常适合排查没有现场的故障。
+例如：=xcapture -d 10 -c exe,cmdline,kstack -o <i>var</i>log/xcaputre= 每10秒记录一次，包括内核栈，不记录S状态的线程，输出是csv格式的文件。
+</p>
+
+<p>
+统计xcaputre的输出非常重要。
+</p>
+
+<div id="outline-container-orgb90c9d1" class="outline-2">
+<h2 id="orgb90c9d1"><span class="section-number-2">1</span> 根据xcapture生成火焰图</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+火焰图非常适合发现热点，无论是CPU热点、还是等待热点。以火焰图的形式呈现xcapture的内核栈非常直观。例如：这是kafka卡顿的日志，
+</p>
+
+<pre class="example">
+2023-10-08 23:00:50.215,111791,113149,kafka,D,(kafka-network-t),sendfile,0,java,/usr/local/bin/java,-&gt;__x64_sys_sendfile64()-&gt;do_sendfile()-&gt;do_splice_direct()-&gt;splice_direct_to_actor()-&gt;generic_file_splice_read()-&gt;xfs_file_read_iter()-&gt;xfs_file_buffered_aio_read()-&gt;generic_file_buffered_read()-&gt;io_schedule()
+</pre>
+
+<p>
+flamegraph 可以把如下文本格式的数据转成火焰图：
+</p>
+<ol class="org-ol">
+<li>第一列是 <code>;</code> 分割的调用栈（栈顶在最后）</li>
+<li>第二列是 <code>调用栈</code> 的次数</li>
+</ol>
+
+<pre class="example">
+__x64_sys_epoll_wait();do_epoll_wait();ep_poll() 9984
+retint_user();prepare_exit_to_usermode();exit_to_usermode_loop() 14058
+ __x64_sys_futex();do_futex();futex_wait();futex_wait_queue_me() 49866
+</pre>
+
+<p>
+转化脚本如下，含义见注释：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">2023-10-08.23.csv &#26159; xcapture &#30340;&#26085;&#24535;</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">grep xfs&#65306; &#21482;&#32479;&#35745; xfs &#30456;&#20851;&#30340;&#26632;&#65292;&#21487;&#20197;&#28789;&#27963;grep&#65292;&#21482;&#32479;&#35745;&#24863;&#20852;&#36259;&#30340;&#37096;&#20998;</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">awk&#65306;&#33719;&#21462;&#20869;&#26680;&#26632;</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">tr&#12289;cut&#65306;&#29992;&#20110;&#36716;&#25442;&#20869;&#26680;&#26632;&#30340;&#26684;&#24335;</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">sort&#12289;uniq&#65306;&#29992;&#20110;&#32479;&#35745;&#26632;&#30340;&#27425;&#25968;</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">flamegraph.pl&#65306;&#29992;&#20110;&#29983;&#25104;&#28779;&#28976;&#22270;</span>
+
+grep xfs 2023-10-08.23.csv  | awk -F, <span style="color: #ffa07a;">'{print $NF}'</span> | tr -d <span style="color: #ffa07a;">'-'</span> | tr <span style="color: #ffa07a;">'&gt;'</span> <span style="color: #ffa07a;">';'</span> | cut -c2- | sort  | uniq -c | sort -n | awk <span style="color: #ffa07a;">'{print $2,$1}'</span> | flamegraph.pl &gt; xfs.html
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32479;&#35745;D&#12289;R&#36827;&#31243;</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">'{print $NF,$2}'&#65292;&#25226;&#36827;&#31243;&#20063;&#21253;&#21547;&#22312;&#28779;&#28976;&#22270;&#20013;</span>
+grep -E <span style="color: #ffa07a;">",D|R,"</span>  2023-10-19.10.csv | awk -F, <span style="color: #ffa07a;">'{print $NF,$2}'</span> | tr -d <span style="color: #ffa07a;">'-'</span> | tr <span style="color: #ffa07a;">'&gt;'</span> <span style="color: #ffa07a;">';'</span> | cut -c2- | awk <span style="color: #ffa07a;">'{print $2 ";" $1}'</span>| sort  | uniq -c | sort -n | awk <span style="color: #ffa07a;">'{print $2,$1}'</span> | flamegraph.pl &gt; busy.html
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge26dcf5" class="outline-2">
+<h2 id="orge26dcf5"><span class="section-number-2">2</span> 其它有用的统计</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+a) 统计每分钟R状态的进程
+<code>grep ",R," 2023-10-20.14.csv | cut -c1-16 | sort | uniq -c | sort -n</code>
+</p>
+
+<p>
+b) 统计每个进程的R状态的数量
+<code>grep ",R," 2023-10-20.14.csv | awk -F, '{print $6}' | sort | uniq -c | sort -n</code>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2023-10-29 日 13:04</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

@@ -1,7 +1,791 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  <head>
-    <title>Webpage redirection</title>
-    <meta http-equiv="refresh" content="0;url=/blogs/index.html"/>
-  </head>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-10-29 日 13:09 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>跬步</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zzyongx" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">跬步</h1>
+
+<div id="outline-container-org6716e85" class="outline-2">
+<h2 id="org6716e85"><span class="section-number-2">1</span> 2023 癸卯年</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org2696f92" class="outline-3">
+<h3 id="org2696f92"><span class="section-number-3">1.1</span> 经验</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+<a href="https://zzyongx.github.io/blogs/%20xcapture-introduce.html">xcapture 介绍</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2023-10-29 日&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/one-instance-cpu-is-higher-than-other.html">同业务内，某实例CPU异常高</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2023-10-29 日&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/%20how-numastat-make-cpu-high.html">numastat 如何导致目标进程CPU飙升</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2023-09-09 六&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/how-pagecache-make-cpu-intensive-program-slow.html">page cache如何让cpu密集程序变慢</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2023-09-03 日&gt;</span></span>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9bfa9de" class="outline-3">
+<h3 id="org9bfa9de"><span class="section-number-3">1.2</span> 笔记</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+<a href="https://zzyongx.github.io/blogs/the-story-of-one-latency-spike.html">一次延迟尖峰的故事</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2023-09-10 日&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/how-many-ifs-are-too-many.html">多少if语句算多</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2023-09-09 六&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/the-sad-state-of-linux-socket-balancing.html">为什么不同的nginx进程CPU使用率差别很大</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2023-09-03 日&gt;</span></span>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc9deaf5" class="outline-2">
+<h2 id="orgc9deaf5"><span class="section-number-2">2</span> 2020 庚子年</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgaa76744" class="outline-3">
+<h3 id="orgaa76744"><span class="section-number-3">2.1</span> 经验</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+<a href="https://zzyongx.github.io/blogs/linux-program-exit-codes.html">Linux 程序退出码</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-01-03 五&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/NMI_watchdog_BUG_soft_lockup.html">NMI watchdog: BUG: soft lockup</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-01-09 四&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/trouble-shooting-redis-replication-lag.html">排查redis主从复制lag不断增大问题</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-01-16 四&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/golang-import-local-package.html">golang 如何import本地package</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-03-09 一&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/rpath_in_chroot.html">chroot 环境中使用带 RPATH 的程序</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-04-18 六&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/socket_fd_leak_2.html">排查socket fd泄漏</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-07-07 二&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/use_rest_access_k8s.html">使用rest访问k8s自定义资源</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-09-06 日&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/mysql-auto_increment-out-of-range.html">MySQL AUTO<sub>INCREMEN</sub> 溢出及危险</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-09-13 日&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/file-attr.html">linux文件的属性</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-11-14 六&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/rsync-fake-super.html">破解rsync -a不a的问题</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-11-14 六&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/linux-load-high.html">破解linux负载高</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-11-15 日&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/linux-lower-nice-make-program-slower.html">低nice让程序变慢了</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2020-11-22 日&gt;</span></span>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4421ce9" class="outline-2">
+<h2 id="org4421ce9"><span class="section-number-2">3</span> 2019 己亥年</h2>
+<div class="outline-text-2" id="text-3">
+<hr />
+</div>
+
+<div id="outline-container-orgfe11a0b" class="outline-3">
+<h3 id="orgfe11a0b"><span class="section-number-3">3.1</span> 经验</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+<a href="https://zzyongx.github.io/blogs/curl-transfer-closed-with-outstanding-read-data-remaining.html">curl: (18) transfer closed with outstanding read data remaining</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-09-23 一&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/bash-glob.html">bash glob 简介</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-09-03 二&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/analyze-websites-ttfb.html">分析网站的TTFB</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-08-27 二&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/nginx_cache_trap.html">nginx缓存陷阱</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-08-23 五&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/zombie_process_caused_by_systemd.html">排查systemd的bug引起的僵尸进程</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-08-22 四&gt;</span></span>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org21e36dd" class="outline-3">
+<h3 id="org21e36dd"><span class="section-number-3">3.2</span> 笔记</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<a href="https://zzyongx.github.io/blogs/using-http-headers-to-secure-you-site.html">使用HTTP头加固你的站点</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-09-09 一&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/dockfile-best-practices.html">Dockfile 最佳实践</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-08-28 三&gt;</span></span>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8db1acc" class="outline-3">
+<h3 id="org8db1acc"><span class="section-number-3">3.3</span> 翻译</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<a href="https://zzyongx.github.io/blogs/sql-window-functions-tutorial.html">教程：使用SQL窗口函数做商务分析</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-09-10 二&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/typical-problems-of-technical-founders.html">技术人员做产品的盲区</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2019-08-27 二&gt;</span></span>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd6db964" class="outline-2">
+<h2 id="orgd6db964"><span class="section-number-2">4</span> 2018 戊戌年</h2>
+<div class="outline-text-2" id="text-4">
+<hr />
+</div>
+
+<div id="outline-container-org6d5977d" class="outline-3">
+<h3 id="org6d5977d"><span class="section-number-3">4.1</span> 经验</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+<a href="https://zzyongx.github.io/blogs/self-inflicted-ddos.html">如何避免自己ddos自己</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2018-01-04 四&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/develop-clients-like-mobile-app.html">像开发手机APP一样开发客户端</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2018-01-04 四&gt;</span></span>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgeb95a54" class="outline-2">
+<h2 id="orgeb95a54"><span class="section-number-2">5</span> 2017 丁酉年</h2>
+<div class="outline-text-2" id="text-5">
+<hr />
+</div>
+
+<div id="outline-container-orgcdf7b43" class="outline-3">
+<h3 id="orgcdf7b43"><span class="section-number-3">5.1</span> 笔记</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+<a href="https://zzyongx.github.io/blogs/a-managers-faq.html">一个管理者的FAQ</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-05-19 五&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/hashing-security.html">密码加盐哈希</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-07-25 二&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/why-the-best-give-away.html">为什么好的公司和工程师乐于分享</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-11-13 一&gt;</span></span>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb1105f2" class="outline-3">
+<h3 id="orgb1105f2"><span class="section-number-3">5.2</span> 经验</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+<a href="https://zzyongx.github.io/blogs/rpm-tutorial.html">rpm 指南</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-09-08 五&gt;</span></span>
+</p>
+<blockquote>
+<p>
+rpm 常用选项
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/iptables.html">iptables 指南</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-08-30 三&gt;</span></span>
+</p>
+<blockquote>
+<p>
+讲了程序员为何要学习iptables，以及iptables的用法
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/azkaban.html">azkaban 常见问题</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-08-25 五&gt;</span></span>
+</p>
+<blockquote>
+<p>
+记录使用azkaban中遇到的问题
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/https-SNI.html">https如何支持虚拟主机</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-05-20 六&gt;</span></span>
+</p>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/grep-command-examples.html">grep</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-03-09 四&gt;</span></span>
+</p>
+<blockquote>
+<p>
+grep 常用选项
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/brower_200_from_disk_cache_vs_304.html">如何控制浏览器缓存</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-02-28 二&gt;</span></span>
+</p>
+<blockquote>
+<p>
+浏览器缓存是性能优化的关键，更关键的是，一旦缓存错误，因为无法控制浏览器，所以很难修复，所以一开始就要配置正确
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/mysql-acid-lock.html">MySQL的事务和锁</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-01-09 一&gt;</span></span>
+</p>
+<blockquote>
+<p>
+MySQL的事务隔离级别和背后的锁
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org157aa50" class="outline-3">
+<h3 id="org157aa50"><span class="section-number-3">5.3</span> 翻译</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+<a href="https://zzyongx.github.io/blogs/tcpdump-tutorial.html">tcpdump指南</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-07-20 四&gt;</span></span>
+</p>
+<blockquote>
+<p>
+轻松掌握开发利器tcpdump
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/openssl-essentials-working-with-ssl-certificates-private-keys-and-csrs.html">openssl 必知必会</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2017-08-24 四&gt;</span></span>
+</p>
+<blockquote>
+<p>
+openssl 如何生成CSR，生成证书，查看证书
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org42aa343" class="outline-2">
+<h2 id="org42aa343"><span class="section-number-2">6</span> 2016 丙申年</h2>
+<div class="outline-text-2" id="text-6">
+<hr />
+</div>
+
+<div id="outline-container-orgbdaf5da" class="outline-3">
+<h3 id="orgbdaf5da"><span class="section-number-3">6.1</span> 经验</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+<a href="https://zzyongx.github.io/blogs/redis-memory-optimization-when-store-small-data.html">如何使用redis存储海量小数据</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-11-22 二&gt;</span></span>
+</p>
+<blockquote>
+<p>
+redis存储海量小数据，如何优化内存使用
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/login-without-username-password-when-troubleshoot.html">排查问题时，如何使用用户身份登录</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-11-14 一&gt;</span></span>
+</p>
+<blockquote>
+<p>
+如何在没用用户的用户名和密码的情况下，使用用户身份登录，排查问题。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/modify-querystring-use-nginx.html">nginx proxy如何修改querystring</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-11-03 四&gt;</span></span>
+</p>
+<blockquote>
+<p>
+这应该算不上是一种技巧，但是它提醒我，专注于目的，而不是解决问题的手段。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/mybatis-spring-howto.html">mybatis使用详解</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-10-21 五&gt;</span></span>
+</p>
+<blockquote>
+<p>
+mybatis如何使用，以及用法背后的机制
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/gitlab-install-config.html">gitlab 安装配置</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-10-20 四&gt;</span></span>
+</p>
+<blockquote>
+<p>
+gitlab 是团队协作，devops的关键环节，有时候小团队需要自己的gitlab。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/linux-terminal-shortcut.html">Linux 终端快捷键</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-10-19 三&gt;</span></span>
+</p>
+<blockquote>
+<p>
+终端快捷键信手拈来，别让“键程”束缚你的想
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/linux-redirect.html">Linux 重定向</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-10-19 三&gt;</span></span>
+</p>
+<blockquote>
+<p>
+linux重定向基础，什么程序需要感知重定向，如何感知重定向
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/crontab.html">Linux CRON 详解</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-10-18 二&gt;</span></span>
+</p>
+<blockquote>
+<p>
+cron语法，注意事项，最佳实践
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/rsa-command-basic.html">RSA命令行工具和KEY格式</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-02-28 日&gt;</span></span>
+</p>
+<blockquote>
+<p>
+如何用程序生成RSA KEY，以及常用的KEY格式。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/cryptography-basic.html">密码系统常识</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-02-28 日&gt;</span></span>
+</p>
+<blockquote>
+<p>
+程序员应该知道的密码系统常识。和算法一样，这些作为基础知识，也是必须知道的。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/jdb.html">使用jdb调试java</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-28 四&gt;</span></span>
+</p>
+<blockquote>
+<p>
+使用IDE调试java程序要比jdb方便快捷，但是作为专业程序员，不能总依赖IDE不是。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/java-exception-tips.html">我的 Java 异常最佳实践</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-25 一&gt;</span></span>
+</p>
+<blockquote>
+<p>
+优先使用 Unchecked 异常，优先使用 try() 释放资源。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/bluff-Ioc-DI.html">唬人的Ioc和DI</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-22 五&gt;</span></span>
+</p>
+<blockquote>
+<p>
+借助反射，Ioc和DI让多态的使用更加优雅了，本身并没有超越多态的范畴。不理解也罢。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/lease-queue-implement-by-mysql.html">租约消息队列和其MySQL实现</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-19 二&gt;</span></span>
+</p>
+<blockquote>
+<p>
+站在数据结构的角度所讲的出队并不适合线上环境，因消费者崩溃带来的消息丢失是面临的主要问题，引入消息租约可以解决这一问题。可以很容易的用MySQL模拟其实现。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/nginx-upstream-send-invalid-header.html">upstream send invalid header</a>
+</p>
+<blockquote>
+<p>
+HTTP 协议对 HEADER 是有字符集要求的，字符集外的字符被视为非法字符，nginx 会报错 upstream send invalid header
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-orga863ed2" class="outline-3">
+<h3 id="orga863ed2"><span class="section-number-3">6.2</span> 阅读笔记</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+<a href="https://zzyongx.github.io/blogs/http2.html">HTTP/2简介</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-31 日&gt;</span></span>
+</p>
+<blockquote>
+<p>
+主要介绍HTTP2的特性，实现现状，性能，如何从HTTP1.x升级到HTTP2
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/how-https-connect-build.html">HTTPS 连接是如何建立的</a> <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-01-31 日&gt;</span></span>
+</p>
+<blockquote>
+<p>
+通过了解 HTTPS 是如何建立的，了解HTTPS对性能的影响，以及HTTPS证书是如何保障安全的
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/SYN-cookies.html">SYN cookie是什么</a>
+</p>
+<blockquote>
+<p>
+SYN cookie 解决了什么问题，原理是什么，有什么缺陷
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/failure-modes-in-distributed-systems.html">分布式系统中的失败模型</a>
+</p>
+<blockquote>
+<p>
+失败模型的核心是确定性，确定性高的失败要优于确定性低的失败。
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbaf7ddf" class="outline-2">
+<h2 id="orgbaf7ddf"><span class="section-number-2">7</span> 2015 乙未年</h2>
+<div class="outline-text-2" id="text-7">
+<hr />
+</div>
+
+<div id="outline-container-orgf747abb" class="outline-3">
+<h3 id="orgf747abb"><span class="section-number-3">7.1</span> 经验</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+<a href="https://zzyongx.github.io/blogs/maven-howto.html">maven HOWTO</a>
+</p>
+<blockquote>
+<p>
+maven 是重要的java构建工具，该文档涵盖了maven的常见用法
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org284054b" class="outline-3">
+<h3 id="org284054b"><span class="section-number-3">7.2</span> 翻译</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+<a href="https://zzyongx.github.io/blogs/tcp-keepalive-howto.html">TCP Keepalive HOWTO</a>
+</p>
+<blockquote>
+<p>
+介绍了TCP Keepalive产生的背景，使用场景，和如何使用。
+对于理解TCP协议和系统开发很有帮助。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/some-REST-best-practices.html">一些REST最佳实践</a>
+</p>
+<blockquote>
+<p>
+越来越多的服务接口采用HTTP的方式，而RESTful风格可以让API语义更清晰。
+</p>
+</blockquote>
+
+<p>
+<a href="https://zzyongx.github.io/blogs/cap-confusion-problems-with-partition-tolerance.html">CAP迷思：关于分区容忍性</a>
+</p>
+<blockquote>
+<p>
+作者说CAP，其实只能是CP或者AP，因为P必选。
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zzyongx</p>
+<p class="date">Created: 2023-10-29 日 13:09</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
 </html>

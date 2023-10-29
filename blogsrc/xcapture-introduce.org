@@ -1,0 +1,50 @@
+#+TITLE: xcapture 介绍
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+[[https://0x.tools/][xcapture]] 是 0x.tools 中的一个工具，用于记录Linux进程快照，包括进程状态、命令、内核栈等。非常适合排查没有现场的故障。
+例如：=xcapture -d 10 -c exe,cmdline,kstack -o /var/log/xcaputre= 每10秒记录一次，包括内核栈，不记录S状态的线程，输出是csv格式的文件。
+
+统计xcaputre的输出非常重要。
+
+* 根据xcapture生成火焰图
+火焰图非常适合发现热点，无论是CPU热点、还是等待热点。以火焰图的形式呈现xcapture的内核栈非常直观。例如：这是kafka卡顿的日志，
+
+#+BEGIN_SRC
+2023-10-08 23:00:50.215,111791,113149,kafka,D,(kafka-network-t),sendfile,0,java,/usr/local/bin/java,->__x64_sys_sendfile64()->do_sendfile()->do_splice_direct()->splice_direct_to_actor()->generic_file_splice_read()->xfs_file_read_iter()->xfs_file_buffered_aio_read()->generic_file_buffered_read()->io_schedule()
+#+END_SRC
+
+flamegraph 可以把如下文本格式的数据转成火焰图：
+1. 第一列是 =;= 分割的调用栈（栈顶在最后）
+2. 第二列是 =调用栈= 的次数
+
+#+BEGIN_SRC
+__x64_sys_epoll_wait();do_epoll_wait();ep_poll() 9984
+retint_user();prepare_exit_to_usermode();exit_to_usermode_loop() 14058
+ __x64_sys_futex();do_futex();futex_wait();futex_wait_queue_me() 49866
+#+END_SRC
+
+转化脚本如下，含义见注释：
+
+#+BEGIN_SRC bash
+# 2023-10-08.23.csv 是 xcapture 的日志
+# grep xfs： 只统计 xfs 相关的栈，可以灵活grep，只统计感兴趣的部分
+# awk：获取内核栈
+# tr、cut：用于转换内核栈的格式
+# sort、uniq：用于统计栈的次数
+# flamegraph.pl：用于生成火焰图
+
+grep xfs 2023-10-08.23.csv  | awk -F, '{print $NF}' | tr -d '-' | tr '>' ';' | cut -c2- | sort  | uniq -c | sort -n | awk '{print $2,$1}' | flamegraph.pl > xfs.html
+
+# 统计D、R进程
+# '{print $NF,$2}'，把进程也包含在火焰图中
+grep -E ",D|R,"  2023-10-19.10.csv | awk -F, '{print $NF,$2}' | tr -d '-' | tr '>' ';' | cut -c2- | awk '{print $2 ";" $1}'| sort  | uniq -c | sort -n | awk '{print $2,$1}' | flamegraph.pl > busy.html
+#+END_SRC
+
+* 其它有用的统计
+
+a) 统计每分钟R状态的进程
+=grep ",R," 2023-10-20.14.csv | cut -c1-16 | sort | uniq -c | sort -n=
+
+b) 统计每个进程的R状态的数量
+=grep ",R," 2023-10-20.14.csv | awk -F, '{print $6}' | sort | uniq -c | sort -n=
