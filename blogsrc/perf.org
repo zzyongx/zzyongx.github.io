@@ -1,0 +1,164 @@
+#+TITLE: perf简介
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+perf是linux下的性能分析工具，主要有以下功能：
+1. 采集机器的pmu指标，分析程序的微架构特征，例如IPC、cache命中率;
+2. 分析程序热点、性能瓶颈。
+
+* perf 的安装
+** 软件包安装
+1. centos环境 =yum install perf=
+2. ubuntu环境 =apt-get install linux-tools-common linux-tools-generic linux-tools-$(uname -r)=
+
+** 从源码安装
+#+BEGIN_SRC bash
+# centos 环境
+
+# 准备gcc >= 8.5.0，但是gcc版本太高也不行（gcc12），错误检查更严格
+yum install centos-release-scl devtoolset-7-gcc -y
+scl enable devtoolset-7 bash
+
+# 安装依赖
+yum install elfutils-devel binutils-devel numactl-devel libcap-devel -y
+
+# 下载linux源码
+curl -LO https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.15.tar.xz && tar xJf linux-5.16.15.tar.xz
+cd linux-5.16.15/tools/perf && make -j $(nproc)
+#+END_SRC
+
+* perf的对象
+perf的对象可以是系统、CPU、进程，不同对象可以取交集。
+1. =-a= 对系统的所有进程、所有CPU;
+2. =-C= 对指定CPU，一个或多个，例如： =-C 1,3,5,9-15= ;
+3. =-p= 对指定的进程，一个或多个，逗号分割;
+4. =-t= 对指定的线程，一个或多个，指定线程时，必须同时用 =-p= 指定进程;
+5. =-C= =-p= 同时指定CPU、进程。
+
+perf的对象越多，perf的损耗越多，perf对象的数量如何计算呢？
+1. =-a= =-C= perf 对象和CPU数量一样;
+2. =-p= perf对象等于 =CPU数量*进程的线程数量= 这个数量可能非常大。
+
+* perf event
+CPU本身有性能计数器（PMU），通过采集PMU的信息，可以评估（程序在）CPU的执行效率、内存带宽等。
+perf 通过event选择对应的PMU，例如： =instructions、cycles、branches= 。
+
+每个CPU的PUM数量是固定的，其中2个不可编程，用于采集cycles、instrctions，剩下的可用编程，用于指定对应的event。
+如果采集的event数量多于PMU数量，perf会采用分时复用的方式使用PMU，准确性会下降。
+
+*备注*
+1. event 是和CPU密切相关的，AMD和INTEL有很大不同，INTEL的不同CPU架构之间也有不小差异;
+2. event 是最原始的指标，需要组合原始指标才能得到更有意义的指标，例如： =ipc = instructions/cycles=;
+
+** event的指定
+1、通过event的名称
+
+=perf list= 用于列出所有的event，这个列表很长（取绝于perf的版本）
+
+2、通过pmu事件号
+
+例如： ~cpu/event=0xd3,umask=0x2,name=remote_dram/~ 用于intel skylake架构，采集跨socket内存访问的次数。
+
+[[https://github.com/intel/perfmon][perfmon]] 可以查到INTEL支持的事件，各个事件的含义。
+
+** event组
+
+如前所讲，PMU可能会分时复用，可以控制每个分时的event， =-e '{event1,event2,event3,event4}'= 。
+
+* perf stat
+perf stat 用于采集PMU信息，用于分析程序使用硬件的效率，最重要的是IPC。这涉及到微架构的内容，需要专门的文章总结。
+
+** 基本用法
+1. =perf stat -p <pid> --timeout <ms>= 采集pid的基本信息，采集时长ms;
+2. =perf stat -e cycles:k,instructions:k -p <pid> -- sleep <sec>= 采集pid内核的指令，采集时长sec;
+3. =perf stat -- test= 运行test，采集基本信息。
+
+** 输出介绍
+下面是采集进程3926信息10秒的情况，整体分三部分：
+1. #号前是采集的值、名称，是从PMU读取的;
+2. #号后是计算的值，是根据PMU和其它信息计算的值;
+3. 括号中表示分时复用的情况。
+
+例如：2.882 GHz 是CPU的频率，这个是计算的，不是采集的。
+
+#+BEGIN_SRC
+$ sudo perf stat -p 3926 -- sleep 10
+
+ Performance counter stats for process id '261662':
+
+      18810.424285      task-clock (msec)         #    1.875 CPUs utilized
+            95,633      context-switches          #    0.005 M/sec
+            19,360      cpu-migrations            #    0.001 M/sec
+           149,140      page-faults               #    0.008 M/sec
+    54,206,371,162      cycles                    #    2.882 GHz                      (98.05%)
+    41,497,287,682      instructions              #    0.77  insn per cycle           (98.84%)
+     7,903,861,194      branches                  #  420.185 M/sec                    (97.91%)
+       140,183,559      branch-misses             #    1.77% of all branches          (97.12%)
+
+      10.033397285 seconds time elapsed
+#+END_SRC
+
+*备注*
+1. 因为要操作硬件 =perf stat= 和内核版本关系密切，在新CPU上perf stat的（一些）功能可能无法使用;
+
+* perf record
+perf record 用于采样程序的运行情况，包括程序的函数、调用栈（含内核）。
+perf使用event作为事件源，按照一定的频率采样，记录采样时的函数，记录的次数越多，说明函数占比越大。
+
+默认使用cycles采样，此时采样得到的就是函数耗时，传统意义上的火焰图。也可以使用l3-miss的event采样，得到的是函数l3-miss的耗时，用于优化内存访问。
+
+** perf record
+采样程序的运行情况，常用参数：
+1. =-g= 记录程序调用栈;
+2. =-o= 指定输出文件，默认是perf.data;
+3. =-F= 采用频率。
+
+** perf report
+查看perf record的结果，常用参数：
+1. =-g none --no-children= 不查看调用栈
+
+** perf top
+函数调用top（类比top命令），相当于一边record一边report，比较消耗资源。
+
+** perf annotate
+查看函数内部热点，例如：perf report显示foo函数占比大，可以用 =perf annotate foo= 显示函数foo内部哪段代码占比多，默认显示汇编，如果有源码，也会关联上源码。
+
+但通常不怎么用，在使用perf record时，移动光标到foo函数，敲enter，就可以对foo做annotate。
+
+** perf script
+解码、输出 perf record 的数据。
+
+** 火焰图
+如果不习惯perf report的文本界面，可以转成火焰图，（perf record时需要-g参数）。
+
+
+#+BEGIN_SRC bash
+# 需要用到火焰图工具：https://github.com/brendangregg/FlameGraph.git
+
+# 采集30秒
+perf record -g -p <pid> -o perfdata -- sleep 30
+
+# perf script 解码perfdata
+# stackcollapse-perf.pl（来自FlameGraph），把perf script的输出转成火焰图需要的文本格式
+# flamegraph.pl 把火焰图文本转成火焰图
+perf script -i perfdata | stackcollapse-perf.pl | flamegraph.pl > perf.svg
+#+END_SRC
+
+* 常见问题
+
+** Too many events are opened
+=perf stat= =perf record= 指定 =-p= 需要为进程的每个线程，每个CPU调用 =perf_event_open= 当线程数量较多，机器CPU数量较多时，会消耗大量fd（例如：5000线程、256个cpu，消耗128万），超出ulimit的限制。此时直接修改ulimit是不行的，需要先修改 =fs.nr_open= 。
+
+#+BEGIN_SRC
+$ perf record -e cycles:k -p 7921 -- sleep 30
+Too many events are opened
+Probably the maximum number of open file descriptors has been reached.
+Hint: Try again after reducing the number of events.
+Hint: Try increasing the limit with 'ulimit -n <limit>'
+
+$ ulimit -n 2560000
+-bash: ulimit: open files: cannot modify limit: Operation not permitted
+
+# ulimit -n 修改失败，需要先修改 fs.nr_open
+$ sysctl -w fs.nr_open=2560000
+#+END_SRC
