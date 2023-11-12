@@ -3,7 +3,7 @@
 #+OPTIONS: toc:nil
 
 [[https://0x.tools/][xcapture]] 是 0x.tools 中的一个工具，用于记录Linux进程快照，包括进程状态、命令、内核栈等。非常适合排查没有现场的故障。
-例如：=xcapture -d 10 -c exe,cmdline,kstack -o /var/log/xcaputre= 每10秒记录一次，包括内核栈，不记录S状态的线程，输出是csv格式的文件。
+例如：=xcapture -d 10 -c exe,cmdline,syscall,kstack -o /var/log/xcaputre= 每10秒记录一次，包括内核栈，不记录S状态的线程，输出是csv格式的文件。
 
 统计xcaputre的输出非常重要。
 

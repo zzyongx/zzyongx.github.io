@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-11-12 日 08:17 -->
+<!-- 2023-11-12 日 10:14 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>git 基础</title>
+<title>进程hang在何处</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="zhengzhiyong" />
 <style type="text/css">
@@ -249,187 +249,82 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">git 基础</h1>
+<h1 class="title">进程hang在何处</h1>
+<p>
+区别于耗时变长，进程hang表现为耗时大大变长，甚至长到永不结束。从CPU角度看，有两种hang：
+</p>
+<ol class="org-ol">
+<li>CPU 高于平时，几乎100%;</li>
+<li>CPU 低于平时，几乎为0;</li>
+</ol>
+<p>
+有现场的话，这两种情况都比较好定位，关键是找到调用栈，从栈上可以看出端倪。
+</p>
 
-<div id="outline-container-org4e78a9f" class="outline-2">
-<h2 id="org4e78a9f"><span class="section-number-2">1</span> branch 相关</h2>
+<div id="outline-container-org2cc60f8" class="outline-2">
+<h2 id="org2cc60f8"><span class="section-number-2">1</span> CPU高于平时</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-列出所有分支：
-<code>git branch</code>
+这种情况需要知道CPU在忙什么（OnCPU），用CPU性能profile（火焰图）工具就可以。几乎每种语言都有自己专有的工具，例如：Java的async-profiler。
+使用专有工具，可以确保函数符号正确解析，但有如下缺陷：
 </p>
+<ol class="org-ol">
+<li>依赖运行时，可能工具无法运行。例如：async-profiler依赖JVM，JVM不响应的话，就没办法;</li>
+<li>可能无法采集内核栈。依赖工具的能力，以及权限的配置。例如：async-profiler 通常需要 <code>sysctl -w kernel.perf_event_paranoid=-1</code></li>
+</ol>
 
 <p>
-删除分支：
-<code>git branch -d branch-to-rm</code>
-<code>git branch -D branch-to-rm-anyway</code>
+如果专有工具无法工作，可以尝试如下方式：
 </p>
-
-<p>
-切换到存在的分支：
-<code>git checkout exists-branch</code>
-</p>
-
-<p>
-创建分支，并切换分支：
-<code>git checkout -b local-branch</code>
-</p>
-
-<p>
-重命名当前分支：
-<code>git branch -m new-branch-name</code>
-</p>
-
-<p>
-切换远程分支：
-<code>git checkout -b remote-branch origin/remote-branch</code>
-</p>
-
-<p>
-推送本地分支 issue25
-<code>git push origin issue25</code>
-</p>
-
-<p>
-删除远程分支 issue25
-<code>git push origin :issue25</code>
-</p>
-
-<p>
-合并分支：
-<code>git merge --no-ff branch-to-be-merged</code>
-</p>
+<ol class="org-ol">
+<li><a href="https://zzyongx.github.io/blogs/perf.html">perf</a> ，perf的缺点是，对于非编译语言，<a href="https://zzyongx.github.io/blogs/perf-java.html">需要辅助工具</a> ，才能解析函数符号;</li>
+<li><a href="https://zzyongx.github.io/blogs/pstack.html">pstack</a>，pstack是gdb工具，可以用stackcollapse-gdb.pl转成火焰图。pstack损耗比较大，且只能看用户态;</li>
+<li>top -H -p&lt;pid&gt;，查看线程的CPU使用率，根据线程名推测可能的原因。</li>
+</ol>
 </div>
 </div>
 
-<div id="outline-container-orgf71eb63" class="outline-2">
-<h2 id="orgf71eb63"><span class="section-number-2">2</span> tag 相关</h2>
+<div id="outline-container-org4f06ca0" class="outline-2">
+<h2 id="org4f06ca0"><span class="section-number-2">2</span> CPU低于平时</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-列出所有tag：
-<code>git tag -l</code>
+这种情况需要知道进程因为什么让出了CPU（OffCPU）。常用的工具如下：
 </p>
+<ol class="org-ol">
+<li>offcputime（BCC工具），查看进程schedule时的栈;</li>
+<li><a href="https://zzyongx.github.io/blogs/pstack.html">cat <i>proc/&lt;pid&gt;</i>stack</a> ，查看进程的内核栈。</li>
+</ol>
 
 <p>
-获取所有tag：
-<code>git fetch --tags</code>
+一个小知识：进程只能通过系统调用进入S状态（不使用CPU），所以查看内核栈可以直到hang的原因。具体来说，有以下原因：
 </p>
+<ol class="org-ol">
+<li>死锁，这个是BUG。除了传统的锁，多线程业务逻辑上的协作，也可能导致死锁;</li>
+<li>IO，包括磁盘IO、网络IO;</li>
+<li>内核限制，比较典型的是cgroup的限制，例如： <code>echo 1 &gt; /cgroup/memory/lab1/memory.oom_control</code> 关闭了oom，则内存不足时，进程会hang，直到内存充足。</li>
+</ol>
 
 <p>
-从tag创建branch：
-<code>git branch new-branch-name tag-name</code>
-<code>git checkout tag-name -b new-branch-name</code>
+网络IO导致的hang，通常是如下原因：
 </p>
-</div>
-</div>
-
-<div id="outline-container-org1973477" class="outline-2">
-<h2 id="org1973477"><span class="section-number-2">3</span> commit 相关</h2>
-<div class="outline-text-2" id="text-3">
-<p>
-从commit创建分支
-<code>git branch branch-name &lt;commit-hash&gt;</code>
-<code>git checkout -b branch-name &lt;commit-hash&gt;</code>
-</p>
+<ol class="org-ol">
+<li>编程不当，例如：没有设置超时，这种可能永远hang;</li>
+<li>网络慢、下游应用慢，通常进程表现为慢，但是不会hang死。</li>
+</ol>
 
 <p>
-跟commit做diff
-<code>git diff &lt;commit-hash&gt; -- filepath</code>
+磁盘IO导致的hang，相对复杂：
 </p>
-</div>
-</div>
-
-<div id="outline-container-org899dfe7" class="outline-2">
-<h2 id="org899dfe7"><span class="section-number-2">4</span> git 源相关</h2>
-<div class="outline-text-2" id="text-4">
-<p>
-添加源：
-<code>git remote add remote-name remote-address</code>
-</p>
-
-<p>
-删除源：
-<code>git remote rm origin</code>
-</p>
-
-<p>
-指定源名称：
-<code>git fetch -tags remote-name</code>
-</p>
-
-<p>
-列出所有源：
-<code>git remote -v</code>
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org6abf4a9" class="outline-2">
-<h2 id="org6abf4a9"><span class="section-number-2">5</span> log 相关</h2>
-<div class="outline-text-2" id="text-5">
-<p>
-查看修改记录：
-<code>git log</code>
-<code>git log -- filename</code>
-</p>
-</div>
-</div>
-
-<div id="outline-container-org267d795" class="outline-2">
-<h2 id="org267d795"><span class="section-number-2">6</span> 其它</h2>
-<div class="outline-text-2" id="text-6">
-<p>
-<code>git clone --bare http://zzyong@git.example/zzyong/small.git</code>
-<code>git push --mirror http://zzyong@git.example/zzyong/big.git</code>
-</p>
-
-<p>
-<code>git diff --cached</code>
-</p>
-
-
-<p>
-<code>git push -u origin master --all</code>
-</p>
-
-<p>
-<code>git commit --amend -m "new commit message"</code>
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-org01e2608" class="outline-2">
-<h2 id="org01e2608"><span class="section-number-2">7</span> 常见错误</h2>
-<div class="outline-text-2" id="text-7">
-<p>
-首次使用git碰到错误，先检查git是否最新版本。
-</p>
-</div>
-
-<div id="outline-container-org5cad7c8" class="outline-3">
-<h3 id="org5cad7c8"><span class="section-number-3">7.1</span> git push error: failed to push some refs to</h3>
-<div class="outline-text-3" id="text-7-1">
-<p>
-通常是因为remote端发生了更新，需要先更新本地repo，执行 <code>git pull</code>
-</p>
-</div>
-</div>
-
-<div id="outline-container-org710617f" class="outline-3">
-<h3 id="org710617f"><span class="section-number-3">7.2</span> git status fatal: index file smaller than expected</h3>
-<div class="outline-text-3" id="text-7-2">
-<p>
-重建索引可以解决 <code>mv .git/index .git/index.backup &amp;&amp; git reset HEAD</code>
-</p>
-</div>
+<ol class="org-ol">
+<li>磁盘硬件故障;</li>
+<li>pagecache命中率低，可能是系统内存不足、编程不当等。</li>
+</ol>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2023-11-12 日 08:17</p>
+<p class="date">Created: 2023-11-12 日 10:14</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

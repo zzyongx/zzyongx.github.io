@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2018-05-21 一 16:50 -->
-<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<meta  name="viewport" content="width=device-width, initial-scale=1" />
+<!-- 2023-11-12 日 08:22 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>grep command examples</title>
-<meta  name="generator" content="Org-mode" />
-<meta  name="author" content="SATHIYAMOORTHY,zhengzhiyong" />
+<meta name="generator" content="Org mode" />
+<meta name="author" content="SATHIYAMOORTHY,zhengzhiyong" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center;
@@ -53,13 +53,98 @@
     border: 1px solid black;
   }
   pre.src:hover:before { display: inline;}
-  pre.src-sh:before    { content: 'sh'; }
-  pre.src-bash:before  { content: 'sh'; }
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
   pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
-  pre.src-R:before     { content: 'R'; }
-  pre.src-perl:before  { content: 'Perl'; }
-  pre.src-java:before  { content: 'Java'; }
-  pre.src-sql:before   { content: 'SQL'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
 
   table { border-collapse:collapse; }
   caption.t-above { caption-side: top; }
@@ -76,6 +161,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -92,6 +190,7 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
@@ -100,12 +199,13 @@
 <script src="/jslib/bootstrap.min.js"></script>
 <script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
 <script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012-2013 Free Software Foundation, Inc.
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -154,21 +254,21 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgheadline1">1. 在文件中查找指定的字符串，可以一次在多个文件查找</a></li>
-<li><a href="#orgheadline2">2. <code>-i</code> 忽略大小写</a></li>
-<li><a href="#orgheadline7">3. 使用正则表达式</a>
+<li><a href="#orgd9b61a8">1. 在文件中查找指定的字符串，可以一次在多个文件查找</a></li>
+<li><a href="#org81012d4">2. <code>-i</code> 忽略大小写</a></li>
+<li><a href="#org5702101">3. 使用正则表达式</a>
 <ul>
-<li><a href="#orgheadline3">3.1. 使用锚点</a></li>
-<li><a href="#orgheadline4">3.2. 使用通配符</a></li>
-<li><a href="#orgheadline5">3.3. 重复次数</a></li>
-<li><a href="#orgheadline6">3.4. 查找th开头，后跟2个字符的行</a></li>
+<li><a href="#org75b660f">3.1. 使用锚点</a></li>
+<li><a href="#org37af45c">3.2. 使用通配符</a></li>
+<li><a href="#org75defde">3.3. 重复次数</a></li>
+<li><a href="#org4eb5bb7">3.4. 查找th开头，后跟2个字符的行</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline8">4. <code>-w</code> 匹配完整的单词</a></li>
-<li><a href="#orgheadline9">5. <code>-B</code> 显示匹配行的前几行， <code>-A</code> 显示后几行， <code>-C</code> 显示前后几行</a></li>
-<li><a href="#orgheadline10">6. <code>--color</code> 高亮现实匹配到的字符串</a></li>
-<li><a href="#orgheadline11">7. 其它很有用的选项</a></li>
-<li><a href="#orgheadline12">8. <b>egrep</b> <b>fgrep</b> </a></li>
+<li><a href="#org6eb5fcf">4. <code>-w</code> 匹配完整的单词</a></li>
+<li><a href="#org193c9e7">5. <code>-B</code> 显示匹配行的前几行， <code>-A</code> 显示后几行， <code>-C</code> 显示前后几行</a></li>
+<li><a href="#org0ca01f5">6. <code>--color</code> 高亮现实匹配到的字符串</a></li>
+<li><a href="#org96d91ce">7. 其它很有用的选项</a></li>
+<li><a href="#org2a54143">8. <b>egrep</b> <b>fgrep</b> </a></li>
 </ul>
 </div>
 </div>
@@ -181,10 +281,9 @@ for the JavaScript code in this tag.
 </p>
 
 <div class="org-src-container">
-
 <pre class="src src-bash">$ cat demo_file
 THIS LINE IS THE 1ST UPPER CASE LINE IN THIS FILE.
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 This Line Has All Its First Character Of The Word With Upper Case.
 
 Two lines above this line is empty.
@@ -192,15 +291,14 @@ And this is the last line.
 </pre>
 </div>
 
-<div id="outline-container-orgheadline1" class="outline-2">
-<h2 id="orgheadline1"><span class="section-number-2">1</span> 在文件中查找指定的字符串，可以一次在多个文件查找</h2>
+<div id="outline-container-orgd9b61a8" class="outline-2">
+<h2 id="orgd9b61a8"><span class="section-number-2">1</span> 在文件中查找指定的字符串，可以一次在多个文件查找</h2>
 <div class="outline-text-2" id="text-1">
 <div class="org-src-container">
-
 <pre class="src src-bash">$ cp demo_file demo_file2
-$ echo grep <span style="color: #00ff00;">"Character"</span> demo*
+$ echo grep <span style="color: #ffa07a;">"Character"</span> demo*
 grep Character demo_file demo_file2
-$ grep <span style="color: #00ff00;">"Character"</span> demo*
+$ grep <span style="color: #ffa07a;">"Character"</span> demo*
 demo_file:This Line Has All Its First Character Of The Word With Upper Case.
 demo_file2:This Line Has All Its First Character Of The Word With Upper Case.
 </pre>
@@ -212,21 +310,20 @@ demo_file2:This Line Has All Its First Character Of The Word With Upper Case.
 </div>
 </div>
 
-<div id="outline-container-orgheadline2" class="outline-2">
-<h2 id="orgheadline2"><span class="section-number-2">2</span> <code>-i</code> 忽略大小写</h2>
+<div id="outline-container-org81012d4" class="outline-2">
+<h2 id="org81012d4"><span class="section-number-2">2</span> <code>-i</code> 忽略大小写</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 grep默认是大小写区分的，通过 <code>-i</code> 可以忽略大小写
 </p>
 
 <div class="org-src-container">
-
 <pre class="src src-bash">$ grep the demo_file
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 And this is the last line.
 $ grep -i the demo_file
 THIS LINE IS THE 1ST UPPER CASE LINE IN THIS FILE.
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 This Line Has All Its First Character Of The Word With Upper Case.
 And this is the last line.
 </pre>
@@ -234,11 +331,12 @@ And this is the last line.
 </div>
 </div>
 
-<div id="outline-container-orgheadline7" class="outline-2">
-<h2 id="orgheadline7"><span class="section-number-2">3</span> 使用正则表达式</h2>
+<div id="outline-container-org5702101" class="outline-2">
+<h2 id="org5702101"><span class="section-number-2">3</span> 使用正则表达式</h2>
 <div class="outline-text-2" id="text-3">
-</div><div id="outline-container-orgheadline3" class="outline-3">
-<h3 id="orgheadline3"><span class="section-number-3">3.1</span> 使用锚点</h3>
+</div>
+<div id="outline-container-org75b660f" class="outline-3">
+<h3 id="org75b660f"><span class="section-number-3">3.1</span> 使用锚点</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li><code>^</code> ：必须出现在行首</li>
@@ -247,8 +345,8 @@ And this is the last line.
 </div>
 </div>
 
-<div id="outline-container-orgheadline4" class="outline-3">
-<h3 id="orgheadline4"><span class="section-number-3">3.2</span> 使用通配符</h3>
+<div id="outline-container-org37af45c" class="outline-3">
+<h3 id="org37af45c"><span class="section-number-3">3.2</span> 使用通配符</h3>
 <div class="outline-text-3" id="text-3-2">
 <ul class="org-ul">
 <li><code>.</code> ：匹配任意字符</li>
@@ -261,8 +359,8 @@ And this is the last line.
 </div>
 </div>
 
-<div id="outline-container-orgheadline5" class="outline-3">
-<h3 id="orgheadline5"><span class="section-number-3">3.3</span> 重复次数</h3>
+<div id="outline-container-org75defde" class="outline-3">
+<h3 id="org75defde"><span class="section-number-3">3.3</span> 重复次数</h3>
 <div class="outline-text-3" id="text-3-3">
 <ul class="org-ul">
 <li><code>?</code>     ：匹配0次或1次</li>
@@ -276,20 +374,19 @@ And this is the last line.
 </div>
 </div>
 
-<div id="outline-container-orgheadline6" class="outline-3">
-<h3 id="orgheadline6"><span class="section-number-3">3.4</span> 查找th开头，后跟2个字符的行</h3>
+<div id="outline-container-org4eb5bb7" class="outline-3">
+<h3 id="org4eb5bb7"><span class="section-number-3">3.4</span> 查找th开头，后跟2个字符的行</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
-主意grep和egrep的差别<a href="#orgtarget1">8</a>
+主意grep和egrep的差别<a href="#orgbdcf48c">8</a>
 </p>
 <div class="org-src-container">
-
-<pre class="src src-sh">$ grep <span style="color: #00ff00;">'th[a-z]\{2\}'</span> demo_file
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+<pre class="src src-sh">$ grep <span style="color: #ffa07a;">'th[a-z]\{2\}'</span> demo_file
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 Two lines above this line is empty.
 And this is the last line.
-$ egrep <span style="color: #00ff00;">'th[a-z]{2}'</span> demo_file
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+$ egrep <span style="color: #ffa07a;">'th[a-z]{2}'</span> demo_file
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 Two lines above this line is empty.
 And this is the last line.
 </pre>
@@ -298,18 +395,17 @@ And this is the last line.
 </div>
 </div>
 
-<div id="outline-container-orgheadline8" class="outline-2">
-<h2 id="orgheadline8"><span class="section-number-2">4</span> <code>-w</code> 匹配完整的单词</h2>
+<div id="outline-container-org6eb5fcf" class="outline-2">
+<h2 id="org6eb5fcf"><span class="section-number-2">4</span> <code>-w</code> 匹配完整的单词</h2>
 <div class="outline-text-2" id="text-4">
 <div class="org-src-container">
-
 <pre class="src src-bash">$ grep is demo_file
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 This Line Has All Its First Character Of The Word With Upper Case.
 Two lines above this line is empty.
 And this is the last line.
 $ grep -w is demo_file
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 Two lines above this line is empty.
 And this is the last line.
 </pre>
@@ -317,11 +413,10 @@ And this is the last line.
 </div>
 </div>
 
-<div id="outline-container-orgheadline9" class="outline-2">
-<h2 id="orgheadline9"><span class="section-number-2">5</span> <code>-B</code> 显示匹配行的前几行， <code>-A</code> 显示后几行， <code>-C</code> 显示前后几行</h2>
+<div id="outline-container-org193c9e7" class="outline-2">
+<h2 id="org193c9e7"><span class="section-number-2">5</span> <code>-B</code> 显示匹配行的前几行， <code>-A</code> 显示后几行， <code>-C</code> 显示前后几行</h2>
 <div class="outline-text-2" id="text-5">
 <div class="org-src-container">
-
 <pre class="src src-bash">$ grep -B 2 empty demo_file
 This Line Has All Its First Character Of The Word With Upper Case.
 
@@ -330,7 +425,7 @@ $ grep -A 1 empty demo_file
 Two lines above this line is empty.
 And this is the last line.
 $ grep -C 3 empty demo_file
-this line is the 1st lower case line<span style="color: #00ffff; font-weight: bold;"> in</span> this file.
+this line is the 1st lower case line<span style="color: #00ffff;"> in</span> this file.
 This Line Has All Its First Character Of The Word With Upper Case.
 
 Two lines above this line is empty.
@@ -340,11 +435,10 @@ And this is the last line.
 </div>
 </div>
 
-<div id="outline-container-orgheadline10" class="outline-2">
-<h2 id="orgheadline10"><span class="section-number-2">6</span> <code>--color</code> 高亮现实匹配到的字符串</h2>
+<div id="outline-container-org0ca01f5" class="outline-2">
+<h2 id="org0ca01f5"><span class="section-number-2">6</span> <code>--color</code> 高亮现实匹配到的字符串</h2>
 <div class="outline-text-2" id="text-6">
 <div class="org-src-container">
-
 <pre class="src src-bash">$ grep --color=always empty demo_file
 Two lines above this line is empty.
 </pre>
@@ -352,26 +446,26 @@ Two lines above this line is empty.
 </div>
 </div>
 
-<div id="outline-container-orgheadline11" class="outline-2">
-<h2 id="orgheadline11"><span class="section-number-2">7</span> 其它很有用的选项</h2>
+<div id="outline-container-org96d91ce" class="outline-2">
+<h2 id="org96d91ce"><span class="section-number-2">7</span> 其它很有用的选项</h2>
 <div class="outline-text-2" id="text-7">
 <ul class="org-ul">
 <li><code>-r</code> ：递归查找</li>
 <li><code>-n</code> ：显示行号</li>
 <li><code>-c</code> ：只显示匹配了多少次</li>
 <li><code>-o</code> ：只显示匹配到的内容（默认是匹配到的行）</li>
-<li><code>-l</code> ：只显示匹配到的文件</li>
+<li><code>-l</code> ：只显示匹配到的文件，用于单行内容特别长的情况</li>
 <li><code>-v</code> ：只显示不匹配的</li>
 <li><code>-q</code> ：关闭输出，通过 <code>$?</code> 判断是否匹配成功</li>
+<li><code>-a</code> ：把二进制文件当文本处理</li>
+<li><code>-F</code> ：不使用正则，使用文本匹配</li>
 </ul>
-<p>
-= <code>-a</code> : 把二进制文件当文本处理
-</p>
 </div>
 </div>
 
-<div id="outline-container-orgheadline12" class="outline-2">
-<h2 id="orgheadline12"><span class="section-number-2">8</span> <b>egrep</b> <b>fgrep</b> <a id="orgtarget1"></a></h2>
+
+<div id="outline-container-org2a54143" class="outline-2">
+<h2 id="org2a54143"><span class="section-number-2">8</span> <b>egrep</b> <b>fgrep</b> <a id="orgbdcf48c"></a></h2>
 <div class="outline-text-2" id="text-8">
 <ul class="org-ul">
 <li><b>egrep</b> 相当于 <code>grep -E</code> ，?， +， {， |， (， )，不需要转义</li>
@@ -383,7 +477,7 @@ Two lines above this line is empty.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: SATHIYAMOORTHY,zhengzhiyong</p>
-<p class="date">Created: 2018-05-21 一 16:50</p>
+<p class="date">Created: 2023-11-12 日 08:22</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

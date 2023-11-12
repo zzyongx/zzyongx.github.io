@@ -1,0 +1,37 @@
+#+TITLE: 进程hang在何处
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+区别于耗时变长，进程hang表现为耗时大大变长，甚至长到永不结束。从CPU角度看，有两种hang：
+1. CPU 高于平时，几乎100%;
+2. CPU 低于平时，几乎为0;
+有现场的话，这两种情况都比较好定位，关键是找到调用栈，从栈上可以看出端倪。
+
+* CPU高于平时
+这种情况需要知道CPU在忙什么（OnCPU），用CPU性能profile（火焰图）工具就可以。几乎每种语言都有自己专有的工具，例如：Java的async-profiler。
+使用专有工具，可以确保函数符号正确解析，但有如下缺陷：
+1. 依赖运行时，可能工具无法运行。例如：async-profiler依赖JVM，JVM不响应的话，就没办法;
+2. 可能无法采集内核栈。依赖工具的能力，以及权限的配置。例如：async-profiler 通常需要 ~sysctl -w kernel.perf_event_paranoid=-1~
+
+如果专有工具无法工作，可以尝试如下方式：
+1. [[blog:perf][perf]] ，perf的缺点是，对于非编译语言，[[blog:perf-java][需要辅助工具]] ，才能解析函数符号;
+2. [[blog:pstack][pstack]]，pstack是gdb工具，可以用stackcollapse-gdb.pl转成火焰图。pstack损耗比较大，且只能看用户态;
+3. top -H -p<pid>，查看线程的CPU使用率，根据线程名推测可能的原因。
+
+* CPU低于平时
+这种情况需要知道进程因为什么让出了CPU（OffCPU）。常用的工具如下：
+1. offcputime（BCC工具），查看进程schedule时的栈;
+2. [[blog:pstack][cat /proc/<pid>/stack]] ，查看进程的内核栈。
+
+一个小知识：进程只能通过系统调用进入S状态（不使用CPU），所以查看内核栈可以直到hang的原因。具体来说，有以下原因：
+1. 死锁，这个是BUG。除了传统的锁，多线程业务逻辑上的协作，也可能导致死锁;
+2. IO，包括磁盘IO、网络IO;
+3. 内核限制，比较典型的是cgroup的限制，例如： =echo 1 > /cgroup/memory/lab1/memory.oom_control= 关闭了oom，则内存不足时，进程会hang，直到内存充足。
+
+网络IO导致的hang，通常是如下原因：
+1. 编程不当，例如：没有设置超时，这种可能永远hang;
+2. 网络慢、下游应用慢，通常进程表现为慢，但是不会hang死。
+
+磁盘IO导致的hang，相对复杂：
+1. 磁盘硬件故障;
+2. pagecache命中率低，可能是系统内存不足、编程不当等。

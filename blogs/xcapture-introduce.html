@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-10-29 日 13:04 -->
+<!-- 2023-11-12 日 08:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>xcapture 介绍</title>
@@ -252,15 +252,15 @@ for the JavaScript code in this tag.
 <h1 class="title">xcapture 介绍</h1>
 <p>
 <a href="https://0x.tools/">xcapture</a> 是 0x.tools 中的一个工具，用于记录Linux进程快照，包括进程状态、命令、内核栈等。非常适合排查没有现场的故障。
-例如：=xcapture -d 10 -c exe,cmdline,kstack -o <i>var</i>log/xcaputre= 每10秒记录一次，包括内核栈，不记录S状态的线程，输出是csv格式的文件。
+例如：=xcapture -d 10 -c exe,cmdline,syscall,kstack -o <i>var</i>log/xcaputre= 每10秒记录一次，包括内核栈，不记录S状态的线程，输出是csv格式的文件。
 </p>
 
 <p>
 统计xcaputre的输出非常重要。
 </p>
 
-<div id="outline-container-orgb90c9d1" class="outline-2">
-<h2 id="orgb90c9d1"><span class="section-number-2">1</span> 根据xcapture生成火焰图</h2>
+<div id="outline-container-org03fdeaf" class="outline-2">
+<h2 id="org03fdeaf"><span class="section-number-2">1</span> 根据xcapture生成火焰图</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 火焰图非常适合发现热点，无论是CPU热点、还是等待热点。以火焰图的形式呈现xcapture的内核栈非常直观。例如：这是kafka卡顿的日志，
@@ -306,8 +306,8 @@ grep -E <span style="color: #ffa07a;">",D|R,"</span>  2023-10-19.10.csv | awk -F
 </div>
 </div>
 
-<div id="outline-container-orge26dcf5" class="outline-2">
-<h2 id="orge26dcf5"><span class="section-number-2">2</span> 其它有用的统计</h2>
+<div id="outline-container-org05d5974" class="outline-2">
+<h2 id="org05d5974"><span class="section-number-2">2</span> 其它有用的统计</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 a) 统计每分钟R状态的进程
@@ -323,7 +323,7 @@ b) 统计每个进程的R状态的数量
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2023-10-29 日 13:04</p>
+<p class="date">Created: 2023-11-12 日 08:25</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
