@@ -6,6 +6,8 @@
 * 2023 癸卯年
 
 ** 经验
+[[blog:rediect-ngx-log-to-std][nginx如何重定向日志到标准输出]] <2023-11-12>
+
 [[blog:where-is-process-hang][进程hang在哪里]] <2023-11-12>
 
 [[blog:why-service-latency-becomes-high-when-the-load-is-not-high][k8s环境增加实例，其它服务延迟变高]] <2023-10-29>

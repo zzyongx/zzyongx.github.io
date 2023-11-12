@@ -1,0 +1,17 @@
+#+TITLE: nginx如何重定向日志到标准输出
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+在docker中运行nginx，发现nginx的CPU使用升高时，containerd-shim、dockerd的CPU使用也升高。
+nginx使用host网络，它的运行应该和docker完全无关才对。
+同事提醒说，dockerd会捕获它所启动进程的标准输出、错误输出。
+查看nginx的access log，果然是空的，也就是说nginx把日志重定向到了标准输出。
+
+查了半天nginx的配置，没发现任何相关配置，最后在StackOverflow上找到了答案，docker发行版把日志符号链接到了stdout/stderr，如下：
+#+BEGIN_EXAMPLE
+$ ls -l access.log error.log
+lrwxrwx 1 root root 11 Feb 22 13:10 access.log -> /dev/stdout
+lrwxrwx 1 root root 11 Feb 22 13:10 error.log -> /dev/stderr
+#+END_EXAMPLE
+
+服了，还有这般骚操作。这么配置有啥好处呢？
