@@ -1,0 +1,34 @@
+#+TITLE: kstack
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+kstack用于打印进程（含线程）的内核栈。在程序hang时比较有用。
+
+#+BEGIN_SRC bash
+# 因为CPU hang，可以把LOOP值调大
+FOLD=0
+LOOP=5
+test $FOLD = 0 && LOOP=1
+
+for x in $(seq 1 $LOOP); do
+  for pid in $(ls /proc/$PID/task); do
+    if test $FOLD = 1; then
+      tac /proc/$PID/task/$pid/stack | awk -F'[ +]' '{print $2}' | tr '\n' ';' | sed -E 's|;$|\n|'
+    else
+      name=$(cat /proc/$PID/task/$pid/stat | awk -F'[()]' '{print $2}')
+      echo $pid $name
+      echo "========"
+      cat /proc/$PID/task/$pid/stack
+      echo
+    fi
+  done
+  sleep 0.1
+done > tmp.txt
+if test $FOLD = 1; then
+  cat tmp.txt | sort | uniq -c | sort -n | awk '{print $2,$1}' > kstack.txt
+else
+  mv tmp.txt kstack.txt
+fi
+#+END_SRC
+
+可以转成火焰图 =cat kstack.txt | flamegraph.pl=

@@ -1,0 +1,22 @@
+#+TITLE: pstack的使用
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+pstack是gdb工具，用于打印进程（含线程）的调用栈。在程序hang时比较有用。
+
+输出pstack.txt
+#+BEGIN_SRC bash
+# PID是进程ID
+# 因为CPU hang，可以把LOOP值调大
+LOOP=5
+for x in $(seq 1 $LOOP); do
+  gdb -ex "set pagination 0" -ex "thread apply all bt" -batch -p $PID 2>/dev/null
+  sleep 0.1
+done > pstack.txt
+#+END_SRC
+
+pstack.txt 转成火焰图
+cat pstack.txt | stackcollapse-gdb.pl | flamegraph.pl
+
+如果上述转法有问题，可以用脚本加工一下pstack.txt。
+例如：java程序运行pstack，可以删除不识别的栈，保留函数名称中带参数， =cat pstack.txt | grep -vF '??' | sed -E 's|^Thread|\nThread|' | sed -E 's|, |,|g' | stackcollapse-gdb.pl | flamegraph.pl= 。

@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-11-14 二 07:29 -->
+<!-- 2023-11-14 二 06:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>进程hang在何处</title>
+<title>pstack的使用</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="zhengzhiyong" />
 <style type="text/css">
@@ -249,87 +249,38 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">进程hang在何处</h1>
+<h1 class="title">pstack的使用</h1>
 <p>
-区别于耗时变长，进程hang表现为耗时大大变长，甚至长到永不结束。从CPU角度看，有两种hang：
-</p>
-<ol class="org-ol">
-<li>CPU 高于平时，几乎100%;</li>
-<li>CPU 低于平时，几乎为0;</li>
-</ol>
-<p>
-有现场的话，这两种情况都比较好定位，关键是找到调用栈，从栈上可以看出端倪。
+pstack是gdb工具，用于打印进程（含线程）的调用栈。在程序hang时比较有用。
 </p>
 
-<div id="outline-container-org5206e5d" class="outline-2">
-<h2 id="org5206e5d"><span class="section-number-2">1</span> CPU高于平时</h2>
-<div class="outline-text-2" id="text-1">
 <p>
-这种情况需要知道CPU在忙什么（OnCPU），用CPU性能profile（火焰图）工具就可以。几乎每种语言都有自己专有的工具，例如：Java的async-profiler。
-使用专有工具，可以确保函数符号正确解析，但有如下缺陷：
+输出pstack.txt
 </p>
-<ol class="org-ol">
-<li>依赖运行时，可能工具无法运行。例如：async-profiler依赖JVM，JVM不响应的话，就没办法;</li>
-<li>可能无法采集内核栈。依赖工具的能力，以及权限的配置。例如：async-profiler 通常需要 <code>sysctl -w kernel.perf_event_paranoid=-1</code></li>
-</ol>
-
-<p>
-如果专有工具无法工作，可以尝试如下方式：
-</p>
-<ol class="org-ol">
-<li><a href="https://zzyongx.github.io/blogs/perf.html">perf</a> ，perf的缺点是，对于非编译语言，<a href="https://zzyongx.github.io/blogs/perf-java.html">需要辅助工具</a> ，才能解析函数符号;</li>
-<li><a href="https://zzyongx.github.io/blogs/pstack.html">pstack</a>，pstack是gdb工具，可以用stackcollapse-gdb.pl转成火焰图。pstack损耗比较大，且只能看用户态;</li>
-<li>top -H -p&lt;pid&gt;，查看线程的CPU使用率，根据线程名推测可能的原因。</li>
-</ol>
-</div>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">PID&#26159;&#36827;&#31243;ID</span>
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#22240;&#20026;CPU hang&#65292;&#21487;&#20197;&#25226;LOOP&#20540;&#35843;&#22823;</span>
+<span style="color: #eedd82;">LOOP</span>=5
+<span style="color: #00ffff;">for</span> x<span style="color: #00ffff;"> in</span> $(<span style="color: #fa8072;">seq</span> 1 $<span style="color: #eedd82;">LOOP</span>); <span style="color: #00ffff;">do</span>
+  gdb -ex <span style="color: #ffa07a;">"set pagination 0"</span> -ex <span style="color: #ffa07a;">"thread apply all bt"</span> -batch -p $<span style="color: #eedd82;">PID</span> 2&gt;/dev/null
+  sleep 0.1
+<span style="color: #00ffff;">done</span> &gt; pstack.txt
+</pre>
 </div>
 
-<div id="outline-container-orged8f851" class="outline-2">
-<h2 id="orged8f851"><span class="section-number-2">2</span> CPU低于平时</h2>
-<div class="outline-text-2" id="text-2">
 <p>
-这种情况需要知道进程因为什么让出了CPU（OffCPU）。常用的工具如下：
-</p>
-<ol class="org-ol">
-<li>offcputime（BCC工具），查看进程schedule时的栈;</li>
-<li><a href="https://zzyongx.github.io/blogs/kstack.html">kstack</a>，查看进程的内核栈。</li>
-<li>查看进程栈，例如Java有jstack，语言专用的工具无法使用时，总是可以尝试<a href="https://zzyongx.github.io/blogs/pstack.html">pstack</a>。</li>
-</ol>
-
-<p>
-虽然可以把OffCPU的调用栈也转成火焰图，但是要注意：火焰图占比最大的可能只是结果，不是根因，根因可能在某一个调用栈上。
+pstack.txt 转成火焰图
+cat pstack.txt | stackcollapse-gdb.pl | flamegraph.pl
 </p>
 
 <p>
-一个小知识：进程只能通过系统调用进入S状态（不使用CPU），所以查看内核栈可以直到hang的原因。具体来说，有以下原因：
+如果上述转法有问题，可以用脚本加工一下pstack.txt。
+例如：java程序运行pstack，可以删除不识别的栈，保留函数名称中带参数， <code>cat pstack.txt | grep -vF '??' | sed -E 's|^Thread|\nThread|' | sed -E 's|, |,|g' | stackcollapse-gdb.pl | flamegraph.pl</code> 。
 </p>
-<ol class="org-ol">
-<li>死锁，这个是BUG。除了传统的锁，多线程业务逻辑上的协作，也可能导致死锁;</li>
-<li>IO，包括磁盘IO、网络IO;</li>
-<li>内核限制，比较典型的是cgroup的限制，例如： <code>echo 1 &gt; /cgroup/memory/lab1/memory.oom_control</code> 关闭了oom，则内存不足时，进程会hang，直到内存充足。</li>
-</ol>
-
-<p>
-网络IO导致的hang，通常是如下原因：
-</p>
-<ol class="org-ol">
-<li>编程不当，例如：没有设置超时，这种可能永远hang;</li>
-<li>网络慢、下游应用慢，通常进程表现为慢，但是不会hang死。</li>
-</ol>
-
-<p>
-磁盘IO导致的hang，相对复杂：
-</p>
-<ol class="org-ol">
-<li>磁盘硬件故障;</li>
-<li>pagecache命中率低，可能是系统内存不足、编程不当等。</li>
-</ol>
-</div>
-</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2023-11-14 二 07:29</p>
+<p class="date">Created: 2023-11-14 二 06:57</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

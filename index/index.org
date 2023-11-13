@@ -6,6 +6,7 @@
 * 2023 癸卯年
 
 ** 经验
+[[
 [[blog:rediect-ngx-log-to-std][nginx如何重定向日志到标准输出]] <2023-11-12>
 
 [[blog:where-is-process-hang][进程hang在哪里]] <2023-11-12>
