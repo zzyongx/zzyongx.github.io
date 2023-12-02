@@ -1,0 +1,121 @@
+#+TITLE: centos 开发工具
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 常用工具
+1. libcgroup-tools，用于操作cgroup;
+2. numactl，用于numa相关操作;
+3. bcc-tools，BCC工具集;
+4. jq，操作JSON;
+
+* 常用命令
+1. 查看Linux内核启动参数， =cat /proc/cmdline= ;
+2. 查看内核编译参数， =cat /boot/config-$(uname -r)= ;
+
+* 时区相关
+1. 查看当前时区， =ls -l /etc/localtime= ;
+2. 列出所有时区， =timedatectl list-timezones | grep Shanghai= ;
+3. 设置时区， =timedatectl set-timezone "Asia/Shanghai"= ;
+4. 在Dockerfile中设置时区， =ENV TZ Asia/Shanghai= 。
+
+* devtoolset
+我常常调侃 c\plus\plus 之所以江河日下，就是因为centos自带的gcc版本太低了，c\plus\plus 最新的特性完全没法用。借助devtoolset，可以安装最新版gcc，而不影响默认版本。分三步完成：
+1. =yum install centos-release-scl=
+2. =yum install devtoolset-7=
+3. =scl enable devtoolset-7 bash= 启动新的bash，此时gcc已经是gcc7，退出bash，gcc是gcc4。
+
+安装中碰到的问题：
+1. Requires: libgfortran4 >= 7.1.1-2，解决方法： =rpm -ivh http://mirror.centos.org/centos/7/os/x86_64/Packages/libgfortran4-8.3.1-2.1.1.el7.x86_64.rpm=
+
+* 编译GCC
+编译GCC比较简单，下载源码后 =./configure --disable-multilib && make && make install= 。
+
+查看LIBCXX的版本， =strings /usr/local/lib64/libstdc++.so.6 | grep -E "^GLIBCXX_|CXXABI_"= 。
+
+* 编译LLVM
+#+BEGIN_SRC bash
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS:BOOL=OFF \
+-DLLVM_BUILD_LLVM_DYLIB=ON -DLIBCLANG_BUILD_STATIC=ON -DCMAKE_BUILD_TYPE=Release \
+-DLLVM_ENABLE_TERMINFO=OFF \
+-DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld;lldb" \
+-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
+-DCLANG_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_GO_TESTS=OFF -DLLVM_INCLUDE_TESTS=OFF \
+-DLLVM_TARGETS_TO_BUILD="all" \
+-DCMAKE_C_COMPILER=/usr/local/bin/gcc -DCMAKE_CXX_COMPILER=/usr/local/bin/g++ -DCMAKE_CXX_FLAGS="-static-libstdc++" \
+-S llvm -B build -G "Unix Makefiles"
+
+cd build && make -j$(nproc) && make install
+
+# 编译参数说明
+
+# 编译类型Debug，编译出来有100G，指定大磁盘作为安装目录
+-DCMAKE_BUILD_TYPE="Debug" -DCMAKE_INSTALL_PREFIX=/data/local
+
+# 编译为static
+-DBUILD_SHARED_LIBS:BOOL=OFF -DLIBCLANG_BUILD_STATIC=ON
+
+# 指定编译器，并且静态编译libstdc++
+-DCMAKE_C_COMPILER=/usr/local/bin/gcc -DCMAKE_CXX_COMPILER=/usr/local/bin/g++ -DCMAKE_CXX_FLAGS="-static-libstdc++"
+#+END_SRC
+
+* cmake & make 技巧
+1. =cmake --debug-trycompile= 查看（详细的）依赖检查过程;
+2. =cmake --build . -v= 通过 =-v= 打印编译过程，包括编译命令、参数;
+3. 清除cmake缓存， =find . -name CMakeCache.txt -delete= ;
+4. ~make VERBOSE=1~ 打印编译过程，包括编译命令、参数。
+
+* 编译boost
+#+BEGIN_SRC bash
+export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH
+./bootstrap.sh
+./b2 install
+#+END_SRC
+
+* sudo 后保留环境变量
+假设需要保留的环境变量是 =HTTP_PROXY= ，修改 =/etc/sudoers= ，在 =Defaults env_reset= 下添加
+~Defaults env_keep += "HTTP_PROXY"~ 。
+
+* bazel
+** bazel 的安装
+#+BEGIN_SRC bash
+# 从源码安装需要下载dist版本
+wget https://github.com/bazelbuild/bazel/releases/download/6.4.0/bazel-6.4.0-dist.zip
+# 解压到指定目录
+unzip bazel-6.4.0-dist.zip -d bazel-6.4.0-dist
+
+cd bazel-6.4.0-dist
+# 需要jdk11及以上
+export JAVA_HOME=/opt/jdk11/
+env EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk" bash ./compile.sh
+
+# 安装
+cp output/bazel /usr/local/bin/
+#+END_SRC
+
+** bazel 的基本用法
+#+BEGIN_src bash
+# 运行bazel时，也需要JAVA_HOME
+export JAVA_HOME=/opt/jdk11/
+
+# 编译、clean
+bazel build //absl/hash:hash_benchmark
+bazel clean
+
+# 指定编译器、编译参数
+# subcommands 用于打印编译命令，验证编译是否生效
+CC=/usr/local/bin/clang++
+bazel build -c opt --cxxopt="-march=skylake" --cxxopt="-O3" --cxxopt="-fomit-frame-pointer" --subcommands //absl/hash:hash_benchmark
+#+END_SRC
+
+* python
+** 手动安装package
+google的benchmark有个compare工具，用于对比两次bench的结果，里面有个gbench需要手动安装，但是gbench没有setup.py。
+
+#+BEGIN_SRC bash
+# 查看安装包的目标位置
+pip3 show numpy | grep Location
+Location: /usr/local/lib64/python3.6/site-packages
+
+# 复制到制定位置即可
+cp -a gbench  /usr/local/lib64/python3.6/site-packages/
+#+END_SRC
