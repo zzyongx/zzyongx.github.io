@@ -142,6 +142,10 @@ perf record -g -p <pid> -o perfdata -- sleep 30
 # stackcollapse-perf.pl（来自FlameGraph），把perf script的输出转成火焰图需要的文本格式
 # flamegraph.pl 把火焰图文本转成火焰图
 perf script -i perfdata | stackcollapse-perf.pl | flamegraph.pl > perf.svg
+
+# 可以在stackcollapse之前，加工文本
+# 例如：删除unknow栈，不区分线程
+perf script -i perfdata | grep -vF '[unknown]' | sed -E 's/^[a-zA-Z0-9-]+/thread/' | stackcollapse-perf.pl | flamegraph.pl > perf.svg
 #+END_SRC
 
 * 常见问题

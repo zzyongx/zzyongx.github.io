@@ -1,0 +1,62 @@
+#+TITLE: 定位磁盘IO问题
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+*
+
+* 磁盘write吞吐饱和的表现
+磁盘write会先写page cache，page cache标记为Dirty（不可直接回收），然后由kswapd进程把page cache写入磁盘，page cache标记为Clean（可回收）。
+
+如果write吞吐饱和，Dirty page的数量（大小）会较大，或持续上升。
+
+#+BEGIN_SRC bash
+# 物理机查看
+for ((i=0; i<100; i++)); do echo $(date +%T) $(cat /proc/meminfo | grep Dirty); done
+
+# 容器查看
+for ((i=0; i<100; i++)); do echo $(date +%T) $(cat /sys/fs/cgroup/memory/memory.stat | grep "^dirty"); done
+#+END_SRC
+
+磁盘通常是读优先，可以通过wbt配置，调整写的优先级。
+
+#+BEGIN_SRC bash
+# sdb 是相应的磁盘，可用通过df查看
+cat /sys/block/sdb/queue/wbt_lat_usec
+75000
+
+echo 0 | sudo tee /sys/block/sdb/queue/wbt_lat_usec
+#+END_SRC
+
+下面两个参数，控制dirty page的写入
+#+BEGIN_EXAMPLE
+# dirty page 存在超过30S，会写入磁盘
+vm.dirty_expire_centisecs = 3000
+
+# dirty page的大小超过available内存的20%，开始写入磁盘
+vm.dirty_ratio = 20
+#+END_EXAMPLE
+
+* 找到IO高的进程
+1. BCC的filetop查看机器的IO，可以找到高IO的线程（ =ps -eLf | grep <tid>= 查找进程），以及对应的文件;
+2. iotop也可以完成类似的工作。
+
+* 查看IO的延迟情况
+1. BCC的fileshower、ext4shower、xfsshower可以查看IO延迟低于某个阈值的操作;
+2. BCC的funclatency可用跟踪 =vfs_read、vfs_write= 查看IO延迟的分布。
+
+* 查看IO设备的延迟情况
+1. BCC的biolatency可以查看设备的延迟情况;
+2. blktrace -d <device> 可以跟踪设备的操作。
+
+* 定位IO延迟高的根因
+IO延迟高通常有如下原因：
+1. 内存不足，pagecache的命中率低，可以使用BCC的cachestat查看;
+2. 磁盘IO到瓶颈了（可能由业务异常导致高IO），dirty page的大小可以用于判断写是否饱和;
+3. 硬件BUG，可能是固件的BUG，例如ssd硬盘的gc算法等;
+4. 软件BUG，软件非预期的行为，例如：用fadvise64清除了文件的缓存。
+
+使用fio压测，看硬件的性能是否和标注的性能差异较大。
+
+* 其它指标
+1. cpu的iowait衡量因为io处于idle的时间，但没有明确的阈值;
+2. iostat的IO数量、IO大小、IO排队，但也没有明确的阈值。
