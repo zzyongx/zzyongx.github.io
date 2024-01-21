@@ -3,6 +3,11 @@
 #+SETUPFILE: ../setup/theme-readtheorg-local.setup
 #+OPTIONS: toc:nil
 
+* 2024 甲辰年
+
+** 经验
+[[blog:google-benchmark][性能优化必备工具google benchmark]] <2024-01-21>
+
 * 2023 癸卯年
 
 ** 经验

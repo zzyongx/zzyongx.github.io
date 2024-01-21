@@ -1,0 +1,142 @@
+#+TITLE: google benchmark 介绍
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+在优化中，最常见的问题是某个优化点是否有效，尤其是某些函数级别的代码优化，比例不是很大（<10%），如何确定是性能波动，还是优化呢？
+[[https://github.com/google/benchmark.git][google benchmark]] 是一个测试函数性能的框架，可以测试函数的性能，此外提供了对比工具，可以“科学”的做性能对比。
+
+* 安装
+#+BEGIN_SRC bash
+# 下载
+git clone https://github.com/google/benchmark.git && cd benchmark
+
+# 编译需要用到bazel，官方提供了cmake，但我使用报错
+bazel build -c opt benchmark benchmark_main
+
+# 安装benchmark库
+cp -a bazel-benchmark/include/benchmark /usr/local/include/
+cp bazel-bin/libbenchmark_main.a bazel-bin/libbenchmark.a  /usr/local/lib/
+
+# 安装对比工具，在tools目录，需要python3
+pip3 install scipy numpy
+cp -a gbench  /usr/local/lib64/python3.6/site-packages/
+cp compare.py /usr/local/bin/benchmark_compare.py
+#+END_SRC
+
+* 编写测试用例
+~dram_access_benchmark.cc~
+
+#+BEGIN_SRC c++
+#include <cstring>
+#include <vector>
+#include <benchmark/benchmark.h>
+
+namespace {
+
+constexpr long buf_size = 12 * 1000 * 1000 * 1000L; // 12G;
+
+int fib(int n) {
+  int v1 = 1;
+  int v2 = 1;
+  for (int i = 2; i < n; ++i) {
+    int v = v1 + v2;
+    v1 = v2;
+    v2 = v;
+  }
+  return v2;
+}
+
+void locs_gen(std::vector<long> *locs)
+{
+  for (int i = 0, max = locs->size(); i < max; ++i) {
+    (*locs)[i] = random() % buf_size;
+  }
+}
+
+char *buf = 0;
+void DoSetup(const benchmark::State& state) {
+  if (!buf) {
+    buf = new char[buf_size];
+    memset(buf, 0x9, buf_size/2);
+    memset(buf + buf_size/2, 0x7, buf_size - buf_size/2);
+  }
+}
+
+void DoTeardown(const benchmark::State& state) {
+}
+
+void BM_dram_access(benchmark::State &state) {
+  std::vector<long> locs(state.range(0), 0);
+  std::vector<long> regs(state.range(0), 0);
+
+  long s = 100;
+  long cnt = 0;
+
+  for (auto _ : state) {
+    locs_gen(&locs);
+
+#ifdef OOO
+    for (int i = 0, max = locs.size(); i < max; ++i) {
+      regs[i] = buf[locs[i]];
+    }
+
+    for (int i = 0, max = regs.size(); i < max; ++i) {
+      s += fib(regs[i]);
+    }
+#else
+    for (int i = 0, max = locs.size(); i < max; ++i) {
+      s += fib(buf[locs[i]]);
+    }
+#endif
+
+    cnt++;
+  }
+  state.SetBytesProcessed(cnt * locs.size());
+  benchmark::DoNotOptimize(s);
+}
+
+BENCHMARK(BM_dram_access)->RangeMultiplier(2)->Range(4, 32)->Setup(DoSetup)->Teardown(DoTeardown);
+
+}
+#+END_SRC
+
+这里有几个关键点：
+1. ~BM_dram_access~ 是测试函数，通过BENCHMARK注册，通常这就是全部了;
+2. 可以给测试函数传递参数，这里 ~RangeMultiplier(2)->Range(4, 32)~ 的含义是传递4、8、16、32，依次是2的倍数;
+3. 这里一次传递一个参数，每个参数生成一个测试用例，因为函数的性能可能和参数相关;
+4. 测试函数通过 ~state.range(0)~ 接收参数;
+5. 通过 ~Setup(DoSetup)~ 初始化全局变量，注意的是每次测试都会调用一次DoSetup，但是测试框架可能调用多次测试函数（Warmup），所以如果只想全局调用一次这个函数，需要函数内部增加逻辑，保证只调用一次。
+6. 测试框架度量一次执行的耗时，作为性能指标，此外可以自定义counter，来定义额外的性能指标，示例使用了一个内置counter。
+
+详细文档在[[https://github.com/google/benchmark/blob/main/docs/user_guide.md][这里]]，此外在源码 ~include/benchmark/benchmark.h~ 也可以找到一些例子。
+
+* 编译运行
+#+BEGIN_SRC bash
+# 编译基准版本
+g++ -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark -lbenchmark_main -lbenchmark -lpthread
+
+# 编译优化版本
+g++ -DOOO -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark_opt -lbenchmark_main -lbenchmark -lpthread
+#+END_SRC
+~-lbenchmark_main~ 使用默认的 main 函数。
+~dram_access_benchmark~ 可以直接运行，常用的参数有：
+1. ~--benchmark_repelitions=<n>~ 运行的次数，次数（>30）越多，结果越准确;
+2. ~--benchmark_display_aggregates_only=true~ 多次运行时benchmark 会自动计算均值，中位数，这个参数只展示汇总值;
+3. ~--benchmark_counters_tabular=true~ 表格形式展示自定义counter。
+
+* 优化效果对比
+如前所述，如何检验优化真实有效呢？compare.py 实现了 Mann-Whitney U test（曼-惠特尼U检验），通过对比程序多次运行的结果，判断是真有优化，还是波动（这不同于单纯的比较多次运行的平均值，而是应用了U检验）。
+
+详细文档在[[https://github.com/google/benchmark/blob/main/docs/tools.md][这里]]。
+
+#+BEGIN_EXAMPLE
+$ ./compare.py benchmarks ./dram_access_benmark ./dram_access_benchmark_opt --benchmark_repetitions=50 --benchmark_display_aggregates_only=true
+Benchmarks                 Time    CPU     Time Old    Time New    CPU Old    CPU New
+-------------------------------------------------------------------------------------
+BM_dram_access/32_pvalue   0.0000  0.0000  U Test, Repetions: 50 vs 50
+BM_dram_access/32_mean    -0.3534 -0.3536  2425        1568        2406       1555
+#+END_EXAMPLE
+
+这里运行次数为50，满足U检验。
+1. pvalue 为0，说明结果非常可信，通常小于0.05认为可信，越小越好;
+2. mean 是均值对比，-0.35表示性能改进了35%。

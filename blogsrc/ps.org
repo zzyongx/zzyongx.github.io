@@ -1,0 +1,24 @@
+#+TITLE: ps
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+* 短命令
+1. 按照启动时间排序进程 ~ps -ef --sort=start_time=~ ;
+2. 按照进程内存排序 ~ps -eo pid,rss,command --sort=rss~ ;
+2. 查看进程内存使用 =ps -o rss,%mem -p <pid>= ;
+3. 查看进程的线程 =ps -L -p <pid>= ;
+4. 查看进程启动时间 =ps -o pid,lstart,cmd,stat -p <pid>= ;
+5. 查看系统进程外的其它进程 =ps --ppid 2 -p 2 -f --deselect= ;
+
+* 进程内存
+1. 进程内存总量， ~ps -e -o rss | awk '{sum += $1} END {printf("%.2fGB\n", sum/1024/1024}'~ ;
+2. 进程内存的变化
+
+* 引起系统load高的进程
+=ps --no-header -eL -o stat,tid,pid,comm | grep -E '^(R|D)'=
+
+
+* 海量进程（线程）
+系统中出现海量（百万级）进程（线程）时，海量进程对内核而言，并不构成问题。但是ps、top等命令，因为要遍历海量进程，消耗大量资源，且很多用到它们的监控，定时运行，导致ps、top推积，加重了问题。
+
+可以通过 =ls /proc | wc -l= 预估进程的数量，如果超过阈值，则不运行ps。

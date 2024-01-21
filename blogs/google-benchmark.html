@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2024-01-21 日 19:23 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>google benchmark 介绍</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="zhengzhiyong" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/readtheorg/css/readtheorg.css"/>
+<script src="/jslib/jquery-2.1.4.min.js"></script>
+<script src="/jslib/bootstrap.min.js"></script>
+<script type="text/javascript" src="/styles/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="/styles/readtheorg/js/readtheorg.js"></script>
+<style> .subtitle { font-size: 70%; } .figure p {padding: 0;} </style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">google benchmark 介绍</h1>
+<p>
+在优化中，最常见的问题是某个优化点是否有效，尤其是某些函数级别的代码优化，比例不是很大（&lt;10%），如何确定是性能波动，还是优化呢？
+<a href="https://github.com/google/benchmark.git">google benchmark</a> 是一个测试函数性能的框架，可以测试函数的性能，此外提供了对比工具，可以“科学”的做性能对比。
+</p>
+
+<div id="outline-container-org6a21127" class="outline-2">
+<h2 id="org6a21127"><span class="section-number-2">1</span> 安装</h2>
+<div class="outline-text-2" id="text-1">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#19979;&#36733;</span>
+git clone https://github.com/google/benchmark.git &amp;&amp; <span style="color: #b0c4de;">cd</span> benchmark
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32534;&#35793;&#38656;&#35201;&#29992;&#21040;bazel&#65292;&#23448;&#26041;&#25552;&#20379;&#20102;cmake&#65292;&#20294;&#25105;&#20351;&#29992;&#25253;&#38169;</span>
+bazel build -c opt benchmark benchmark_main
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#23433;&#35013;benchmark&#24211;</span>
+cp -a bazel-benchmark/include/benchmark /usr/local/include/
+cp bazel-bin/libbenchmark_main.a bazel-bin/libbenchmark.a  /usr/local/lib/
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#23433;&#35013;&#23545;&#27604;&#24037;&#20855;&#65292;&#22312;tools&#30446;&#24405;&#65292;&#38656;&#35201;python3</span>
+pip3 install scipy numpy
+cp -a gbench  /usr/local/lib64/python3.6/site-packages/
+cp compare.py /usr/local/bin/benchmark_compare.py
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org099b865" class="outline-2">
+<h2 id="org099b865"><span class="section-number-2">2</span> 编写测试用例</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+<code>dram_access_benchmark.cc</code>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #b0c4de;">#include</span> <span style="color: #ffa07a;">&lt;cstring&gt;</span>
+<span style="color: #b0c4de;">#include</span> <span style="color: #ffa07a;">&lt;vector&gt;</span>
+<span style="color: #b0c4de;">#include</span> <span style="color: #ffa07a;">&lt;benchmark/benchmark.h&gt;</span>
+
+<span style="color: #00ffff;">namespace</span> {
+
+<span style="color: #00ffff;">constexpr</span> <span style="color: #98fb98;">long</span> <span style="color: #eedd82;">buf_size</span> = 12 * 1000 * 1000 * 1000L; <span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">12G;</span>
+
+<span style="color: #98fb98;">int</span> <span style="color: #87cefa;">fib</span>(<span style="color: #98fb98;">int</span> <span style="color: #eedd82;">n</span>) {
+  <span style="color: #98fb98;">int</span> <span style="color: #eedd82;">v1</span> = 1;
+  <span style="color: #98fb98;">int</span> <span style="color: #eedd82;">v2</span> = 1;
+  <span style="color: #00ffff;">for</span> (<span style="color: #98fb98;">int</span> <span style="color: #eedd82;">i</span> = 2; i &lt; n; ++i) {
+    <span style="color: #98fb98;">int</span> <span style="color: #eedd82;">v</span> = v1 + v2;
+    v1 = v2;
+    v2 = v;
+  }
+  <span style="color: #00ffff;">return</span> v2;
+}
+
+<span style="color: #98fb98;">void</span> <span style="color: #87cefa;">locs_gen</span>(<span style="color: #7fffd4;">std</span>::<span style="color: #98fb98;">vector</span>&lt;<span style="color: #98fb98;">long</span>&gt; *<span style="color: #eedd82;">locs</span>)
+{
+  <span style="color: #00ffff;">for</span> (<span style="color: #98fb98;">int</span> <span style="color: #eedd82;">i</span> = 0, <span style="color: #eedd82;">max</span> = locs-&gt;size(); i &lt; max; ++i) {
+    (*locs)[i] = random() % buf_size;
+  }
+}
+
+<span style="color: #98fb98;">char</span> *<span style="color: #eedd82;">buf</span> = 0;
+<span style="color: #98fb98;">void</span> <span style="color: #87cefa;">DoSetup</span>(<span style="color: #00ffff;">const</span> <span style="color: #7fffd4;">benchmark</span>::<span style="color: #98fb98;">State</span>&amp; <span style="color: #eedd82;">state</span>) {
+  <span style="color: #00ffff;">if</span> (!buf) {
+    buf = <span style="color: #00ffff;">new</span> <span style="color: #98fb98;">char</span>[buf_size];
+    memset(buf, 0x9, buf_size/2);
+    memset(buf + buf_size/2, 0x7, buf_size - buf_size/2);
+  }
+}
+
+<span style="color: #98fb98;">void</span> <span style="color: #87cefa;">DoTeardown</span>(<span style="color: #00ffff;">const</span> <span style="color: #7fffd4;">benchmark</span>::<span style="color: #98fb98;">State</span>&amp; <span style="color: #eedd82;">state</span>) {
+}
+
+<span style="color: #98fb98;">void</span> <span style="color: #87cefa;">BM_dram_access</span>(<span style="color: #7fffd4;">benchmark</span>::<span style="color: #98fb98;">State</span> &amp;<span style="color: #eedd82;">state</span>) {
+  <span style="color: #7fffd4;">std</span>::<span style="color: #98fb98;">vector</span>&lt;<span style="color: #98fb98;">long</span>&gt; <span style="color: #eedd82;">locs</span>(state.range(0), 0);
+  <span style="color: #7fffd4;">std</span>::<span style="color: #98fb98;">vector</span>&lt;<span style="color: #98fb98;">long</span>&gt; <span style="color: #eedd82;">regs</span>(state.range(0), 0);
+
+  <span style="color: #98fb98;">long</span> <span style="color: #eedd82;">s</span> = 100;
+  <span style="color: #98fb98;">long</span> <span style="color: #eedd82;">cnt</span> = 0;
+
+  <span style="color: #00ffff;">for</span> (<span style="color: #00ffff;">auto</span> <span style="color: #eedd82;">_</span> : state) {
+    locs_gen(&amp;locs);
+
+<span style="color: #b0c4de;">#ifdef</span> OOO
+    <span style="color: #00ffff;">for</span> (<span style="color: #98fb98;">int</span> <span style="color: #eedd82;">i</span> = 0, <span style="color: #eedd82;">max</span> = locs.size(); i &lt; max; ++i) {
+      regs[i] = buf[locs[i]];
+    }
+
+    <span style="color: #00ffff;">for</span> (<span style="color: #98fb98;">int</span> <span style="color: #eedd82;">i</span> = 0, <span style="color: #eedd82;">max</span> = regs.size(); i &lt; max; ++i) {
+      s += fib(regs[i]);
+    }
+<span style="color: #b0c4de;">#else</span>
+    <span style="color: #00ffff;">for</span> (<span style="color: #98fb98;">int</span> <span style="color: #eedd82;">i</span> = 0, <span style="color: #eedd82;">max</span> = locs.size(); i &lt; max; ++i) {
+      s += fib(buf[locs[i]]);
+    }
+<span style="color: #b0c4de;">#endif</span>
+
+    cnt++;
+  }
+  state.SetBytesProcessed(cnt * locs.size());
+  <span style="color: #7fffd4;">benchmark</span>::DoNotOptimize(s);
+}
+
+BENCHMARK(BM_dram_access)-&gt;RangeMultiplier(2)-&gt;Range(4, 32)-&gt;Setup(DoSetup)-&gt;Teardown(DoTeardown);
+
+}
+</pre>
+</div>
+
+<p>
+这里有几个关键点：
+</p>
+<ol class="org-ol">
+<li><code>BM_dram_access</code> 是测试函数，通过BENCHMARK注册，通常这就是全部了;</li>
+<li>可以给测试函数传递参数，这里 <code>RangeMultiplier(2)-&gt;Range(4, 32)</code> 的含义是传递4、8、16、32，依次是2的倍数;</li>
+<li>这里一次传递一个参数，每个参数生成一个测试用例，因为函数的性能可能和参数相关;</li>
+<li>测试函数通过 <code>state.range(0)</code> 接收参数;</li>
+<li>通过 <code>Setup(DoSetup)</code> 初始化全局变量，注意的是每次测试都会调用一次DoSetup，但是测试框架可能调用多次测试函数（Warmup），所以如果只想全局调用一次这个函数，需要函数内部增加逻辑，保证只调用一次。</li>
+<li>测试框架度量一次执行的耗时，作为性能指标，此外可以自定义counter，来定义额外的性能指标，示例使用了一个内置counter。</li>
+</ol>
+
+<p>
+详细文档在<a href="https://github.com/google/benchmark/blob/main/docs/user_guide.md">这里</a>，此外在源码 <code>include/benchmark/benchmark.h</code> 也可以找到一些例子。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc3d9227" class="outline-2">
+<h2 id="orgc3d9227"><span class="section-number-2">3</span> 编译运行</h2>
+<div class="outline-text-2" id="text-3">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32534;&#35793;&#22522;&#20934;&#29256;&#26412;</span>
+g++ -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark -lbenchmark_main -lbenchmark -lpthread
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32534;&#35793;&#20248;&#21270;&#29256;&#26412;</span>
+g++ -DOOO -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark_opt -lbenchmark_main -lbenchmark -lpthread
+</pre>
+</div>
+<p>
+<code>-lbenchmark_main</code> 使用默认的 main 函数。
+<code>dram_access_benchmark</code> 可以直接运行，常用的参数有：
+</p>
+<ol class="org-ol">
+<li><code>--benchmark_repelitions=&lt;n&gt;</code> 运行的次数，次数（&gt;30）越多，结果越准确;</li>
+<li><code>--benchmark_display_aggregates_only=true</code> 多次运行时benchmark 会自动计算均值，中位数，这个参数只展示汇总值;</li>
+<li><code>--benchmark_counters_tabular=true</code> 表格形式展示自定义counter。</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org64e60ba" class="outline-2">
+<h2 id="org64e60ba"><span class="section-number-2">4</span> 优化效果对比</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+如前所述，如何检验优化真实有效呢？compare.py 实现了 Mann-Whitney U test（曼-惠特尼U检验），通过对比程序多次运行的结果，判断是真有优化，还是波动（这不同于单纯的比较多次运行的平均值，而是应用了U检验）。
+</p>
+
+<p>
+详细文档在<a href="https://github.com/google/benchmark/blob/main/docs/tools.md">这里</a>。
+</p>
+
+<pre class="example">
+$ ./compare.py benchmarks ./dram_access_benmark ./dram_access_benchmark_opt --benchmark_repetitions=50 --benchmark_display_aggregates_only=true
+Benchmarks                 Time    CPU     Time Old    Time New    CPU Old    CPU New
+-------------------------------------------------------------------------------------
+BM_dram_access/32_pvalue   0.0000  0.0000  U Test, Repetions: 50 vs 50
+BM_dram_access/32_mean    -0.3534 -0.3536  2425        1568        2406       1555
+</pre>
+
+<p>
+这里运行次数为50，满足U检验。
+</p>
+<ol class="org-ol">
+<li>pvalue 为0，说明结果非常可信，通常小于0.05认为可信，越小越好;</li>
+<li>mean 是均值对比，-0.35表示性能改进了35%。</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zhengzhiyong</p>
+<p class="date">Created: 2024-01-21 日 19:23</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
