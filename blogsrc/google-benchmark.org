@@ -15,7 +15,7 @@ bazel build -c opt benchmark benchmark_main
 
 # 安装benchmark库
 cp -a bazel-benchmark/include/benchmark /usr/local/include/
-cp bazel-bin/libbenchmark_main.a bazel-bin/libbenchmark.a  /usr/local/lib/
+cp bazel-bin/libbenchmark_main.a bazel-bin/libbenchmark.a  /usr/local/lib64
 
 # 安装对比工具，在tools目录，需要python3
 pip3 install scipy numpy
@@ -105,8 +105,9 @@ BENCHMARK(BM_dram_access)->RangeMultiplier(2)->Range(4, 32)->Setup(DoSetup)->Tea
 2. 可以给测试函数传递参数，这里 ~RangeMultiplier(2)->Range(4, 32)~ 的含义是传递4、8、16、32，依次是2的倍数;
 3. 这里一次传递一个参数，每个参数生成一个测试用例，因为函数的性能可能和参数相关;
 4. 测试函数通过 ~state.range(0)~ 接收参数;
-5. 通过 ~Setup(DoSetup)~ 初始化全局变量，注意的是每次测试都会调用一次DoSetup，但是测试框架可能调用多次测试函数（Warmup），所以如果只想全局调用一次这个函数，需要函数内部增加逻辑，保证只调用一次。
-6. 测试框架度量一次执行的耗时，作为性能指标，此外可以自定义counter，来定义额外的性能指标，示例使用了一个内置counter。
+5. 通过 ~Setup(DoSetup)~ 初始化全局变量，注意的是每次测试都会调用一次DoSetup，但是测试框架可能调用多次测试函数（Warmup），所以如果只想全局调用一次这个函数，需要函数内部增加逻辑，保证只调用一次;
+6. 测试框架度量一次执行的耗时，作为性能指标，此外可以自定义counter，来定义额外的性能指标，示例使用了一个内置counter;
+7. ~benchmark::DoNotOptimize(s)~ 避免编译器把s相关指令优化掉，这点非常重要。
 
 详细文档在[[https://github.com/google/benchmark/blob/main/docs/user_guide.md][这里]]，此外在源码 ~include/benchmark/benchmark.h~ 也可以找到一些例子。
 
@@ -117,6 +118,7 @@ g++ -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark -lbenchmark_m
 
 # 编译优化版本
 g++ -DOOO -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark_opt -lbenchmark_main -lbenchmark -lpthread
+
 #+END_SRC
 ~-lbenchmark_main~ 使用默认的 main 函数。
 ~dram_access_benchmark~ 可以直接运行，常用的参数有：
@@ -140,3 +142,40 @@ BM_dram_access/32_mean    -0.3534 -0.3536  2425        1568        2406       15
 这里运行次数为50，满足U检验。
 1. pvalue 为0，说明结果非常可信，通常小于0.05认为可信，越小越好;
 2. mean 是均值对比，-0.35表示性能改进了35%。
+
+* 使用perf count
+benchmark 可以测试、对比性能，但是无法给出性能差异上的原因，尤其在涉及硬件方面的优化时。google benchmark支持采集CPU的PMU，可以提供微架构方面的一些度量。google benchmark 通过libpfm采集PMU采集数据，以自定义counter的方式展示数据。
+
+#+BEGIN_SRC bash
+# 编译google benchmark添加libpfm支持，--define pfm=1
+bazel build -c opt --define pfm=1 benchmark benchmark_main
+cp ./bazel-bin/external/libpfm/copy_libpfm/libpfm/lib/libpfm.so /usr/local/lib64
+
+# 编译benchmark用例，-lpfm
+g++ -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark -lbenchmark_main -lbenchmark -lpthread -lpfm
+
+# 运行时指定pmu counter， 可以通过 perf list 查看可用的counter
+./dram_access_benmark --benchmark_repetitions=50 --benchmark_display_aggregates_only=true --benchmark_perf_counters=cycles,instructions,mem_uops_retired.all_loads
+#+END_SRC
+
+google benchmark输出的是原始counter，可以在benchmark中获取原始counter值，计算复合counter，例如IPC。
+
+#+BEGIN_SRC c++
+void BM_dram_access(benchmark::State &state) {
+// ...
+  for (auto _ : state) {
+// ...
+  }
+
+// ipc = instructins/cycles
+  auto cycles = state.counters["cycles"];
+  if (cycles) {
+    auto ins = state.counters["instructions"];
+    state.counters["ipc"] = ins / cycles;
+  }
+}
+#+END_SRC
+
+* 注意
+代码的性能测试，因为并不是真实的线上环境，有些特别需要注意的地方。
+1. 编译优化：编译器会优化掉没用的代码，哪些代码会被优化掉，并不总是可以预料的，需要特别小心。

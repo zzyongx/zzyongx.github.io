@@ -8,6 +8,10 @@
 ** 经验
 [[blog:google-benchmark][性能优化必备工具google benchmark]] <2024-01-21>
 
+[[blog:operate-container-on-host][在宿主机上操作container]] <2024-02-25>
+
+[[blog:vtune-introduce][vtune 介绍]] <2024-02-25>
+
 * 2023 癸卯年
 
 ** 经验

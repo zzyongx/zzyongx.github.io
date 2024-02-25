@@ -1,0 +1,72 @@
+#+TITLE: vtune 介绍
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+[[https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler.html][vtune]] 是Intel推出的性能分析工具，类比一下，vtune是perf超级豪华版，可以做TMA性能、热点分析，参考：[[https://www.intel.com/content/www/us/en/docs/vtune-profiler/tutorial-common-bottlenecks-linux/2023-1/overview.html][vtune 教程:分析常见的性能瓶颈]]。
+使用vtune分两阶段：
+1. 对目标做性能采样，得到性能数据，这个阶段常常在linux服务端进行，可以把vtune的分析数据打包（tar）;
+2. 然后分析性能数据，优化程序，这个阶段可以在有GUI的机器进行，可以使用阶段1打包的数据，vtune的GUI很好用。
+
+vtune的优势：
+1. 有TMA数据;
+2. 可以看到inline函数;
+2. 可以看到函数热点的IPC;
+3. 可以看到函数每行的CPU比例;
+4. 可以分析函数的内存瓶颈。
+
+注意：不要贸然对线上机器使用vtune。
+
+* 安装
+vtune 可以在多个平台运行，[[https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler-download.html][vtune下载]] 。以linux为例：
+
+#+BEGIN_SRC bash
+wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/56d0db2b-1ff1-4abe-857a-72ca9be22bd3/l_oneapi_vtune_p_2024.0.1.14_offline.sh
+sudo sh ./l_oneapi_vtune_p_2024.0.1.14_offline.sh
+
+echo 'PATH=$PATH:/opt/intel/oneapi/vtune/latest/bin64' > ~/.bash_profile
+#+END_SRC
+
+* 教学模式
+vtune 内置一个程序、以及它的性能采样数据。可以通过这个程序学习如何使用vtune，也可以直接使用采样好的数据。
+vtune 支持复制采样命令，可以把采样命令在linux服务端运行，避免记忆复杂的命令。
+
+
+* web 模式
+vtune支持web方式使用，适合不支持GUI的环境，具体来说：
+1. 在（性能分析）目标机器运行vtune server，提供web访问UI;
+2. 访问web UI，通过web操作目标机器，性能采样、性能分析。
+
+在目标机器运行： ~vtune-server --allow-remote-access --enable-server-profiling~ ，该命令启动server，同时打印一个web URL，可以通过web访问。
+
+* 常用采样命令
+#+BEGIN_SRC bash
+
+# 性能快照（含TMA）
+vtune -collect performance-snapshot -resume-after 20 ./a.out
+vtune -collect performance-snapshot -cpu-mask 5 -resume-after 20 taskset -c 5 ./a.out
+
+# 针对整机
+vtune -collect performance-snapshot -d 10
+
+# 针对正在运行的进程
+vtune -collect performance-snapshot -d 10 -target-pid=3042240
+
+# 性能热点
+
+# -data-limit 采集500M的数据后结束
+vtune -collect hotspots -knob sampling-mode=hw -knob stack-size=0 -data-limit=500 -r vtune001
+
+# -d 采集10s数据后结束，采集调用栈信息，可用看到火焰图
+vtune -collect hotspots -knob sampling-mode=hw -knob sampling-interval=2 -knob enable-stack-collection=true -knob stack-size=4096 -run-pass-thru=--no-altstack -d 10 -r vtune002
+
+# 内存分析
+vtune -collect memory-access -knob sampling-mode=hw -knob sampling-interval=1 -d 10 -r vtune003
+#+END_SRC
+
+* container 中使用vtune
+container中也可以使用vtune，注意事项：
+1. 宿主机配置 ~sysctl -w kernel.kptr_restrict=0~ ，这样container中可以访问kernal符号;
+2. 需要用nsenter进入容器，详见：[[blog:operate-container-on-host][在宿主机上操作container]]。
+
+* 注意事项
+1. 在指定 ~-target-pid~ 参数时，有时候目标进程会在vtune结束时意外退出，尽量避免使用，大多数vtune功能支持结果分析时选择进程。

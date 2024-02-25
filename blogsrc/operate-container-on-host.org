@@ -1,0 +1,29 @@
+#+TITLE: 在宿主机上操作container
+#+SETUPFILE: ../setup/theme-readtheorg-local.setup
+#+OPTIONS: toc:nil
+
+现在业务基本都部署在container中，但是container通常设置 ~privileged=false~ ，并没有root权限，很多“高级”操作仍然需要在宿主机上操作。
+通常可以把container中的进程当作普通的进程看待（pidstat、perf stat、bpftrace等），但是有些工具并没有适配文件的容器路径，容器的路径在宿主机上无法直接访问，这造成很多不便，例如：无法获取进程的函数符号。此时操作仍然需要在容器中执行，但是以一种稍微不同的方式。
+
+* 宿主机进入container
+** 以root进入container
+首先需要知道container中进程在宿主机上的pid，可用通过ps获取。 ~nsenter -t <pid> -m -p bash~ 就可以进入<pid>进程所在的container了。
+这种方式进入container，有两个特点：
+1. 真正的root权限;
+2. 不受container CGROUP资源quota的限制。
+
+** 保留CGROUP限制
+如果需要保留container的CGROUP限制，同时需要真正的root，可以这样：
+1. bash命令，启动新的bash;
+2. ~echo $$ > /sys/fs/cgroup/cpu/<cgroup_path>/cgroups.procs~ 把当前bash加入container的CGROUP，这里添加的是cpu的，其它CGROUP类似;
+3. 使用 ~nsenter~ 命令进入container
+4. 退出bash，就离开CGROUP了
+
+也可以使用cgexec，但是要安装libcgroup。
+
+* 宿主机操作container的文件
+不需要进入container就可以访问container的文件，只需要路径加个前缀即可， ~/proc/<pid>/root~ 这里<pid>是container进程在宿主机上的pid。
+假设container中的文件路径是 ~/tmp/perfmap.24~ ，对应宿主机的路径是 ~/proc/<pid>/root/tmp/perfmap.24~ 。
+目录的映射规则类似。
+
+知道了映射规则，container的路径，就可以当宿主机的使用，cp、mv、vim，各种文件命令都可用使用。

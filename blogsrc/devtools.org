@@ -32,6 +32,11 @@
 
 查看LIBCXX的版本， =strings /usr/local/lib64/libstdc++.so.6 | grep -E "^GLIBCXX_|CXXABI_"= 。
 
+升级GCC后的常见问题：
+1. 使用新版g++编译的程序，在老版g++机器上可能无法运行，可用使用 ~-static-libstdc++~ 静态链接c++库;
+2. 碰到高版本c++标准不再支持的函数，例如 ~make_unique~ 可用使用类似 ~-std=c++14~ 降低c++标准。
+
+
 * 编译LLVM
 #+BEGIN_SRC bash
 cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS:BOOL=OFF \
@@ -119,3 +124,7 @@ Location: /usr/local/lib64/python3.6/site-packages
 # 复制到制定位置即可
 cp -a gbench  /usr/local/lib64/python3.6/site-packages/
 #+END_SRC
+
+* bash
+** Argument list too lang
+当目录下文件太多时， ~ls~ 会报这个错，可用使用 ~find . -maxdepth 1~ 代替。

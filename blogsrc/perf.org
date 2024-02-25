@@ -131,7 +131,6 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 ** 火焰图
 如果不习惯perf report的文本界面，可以转成火焰图，（perf record时需要-g参数）。
 
-
 #+BEGIN_SRC bash
 # 需要用到火焰图工具：https://github.com/brendangregg/FlameGraph.git
 
@@ -147,6 +146,10 @@ perf script -i perfdata | stackcollapse-perf.pl | flamegraph.pl > perf.svg
 # 例如：删除unknow栈，不区分线程
 perf script -i perfdata | grep -vF '[unknown]' | sed -E 's/^[a-zA-Z0-9-]+/thread/' | stackcollapse-perf.pl | flamegraph.pl > perf.svg
 #+END_SRC
+
+注意事项：
+
+1. 为了展示内联函数， 为 ~perf record~ 指定 ~--call-graph dwarf~ 参数，使用dwarf来爬栈。但是会导致 perf.data 文件巨大，可用通过-F降低采样频率;
 
 * 常见问题
 
@@ -166,3 +169,6 @@ $ ulimit -n 2560000
 # ulimit -n 修改失败，需要先修改 fs.nr_open
 $ sysctl -w fs.nr_open=2560000
 #+END_SRC
+
+** perf script 调用栈频率
+perf script 输出调用栈，不能只看栈的输出频次，有个 period 字段，表示每个栈的耗时。

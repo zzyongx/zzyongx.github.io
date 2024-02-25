@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-01-21 日 19:23 -->
+<!-- 2024-02-25 日 07:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>google benchmark 介绍</title>
@@ -255,8 +255,8 @@ for the JavaScript code in this tag.
 <a href="https://github.com/google/benchmark.git">google benchmark</a> 是一个测试函数性能的框架，可以测试函数的性能，此外提供了对比工具，可以“科学”的做性能对比。
 </p>
 
-<div id="outline-container-org6a21127" class="outline-2">
-<h2 id="org6a21127"><span class="section-number-2">1</span> 安装</h2>
+<div id="outline-container-orgf1e9c2b" class="outline-2">
+<h2 id="orgf1e9c2b"><span class="section-number-2">1</span> 安装</h2>
 <div class="outline-text-2" id="text-1">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#19979;&#36733;</span>
@@ -267,7 +267,7 @@ bazel build -c opt benchmark benchmark_main
 
 <span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#23433;&#35013;benchmark&#24211;</span>
 cp -a bazel-benchmark/include/benchmark /usr/local/include/
-cp bazel-bin/libbenchmark_main.a bazel-bin/libbenchmark.a  /usr/local/lib/
+cp bazel-bin/libbenchmark_main.a bazel-bin/libbenchmark.a  /usr/local/lib64
 
 <span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#23433;&#35013;&#23545;&#27604;&#24037;&#20855;&#65292;&#22312;tools&#30446;&#24405;&#65292;&#38656;&#35201;python3</span>
 pip3 install scipy numpy
@@ -278,8 +278,8 @@ cp compare.py /usr/local/bin/benchmark_compare.py
 </div>
 </div>
 
-<div id="outline-container-org099b865" class="outline-2">
-<h2 id="org099b865"><span class="section-number-2">2</span> 编写测试用例</h2>
+<div id="outline-container-org63c197f" class="outline-2">
+<h2 id="org63c197f"><span class="section-number-2">2</span> 编写测试用例</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 <code>dram_access_benchmark.cc</code>
@@ -368,8 +368,9 @@ BENCHMARK(BM_dram_access)-&gt;RangeMultiplier(2)-&gt;Range(4, 32)-&gt;Setup(DoSe
 <li>可以给测试函数传递参数，这里 <code>RangeMultiplier(2)-&gt;Range(4, 32)</code> 的含义是传递4、8、16、32，依次是2的倍数;</li>
 <li>这里一次传递一个参数，每个参数生成一个测试用例，因为函数的性能可能和参数相关;</li>
 <li>测试函数通过 <code>state.range(0)</code> 接收参数;</li>
-<li>通过 <code>Setup(DoSetup)</code> 初始化全局变量，注意的是每次测试都会调用一次DoSetup，但是测试框架可能调用多次测试函数（Warmup），所以如果只想全局调用一次这个函数，需要函数内部增加逻辑，保证只调用一次。</li>
-<li>测试框架度量一次执行的耗时，作为性能指标，此外可以自定义counter，来定义额外的性能指标，示例使用了一个内置counter。</li>
+<li>通过 <code>Setup(DoSetup)</code> 初始化全局变量，注意的是每次测试都会调用一次DoSetup，但是测试框架可能调用多次测试函数（Warmup），所以如果只想全局调用一次这个函数，需要函数内部增加逻辑，保证只调用一次;</li>
+<li>测试框架度量一次执行的耗时，作为性能指标，此外可以自定义counter，来定义额外的性能指标，示例使用了一个内置counter;</li>
+<li><code>benchmark::DoNotOptimize(s)</code> 避免编译器把s相关指令优化掉，这点非常重要。</li>
 </ol>
 
 <p>
@@ -378,8 +379,8 @@ BENCHMARK(BM_dram_access)-&gt;RangeMultiplier(2)-&gt;Range(4, 32)-&gt;Setup(DoSe
 </div>
 </div>
 
-<div id="outline-container-orgc3d9227" class="outline-2">
-<h2 id="orgc3d9227"><span class="section-number-2">3</span> 编译运行</h2>
+<div id="outline-container-orgf499958" class="outline-2">
+<h2 id="orgf499958"><span class="section-number-2">3</span> 编译运行</h2>
 <div class="outline-text-2" id="text-3">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32534;&#35793;&#22522;&#20934;&#29256;&#26412;</span>
@@ -387,6 +388,7 @@ g++ -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark -lbenchmark_m
 
 <span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32534;&#35793;&#20248;&#21270;&#29256;&#26412;</span>
 g++ -DOOO -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark_opt -lbenchmark_main -lbenchmark -lpthread
+
 </pre>
 </div>
 <p>
@@ -401,8 +403,8 @@ g++ -DOOO -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark_opt -lb
 </div>
 </div>
 
-<div id="outline-container-org64e60ba" class="outline-2">
-<h2 id="org64e60ba"><span class="section-number-2">4</span> 优化效果对比</h2>
+<div id="outline-container-org0b218a0" class="outline-2">
+<h2 id="org0b218a0"><span class="section-number-2">4</span> 优化效果对比</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 如前所述，如何检验优化真实有效呢？compare.py 实现了 Mann-Whitney U test（曼-惠特尼U检验），通过对比程序多次运行的结果，判断是真有优化，还是波动（这不同于单纯的比较多次运行的平均值，而是应用了U检验）。
@@ -429,10 +431,65 @@ BM_dram_access/32_mean    -0.3534 -0.3536  2425        1568        2406       15
 </ol>
 </div>
 </div>
+
+<div id="outline-container-org7ac84fd" class="outline-2">
+<h2 id="org7ac84fd"><span class="section-number-2">5</span> 使用perf count</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+benchmark 可以测试、对比性能，但是无法给出性能差异上的原因，尤其在涉及硬件方面的优化时。google benchmark支持采集CPU的PMU，可以提供微架构方面的一些度量。google benchmark 通过libpfm采集PMU采集数据，以自定义counter的方式展示数据。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32534;&#35793;google benchmark&#28155;&#21152;libpfm&#25903;&#25345;&#65292;--define pfm=1</span>
+bazel build -c opt --define <span style="color: #eedd82;">pfm</span>=1 benchmark benchmark_main
+cp ./bazel-bin/external/libpfm/copy_libpfm/libpfm/lib/libpfm.so /usr/local/lib64
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#32534;&#35793;benchmark&#29992;&#20363;&#65292;-lpfm</span>
+g++ -g -Wall -O3 dram_access_benchmark.cc -o dram_access_benchmark -lbenchmark_main -lbenchmark -lpthread -lpfm
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#36816;&#34892;&#26102;&#25351;&#23450;pmu counter&#65292; &#21487;&#20197;&#36890;&#36807; perf list &#26597;&#30475;&#21487;&#29992;&#30340;counter</span>
+./dram_access_benmark --benchmark_repetitions=50 --benchmark_display_aggregates_only=true --benchmark_perf_counters=cycles,instructions,mem_uops_retired.all_loads
+</pre>
+</div>
+
+<p>
+google benchmark输出的是原始counter，可以在benchmark中获取原始counter值，计算复合counter，例如IPC。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #98fb98;">void</span> <span style="color: #87cefa;">BM_dram_access</span>(<span style="color: #7fffd4;">benchmark</span>::<span style="color: #98fb98;">State</span> &amp;<span style="color: #eedd82;">state</span>) {
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">...</span>
+  <span style="color: #00ffff;">for</span> (<span style="color: #00ffff;">auto</span> <span style="color: #eedd82;">_</span> : state) {
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">...</span>
+  }
+
+<span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">ipc = instructins/cycles</span>
+  <span style="color: #00ffff;">auto</span> <span style="color: #eedd82;">cycles</span> = state.counters[<span style="color: #ffa07a;">"cycles"</span>];
+  <span style="color: #00ffff;">if</span> (cycles) {
+    <span style="color: #00ffff;">auto</span> <span style="color: #eedd82;">ins</span> = state.counters[<span style="color: #ffa07a;">"instructions"</span>];
+    state.counters[<span style="color: #ffa07a;">"ipc"</span>] = ins / cycles;
+  }
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org62e78ec" class="outline-2">
+<h2 id="org62e78ec"><span class="section-number-2">6</span> 注意</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+代码的性能测试，因为并不是真实的线上环境，有些特别需要注意的地方。
+</p>
+<ol class="org-ol">
+<li>编译优化：编译器会优化掉没用的代码，哪些代码会被优化掉，并不总是可以预料的，需要特别小心。</li>
+</ol>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2024-01-21 日 19:23</p>
+<p class="date">Created: 2024-02-25 日 07:57</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
