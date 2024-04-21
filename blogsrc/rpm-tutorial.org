@@ -22,7 +22,11 @@
     - =-p= 指定查询的rpm包，通常配合上述参数使用，默认是系统安装的， =rpm -qlp redis-service-1.0.8-3.x86_64.rpm= 通常查看rpm包是否包含预期的文件。
 
 * 提取rpm包的内容
-不安装提取rpm包的内容。 =rpm2cpio redis-service-1.0.8-3.x86_64.rpm | cpio -idmv=
+1. 提取rpm包的内容， =rpm2cpio redis-service-1.0.8-3.x86_64.rpm | cpio -idmv=
+2. 提取已安装程序rpm包的内容， =rpm -ql redis-service | xargs tar -czvf redis-service.tar.gz=
+
+* 修复rpmdb错误
+~mv /var/lib/rpm/__db* /tmp && rpm --rebuilddb && yum clean all~
 
 * 打包rpm
 1. 编写 =spec= 文件

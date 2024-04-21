@@ -11,6 +11,7 @@
 * 常用命令
 1. 查看Linux内核启动参数， =cat /proc/cmdline= ;
 2. 查看内核编译参数， =cat /boot/config-$(uname -r)= ;
+3. 查看重启记录， =last reboot= ;
 
 * 时区相关
 1. 查看当前时区， =ls -l /etc/localtime= ;
@@ -141,8 +142,50 @@ cp -a gbench  /usr/local/lib64/python3.6/site-packages/
 ** Argument list too lang
 当目录下文件太多时， ~ls~ 会报这个错，可用使用 ~find . -maxdepth 1~ 代替。
 
-* 显示文件行号范围内的内容
+
+* sed相关
+** 显示文件行号范围内的内容
 =sed -n '<start>,<end>p;<quit>q' filename= 打印<start>、<end>范围的文件，在<quit>退出。注意p、q字符。
 
-* sshfs
-可用使用sshfs挂载远程文件系统， ~sshfs user@host:remote_path local_path~ 。
+* ssh
+** ssh Connection closed
+
+#+BEGIN_EXAMPLE
+$ ssh 192.168.1.99
+Last login: Thu Apr 19 11:31:35 2024 from 192.168.1.99
+Connection to 192.168.1.99 closed.
+
+# 打印Last login说明登录成功了，但很快断开连接不正常。
+# 修改 /etc/ssh/sshd_config
+UsePAM yes => UsePAM no
+
+# 重启sshd systemctl restart sshd
+#+END_EXAMPLE
+
+** sshfs
+基于ssh + fuse的网络文件系统， ~sshfs user@host:remote_path local_path~ 。
+
+* CPU频率
+1. ~cpupower monitor~
+2. ~trubostat~
+3. ~cpupower -c all frequency-info~
+
+* 查看硬件信息
+1. 安装 =yum install hwloc lshw=
+2. =hwloc-ls=
+
+* 网卡相关
+1. 查看带宽 =ethtool <devname>=
+2. 查看mtu =ifconfig <devname>=
+
+* IP转域名
+1. =yum install bind-utils=
+2. =host <ip>=
+
+* tc
+** tc qdisc
+1. 查看规则： ~tc qdisc show dev <devname>~
+2. 修改规则： ~tc qdisc replace dev <devname> root fq_codel limit 40960 flows 1024 quantum 1514 target 500ms interval 1000ms ecn~
+3. 删除规则： ~tc qdisc delete dev <devname> root fq_codel~
+
+tc没有配置文件，如果想要启动时生效，在rc.local中加入相应命令。

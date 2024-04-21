@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-12-02 六 11:53 -->
+<!-- 2024-04-21 日 17:15 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>centos 开发工具</title>
@@ -251,8 +251,8 @@ for the JavaScript code in this tag.
 <div id="content">
 <h1 class="title">centos 开发工具</h1>
 
-<div id="outline-container-orga0e4776" class="outline-2">
-<h2 id="orga0e4776"><span class="section-number-2">1</span> 常用工具</h2>
+<div id="outline-container-orgb0dbbb6" class="outline-2">
+<h2 id="orgb0dbbb6"><span class="section-number-2">1</span> 常用工具</h2>
 <div class="outline-text-2" id="text-1">
 <ol class="org-ol">
 <li>libcgroup-tools，用于操作cgroup;</li>
@@ -263,18 +263,19 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org90a60df" class="outline-2">
-<h2 id="org90a60df"><span class="section-number-2">2</span> 常用命令</h2>
+<div id="outline-container-org8163c17" class="outline-2">
+<h2 id="org8163c17"><span class="section-number-2">2</span> 常用命令</h2>
 <div class="outline-text-2" id="text-2">
 <ol class="org-ol">
 <li>查看Linux内核启动参数， <code>cat /proc/cmdline</code> ;</li>
 <li>查看内核编译参数， <code>cat /boot/config-$(uname -r)</code> ;</li>
+<li>查看重启记录， <code>last reboot</code> ;</li>
 </ol>
 </div>
 </div>
 
-<div id="outline-container-orga2c2da8" class="outline-2">
-<h2 id="orga2c2da8"><span class="section-number-2">3</span> 时区相关</h2>
+<div id="outline-container-org1156d99" class="outline-2">
+<h2 id="org1156d99"><span class="section-number-2">3</span> 时区相关</h2>
 <div class="outline-text-2" id="text-3">
 <ol class="org-ol">
 <li>查看当前时区， <code>ls -l /etc/localtime</code> ;</li>
@@ -285,8 +286,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgef6c95e" class="outline-2">
-<h2 id="orgef6c95e"><span class="section-number-2">4</span> devtoolset</h2>
+<div id="outline-container-org84d50b0" class="outline-2">
+<h2 id="org84d50b0"><span class="section-number-2">4</span> devtoolset</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 我常常调侃 c++ 之所以江河日下，就是因为centos自带的gcc版本太低了，c++ 最新的特性完全没法用。借助devtoolset，可以安装最新版gcc，而不影响默认版本。分三步完成：
@@ -306,8 +307,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org98ef9be" class="outline-2">
-<h2 id="org98ef9be"><span class="section-number-2">5</span> 编译GCC</h2>
+<div id="outline-container-orgf722b93" class="outline-2">
+<h2 id="orgf722b93"><span class="section-number-2">5</span> 编译GCC</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 编译GCC比较简单，下载源码后 <code>./configure --disable-multilib &amp;&amp; make &amp;&amp; make install</code> 。
@@ -316,11 +317,20 @@ for the JavaScript code in this tag.
 <p>
 查看LIBCXX的版本， <code>strings /usr/local/lib64/libstdc++.so.6 | grep -E "^GLIBCXX_|CXXABI_"</code> 。
 </p>
+
+<p>
+升级GCC后的常见问题：
+</p>
+<ol class="org-ol">
+<li>使用新版g<del><del>编译的程序，在老版g</del></del>机器上可能无法运行，可用使用 <code>-static-libstdc++</code> 静态链接c++库;</li>
+<li>碰到高版本c<del><del>标准不再支持的函数，例如 <code>make_unique</code> 可用使用类似 <code>-std=c++14</code> 降低c</del></del>标准。</li>
+</ol>
 </div>
 </div>
 
-<div id="outline-container-orga936e13" class="outline-2">
-<h2 id="orga936e13"><span class="section-number-2">6</span> 编译LLVM</h2>
+
+<div id="outline-container-org3854190" class="outline-2">
+<h2 id="org3854190"><span class="section-number-2">6</span> 编译LLVM</h2>
 <div class="outline-text-2" id="text-6">
 <div class="org-src-container">
 <pre class="src src-bash">cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_SHARED_LIBS:<span style="color: #eedd82;">BOOL</span>=OFF <span style="color: #ffa07a;">\</span>
@@ -350,8 +360,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgdd51832" class="outline-2">
-<h2 id="orgdd51832"><span class="section-number-2">7</span> cmake &amp; make 技巧</h2>
+<div id="outline-container-orgb2c7180" class="outline-2">
+<h2 id="orgb2c7180"><span class="section-number-2">7</span> cmake &amp; make 技巧</h2>
 <div class="outline-text-2" id="text-7">
 <ol class="org-ol">
 <li><code>cmake --debug-trycompile</code> 查看（详细的）依赖检查过程;</li>
@@ -362,8 +372,8 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-org9262993" class="outline-2">
-<h2 id="org9262993"><span class="section-number-2">8</span> 编译boost</h2>
+<div id="outline-container-org6da18f6" class="outline-2">
+<h2 id="org6da18f6"><span class="section-number-2">8</span> 编译boost</h2>
 <div class="outline-text-2" id="text-8">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #b0c4de;">export</span> <span style="color: #eedd82;">LD_LIBRARY_PATH</span>=/usr/local/lib64:$<span style="color: #eedd82;">LD_LIBRARY_PATH</span>
@@ -374,9 +384,23 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgf258d6d" class="outline-2">
-<h2 id="orgf258d6d"><span class="section-number-2">9</span> sudo 后保留环境变量</h2>
+<div id="outline-container-orgbd210fd" class="outline-2">
+<h2 id="orgbd210fd"><span class="section-number-2">9</span> 编译folly</h2>
 <div class="outline-text-2" id="text-9">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #b0c4de;">export</span> <span style="color: #eedd82;">OPENSSL_ROOT_DIR</span>=/data/softs/openssl-1.1.1u
+python3 ./build/fbcode_builder/getdeps.py --allow-system-packages build
+
+&#22914;&#26524;&#30896;&#21040;drawf&#30456;&#20851;&#30340;&#38169;&#35823;&#65292;&#21487;&#20197;&#29992;-E&#26597;&#30475;&#25253;&#38169;&#25991;&#20214;&#39044;&#22788;&#29702;&#21518;&#30340;&#20869;&#23481;&#65288;&#26597;&#30475; include&#65289;&#65292;&#21487;&#33021;&#26159;&#27809;&#25214;&#23545;dwarf.h&#30340;&#20301;&#32622;
+DwarfUtil.cpp:235:18: error: &#8216;DW_SECT_INFO&#8217; was not declared<span style="color: #00ffff;"> in</span> this sco
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org85251e1" class="outline-2">
+<h2 id="org85251e1"><span class="section-number-2">10</span> sudo 后保留环境变量</h2>
+<div class="outline-text-2" id="text-10">
 <p>
 假设需要保留的环境变量是 <code>HTTP_PROXY</code> ，修改 <code>/etc/sudoers</code> ，在 <code>Defaults env_reset</code> 下添加
 <code>Defaults env_keep += "HTTP_PROXY"</code> 。
@@ -384,13 +408,13 @@ for the JavaScript code in this tag.
 </div>
 </div>
 
-<div id="outline-container-orgd019d20" class="outline-2">
-<h2 id="orgd019d20"><span class="section-number-2">10</span> bazel</h2>
-<div class="outline-text-2" id="text-10">
+<div id="outline-container-org1fc66c7" class="outline-2">
+<h2 id="org1fc66c7"><span class="section-number-2">11</span> bazel</h2>
+<div class="outline-text-2" id="text-11">
 </div>
-<div id="outline-container-org650cebf" class="outline-3">
-<h3 id="org650cebf"><span class="section-number-3">10.1</span> bazel 的安装</h3>
-<div class="outline-text-3" id="text-10-1">
+<div id="outline-container-org16ea34f" class="outline-3">
+<h3 id="org16ea34f"><span class="section-number-3">11.1</span> bazel 的安装</h3>
+<div class="outline-text-3" id="text-11-1">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#20174;&#28304;&#30721;&#23433;&#35013;&#38656;&#35201;&#19979;&#36733;dist&#29256;&#26412;</span>
 wget https://github.com/bazelbuild/bazel/releases/download/6.4.0/bazel-6.4.0-dist.zip
@@ -409,9 +433,9 @@ cp output/bazel /usr/local/bin/
 </div>
 </div>
 
-<div id="outline-container-org4ef1be7" class="outline-3">
-<h3 id="org4ef1be7"><span class="section-number-3">10.2</span> bazel 的基本用法</h3>
-<div class="outline-text-3" id="text-10-2">
+<div id="outline-container-orgb4d956f" class="outline-3">
+<h3 id="orgb4d956f"><span class="section-number-3">11.2</span> bazel 的基本用法</h3>
+<div class="outline-text-3" id="text-11-2">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">&#36816;&#34892;bazel&#26102;&#65292;&#20063;&#38656;&#35201;JAVA_HOME</span>
 <span style="color: #b0c4de;">export</span> <span style="color: #eedd82;">JAVA_HOME</span>=/opt/jdk11/
@@ -430,13 +454,22 @@ bazel build -c opt --cxxopt=<span style="color: #ffa07a;">"-march=skylake"</span
 </div>
 </div>
 
-<div id="outline-container-org4d64263" class="outline-2">
-<h2 id="org4d64263"><span class="section-number-2">11</span> python</h2>
-<div class="outline-text-2" id="text-11">
+<div id="outline-container-org7c10711" class="outline-2">
+<h2 id="org7c10711"><span class="section-number-2">12</span> pidstat</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+pidstat 查看进程的cpu、内存， <code>pidstat -ru -p &lt;pid&gt; 1</code> 。
+</p>
 </div>
-<div id="outline-container-orgeb000b1" class="outline-3">
-<h3 id="orgeb000b1"><span class="section-number-3">11.1</span> 手动安装package</h3>
-<div class="outline-text-3" id="text-11-1">
+</div>
+
+<div id="outline-container-orgfac3318" class="outline-2">
+<h2 id="orgfac3318"><span class="section-number-2">13</span> python</h2>
+<div class="outline-text-2" id="text-13">
+</div>
+<div id="outline-container-org0e99914" class="outline-3">
+<h3 id="org0e99914"><span class="section-number-3">13.1</span> 手动安装package</h3>
+<div class="outline-text-3" id="text-13-1">
 <p>
 google的benchmark有个compare工具，用于对比两次bench的结果，里面有个gbench需要手动安装，但是gbench没有setup.py。
 </p>
@@ -453,10 +486,131 @@ cp -a gbench  /usr/local/lib64/python3.6/site-packages/
 </div>
 </div>
 </div>
+
+<div id="outline-container-org4b27599" class="outline-2">
+<h2 id="org4b27599"><span class="section-number-2">14</span> bash</h2>
+<div class="outline-text-2" id="text-14">
+</div>
+<div id="outline-container-orga43627c" class="outline-3">
+<h3 id="orga43627c"><span class="section-number-3">14.1</span> Argument list too lang</h3>
+<div class="outline-text-3" id="text-14-1">
+<p>
+当目录下文件太多时， <code>ls</code> 会报这个错，可用使用 <code>find . -maxdepth 1</code> 代替。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org47b84af" class="outline-2">
+<h2 id="org47b84af"><span class="section-number-2">15</span> sed相关</h2>
+<div class="outline-text-2" id="text-15">
+</div>
+<div id="outline-container-orgeca5f2c" class="outline-3">
+<h3 id="orgeca5f2c"><span class="section-number-3">15.1</span> 显示文件行号范围内的内容</h3>
+<div class="outline-text-3" id="text-15-1">
+<p>
+<code>sed -n '&lt;start&gt;,&lt;end&gt;p;&lt;quit&gt;q' filename</code> 打印&lt;start&gt;、&lt;end&gt;范围的文件，在&lt;quit&gt;退出。注意p、q字符。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2467479" class="outline-2">
+<h2 id="org2467479"><span class="section-number-2">16</span> ssh</h2>
+<div class="outline-text-2" id="text-16">
+</div>
+<div id="outline-container-orga024a1c" class="outline-3">
+<h3 id="orga024a1c"><span class="section-number-3">16.1</span> ssh Connection closed</h3>
+<div class="outline-text-3" id="text-16-1">
+<pre class="example">
+$ ssh 192.168.1.99
+Last login: Thu Apr 19 11:31:35 2024 from 192.168.1.99
+Connection to 192.168.1.99 closed.
+
+# 打印Last login说明登录成功了，但很快断开连接不正常。
+# 修改 /etc/ssh/sshd_config
+UsePAM yes =&gt; UsePAM no
+
+# 重启sshd systemctl restart sshd
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org6e7e14d" class="outline-3">
+<h3 id="org6e7e14d"><span class="section-number-3">16.2</span> sshfs</h3>
+<div class="outline-text-3" id="text-16-2">
+<p>
+基于ssh + fuse的网络文件系统， <code>sshfs user@host:remote_path local_path</code> 。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga785760" class="outline-2">
+<h2 id="orga785760"><span class="section-number-2">17</span> CPU频率</h2>
+<div class="outline-text-2" id="text-17">
+<ol class="org-ol">
+<li><code>cpupower monitor</code></li>
+<li><code>trubostat</code></li>
+<li><code>cpupower -c all frequency-info</code></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgcab229b" class="outline-2">
+<h2 id="orgcab229b"><span class="section-number-2">18</span> 查看硬件信息</h2>
+<div class="outline-text-2" id="text-18">
+<ol class="org-ol">
+<li>安装 <code>yum install hwloc lshw</code></li>
+<li><code>hwloc-ls</code></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgf55ad45" class="outline-2">
+<h2 id="orgf55ad45"><span class="section-number-2">19</span> 网卡相关</h2>
+<div class="outline-text-2" id="text-19">
+<ol class="org-ol">
+<li>查看带宽 <code>ethtool &lt;devname&gt;</code></li>
+<li>查看mtu <code>ifconfig &lt;devname&gt;</code></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org26ae6f6" class="outline-2">
+<h2 id="org26ae6f6"><span class="section-number-2">20</span> IP转域名</h2>
+<div class="outline-text-2" id="text-20">
+<ol class="org-ol">
+<li><code>yum install bind-utils</code></li>
+<li><code>host &lt;ip&gt;</code></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org112fc74" class="outline-2">
+<h2 id="org112fc74"><span class="section-number-2">21</span> tc</h2>
+<div class="outline-text-2" id="text-21">
+</div>
+<div id="outline-container-org7961e31" class="outline-3">
+<h3 id="org7961e31"><span class="section-number-3">21.1</span> tc qdisc</h3>
+<div class="outline-text-3" id="text-21-1">
+<ol class="org-ol">
+<li>查看规则： <code>tc qdisc show dev &lt;devname&gt;</code></li>
+<li>修改规则： <code>tc qdisc replace dev &lt;devname&gt; root fq_codel limit 40960 flows 1024 quantum 1514 target 500ms interval 1000ms ecn</code></li>
+<li>删除规则： <code>tc qdisc delete dev &lt;devname&gt; root fq_codel</code></li>
+</ol>
+
+<p>
+tc没有配置文件，如果想要启动时生效，在rc.local中加入相应命令。
+</p>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2023-12-02 六 11:53</p>
+<p class="date">Created: 2024-04-21 日 17:15</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

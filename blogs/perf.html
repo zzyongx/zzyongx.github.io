@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-04-21 日 16:07 -->
+<!-- 2024-04-21 日 17:31 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>perf简介</title>
@@ -258,12 +258,12 @@ perf是linux下的性能分析工具，主要有以下功能：
 <li>分析程序热点、性能瓶颈。</li>
 </ol>
 
-<div id="outline-container-orgc95920a" class="outline-2">
-<h2 id="orgc95920a"><span class="section-number-2">1</span> perf 的安装</h2>
+<div id="outline-container-org72fc8a7" class="outline-2">
+<h2 id="org72fc8a7"><span class="section-number-2">1</span> perf 的安装</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org7b9def3" class="outline-3">
-<h3 id="org7b9def3"><span class="section-number-3">1.1</span> 软件包安装</h3>
+<div id="outline-container-orgf31756d" class="outline-3">
+<h3 id="orgf31756d"><span class="section-number-3">1.1</span> 软件包安装</h3>
 <div class="outline-text-3" id="text-1-1">
 <ol class="org-ol">
 <li>centos环境 <code>yum install perf</code></li>
@@ -272,8 +272,8 @@ perf是linux下的性能分析工具，主要有以下功能：
 </div>
 </div>
 
-<div id="outline-container-org460416b" class="outline-3">
-<h3 id="org460416b"><span class="section-number-3">1.2</span> 从源码安装</h3>
+<div id="outline-container-org5554b7f" class="outline-3">
+<h3 id="org5554b7f"><span class="section-number-3">1.2</span> 从源码安装</h3>
 <div class="outline-text-3" id="text-1-2">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">centos &#29615;&#22659;</span>
@@ -294,8 +294,8 @@ curl -LO https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.15.tar.xz &amp;
 </div>
 </div>
 
-<div id="outline-container-orga16aabb" class="outline-2">
-<h2 id="orga16aabb"><span class="section-number-2">2</span> perf的对象</h2>
+<div id="outline-container-org0f72f61" class="outline-2">
+<h2 id="org0f72f61"><span class="section-number-2">2</span> perf的对象</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 perf的对象可以是系统、CPU、进程，不同对象可以取交集。
@@ -318,8 +318,8 @@ perf的对象越多，perf的损耗越多，perf对象的数量如何计算呢�
 </div>
 </div>
 
-<div id="outline-container-org21c0583" class="outline-2">
-<h2 id="org21c0583"><span class="section-number-2">3</span> perf event</h2>
+<div id="outline-container-org7e0d026" class="outline-2">
+<h2 id="org7e0d026"><span class="section-number-2">3</span> perf event</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 CPU本身有性能计数器（PMU），通过采集PMU的信息，可以评估（程序在）CPU的执行效率、内存带宽等。
@@ -340,8 +340,8 @@ perf 通过event选择对应的PMU，例如： <code>instructions、cycles、bra
 </ol>
 </div>
 
-<div id="outline-container-orgf46ad97" class="outline-3">
-<h3 id="orgf46ad97"><span class="section-number-3">3.1</span> event的指定</h3>
+<div id="outline-container-orga7d18f2" class="outline-3">
+<h3 id="orga7d18f2"><span class="section-number-3">3.1</span> event的指定</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 1、通过event的名称
@@ -365,8 +365,8 @@ perf 通过event选择对应的PMU，例如： <code>instructions、cycles、bra
 </div>
 </div>
 
-<div id="outline-container-org79220b7" class="outline-3">
-<h3 id="org79220b7"><span class="section-number-3">3.2</span> event组</h3>
+<div id="outline-container-org4138c37" class="outline-3">
+<h3 id="org4138c37"><span class="section-number-3">3.2</span> event组</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 如前所讲，PMU可能会分时复用，可以控制每个分时的event， <code>-e '{event1,event2,event3,event4}'</code> 。
@@ -375,16 +375,16 @@ perf 通过event选择对应的PMU，例如： <code>instructions、cycles、bra
 </div>
 </div>
 
-<div id="outline-container-orgc5d068b" class="outline-2">
-<h2 id="orgc5d068b"><span class="section-number-2">4</span> perf stat</h2>
+<div id="outline-container-org6c5177b" class="outline-2">
+<h2 id="org6c5177b"><span class="section-number-2">4</span> perf stat</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 perf stat 用于采集PMU信息，用于分析程序使用硬件的效率，最重要的是IPC。这涉及到微架构的内容，需要专门的文章总结。
 </p>
 </div>
 
-<div id="outline-container-org8a7c550" class="outline-3">
-<h3 id="org8a7c550"><span class="section-number-3">4.1</span> 基本用法</h3>
+<div id="outline-container-org64406a4" class="outline-3">
+<h3 id="org64406a4"><span class="section-number-3">4.1</span> 基本用法</h3>
 <div class="outline-text-3" id="text-4-1">
 <ol class="org-ol">
 <li><code>perf stat -p &lt;pid&gt; --timeout &lt;ms&gt;</code> 采集pid的基本信息，采集时长ms;</li>
@@ -394,8 +394,8 @@ perf stat 用于采集PMU信息，用于分析程序使用硬件的效率，最�
 </div>
 </div>
 
-<div id="outline-container-org7b5c638" class="outline-3">
-<h3 id="org7b5c638"><span class="section-number-3">4.2</span> 输出介绍</h3>
+<div id="outline-container-org0f66861" class="outline-3">
+<h3 id="org0f66861"><span class="section-number-3">4.2</span> 输出介绍</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 下面是采集进程3926信息10秒的情况，整体分三部分：
@@ -437,8 +437,8 @@ $ sudo perf stat -p 3926 -- sleep 10
 </div>
 </div>
 
-<div id="outline-container-org4f61e0a" class="outline-2">
-<h2 id="org4f61e0a"><span class="section-number-2">5</span> perf record</h2>
+<div id="outline-container-orgee202a7" class="outline-2">
+<h2 id="orgee202a7"><span class="section-number-2">5</span> perf record</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 perf record 用于采样程序的运行情况，包括程序的函数、调用栈（含内核）。
@@ -450,8 +450,8 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 </p>
 </div>
 
-<div id="outline-container-org56dcea1" class="outline-3">
-<h3 id="org56dcea1"><span class="section-number-3">5.1</span> perf record</h3>
+<div id="outline-container-org91288b6" class="outline-3">
+<h3 id="org91288b6"><span class="section-number-3">5.1</span> perf record</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 采样程序的运行情况，常用参数：
@@ -464,8 +464,8 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 </div>
 </div>
 
-<div id="outline-container-org9d61e02" class="outline-3">
-<h3 id="org9d61e02"><span class="section-number-3">5.2</span> perf report</h3>
+<div id="outline-container-org62ee253" class="outline-3">
+<h3 id="org62ee253"><span class="section-number-3">5.2</span> perf report</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 查看perf record的结果，常用参数：
@@ -482,8 +482,8 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 </div>
 </div>
 
-<div id="outline-container-org3b4562a" class="outline-3">
-<h3 id="org3b4562a"><span class="section-number-3">5.3</span> perf top</h3>
+<div id="outline-container-org3839b63" class="outline-3">
+<h3 id="org3839b63"><span class="section-number-3">5.3</span> perf top</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 函数调用top（类比top命令），相当于一边record一边report，比较消耗资源。
@@ -491,8 +491,8 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 </div>
 </div>
 
-<div id="outline-container-org84b1032" class="outline-3">
-<h3 id="org84b1032"><span class="section-number-3">5.4</span> perf annotate</h3>
+<div id="outline-container-orgcd0ba50" class="outline-3">
+<h3 id="orgcd0ba50"><span class="section-number-3">5.4</span> perf annotate</h3>
 <div class="outline-text-3" id="text-5-4">
 <p>
 查看函数内部热点，例如：perf report显示foo函数占比大，可以用 <code>perf annotate foo</code> 显示函数foo内部哪段代码占比多，默认显示汇编，如果有源码，也会关联上源码。
@@ -504,8 +504,8 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 </div>
 </div>
 
-<div id="outline-container-orgc26c073" class="outline-3">
-<h3 id="orgc26c073"><span class="section-number-3">5.5</span> perf script</h3>
+<div id="outline-container-org87fe61d" class="outline-3">
+<h3 id="org87fe61d"><span class="section-number-3">5.5</span> perf script</h3>
 <div class="outline-text-3" id="text-5-5">
 <p>
 解码、输出 perf record 的数据。
@@ -513,8 +513,8 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 </div>
 </div>
 
-<div id="outline-container-org36fdc1d" class="outline-3">
-<h3 id="org36fdc1d"><span class="section-number-3">5.6</span> 火焰图</h3>
+<div id="outline-container-orga4003d5" class="outline-3">
+<h3 id="orga4003d5"><span class="section-number-3">5.6</span> 火焰图</h3>
 <div class="outline-text-3" id="text-5-6">
 <p>
 如果不习惯perf report的文本界面，可以转成火焰图，（perf record时需要-g参数）。
@@ -548,13 +548,40 @@ perf script -i perfdata | grep -vF <span style="color: #ffa07a;">'[unknown]'</sp
 </div>
 </div>
 
-<div id="outline-container-orgb8c349d" class="outline-2">
-<h2 id="orgb8c349d"><span class="section-number-2">6</span> 常见问题</h2>
+<div id="outline-container-org1a8bb4d" class="outline-2">
+<h2 id="org1a8bb4d"><span class="section-number-2">6</span> perf 对性能的影响</h2>
 <div class="outline-text-2" id="text-6">
+<p>
+要弄清楚对性能的影响，需要了解perf的工作原理。
+</p>
 </div>
-<div id="outline-container-orga483b9d" class="outline-3">
-<h3 id="orga483b9d"><span class="section-number-3">6.1</span> Too many events are opened</h3>
+
+<div id="outline-container-org6684126" class="outline-3">
+<h3 id="org6684126"><span class="section-number-3">6.1</span> perf stat</h3>
 <div class="outline-text-3" id="text-6-1">
+<p>
+perf stat 观察的是程序运行时，pmu计数器的值，这是个旁路流程，对程序影响很小。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org31132bd" class="outline-3">
+<h3 id="org31132bd"><span class="section-number-3">6.2</span> perf record</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+perf record 观察的是程序运行时，程序的调用（函数、或栈），这个信息只有程序自己知道。程序需要响应中断，进入内核态，记录下中断发生时的调用地址、栈。这影响程序的性能，尤其是采样频率较高时。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org082b798" class="outline-2">
+<h2 id="org082b798"><span class="section-number-2">7</span> 常见问题</h2>
+<div class="outline-text-2" id="text-7">
+</div>
+<div id="outline-container-org830e5b8" class="outline-3">
+<h3 id="org830e5b8"><span class="section-number-3">7.1</span> Too many events are opened</h3>
+<div class="outline-text-3" id="text-7-1">
 <p>
 <code>perf stat</code> <code>perf record</code> 指定 <code>-p</code> 需要为进程的每个线程，每个CPU调用 <code>perf_event_open</code> 当线程数量较多，机器CPU数量较多时，会消耗大量fd（例如：5000线程、256个cpu，消耗128万），超出ulimit的限制。此时直接修改ulimit是不行的，需要先修改 <code>fs.nr_open</code> 。
 </p>
@@ -575,27 +602,27 @@ $ sysctl -w fs.nr_open=2560000
 </div>
 </div>
 
-<div id="outline-container-org7974e3c" class="outline-3">
-<h3 id="org7974e3c"><span class="section-number-3">6.2</span> perf script 调用栈频率</h3>
-<div class="outline-text-3" id="text-6-2">
+<div id="outline-container-org33eeb2f" class="outline-3">
+<h3 id="org33eeb2f"><span class="section-number-3">7.2</span> perf script 调用栈频率</h3>
+<div class="outline-text-3" id="text-7-2">
 <p>
 perf script 输出调用栈，不能只看栈的输出频次，有个 period 字段，表示每个栈的耗时。FlameGraph 有个 <a href="https://github.com/brendangregg/FlameGraph/issues/165">issue</a> 讨论这个问题。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org05f71f3" class="outline-3">
-<h3 id="org05f71f3"><span class="section-number-3">6.3</span> 全量采集、单独展示</h3>
-<div class="outline-text-3" id="text-6-3">
+<div id="outline-container-org8684f24" class="outline-3">
+<h3 id="org8684f24"><span class="section-number-3">7.3</span> 全量采集、单独展示</h3>
+<div class="outline-text-3" id="text-7-3">
 <p>
 如上所述，指定pid采集不见得开销就小，可以用 <code>-a</code> 全量采集，然后在perf report、perf script时指定 <code>--pid</code> 只展示单独的进程。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orge83ac86" class="outline-3">
-<h3 id="orge83ac86"><span class="section-number-3">6.4</span> Java程序的符号</h3>
-<div class="outline-text-3" id="text-6-4">
+<div id="outline-container-org4827e54" class="outline-3">
+<h3 id="org4827e54"><span class="section-number-3">7.4</span> Java程序的符号</h3>
+<div class="outline-text-3" id="text-7-4">
 <p>
 对于解释性语言而言，通常perf抓到的地址是解释器的、而不是被解释程序自身的。带JIT的语言（如Java）抓到的地址是JIT后的程序的，但是地址和符号的映射关系需要JIT单独提供。perf 在解析进程 <code>&lt;pid&gt;</code> 符号时，会访问 <code>/tmp/perf-&lt;pid&gt;.map</code> 。JIT提供的映射关系放到这个地址即可。
 </p>
@@ -606,9 +633,9 @@ Java17提供了导出JIT符号的方法。 <code>jcmd &lt;pid&gt; Compiler.perfm
 </div>
 </div>
 
-<div id="outline-container-org935fedd" class="outline-3">
-<h3 id="org935fedd"><span class="section-number-3">6.5</span> 容器中使用perf的问题</h3>
-<div class="outline-text-3" id="text-6-5">
+<div id="outline-container-orga9190aa" class="outline-3">
+<h3 id="orga9190aa"><span class="section-number-3">7.5</span> 容器中使用perf的问题</h3>
+<div class="outline-text-3" id="text-7-5">
 <p>
 容器通常没有root权限，需要配置sysctl采集内核符号， <code>sysctl -w kernel.perf_event_paranoid=-1</code> 。
 </p>
@@ -618,7 +645,7 @@ Java17提供了导出JIT符号的方法。 <code>jcmd &lt;pid&gt; Compiler.perfm
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2024-04-21 日 16:07</p>
+<p class="date">Created: 2024-04-21 日 17:31</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
