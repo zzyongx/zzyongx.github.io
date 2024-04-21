@@ -76,6 +76,15 @@ export LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH
 ./b2 install
 #+END_SRC
 
+* 编译folly
+#+BEGIN_SRC bash
+export OPENSSL_ROOT_DIR=/data/softs/openssl-1.1.1u
+python3 ./build/fbcode_builder/getdeps.py --allow-system-packages build
+
+如果碰到drawf相关的错误，可以用-E查看报错文件预处理后的内容（查看 include），可能是没找对dwarf.h的位置
+DwarfUtil.cpp:235:18: error: ‘DW_SECT_INFO’ was not declared in this sco
+#+END_SRC
+
 * sudo 后保留环境变量
 假设需要保留的环境变量是 =HTTP_PROXY= ，修改 =/etc/sudoers= ，在 =Defaults env_reset= 下添加
 ~Defaults env_keep += "HTTP_PROXY"~ 。
@@ -112,6 +121,9 @@ CC=/usr/local/bin/clang++
 bazel build -c opt --cxxopt="-march=skylake" --cxxopt="-O3" --cxxopt="-fomit-frame-pointer" --subcommands //absl/hash:hash_benchmark
 #+END_SRC
 
+* pidstat
+pidstat 查看进程的cpu、内存， ~pidstat -ru -p <pid> 1~ 。
+
 * python
 ** 手动安装package
 google的benchmark有个compare工具，用于对比两次bench的结果，里面有个gbench需要手动安装，但是gbench没有setup.py。
@@ -128,3 +140,9 @@ cp -a gbench  /usr/local/lib64/python3.6/site-packages/
 * bash
 ** Argument list too lang
 当目录下文件太多时， ~ls~ 会报这个错，可用使用 ~find . -maxdepth 1~ 代替。
+
+* 显示文件行号范围内的内容
+=sed -n '<start>,<end>p;<quit>q' filename= 打印<start>、<end>范围的文件，在<quit>退出。注意p、q字符。
+
+* sshfs
+可用使用sshfs挂载远程文件系统， ~sshfs user@host:remote_path local_path~ 。

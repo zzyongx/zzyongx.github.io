@@ -116,6 +116,10 @@ perf使用event作为事件源，按照一定的频率采样，记录采样时�
 ** perf report
 查看perf record的结果，常用参数：
 1. =-g none --no-children= 不查看调用栈
+2. =-d <dso>= 查看该dso的符号
+
+搜索特定符号的占比
+~perf report | grep -F'%' | tr -d'%' | awk '{sum += $1} END {print sum}'~
 
 ** perf top
 函数调用top（类比top命令），相当于一边record一边report，比较消耗资源。
@@ -144,7 +148,7 @@ perf script -i perfdata | stackcollapse-perf.pl | flamegraph.pl > perf.svg
 
 # 可以在stackcollapse之前，加工文本
 # 例如：删除unknow栈，不区分线程
-perf script -i perfdata | grep -vF '[unknown]' | sed -E 's/^[a-zA-Z0-9-]+/thread/' | stackcollapse-perf.pl | flamegraph.pl > perf.svg
+perf script -i perfdata | grep -vF '[unknown]' | sed -E 's/^[a-zA-Z0-9:_-]+/thread/' | stackcollapse-perf.pl | flamegraph.pl > perf.svg
 #+END_SRC
 
 注意事项：
@@ -171,4 +175,15 @@ $ sysctl -w fs.nr_open=2560000
 #+END_SRC
 
 ** perf script 调用栈频率
-perf script 输出调用栈，不能只看栈的输出频次，有个 period 字段，表示每个栈的耗时。
+perf script 输出调用栈，不能只看栈的输出频次，有个 period 字段，表示每个栈的耗时。FlameGraph 有个 [[https://github.com/brendangregg/FlameGraph/issues/165][issue]] 讨论这个问题。
+
+** 全量采集、单独展示
+如上所述，指定pid采集不见得开销就小，可以用 =-a= 全量采集，然后在perf report、perf script时指定 =--pid= 只展示单独的进程。
+
+** Java程序的符号
+对于解释性语言而言，通常perf抓到的地址是解释器的、而不是被解释程序自身的。带JIT的语言（如Java）抓到的地址是JIT后的程序的，但是地址和符号的映射关系需要JIT单独提供。perf 在解析进程 =<pid>= 符号时，会访问 =/tmp/perf-<pid>.map= 。JIT提供的映射关系放到这个地址即可。
+
+Java17提供了导出JIT符号的方法。 =jcmd <pid> Compiler.perfmap= 。
+
+** 容器中使用perf的问题
+容器通常没有root权限，需要配置sysctl采集内核符号， ~sysctl -w kernel.perf_event_paranoid=-1~ 。

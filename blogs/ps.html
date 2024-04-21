@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-04-21 日 15:29 -->
+<!-- 2024-04-21 日 15:00 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>在宿主机上操作container</title>
+<title>ps</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="zhengzhiyong" />
 <style type="text/css">
@@ -249,77 +249,58 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">在宿主机上操作container</h1>
-<p>
-现在业务基本都部署在container中，但是container通常设置 <code>privileged=false</code> ，并没有root权限，很多“高级”操作仍然需要在宿主机上操作。
-通常可以把container中的进程当作普通的进程看待（pidstat、perf stat、bpftrace等），但是有些工具并没有适配文件的容器路径，容器的路径在宿主机上无法直接访问，这造成很多不便，例如：无法获取进程的函数符号。此时操作仍然需要在容器中执行，但是以一种稍微不同的方式。
-</p>
+<h1 class="title">ps</h1>
 
-<div id="outline-container-orgc3b3eda" class="outline-2">
-<h2 id="orgc3b3eda"><span class="section-number-2">1</span> 宿主机进入container</h2>
+<div id="outline-container-org212c0a8" class="outline-2">
+<h2 id="org212c0a8"><span class="section-number-2">1</span> 短命令</h2>
 <div class="outline-text-2" id="text-1">
-</div>
-<div id="outline-container-org7d825a3" class="outline-3">
-<h3 id="org7d825a3"><span class="section-number-3">1.1</span> 以root进入container</h3>
-<div class="outline-text-3" id="text-1-1">
-<p>
-首先需要知道container中进程在宿主机上的pid，可用通过ps获取。 <code>nsenter -t &lt;pid&gt; -m -p bash</code> 就可以进入&lt;pid&gt;进程所在的container了。
-这种方式进入container，有两个特点：
-</p>
 <ol class="org-ol">
-<li>真正的root权限;</li>
-<li>不受container CGROUP资源quota的限制。</li>
+<li>按照启动时间排序进程 <code>ps -ef --sort=start_time=</code> ;</li>
+<li>按照进程内存排序 <code>ps -eo pid,rss,command --sort=rss</code> ;</li>
+<li>查看进程内存使用 <code>ps -o rss,%mem -p &lt;pid&gt;</code> ;</li>
+<li>查看进程的线程 <code>ps -L -p &lt;pid&gt;</code> ;</li>
+<li>查看进程启动时间 <code>ps -o pid,lstart,cmd,stat -p &lt;pid&gt;</code> ;</li>
+<li>查看系统进程外的其它进程 <code>ps --ppid 2 -p 2 -f --deselect</code> ;</li>
 </ol>
 </div>
 </div>
 
-<div id="outline-container-org574439a" class="outline-3">
-<h3 id="org574439a"><span class="section-number-3">1.2</span> 保留CGROUP限制</h3>
-<div class="outline-text-3" id="text-1-2">
-<p>
-如果需要保留container的CGROUP限制，同时需要真正的root，可以这样：
-</p>
-<ol class="org-ol">
-<li>bash命令，启动新的bash;</li>
-<li><code>echo $$ &gt; /sys/fs/cgroup/cpu/&lt;cgroup_path&gt;/cgroups.procs</code> 把当前bash加入container的CGROUP，这里添加的是cpu的，其它CGROUP类似;</li>
-<li>使用 <code>nsenter</code> 命令进入container</li>
-<li>退出bash，就离开CGROUP了</li>
-</ol>
-
-<p>
-也可以使用cgexec，但是要安装libcgroup。
-</p>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orgc62fd77" class="outline-2">
-<h2 id="orgc62fd77"><span class="section-number-2">2</span> 宿主机操作container的文件</h2>
+<div id="outline-container-org60f252a" class="outline-2">
+<h2 id="org60f252a"><span class="section-number-2">2</span> 进程内存</h2>
 <div class="outline-text-2" id="text-2">
-<p>
-不需要进入container就可以访问container的文件，只需要路径加个前缀即可， <code>/proc/&lt;pid&gt;/root</code> 这里&lt;pid&gt;是container进程在宿主机上的pid。
-假设container中的文件路径是 <code>/tmp/perfmap.24</code> ，对应宿主机的路径是 <code>/proc/&lt;pid&gt;/root/tmp/perfmap.24</code> 。
-目录的映射规则类似。
-</p>
-
-<p>
-知道了映射规则，container的路径，就可以当宿主机的使用，cp、mv、vim，各种文件命令都可用使用。
-</p>
+<ol class="org-ol">
+<li>进程内存总量， <code>ps -e -o rss | awk '{sum += $1} END {printf("%.2fGB\n", sum/1024/1024}'</code> ;</li>
+<li>进程内存的变化</li>
+</ol>
 </div>
 </div>
 
-<div id="outline-container-orgf138d69" class="outline-2">
-<h2 id="orgf138d69"><span class="section-number-2">3</span> 宿主机获取container中进程的pid</h2>
+<div id="outline-container-org3dbb976" class="outline-2">
+<h2 id="org3dbb976"><span class="section-number-2">3</span> 引起系统load高的进程</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-<code>awk '($1 == "NStgid:") {print $NF}' /proc/&lt;pid&gt;/status</code>
+<code>ps --no-header -eL -o stat,tid,pid,comm | grep -E '^(R|D)'</code>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org7124d70" class="outline-2">
+<h2 id="org7124d70"><span class="section-number-2">4</span> 海量进程（线程）</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+系统中出现海量（百万级）进程（线程）时，海量进程对内核而言，并不构成问题。但是ps、top等命令，因为要遍历海量进程，消耗大量资源，且很多用到它们的监控，定时运行，导致ps、top推积，加重了问题。
+</p>
+
+<p>
+可以通过 <code>ls /proc | wc -l</code> 预估进程的数量，如果超过阈值，则不运行ps。
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zhengzhiyong</p>
-<p class="date">Created: 2024-04-21 日 15:29</p>
+<p class="date">Created: 2024-04-21 日 15:00</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

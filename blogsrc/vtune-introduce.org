@@ -54,7 +54,7 @@ vtune -collect performance-snapshot -d 10 -target-pid=3042240
 # 性能热点
 
 # -data-limit 采集500M的数据后结束
-vtune -collect hotspots -knob sampling-mode=hw -knob stack-size=0 -data-limit=500 -r vtune001
+vtune -collect hotspots -knob sampling-mode=hw -knob stack-size=0 -data-limit=500 -d 30 -r vtune001
 
 # -d 采集10s数据后结束，采集调用栈信息，可用看到火焰图
 vtune -collect hotspots -knob sampling-mode=hw -knob sampling-interval=2 -knob enable-stack-collection=true -knob stack-size=4096 -run-pass-thru=--no-altstack -d 10 -r vtune002
@@ -67,6 +67,9 @@ vtune -collect memory-access -knob sampling-mode=hw -knob sampling-interval=1 -d
 container中也可以使用vtune，注意事项：
 1. 宿主机配置 ~sysctl -w kernel.kptr_restrict=0~ ，这样container中可以访问kernal符号;
 2. 需要用nsenter进入容器，详见：[[blog:operate-container-on-host][在宿主机上操作container]]。
+
+* container 导出
+
 
 * 注意事项
 1. 在指定 ~-target-pid~ 参数时，有时候目标进程会在vtune结束时意外退出，尽量避免使用，大多数vtune功能支持结果分析时选择进程。

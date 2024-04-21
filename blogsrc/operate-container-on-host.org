@@ -27,3 +27,6 @@
 目录的映射规则类似。
 
 知道了映射规则，container的路径，就可以当宿主机的使用，cp、mv、vim，各种文件命令都可用使用。
+
+* 宿主机获取container中进程的pid
+~awk '($1 == "NStgid:") {print $NF}' /proc/<pid>/status~
